@@ -13,13 +13,13 @@ dataset_view_row_count = 5
 learning_rate_scheduler_gamma = 0.1
 learning_rate_scheduler_step_size = 7
 
-log_level = logger.LogLevel.debug
+log_level = logger.LogLevel.info
 
 model_epochs = 25
 model_input_height = 224
 model_input_width = model_input_height
 model_input_channels = 3
-model_pretrained_weights = "IMAGENET1K_V1"
+model_pretrained_weights = "IMAGENET1K_V2"
 model_file_name = "model.pth"
 
 optimizer_learning_rate = 0.001
