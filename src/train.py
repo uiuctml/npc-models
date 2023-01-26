@@ -113,7 +113,17 @@ def main():
 
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr = header.optimizer_learning_rate, momentum = header.optimizer_momentum)
-    learning_rate_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = header.learning_rate_scheduler_step_size, gamma = header.learning_rate_scheduler_gamma)
+    learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer = optimizer,
+                                                                         mode = "min",
+                                                                         factor = header.learning_rate_scheduler_factor,
+                                                                         patience = header.learning_rate_scheduler_patient,
+                                                                         threshold = header.learning_rate_scheduler_threshold,
+                                                                         threshold_mode = header.learning_rate_scheduler_threshold_mode,
+                                                                         cooldown = header.learning_rate_scheduler_cooldown,
+                                                                         min_lr = header.learning_rate_scheduler_min_learning_rate,
+                                                                         eps = header.learning_rate_scheduler_min_learning_rate_decay,
+                                                                         verbose = True)
+    # learning_rate_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = header.learning_rate_scheduler_step_size, gamma = header.learning_rate_scheduler_gamma)
 
     model_accuracy_validation = 0
 
