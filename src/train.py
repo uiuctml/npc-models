@@ -107,8 +107,8 @@ def main():
     device = torch.device("cuda")
 
     model = torchvision.models.resnet18(weights = header.model_pretrained_weights)
-    model = torch.nn.DataParallel(model)
     model.fc = torch.nn.Linear(model.fc.in_features, len(dataset.classes))
+    model = torch.nn.DataParallel(model)
     model = model.to(device)
 
     criterion = torch.nn.CrossEntropyLoss()
