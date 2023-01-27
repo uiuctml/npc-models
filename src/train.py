@@ -175,8 +175,8 @@ def main():
 
         if epoch_accuracy_validation > accuracy_validation:
             accuracy_validation = epoch_accuracy_validation
-            utility.save(model, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation)
 
+        utility.save(model, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation)
         logger.log_info_raw("\n")
 
     progress_bar.close()
