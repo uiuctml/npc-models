@@ -10,13 +10,16 @@ import torchvision
 import tqdm
 import utility
 
-def train(model, data_loader, criterion, optimizer, learning_rate_scheduler, device):
+def train(model, data_loader, criterion, optimizer, device):
     running_loss = 0
     running_corrects = 0
 
     model.train()
 
-    for (input, labels) in data_loader:
+    progress_bar = tqdm.tqdm(total = len(data_loader.dataset), position = 1)
+    progress_bar.set_description_str("[INFO]: Training progress")
+
+    for (i, (input, labels)) in enumerate(data_loader):
         input = input.to(device, non_blocking = True)
         labels = labels.to(device, non_blocking = True)
 
@@ -32,6 +35,11 @@ def train(model, data_loader, criterion, optimizer, learning_rate_scheduler, dev
         running_loss += loss.item() * input.size(0)
         running_corrects += torch.sum(predictions == labels.data)
 
+        progress_bar.n = i
+        progress_bar.refresh()
+
+    progress_bar.close()
+
     return (running_loss, running_corrects)
 
 def validate(model, data_loader, criterion, device):
@@ -40,7 +48,10 @@ def validate(model, data_loader, criterion, device):
 
     model.eval()
 
-    for (input, labels) in data_loader:
+    progress_bar = tqdm.tqdm(total = len(data_loader.dataset), position = 2)
+    progress_bar.set_description_str("[INFO]: Validation progress")
+
+    for (i, (input, labels)) in enumerate(data_loader):
         input = input.to(device, non_blocking = True)
         labels = labels.to(device, non_blocking = True)
 
@@ -51,6 +62,11 @@ def validate(model, data_loader, criterion, device):
 
         running_loss += loss.item() * input.size(0)
         running_corrects += torch.sum(predictions == labels.data)
+
+        progress_bar.n = i
+        progress_bar.refresh()
+
+    progress_bar.close()
 
     return (running_loss, running_corrects)
 
@@ -107,7 +123,7 @@ def main():
         stats_validation = (0, 0)
 
         if not header.dry_run:
-            stats_train = train(model, data_loader_train, criterion, optimizer, learning_rate_scheduler, device)
+            stats_train = train(model, data_loader_train, criterion, optimizer, device)
             stats_validation = validate(model, data_loader_validation, criterion, device)
 
         epoch_loss_train = stats_train[0] / len(data_loader_train.dataset)
