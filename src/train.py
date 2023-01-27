@@ -32,8 +32,6 @@ def train(model, data_loader, criterion, optimizer, learning_rate_scheduler, dev
         running_loss += loss.item() * input.size(0)
         running_corrects += torch.sum(predictions == labels.data)
 
-    learning_rate_scheduler.step()
-
     return (running_loss, running_corrects)
 
 def validate(model, data_loader, criterion, device):
@@ -73,7 +71,7 @@ def main():
     model = model.to(device)
 
     optimizer = torch.optim.SGD(model.parameters(), lr = header.optimizer_learning_rate, momentum = header.optimizer_momentum)
-    learning_rate_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = header.learning_rate_scheduler_step_size, gamma = header.learning_rate_scheduler_gamma)
+    learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.learning_rate_scheduler_mode, header.learning_rate_scheduler_factor, header.learning_rate_scheduler_patient, header.learning_rate_scheduler_threshold, header.learning_rate_scheduler_threshold_mode, header.learning_rate_scheduler_cooldown, header.learning_rate_scheduler_min_learning_rate, header.learning_rate_scheduler_min_learning_rate_decay, verbose = header.learning_rate_scheduler_verbose)
 
     (data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation) = utility.load(model, optimizer, learning_rate_scheduler)
     logger.log_info_raw("\n")
@@ -125,6 +123,7 @@ def main():
         logger.log_info("Training accuracy: " + str(epoch_accuracy_train) + ".")
         logger.log_info("Validation accuracy: " + str(epoch_accuracy_validation) + ".")
 
+        learning_rate_scheduler.step(epoch_loss_validation)
         epoch += 1
 
         if epoch_accuracy_validation > accuracy_validation:

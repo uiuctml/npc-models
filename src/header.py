@@ -11,10 +11,17 @@ dataset_split_percentage_train = 0.8
 dataset_split_percentage_validation = 1 - dataset_split_percentage_train
 dataset_view_row_count = 5
 
-dry_run = False
+dry_run = True
 
-learning_rate_scheduler_gamma = 0.1
-learning_rate_scheduler_step_size = 5
+learning_rate_scheduler_mode = "min"
+learning_rate_scheduler_factor = 0.1
+learning_rate_scheduler_patient = 2
+learning_rate_scheduler_threshold = 1e-4
+learning_rate_scheduler_threshold_mode = "abs"
+learning_rate_scheduler_cooldown = 0
+learning_rate_scheduler_min_learning_rate = 1e-6
+learning_rate_scheduler_min_learning_rate_decay = 1e-8
+learning_rate_scheduler_verbose = True
 
 log_level = logger.LogLevel.info
 
