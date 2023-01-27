@@ -157,8 +157,10 @@ def main():
             stats_train = train(model, data_loader_train, criterion, optimizer, device)
             stats_validation = validate(model, data_loader_validation, criterion, device)
 
-        epoch_loss_train = stats_train[0] / header.data_loader_batch_size
-        epoch_loss_validation = stats_validation[0] / header.data_loader_batch_size
+        batch_count_train = math.ceil(len(data_loader_train.dataset) / header.data_loader_batch_size)
+        batch_count_validation = math.ceil(len(data_loader_validation.dataset) / header.data_loader_batch_size)
+        epoch_loss_train = stats_train[0] / batch_count_train
+        epoch_loss_validation = stats_validation[0] / batch_count_validation
         epoch_accuracy_train = stats_train[1] / len(data_loader_train.dataset)
         epoch_accuracy_validation = stats_validation[1] / len(data_loader_validation.dataset)
 
