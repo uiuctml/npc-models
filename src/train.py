@@ -2,14 +2,13 @@
 
 import header
 import logger
-import math
-import matplotlib.pyplot as plt
 import torch
 import torch.nn
 import torch.optim
 import torchsummary
 import torchvision
 import tqdm
+import utility
 
 def train(model, data_loader, criterion, optimizer, learning_rate_scheduler, device):
     running_loss = 0
@@ -57,40 +56,9 @@ def validate(model, data_loader, criterion, device):
 
     return (running_loss, running_corrects)
 
-def save(model, epoch, criterion, optimizer):
-    torch.save({
-            "epoch": epoch,
-            "model_state_dict": model.state_dict(),
-            "optimizer_state_dict": optimizer.state_dict(),
-            "criterion": criterion,
-        }, header.model_file_name)
-    
-    return
-
-def viewDataset(dataset, data_loader):
-    if header.log_level < logger.LogLevel.trace:
-        return
-
-    figure_rows = header.dataset_view_row_count
-    figure_cols = math.ceil(header.data_loader_batch_size / header.dataset_view_row_count)
-    figure = plt.figure(figsize = (figure_cols, figure_rows))
-    figure_manager = plt.get_current_fig_manager()
-    input, labels = next(iter(data_loader))
-    input = input.numpy().transpose((0, 2, 3, 1))
-    class_list = list(dataset.classes[label] for label in labels)
-
-    for i in range(0, header.data_loader_batch_size):
-        figure.add_subplot(figure_cols, figure_rows, i + 1)
-        plt.title(class_list[i])
-        plt.axis("off")
-        plt.imshow(input[i].squeeze())
-
-    figure_manager.full_screen_toggle()
-    plt.show()
-
-    return
-
 def main():
+    device = torch.device("cuda")
+
     dataset_transforms = torchvision.transforms.Compose([
         torchvision.transforms.Resize((header.model_input_height, header.model_input_width)),
         torchvision.transforms.ToTensor(),
@@ -98,77 +66,76 @@ def main():
     ])
 
     dataset = torchvision.datasets.ImageFolder(root = header.dataset_dir_images, transform = dataset_transforms)
-    dataset_split_lengths = [header.dataset_split_percentage_train, header.dataset_split_percentage_validation]
-    (dataset_subset_train, dataset_subset_validation) = torch.utils.data.random_split(dataset, dataset_split_lengths)
-
-    data_loader_train = torch.utils.data.DataLoader(dataset_subset_train, batch_size = header.data_loader_batch_size, shuffle = header.data_loader_shuffle, num_workers = header.data_loader_worker_count, pin_memory = True)
-    data_loader_validation = torch.utils.data.DataLoader(dataset_subset_validation, batch_size = header.data_loader_batch_size, shuffle = header.data_loader_shuffle, num_workers = header.data_loader_worker_count, pin_memory = True)
-
-    device = torch.device("cuda")
 
     model = torchvision.models.resnet152(weights = header.model_pretrained_weights)
     model.fc = torch.nn.Linear(model.fc.in_features, len(dataset.classes))
     model = torch.nn.DataParallel(model)
     model = model.to(device)
 
-    criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr = header.optimizer_learning_rate, momentum = header.optimizer_momentum)
     learning_rate_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = header.learning_rate_scheduler_step_size, gamma = header.learning_rate_scheduler_gamma)
 
-    model_accuracy_validation = 0
+    (data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation) = utility.load(model, optimizer, learning_rate_scheduler)
+    logger.log_info_raw("\n")
+
+    if data_loader_train == None or data_loader_validation == None:
+        dataset_split_lengths = [header.dataset_split_percentage_train, header.dataset_split_percentage_validation]
+        (dataset_subset_train, dataset_subset_validation) = torch.utils.data.random_split(dataset, dataset_split_lengths)
+
+        data_loader_train = torch.utils.data.DataLoader(dataset_subset_train, batch_size = header.data_loader_batch_size, shuffle = header.data_loader_shuffle, num_workers = header.data_loader_worker_count, pin_memory = True)
+        data_loader_validation = torch.utils.data.DataLoader(dataset_subset_validation, batch_size = header.data_loader_batch_size, shuffle = header.data_loader_shuffle, num_workers = header.data_loader_worker_count, pin_memory = True)
+
+    if epoch == None:
+        epoch = 1
+
+    if criterion == None:
+        criterion = torch.nn.CrossEntropyLoss()
+
+    if accuracy_validation == None:
+        accuracy_validation = 0
 
     if header.log_level >= logger.LogLevel.debug:
         model_input_size = (header.model_input_channels, header.model_input_height, header.model_input_width)
         torchsummary.summary(model, input_size=model_input_size)
 
-    viewDataset(dataset, data_loader_train)
-    viewDataset(dataset, data_loader_validation)
+    utility.viewDataset(dataset, data_loader_train)
+    utility.viewDataset(dataset, data_loader_validation)
 
-    progress_bar_epoch = tqdm.tqdm(total = header.model_epochs, position = 0)
-    progress_bar_loss_train = tqdm.tqdm(total = 1.0, position = 1)
-    progress_bar_loss_validation = tqdm.tqdm(total = 1.0, position = 2)
-    progress_bar_accuracy_train = tqdm.tqdm(total = 1.0, position = 3)
-    progress_bar_accuracy_validation = tqdm.tqdm(total = 1.0, position = 4)
+    progress_bar = tqdm.tqdm(total = header.model_epochs, position = 0)
+    progress_bar.set_description_str("[INFO]: Epoch")
 
-    progress_bar_epoch.set_description_str("Epoch")
-    progress_bar_loss_train.set_description_str("Training loss")
-    progress_bar_loss_validation.set_description_str("Validation loss")
-    progress_bar_accuracy_train.set_description_str("Training accuracy")
-    progress_bar_accuracy_validation.set_description_str("Validation accuracy")
+    while epoch <= header.model_epochs:
+        stats_train = (0, 0)
+        stats_validation = (0, 0)
 
-    for epoch in range(header.model_epochs):
-        stats_train = train(model, data_loader_train, criterion, optimizer, learning_rate_scheduler, device)
-        stats_validation = validate(model, data_loader_validation, criterion, device)
+        if not header.dry_run:
+            stats_train = train(model, data_loader_train, criterion, optimizer, learning_rate_scheduler, device)
+            stats_validation = validate(model, data_loader_validation, criterion, device)
 
-        epoch_loss_train = stats_train[0] / len(dataset_subset_train)
-        epoch_accuracy_train = stats_train[1] / len(dataset_subset_train)
+        epoch_loss_train = stats_train[0] / len(data_loader_train.dataset)
+        epoch_loss_validation = stats_validation[0] / len(data_loader_validation.dataset)
+        epoch_accuracy_train = stats_train[1] / len(data_loader_train.dataset)
+        epoch_accuracy_validation = stats_validation[1] / len(data_loader_validation.dataset)
 
-        epoch_loss_validation = stats_validation[0] / len(dataset_subset_validation)
-        epoch_accuracy_validation = stats_validation[1] / len(dataset_subset_validation)
+        progress_bar.n = epoch
+        progress_bar.refresh()
 
-        progress_bar_epoch.n = epoch
-        progress_bar_loss_train.n = epoch_loss_train
-        progress_bar_loss_validation.n = epoch_loss_validation
-        progress_bar_accuracy_train.n = epoch_accuracy_train
-        progress_bar_accuracy_validation.n = epoch_accuracy_validation
+        logger.log_info("Training loss: " + str(epoch_loss_train) + ".")
+        logger.log_info("Validation loss: " + str(epoch_loss_validation) + ".")
+        logger.log_info("Training accuracy: " + str(epoch_accuracy_train) + ".")
+        logger.log_info("Validation accuracy: " + str(epoch_accuracy_validation) + ".")
 
-        progress_bar_epoch.refresh()
-        progress_bar_loss_train.refresh()
-        progress_bar_loss_validation.refresh()
-        progress_bar_accuracy_train.refresh()
-        progress_bar_accuracy_validation.refresh()
+        epoch += 1
 
-        if epoch_accuracy_validation > model_accuracy_validation:
-            model_accuracy_validation = epoch_accuracy_validation
-            save(model, epoch, criterion, optimizer)
+        if epoch_accuracy_validation > accuracy_validation:
+            accuracy_validation = epoch_accuracy_validation
+            utility.save(model, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation)
 
-    progress_bar_epoch.close()
-    progress_bar_loss_train.close()
-    progress_bar_loss_validation.close()
-    progress_bar_accuracy_train.close()
-    progress_bar_accuracy_validation.close()
+        logger.log_info_raw("\n")
 
-    logger.log_info("Best validation accuracy: " + str(model_accuracy_validation) + ".")
+    progress_bar.close()
+
+    logger.log_info("Highest validation accuracy: " + str(accuracy_validation) + ".")
 
     return
 
