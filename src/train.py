@@ -146,6 +146,8 @@ def main():
 
     progress_bar = tqdm.tqdm(total = header.model_epochs, position = 0)
     progress_bar.set_description_str("[INFO]: Epoch")
+    progress_bar.n = epoch
+    progress_bar.refresh()
 
     while epoch <= header.model_epochs:
         stats_train = (0, 0)
