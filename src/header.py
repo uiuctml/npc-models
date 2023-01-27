@@ -11,7 +11,7 @@ dataset_split_percentage_train = 0.8
 dataset_split_percentage_validation = 1 - dataset_split_percentage_train
 dataset_view_row_count = 5
 
-dry_run = True
+dry_run = False
 
 learning_rate_scheduler_mode = "min"
 learning_rate_scheduler_factor = 0.1
