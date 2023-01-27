@@ -2,6 +2,7 @@
 
 import header
 import logger
+import math
 import torch
 import torch.nn
 import torch.optim
@@ -16,7 +17,8 @@ def train(model, data_loader, criterion, optimizer, device):
 
     model.train()
 
-    progress_bar = tqdm.tqdm(total = len(data_loader.dataset), position = 1)
+    batch_count = math.ceil(len(data_loader.dataset) / header.data_loader_batch_size)
+    progress_bar = tqdm.tqdm(total = batch_count, position = 1)
     progress_bar.set_description_str("[INFO]: Training progress")
 
     for (i, (input, labels)) in enumerate(data_loader):
@@ -35,7 +37,7 @@ def train(model, data_loader, criterion, optimizer, device):
         running_loss += loss.item() * input.size(0)
         running_corrects += torch.sum(predictions == labels.data)
 
-        progress_bar.n = i
+        progress_bar.n = i + 1
         progress_bar.refresh()
 
     progress_bar.close()
@@ -48,7 +50,8 @@ def validate(model, data_loader, criterion, device):
 
     model.eval()
 
-    progress_bar = tqdm.tqdm(total = len(data_loader.dataset), position = 2)
+    batch_count = math.ceil(len(data_loader.dataset) / header.data_loader_batch_size)
+    progress_bar = tqdm.tqdm(total = batch_count, position = 2)
     progress_bar.set_description_str("[INFO]: Validation progress")
 
     for (i, (input, labels)) in enumerate(data_loader):
@@ -63,7 +66,7 @@ def validate(model, data_loader, criterion, device):
         running_loss += loss.item() * input.size(0)
         running_corrects += torch.sum(predictions == labels.data)
 
-        progress_bar.n = i
+        progress_bar.n = i + 1
         progress_bar.refresh()
 
     progress_bar.close()
