@@ -18,8 +18,12 @@ def train(model, data_loader, criterion, optimizer, device):
     model.train()
 
     batch_count = math.ceil(len(data_loader.dataset) / header.data_loader_batch_size)
-    progress_bar = tqdm.tqdm(total = batch_count, position = 1)
-    progress_bar.set_description_str("[INFO]: Training progress")
+    progress_bar_accuracy = tqdm.tqdm(total = 1, position = 3, leave = False)
+    progress_bar_loss = tqdm.tqdm(total = 10, position = 2, leave = False)
+    progress_bar_progress = tqdm.tqdm(total = batch_count, position = 1, leave = False)
+    progress_bar_accuracy.set_description_str("[INFO]: Training accuracy")
+    progress_bar_loss.set_description_str("[INFO]: Training loss")
+    progress_bar_progress.set_description_str("[INFO]: Training progress")
 
     for (i, (input, labels)) in enumerate(data_loader):
         input = input.to(device, non_blocking = True)
@@ -34,13 +38,22 @@ def train(model, data_loader, criterion, optimizer, device):
             loss.backward()
             optimizer.step()
 
-        running_loss += loss.item() * input.size(0)
-        running_corrects += torch.sum(predictions == labels.data)
+        corrects = torch.sum(predictions == labels.data)
 
-        progress_bar.n = i + 1
-        progress_bar.refresh()
+        running_loss += loss.item()
+        running_corrects += corrects.item()
 
-    progress_bar.close()
+        progress_bar_accuracy.n = corrects.item() / header.data_loader_batch_size
+        progress_bar_loss.n = loss.item()
+        progress_bar_progress.n = i + 1
+
+        progress_bar_accuracy.refresh()
+        progress_bar_loss.refresh()
+        progress_bar_progress.refresh()
+
+    progress_bar_accuracy.close()
+    progress_bar_loss.close()
+    progress_bar_progress.close()
 
     return (running_loss, running_corrects)
 
@@ -51,8 +64,12 @@ def validate(model, data_loader, criterion, device):
     model.eval()
 
     batch_count = math.ceil(len(data_loader.dataset) / header.data_loader_batch_size)
-    progress_bar = tqdm.tqdm(total = batch_count, position = 2)
-    progress_bar.set_description_str("[INFO]: Validation progress")
+    progress_bar_accuracy = tqdm.tqdm(total = 1, position = 3, leave = False)
+    progress_bar_loss = tqdm.tqdm(total = 10, position = 2, leave = False)
+    progress_bar_progress = tqdm.tqdm(total = batch_count, position = 1, leave = False)
+    progress_bar_accuracy.set_description_str("[INFO]: Validation accuracy")
+    progress_bar_loss.set_description_str("[INFO]: Validation loss")
+    progress_bar_progress.set_description_str("[INFO]: Validation progress")
 
     for (i, (input, labels)) in enumerate(data_loader):
         input = input.to(device, non_blocking = True)
@@ -63,13 +80,22 @@ def validate(model, data_loader, criterion, device):
             (_, predictions) = torch.max(output, 1)
             loss = criterion(output, labels)
 
-        running_loss += loss.item() * input.size(0)
-        running_corrects += torch.sum(predictions == labels.data)
+        corrects = torch.sum(predictions == labels.data)
 
-        progress_bar.n = i + 1
-        progress_bar.refresh()
+        running_loss += loss.item()
+        running_corrects += corrects.item()
 
-    progress_bar.close()
+        progress_bar_accuracy.n = corrects.item() / header.data_loader_batch_size
+        progress_bar_loss.n = loss.item()
+        progress_bar_progress.n = i + 1
+
+        progress_bar_accuracy.refresh()
+        progress_bar_loss.refresh()
+        progress_bar_progress.refresh()
+
+    progress_bar_accuracy.close()
+    progress_bar_loss.close()
+    progress_bar_progress.close()
 
     return (running_loss, running_corrects)
 
@@ -129,8 +155,8 @@ def main():
             stats_train = train(model, data_loader_train, criterion, optimizer, device)
             stats_validation = validate(model, data_loader_validation, criterion, device)
 
-        epoch_loss_train = stats_train[0] / len(data_loader_train.dataset)
-        epoch_loss_validation = stats_validation[0] / len(data_loader_validation.dataset)
+        epoch_loss_train = stats_train[0] / header.data_loader_batch_size
+        epoch_loss_validation = stats_validation[0] / header.data_loader_batch_size
         epoch_accuracy_train = stats_train[1] / len(data_loader_train.dataset)
         epoch_accuracy_validation = stats_validation[1] / len(data_loader_validation.dataset)
 
