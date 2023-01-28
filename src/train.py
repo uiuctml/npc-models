@@ -61,8 +61,8 @@ def train(model, data_loader, epoch, criterion, optimizer, device, statistics):
     progress_bar_loss.close()
     progress_bar_progress.close()
 
-    statistics["epoch_" + str(epoch)]["batch_" + str(i)]["training_accuracies"] = accuracies
-    statistics["epoch_" + str(epoch)]["batch_" + str(i)]["training_losses"] = losses
+    statistics["epoch_" + str(epoch)]["training_accuracies"] = accuracies
+    statistics["epoch_" + str(epoch)]["training_losses"] = losses
 
     return (running_loss, running_corrects)
 
@@ -112,8 +112,8 @@ def validate(model, data_loader, epoch, criterion, device, statistics):
     progress_bar_loss.close()
     progress_bar_progress.close()
 
-    statistics["epoch_" + str(epoch)]["batch_" + str(i)]["validation_accuracies"] = accuracies
-    statistics["epoch_" + str(epoch)]["batch_" + str(i)]["validation_losses"] = losses
+    statistics["epoch_" + str(epoch)]["validation_accuracies"] = accuracies
+    statistics["epoch_" + str(epoch)]["validation_losses"] = losses
 
     return (running_loss, running_corrects)
 
