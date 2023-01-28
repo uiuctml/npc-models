@@ -1,5 +1,6 @@
 
 import header
+import json
 import logger
 import math
 import matplotlib.pyplot as plt
@@ -7,11 +8,12 @@ import os
 import torch
 
 def load(model, optimizer, learning_rate_scheduler):
+    accuracy_validation = None
+    criterion = None
     data_loader_train = None
     data_loader_validation = None
     epoch = None
-    criterion = None
-    accuracy_validation = None
+    statistics = None
 
     if os.path.isdir(header.model_dir):
         if os.path.isfile(header.model_file_path_model):
@@ -46,9 +48,14 @@ def load(model, optimizer, learning_rate_scheduler):
             accuracy_validation = torch.load(header.model_file_path_accuracy_validation)
             logger.log_info("Loaded highest accuracy validation from \"" + header.model_dir + "\".")
 
-    return (data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation)
+        if os.path.isfile(header.model_file_path_statistics):
+            with open(header.model_file_path_statistics, "r") as file_statistics:
+                statistics = json.load(file_statistics)
+                logger.log_info("Loaded statistics from \"" + header.model_dir + "\".")
 
-def save(model, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation):
+    return (data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation, statistics)
+
+def save(model, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics):
     if not os.path.isdir(header.model_dir):
         os.makedirs(header.model_dir, exist_ok = True)
 
@@ -61,7 +68,10 @@ def save(model, data_loader_train, data_loader_validation, epoch, criterion, opt
     torch.save(learning_rate_scheduler.state_dict(), header.model_file_path_learning_rate_scheduler)
     torch.save(accuracy_validation, header.model_file_path_accuracy_validation)
 
-    logger.log_info("Saved training states to \"" + header.model_dir + "\".")
+    with open(header.model_file_path_statistics, "w") as file_statistics:
+        json.dump(statistics, file_statistics, indent = 4)
+
+    logger.log_info("Saved training states and statistics to \"" + header.model_dir + "\".")
 
     return
 

@@ -36,6 +36,7 @@ model_file_path_learning_rate_scheduler = model_dir + "/learning_rate_scheduler.
 model_file_path_model = model_dir + "/model.pth"
 model_file_path_model = model_dir + "/model.pth"
 model_file_path_optimizer = model_dir + "/optimizer.pth"
+model_file_path_statistics = model_dir + "/statistics.json"
 model_input_height = 224
 model_input_width = model_input_height
 model_input_channels = 3
@@ -43,4 +44,3 @@ model_pretrained_weights = "IMAGENET1K_V2"
 
 optimizer_learning_rate = 0.001
 optimizer_momentum = 0.9
-
