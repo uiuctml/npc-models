@@ -13,7 +13,7 @@ import utility
 
 def train(model, data_loader, epoch, criterion, optimizer, device, statistics):
     accuracies = []
-    batch_count = math.ceil(len(data_loader.dataset) / header.data_loader_batch_size)
+    batch_count = math.ceil(len(data_loader.dataset) / header.train_data_loader_batch_size)
     losses = []
     running_loss = 0
     running_corrects = 0
@@ -40,7 +40,7 @@ def train(model, data_loader, epoch, criterion, optimizer, device, statistics):
             optimizer.step()
 
         corrects = torch.sum(predictions == labels.data).item()
-        accuracy_value = corrects / header.data_loader_batch_size
+        accuracy_value = corrects / header.train_data_loader_batch_size
         loss_value = loss.item()
 
         running_loss += loss_value
@@ -68,7 +68,7 @@ def train(model, data_loader, epoch, criterion, optimizer, device, statistics):
 
 def validate(model, data_loader, epoch, criterion, device, statistics):
     accuracies = []
-    batch_count = math.ceil(len(data_loader.dataset) / header.data_loader_batch_size)
+    batch_count = math.ceil(len(data_loader.dataset) / header.train_data_loader_batch_size)
     losses = []
     running_loss = 0
     running_corrects = 0
@@ -91,7 +91,7 @@ def validate(model, data_loader, epoch, criterion, device, statistics):
             loss = criterion(output, labels)
 
         corrects = torch.sum(predictions == labels.data).item()
-        accuracy_value = corrects / header.data_loader_batch_size
+        accuracy_value = corrects / header.train_data_loader_batch_size
         loss_value = loss.item()
 
         running_loss += loss_value
@@ -123,7 +123,7 @@ def main():
     data_loader_train = None
     data_loader_validation = None
     dataset_transforms = torchvision.transforms.Compose([
-        torchvision.transforms.Resize((header.model_input_height, header.model_input_width)),
+        torchvision.transforms.Resize((header.train_model_input_height, header.train_model_input_width)),
         torchvision.transforms.ToTensor(),
         torchvision.transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
@@ -133,15 +133,15 @@ def main():
 
     dataset = torchvision.datasets.ImageFolder(root = header.dataset_dir_images, transform = dataset_transforms)
 
-    model = torchvision.models.resnet152(weights = header.model_pretrained_weights)
+    model = torchvision.models.resnet152(weights = header.train_model_pretrained_weights)
     model.fc = torch.nn.Linear(model.fc.in_features, len(dataset.classes))
     model = torch.nn.DataParallel(model)
     model = model.to(device)
 
-    optimizer = torch.optim.SGD(model.parameters(), lr = header.optimizer_learning_rate, momentum = header.optimizer_momentum)
-    learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.learning_rate_scheduler_mode, header.learning_rate_scheduler_factor, header.learning_rate_scheduler_patient, header.learning_rate_scheduler_threshold, header.learning_rate_scheduler_threshold_mode, header.learning_rate_scheduler_cooldown, header.learning_rate_scheduler_min_learning_rate, header.learning_rate_scheduler_min_learning_rate_decay, verbose = header.learning_rate_scheduler_verbose)
+    optimizer = torch.optim.SGD(model.parameters(), lr = header.train_optimizer_learning_rate, momentum = header.train_optimizer_momentum)
+    learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.train_learning_rate_scheduler_mode, header.train_learning_rate_scheduler_factor, header.train_learning_rate_scheduler_patient, header.train_learning_rate_scheduler_threshold, header.train_learning_rate_scheduler_threshold_mode, header.train_learning_rate_scheduler_cooldown, header.train_learning_rate_scheduler_min_learning_rate, header.train_learning_rate_scheduler_min_learning_rate_decay, verbose = header.train_learning_rate_scheduler_verbose)
 
-    if not header.dry_run:
+    if not header.train_dry_run:
         (data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation, statistics) = utility.load(model, optimizer, learning_rate_scheduler)
         logger.log_info_raw("\n")
 
@@ -155,8 +155,8 @@ def main():
         dataset_split_lengths = [header.dataset_split_percentage_train, header.dataset_split_percentage_validation]
         (dataset_subset_train, dataset_subset_validation) = torch.utils.data.random_split(dataset, dataset_split_lengths)
 
-        data_loader_train = torch.utils.data.DataLoader(dataset_subset_train, batch_size = header.data_loader_batch_size, shuffle = header.data_loader_shuffle, num_workers = header.data_loader_worker_count, pin_memory = True)
-        data_loader_validation = torch.utils.data.DataLoader(dataset_subset_validation, batch_size = header.data_loader_batch_size, shuffle = header.data_loader_shuffle, num_workers = header.data_loader_worker_count, pin_memory = True)
+        data_loader_train = torch.utils.data.DataLoader(dataset_subset_train, batch_size = header.train_data_loader_batch_size, shuffle = header.train_data_loader_shuffle, num_workers = header.train_data_loader_worker_count, pin_memory = True)
+        data_loader_validation = torch.utils.data.DataLoader(dataset_subset_validation, batch_size = header.train_data_loader_batch_size, shuffle = header.train_data_loader_shuffle, num_workers = header.train_data_loader_worker_count, pin_memory = True)
 
     if epoch == None:
         epoch = 1
@@ -165,28 +165,28 @@ def main():
         statistics = {}
 
     if header.log_level >= logger.LogLevel.debug:
-        model_input_size = (header.model_input_channels, header.model_input_height, header.model_input_width)
+        model_input_size = (header.train_model_input_channels, header.train_model_input_height, header.train_model_input_width)
         torchsummary.summary(model, input_size=model_input_size)
 
     utility.viewDataset(dataset, data_loader_train)
     utility.viewDataset(dataset, data_loader_validation)
 
-    progress_bar = tqdm.tqdm(total = header.model_epochs, position = 0)
+    progress_bar = tqdm.tqdm(total = header.train_epochs, position = 0)
     progress_bar.set_description_str("[INFO]: Epoch")
     progress_bar.n = epoch
     progress_bar.refresh()
 
-    while epoch <= header.model_epochs:
+    while epoch <= header.train_epochs:
         statistics_epoch_train = (0, 0)
         statistics_epoch_validation = (0, 0)
 
-        if not header.dry_run:
+        if not header.train_dry_run:
             statistics["epoch_" + str(epoch)] = {}
             statistics_epoch_train = train(model, data_loader_train, epoch, criterion, optimizer, device, statistics)
             statistics_epoch_validation = validate(model, data_loader_validation, epoch, criterion, device, statistics)
 
-        batch_count_train = math.ceil(len(data_loader_train.dataset) / header.data_loader_batch_size)
-        batch_count_validation = math.ceil(len(data_loader_validation.dataset) / header.data_loader_batch_size)
+        batch_count_train = math.ceil(len(data_loader_train.dataset) / header.train_data_loader_batch_size)
+        batch_count_validation = math.ceil(len(data_loader_validation.dataset) / header.train_data_loader_batch_size)
         epoch_loss_train = statistics_epoch_train[0] / batch_count_train
         epoch_loss_validation = statistics_epoch_validation[0] / batch_count_validation
         epoch_accuracy_train = statistics_epoch_train[1] / len(data_loader_train.dataset)
@@ -206,7 +206,7 @@ def main():
         if epoch_accuracy_validation > accuracy_validation:
             accuracy_validation = epoch_accuracy_validation
 
-        if not header.dry_run:
+        if not header.train_dry_run:
             utility.save(model, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics)
 
         logger.log_info_raw("\n")
