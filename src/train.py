@@ -46,8 +46,8 @@ def train(model, data_loader, epoch, criterion, optimizer, device, statistics):
         running_loss += loss_value
         running_corrects += corrects
 
-        progress_bar_accuracy.n = accuracy_value
-        progress_bar_loss.n = loss_value
+        progress_bar_accuracy.n = round(accuracy_value, 4)
+        progress_bar_loss.n = round(loss_value, 4)
         progress_bar_progress.n = i + 1
 
         progress_bar_accuracy.refresh()
@@ -97,8 +97,8 @@ def validate(model, data_loader, epoch, criterion, device, statistics):
         running_loss += loss_value
         running_corrects += corrects
 
-        progress_bar_accuracy.n = accuracy_value
-        progress_bar_loss.n = loss_value
+        progress_bar_accuracy.n = round(accuracy_value, 4)
+        progress_bar_loss.n = round(loss_value, 4)
         progress_bar_progress.n = i + 1
 
         progress_bar_accuracy.refresh()
