@@ -55,6 +55,68 @@ def load(model, optimizer, learning_rate_scheduler):
 
     return (data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation, statistics)
 
+def plotStatistics(statistics):
+    if statistics == None:
+        return
+
+    accuracies_training = []
+    accuracies_training_xticks = [0]
+    accuracies_validation = []
+    accuracies_validation_xticks = [0]
+    losses_training = []
+    losses_training_xticks = [0]
+    losses_validation = []
+    losses_validation_xticks = [0]
+
+    for epoch in statistics.keys():
+        accuracies_training += statistics[epoch]["training_accuracies"]
+        accuracies_training_xticks.append(len(accuracies_training) + 1)
+
+        accuracies_validation += statistics[epoch]["validation_accuracies"]
+        accuracies_validation_xticks.append(len(accuracies_validation) + 1)
+
+        losses_training += statistics[epoch]["training_losses"]
+        losses_training_xticks.append(len(losses_training) + 1)
+
+        losses_validation += statistics[epoch]["validation_losses"]
+        losses_validation_xticks.append(len(losses_validation) + 1)
+
+    figure = plt.figure(figsize = (2, 2))
+    figure_manager = plt.get_current_fig_manager()
+
+    figure.add_subplot(2, 2, 1)
+    plt.plot(accuracies_training)
+    plt.xticks(accuracies_training_xticks, range(0, len(accuracies_training_xticks)))
+    plt.title("Training Accuracy")
+    plt.xlabel("Epochs")
+    plt.ylabel("Accuracy")
+
+    figure.add_subplot(2, 2, 2)
+    plt.plot(accuracies_validation)
+    plt.xticks(accuracies_validation_xticks, range(0, len(accuracies_validation_xticks)))
+    plt.title("Validation Accuracy")
+    plt.xlabel("Epochs")
+    plt.ylabel("Accuracy")
+
+    figure.add_subplot(2, 2, 3)
+    plt.plot(losses_training)
+    plt.xticks(losses_training_xticks, range(0, len(losses_training_xticks)))
+    plt.title("Training Loss")
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+
+    figure.add_subplot(2, 2, 4)
+    plt.plot(losses_validation)
+    plt.xticks(losses_validation_xticks, range(0, len(losses_validation_xticks)))
+    plt.title("Validation Loss")
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+
+    figure_manager.full_screen_toggle()
+    plt.show()
+
+    return
+
 def save(model, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics):
     if not os.path.isdir(header.model_dir):
         os.makedirs(header.model_dir, exist_ok = True)
