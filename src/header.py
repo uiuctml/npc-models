@@ -43,7 +43,6 @@ train_model_file_path_data_loader_validation = train_model_dir + "/data_loader_v
 train_model_file_path_epoch = train_model_dir + "/epoch.pth"
 train_model_file_path_learning_rate_scheduler = train_model_dir + "/learning_rate_scheduler.pth"
 train_model_file_path_model = train_model_dir + "/model.pth"
-train_model_file_path_model = train_model_dir + "/model.pth"
 train_model_file_path_optimizer = train_model_dir + "/optimizer.pth"
 train_model_file_path_statistics = train_model_dir + "/statistics.json"
 train_model_input_height = 224
