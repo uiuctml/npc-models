@@ -1,3 +1,4 @@
 *.pth
+.idea/
 model*/
 __pycache__/

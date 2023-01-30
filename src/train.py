@@ -11,6 +11,12 @@ import torchvision
 import tqdm
 import utility
 
+def compute_l2_norm(parameters):
+    l2_parameters = []
+    for parameter in parameters:
+        l2_parameters.append(parameter.view(-1))
+    return torch.square(torch.cat(l2_parameters)).sum()
+
 def train(model, data_loader, epoch, criterion, optimizer, device, statistics):
     accuracies = []
     batch_count = math.ceil(len(data_loader.dataset) / header.train_data_loader_batch_size)
@@ -42,8 +48,11 @@ def train(model, data_loader, epoch, criterion, optimizer, device, statistics):
         corrects = torch.sum(predictions == labels.data).item()
         accuracy_value = corrects / header.train_data_loader_batch_size
         loss_value = loss.item()
+        l2_norm = compute_l2_norm(model.parameters())
+        l2_loss = header.l2_lambda * l2_norm
 
         running_loss += loss_value
+        running_loss += l2_loss
         running_corrects += corrects
 
         progress_bar_accuracy.n = round(accuracy_value, 4)
@@ -134,7 +143,7 @@ def main():
     dataset = torchvision.datasets.ImageFolder(root = header.dataset_dir_images, transform = dataset_transforms)
 
     model = torchvision.models.resnet152(weights = header.train_model_pretrained_weights)
-    model.fc = torch.nn.Linear(model.fc.in_features, len(dataset.classes))
+    model.fc = torch.nn.Sequential(torch.nn.Dropout(p=header.train_dropout_probability), torch.nn.Linear(model.fc.in_features, len(dataset.classes)))
     model = torch.nn.DataParallel(model)
     model = model.to(device)
 
