@@ -8,7 +8,7 @@ import utility
 def main():
     statistics = None
 
-    with open(header.model_file_path_statistics, "r") as file_statistics:
+    with open(header.evaluate_model_file_path_statistics, "r") as file_statistics:
         statistics = json.load(file_statistics)
 
     utility.plotStatistics(statistics)

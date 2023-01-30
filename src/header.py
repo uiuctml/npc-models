@@ -7,6 +7,18 @@ dataset_split_percentage_train = 0.8
 dataset_split_percentage_validation = 1 - dataset_split_percentage_train
 dataset_view_row_count = 5
 
+evaluate_model_dir = "../model"
+evaluate_model_file_path_accuracy_validation = evaluate_model_dir + "/accuracy_validation.pth"
+evaluate_model_file_path_criterion = evaluate_model_dir + "/criterion.pth"
+evaluate_model_file_path_data_loader_train = evaluate_model_dir + "/data_loader_train.pth"
+evaluate_model_file_path_data_loader_validation = evaluate_model_dir + "/data_loader_validation.pth"
+evaluate_model_file_path_epoch = evaluate_model_dir + "/epoch.pth"
+evaluate_model_file_path_learning_rate_scheduler = evaluate_model_dir + "/learning_rate_scheduler.pth"
+evaluate_model_file_path_model = evaluate_model_dir + "/model.pth"
+evaluate_model_file_path_model = evaluate_model_dir + "/model.pth"
+evaluate_model_file_path_optimizer = evaluate_model_dir + "/optimizer.pth"
+evaluate_model_file_path_statistics = evaluate_model_dir + "/statistics.json"
+
 log_level = logger.LogLevel.info
 
 train_data_loader_batch_size = 32
