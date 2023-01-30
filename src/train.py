@@ -49,7 +49,7 @@ def train(model, data_loader, epoch, criterion, optimizer, device, statistics):
         accuracy_value = corrects / header.train_data_loader_batch_size
         loss_value = loss.item()
         l2_norm = compute_l2_norm(model.parameters())
-        l2_loss = header.l2_lambda * l2_norm
+        l2_loss = header.train_l2_lambda * l2_norm
 
         running_loss += loss_value
         running_loss += l2_loss
