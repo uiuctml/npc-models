@@ -7,6 +7,14 @@ import matplotlib.pyplot as plt
 import os
 import torch
 
+def computeL2Norm(parameters):
+    parameters_list = []
+
+    for parameter in parameters:
+        parameters_list.append(parameter.view(-1))
+
+    return torch.square(torch.cat(parameters_list)).sum().item()
+
 def load(model_dir, model, optimizer, learning_rate_scheduler):
     accuracy_validation = None
     criterion = None

@@ -63,7 +63,7 @@ def main():
     model = torchvision.models.resnet152(weights = header.test_model_pretrained_weights)
     predictions = {}
 
-    model.fc = torch.nn.Linear(model.fc.in_features, len(dataset.classes))
+    model.fc = torch.nn.Sequential(torch.nn.Dropout(p = header.train_dropout_probability), torch.nn.Linear(model.fc.in_features, len(dataset.classes)))
     model = torch.nn.DataParallel(model)
     model = model.to(device)
 
