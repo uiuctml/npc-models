@@ -115,7 +115,12 @@ def plotStatistics(statistics):
     plt.ylabel("Loss")
 
     figure_manager.full_screen_toggle()
-    plt.show()
+
+    if header.evaluate_show_plot:
+        plt.show()
+
+    if header.evaluate_save_plot:
+        figure.savefig(header.evaluate_model_dir.split("/")[-1] + ".png")
 
     return
 

@@ -19,6 +19,8 @@ evaluate_model_file_path_model = evaluate_model_dir + "/model.pth"
 evaluate_model_file_path_model = evaluate_model_dir + "/model.pth"
 evaluate_model_file_path_optimizer = evaluate_model_dir + "/optimizer.pth"
 evaluate_model_file_path_statistics = evaluate_model_dir + "/statistics.json"
+evaluate_save_plot = True
+evaluate_show_plot = False
 
 log_level = logger.LogLevel.info
 
