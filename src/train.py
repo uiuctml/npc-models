@@ -15,7 +15,7 @@ def compute_l2_norm(parameters):
     l2_parameters = []
     for parameter in parameters:
         l2_parameters.append(parameter.view(-1))
-    return torch.square(torch.cat(l2_parameters)).sum()
+    return torch.square(torch.cat(l2_parameters)).sum().item()
 
 def train(model, data_loader, epoch, criterion, optimizer, device, statistics):
     accuracies = []
@@ -42,17 +42,17 @@ def train(model, data_loader, epoch, criterion, optimizer, device, statistics):
             output = model(input)
             (_, predictions) = torch.max(output, 1)
             loss = criterion(output, labels)
+            l2_norm = compute_l2_norm(model.parameters())
+            l2_loss = header.train_l2_lambda * l2_norm
+            loss += l2_loss
             loss.backward()
             optimizer.step()
 
         corrects = torch.sum(predictions == labels.data).item()
         accuracy_value = corrects / header.train_data_loader_batch_size
         loss_value = loss.item()
-        l2_norm = compute_l2_norm(model.parameters())
-        l2_loss = header.train_l2_lambda * l2_norm
 
         running_loss += loss_value
-        running_loss += l2_loss
         running_corrects += corrects
 
         progress_bar_accuracy.n = round(accuracy_value, 4)
@@ -147,7 +147,7 @@ def main():
     model = torch.nn.DataParallel(model)
     model = model.to(device)
 
-    optimizer = torch.optim.SGD(model.parameters(), lr = header.train_optimizer_learning_rate, momentum = header.train_optimizer_momentum)
+    optimizer = torch.optim.SGD(model.parameters(), lr = header.train_optimizer_learning_rate, momentum = header.train_optimizer_momentum, weight_decay = header.train_optimizer_weight_decay)
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.train_learning_rate_scheduler_mode, header.train_learning_rate_scheduler_factor, header.train_learning_rate_scheduler_patient, header.train_learning_rate_scheduler_threshold, header.train_learning_rate_scheduler_threshold_mode, header.train_learning_rate_scheduler_cooldown, header.train_learning_rate_scheduler_min_learning_rate, header.train_learning_rate_scheduler_min_learning_rate_decay, header.train_learning_rate_scheduler_verbose)
 
     if not header.train_dry_run:
