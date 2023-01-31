@@ -166,7 +166,7 @@ def main():
 
     if header.log_level >= logger.LogLevel.debug:
         model_input_size = (header.train_model_input_channels, header.train_model_input_height, header.train_model_input_width)
-        torchsummary.summary(model, input_size=model_input_size)
+        torchsummary.summary(model, input_size = model_input_size)
 
     utility.viewDataset(dataset, data_loader_train)
     utility.viewDataset(dataset, data_loader_validation)
