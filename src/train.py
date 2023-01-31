@@ -140,7 +140,7 @@ def main():
     epoch = None
     statistics = None
 
-    dataset = torchvision.datasets.ImageFolder(root = header.dataset_dir_images, transform = dataset_transforms)
+    dataset = torchvision.datasets.ImageFolder(root = header.dataset_dir_train_validation, transform = dataset_transforms)
 
     model = torchvision.models.resnet152(weights = header.train_model_pretrained_weights)
     model.fc = torch.nn.Sequential(torch.nn.Dropout(p=header.train_dropout_probability), torch.nn.Linear(model.fc.in_features, len(dataset.classes)))

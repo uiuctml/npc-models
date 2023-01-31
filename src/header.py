@@ -2,7 +2,8 @@ import logger
 import multiprocessing
 
 dataset_dir = "../../mapillary-dataset"
-dataset_dir_images = dataset_dir + "/images" + "/sliced" + "/original"
+dataset_dir_train_validation = dataset_dir + "/images" + "/split" + "/train_val"
+dataset_dir_train_test = dataset_dir + "/images" + "/split" + "/test"
 dataset_split_percentage_train = 0.8
 dataset_split_percentage_validation = 1 - dataset_split_percentage_train
 dataset_view_row_count = 5
