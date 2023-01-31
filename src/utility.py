@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import os
 import torch
 
-def load(model, optimizer, learning_rate_scheduler):
+def load(model_dir, model, optimizer, learning_rate_scheduler):
     accuracy_validation = None
     criterion = None
     data_loader_train = None
@@ -15,43 +15,53 @@ def load(model, optimizer, learning_rate_scheduler):
     epoch = None
     statistics = None
 
-    if os.path.isdir(header.train_model_dir):
-        if os.path.isfile(header.train_model_file_path_model) and model != None:
-            model.load_state_dict(torch.load(header.train_model_file_path_model))
-            logger.log_info("Loaded model state from \"" + header.train_model_dir + "\".")
+    if os.path.isdir(model_dir):
+        model_file_path_accuracy_validation = os.path.join(model_dir, header.model_file_name_accuracy_validation)
+        model_file_path_criterion = os.path.join(model_dir, header.model_file_name_criterion)
+        model_file_path_data_loader_train = os.path.join(model_dir, header.model_file_name_data_loader_train)
+        model_file_path_data_loader_validation = os.path.join(model_dir, header.model_file_name_data_loader_validation)
+        model_file_path_epoch = os.path.join(model_dir, header.model_file_name_epoch)
+        model_file_path_learning_rate_scheduler = os.path.join(model_dir, header.model_file_name_learning_rate_scheduler)
+        model_file_path_model = os.path.join(model_dir, header.model_file_name_model)
+        model_file_path_optimizer = os.path.join(model_dir, header.model_file_name_optimizer)
+        model_file_path_statistics = os.path.join(model_dir, header.model_file_name_statistics)
 
-        if os.path.isfile(header.train_model_file_path_data_loader_train):
-            data_loader_train = torch.load(header.train_model_file_path_data_loader_train)
-            logger.log_info("Loaded training data loader from \"" + header.train_model_dir + "\".")
+        if os.path.isfile(model_file_path_model) and model != None:
+            model.load_state_dict(torch.load(model_file_path_model))
+            logger.log_info("Loaded model state from \"" + model_dir + "\".")
 
-        if os.path.isfile(header.train_model_file_path_data_loader_validation):
-            data_loader_validation = torch.load(header.train_model_file_path_data_loader_validation)
-            logger.log_info("Loaded validation data loader from \"" + header.train_model_dir + "\".")
+        if os.path.isfile(model_file_path_data_loader_train):
+            data_loader_train = torch.load(model_file_path_data_loader_train)
+            logger.log_info("Loaded training data loader from \"" + model_dir + "\".")
 
-        if os.path.isfile(header.train_model_file_path_epoch):
-            epoch = torch.load(header.train_model_file_path_epoch)
-            logger.log_info("Loaded epoch from \"" + header.train_model_dir + "\".")
+        if os.path.isfile(model_file_path_data_loader_validation):
+            data_loader_validation = torch.load(model_file_path_data_loader_validation)
+            logger.log_info("Loaded validation data loader from \"" + model_dir + "\".")
 
-        if os.path.isfile(header.train_model_file_path_criterion):
-            criterion = torch.load(header.train_model_file_path_criterion)
-            logger.log_info("Loaded criterion from \"" + header.train_model_dir + "\".")
+        if os.path.isfile(model_file_path_epoch):
+            epoch = torch.load(model_file_path_epoch)
+            logger.log_info("Loaded epoch from \"" + model_dir + "\".")
 
-        if os.path.isfile(header.train_model_file_path_optimizer) and optimizer != None:
-            optimizer.load_state_dict(torch.load(header.train_model_file_path_optimizer))
-            logger.log_info("Loaded optimizer state from \"" + header.train_model_dir + "\".")
+        if os.path.isfile(model_file_path_criterion):
+            criterion = torch.load(model_file_path_criterion)
+            logger.log_info("Loaded criterion from \"" + model_dir + "\".")
 
-        if os.path.isfile(header.train_model_file_path_learning_rate_scheduler) and learning_rate_scheduler != None:
-            learning_rate_scheduler.load_state_dict(torch.load(header.train_model_file_path_learning_rate_scheduler))
-            logger.log_info("Loaded learning rate scheduler state from \"" + header.train_model_dir + "\".")
+        if os.path.isfile(model_file_path_optimizer) and optimizer != None:
+            optimizer.load_state_dict(torch.load(model_file_path_optimizer))
+            logger.log_info("Loaded optimizer state from \"" + model_dir + "\".")
 
-        if os.path.isfile(header.train_model_file_path_accuracy_validation):
-            accuracy_validation = torch.load(header.train_model_file_path_accuracy_validation)
-            logger.log_info("Loaded highest accuracy validation from \"" + header.train_model_dir + "\".")
+        if os.path.isfile(model_file_path_learning_rate_scheduler) and learning_rate_scheduler != None:
+            learning_rate_scheduler.load_state_dict(torch.load(model_file_path_learning_rate_scheduler))
+            logger.log_info("Loaded learning rate scheduler state from \"" + model_dir + "\".")
 
-        if os.path.isfile(header.train_model_file_path_statistics):
-            with open(header.train_model_file_path_statistics, "r") as file_statistics:
+        if os.path.isfile(model_file_path_accuracy_validation):
+            accuracy_validation = torch.load(model_file_path_accuracy_validation)
+            logger.log_info("Loaded highest accuracy validation from \"" + model_dir + "\".")
+
+        if os.path.isfile(model_file_path_statistics):
+            with open(model_file_path_statistics, "r") as file_statistics:
                 statistics = json.load(file_statistics)
-                logger.log_info("Loaded statistics from \"" + header.train_model_dir + "\".")
+                logger.log_info("Loaded statistics from \"" + model_dir + "\".")
 
     return (data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation, statistics)
 
@@ -124,23 +134,33 @@ def plotStatistics(statistics):
 
     return
 
-def save(model, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics):
-    if not os.path.isdir(header.train_model_dir):
-        os.makedirs(header.train_model_dir, exist_ok = True)
+def save(model_dir, model, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics):
+    if not os.path.isdir(model_dir):
+        os.makedirs(model_dir, exist_ok = True)
 
-    torch.save(model.state_dict(), header.train_model_file_path_model)
-    torch.save(data_loader_train, header.train_model_file_path_data_loader_train)
-    torch.save(data_loader_validation, header.train_model_file_path_data_loader_validation)
-    torch.save(epoch, header.train_model_file_path_epoch)
-    torch.save(criterion, header.train_model_file_path_criterion)
-    torch.save(optimizer.state_dict(), header.train_model_file_path_optimizer)
-    torch.save(learning_rate_scheduler.state_dict(), header.train_model_file_path_learning_rate_scheduler)
-    torch.save(accuracy_validation, header.train_model_file_path_accuracy_validation)
+    model_file_path_accuracy_validation = os.path.join(model_dir, header.model_file_name_accuracy_validation)
+    model_file_path_criterion = os.path.join(model_dir, header.model_file_name_criterion)
+    model_file_path_data_loader_train = os.path.join(model_dir, header.model_file_name_data_loader_train)
+    model_file_path_data_loader_validation = os.path.join(model_dir, header.model_file_name_data_loader_validation)
+    model_file_path_epoch = os.path.join(model_dir, header.model_file_name_epoch)
+    model_file_path_learning_rate_scheduler = os.path.join(model_dir, header.model_file_name_learning_rate_scheduler)
+    model_file_path_model = os.path.join(model_dir, header.model_file_name_model)
+    model_file_path_optimizer = os.path.join(model_dir, header.model_file_name_optimizer)
+    model_file_path_statistics = os.path.join(model_dir, header.model_file_name_statistics)
 
-    with open(header.train_model_file_path_statistics, "w") as file_statistics:
+    torch.save(model.state_dict(), model_file_path_model)
+    torch.save(data_loader_train, model_file_path_data_loader_train)
+    torch.save(data_loader_validation, model_file_path_data_loader_validation)
+    torch.save(epoch, model_file_path_epoch)
+    torch.save(criterion, model_file_path_criterion)
+    torch.save(optimizer.state_dict(), model_file_path_optimizer)
+    torch.save(learning_rate_scheduler.state_dict(), model_file_path_learning_rate_scheduler)
+    torch.save(accuracy_validation, model_file_path_accuracy_validation)
+
+    with open(model_file_path_statistics, "w") as file_statistics:
         json.dump(statistics, file_statistics, indent = 4)
 
-    logger.log_info("Saved training states and statistics to \"" + header.train_model_dir + "\".")
+    logger.log_info("Saved training states and statistics to \"" + model_dir + "\".")
 
     return
 

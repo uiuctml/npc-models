@@ -67,7 +67,7 @@ def main():
     model = torch.nn.DataParallel(model)
     model = model.to(device)
 
-    utility.load(model, None, None)
+    utility.load(header.test_model_dir, model, None, None)
     logger.log_info_raw("\n")
 
     if header.log_level >= logger.LogLevel.debug:
