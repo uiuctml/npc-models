@@ -84,6 +84,8 @@ def plotStatistics(statistics):
     figure = plt.figure(figsize = (2, 2))
     figure_manager = plt.get_current_fig_manager()
 
+    figure.suptitle("Statistics for \"" + header.evaluate_model_dir + "\"")
+
     figure.add_subplot(2, 2, 1)
     plt.plot(accuracies_training)
     plt.xticks(accuracies_training_xticks, range(0, len(accuracies_training_xticks)))
