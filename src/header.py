@@ -3,7 +3,7 @@ import multiprocessing
 
 dataset_dir = "../../mapillary-dataset"
 dataset_dir_train_validation = dataset_dir + "/images" + "/split" + "/train_val"
-dataset_dir_train_test = dataset_dir + "/images" + "/split" + "/test"
+dataset_dir_test = dataset_dir + "/images" + "/split" + "/test"
 dataset_split_percentage_train = 0.8
 dataset_split_percentage_validation = 1 - dataset_split_percentage_train
 dataset_view_row_count = 5
@@ -25,8 +25,8 @@ evaluate_show_plot = False
 log_level = logger.LogLevel.info
 
 train_data_loader_batch_size = 32
-train_data_loader_worker_count = multiprocessing.cpu_count()
 train_data_loader_shuffle = True
+train_data_loader_worker_count = multiprocessing.cpu_count()
 train_dry_run = False
 train_epochs = 25
 train_learning_rate_scheduler_mode = "min"
@@ -54,3 +54,11 @@ train_model_input_channels = 3
 train_model_pretrained_weights = "IMAGENET1K_V2"
 train_optimizer_learning_rate = 0.001
 train_optimizer_momentum = 0.9
+
+test_data_loader_batch_size = train_data_loader_batch_size
+test_data_loader_shuffle = train_data_loader_shuffle
+test_data_loader_worker_count = multiprocessing.cpu_count()
+test_model_input_height = train_model_input_height
+test_model_input_width = train_model_input_width
+test_model_input_channels = train_model_input_channels
+test_model_pretrained_weights = train_model_pretrained_weights

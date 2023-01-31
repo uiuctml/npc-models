@@ -16,7 +16,7 @@ def load(model, optimizer, learning_rate_scheduler):
     statistics = None
 
     if os.path.isdir(header.train_model_dir):
-        if os.path.isfile(header.train_model_file_path_model):
+        if os.path.isfile(header.train_model_file_path_model) and model != None:
             model.load_state_dict(torch.load(header.train_model_file_path_model))
             logger.log_info("Loaded model state from \"" + header.train_model_dir + "\".")
 
@@ -36,11 +36,11 @@ def load(model, optimizer, learning_rate_scheduler):
             criterion = torch.load(header.train_model_file_path_criterion)
             logger.log_info("Loaded criterion from \"" + header.train_model_dir + "\".")
 
-        if os.path.isfile(header.train_model_file_path_optimizer):
+        if os.path.isfile(header.train_model_file_path_optimizer) and optimizer != None:
             optimizer.load_state_dict(torch.load(header.train_model_file_path_optimizer))
             logger.log_info("Loaded optimizer state from \"" + header.train_model_dir + "\".")
 
-        if os.path.isfile(header.train_model_file_path_learning_rate_scheduler):
+        if os.path.isfile(header.train_model_file_path_learning_rate_scheduler) and learning_rate_scheduler != None:
             learning_rate_scheduler.load_state_dict(torch.load(header.train_model_file_path_learning_rate_scheduler))
             logger.log_info("Loaded learning rate scheduler state from \"" + header.train_model_dir + "\".")
 
