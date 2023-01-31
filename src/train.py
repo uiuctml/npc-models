@@ -42,9 +42,9 @@ def train(model, data_loader, epoch, criterion, optimizer, device, statistics):
             output = model(input)
             (_, predictions) = torch.max(output, 1)
             loss = criterion(output, labels)
-            l2_norm = compute_l2_norm(model.parameters())
-            l2_loss = header.train_l2_lambda * l2_norm
-            loss += l2_loss
+            # l2_norm = compute_l2_norm(model.parameters())
+            # l2_loss = header.train_l2_lambda * l2_norm
+            # loss += l2_loss
             loss.backward()
             optimizer.step()
 
