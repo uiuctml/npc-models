@@ -32,7 +32,7 @@ def load(model_dir, model, optimizer, learning_rate_scheduler):
         model_file_path_learning_rate_scheduler = os.path.join(model_dir, header.model_file_name_learning_rate_scheduler)
         model_file_path_model = os.path.join(model_dir, header.model_file_name_model)
         model_file_path_optimizer = os.path.join(model_dir, header.model_file_name_optimizer)
-        model_file_path_statistics = os.path.join(model_dir, header.model_file_name_statistics)
+        model_file_path_statistics_train = os.path.join(model_dir, header.model_file_name_statistics_train)
 
         if os.path.isfile(model_file_path_model) and model != None:
             model.load_state_dict(torch.load(model_file_path_model))
@@ -66,14 +66,14 @@ def load(model_dir, model, optimizer, learning_rate_scheduler):
             accuracy_validation = torch.load(model_file_path_accuracy_validation)
             logger.log_info("Loaded highest accuracy validation from \"" + model_dir + "\".")
 
-        if os.path.isfile(model_file_path_statistics):
-            with open(model_file_path_statistics, "r") as file_statistics:
-                statistics = json.load(file_statistics)
-                logger.log_info("Loaded statistics from \"" + model_dir + "\".")
+        if os.path.isfile(model_file_path_statistics_train):
+            with open(model_file_path_statistics_train, "r") as file_statistics_train:
+                statistics_train = json.load(file_statistics_train)
+                logger.log_info("Loaded training statistics from \"" + model_dir + "\".")
 
-    return (data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation, statistics)
+    return (data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation, statistics_train)
 
-def plotStatistics(statistics):
+def plotTrainingStatistics(statistics):
     if statistics == None:
         return
 
@@ -102,7 +102,7 @@ def plotStatistics(statistics):
     figure = plt.figure(figsize = (2, 2))
     figure_manager = plt.get_current_fig_manager()
 
-    figure.suptitle("Statistics for \"" + header.evaluate_model_dir + "\"")
+    figure.suptitle("Training Statistics for \"" + header.evaluate_model_dir + "\"")
 
     figure.add_subplot(2, 2, 1)
     plt.plot(accuracies_training)
@@ -154,7 +154,7 @@ def save(model_dir, model, data_loader_train, data_loader_validation, epoch, cri
     model_file_path_learning_rate_scheduler = os.path.join(model_dir, header.model_file_name_learning_rate_scheduler)
     model_file_path_model = os.path.join(model_dir, header.model_file_name_model)
     model_file_path_optimizer = os.path.join(model_dir, header.model_file_name_optimizer)
-    model_file_path_statistics = os.path.join(model_dir, header.model_file_name_statistics)
+    model_file_path_statistics_train = os.path.join(model_dir, header.model_file_name_statistics_train)
 
     torch.save(model.state_dict(), model_file_path_model)
     torch.save(data_loader_train, model_file_path_data_loader_train)
@@ -165,8 +165,8 @@ def save(model_dir, model, data_loader_train, data_loader_validation, epoch, cri
     torch.save(learning_rate_scheduler.state_dict(), model_file_path_learning_rate_scheduler)
     torch.save(accuracy_validation, model_file_path_accuracy_validation)
 
-    with open(model_file_path_statistics, "w") as file_statistics:
-        json.dump(statistics, file_statistics, indent = 4)
+    with open(model_file_path_statistics_train, "w") as file_statistics_train:
+        json.dump(statistics, file_statistics_train, indent = 4)
 
     logger.log_info("Saved training states and statistics to \"" + model_dir + "\".")
 

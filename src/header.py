@@ -1,7 +1,7 @@
 import logger
 import multiprocessing
 
-dataset_dir = "/data/common/mapillary-dataset"
+dataset_dir = "../../mapillary-dataset"
 dataset_dir_train_validation = dataset_dir + "/images" + "/split" + "/train_val"
 dataset_dir_test = dataset_dir + "/images" + "/split" + "/test"
 dataset_split_percentage_train = 0.8
@@ -20,7 +20,8 @@ model_file_name_epoch = "epoch.pth"
 model_file_name_learning_rate_scheduler = "learning_rate_scheduler.pth"
 model_file_name_model = "model.pth"
 model_file_name_optimizer = "optimizer.pth"
-model_file_name_statistics = "statistics.json"
+model_file_name_statistics_test = "statistics_test.json"
+model_file_name_statistics_train = "statistics_train.json"
 
 log_level = logger.LogLevel.info
 
@@ -53,7 +54,7 @@ train_use_l2_loss = False
 test_data_loader_batch_size = train_data_loader_batch_size
 test_data_loader_shuffle = train_data_loader_shuffle
 test_data_loader_worker_count = multiprocessing.cpu_count()
-test_model_dir = "../model"
+test_model_dir = "../model.01.30.euler.d"
 test_model_input_height = train_model_input_height
 test_model_input_width = train_model_input_width
 test_model_input_channels = train_model_input_channels

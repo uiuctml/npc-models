@@ -2,16 +2,17 @@
 
 import header
 import json
-import logger
+import os
 import utility
 
 def main():
+    model_file_path_statistics_train = os.path.join(header.evaluate_model_dir, header.model_file_name_statistics_train)
     statistics = None
 
-    with open(header.evaluate_model_file_path_statistics, "r") as file_statistics:
-        statistics = json.load(file_statistics)
+    with open(model_file_path_statistics_train, "r") as file_statistics_train:
+        statistics = json.load(file_statistics_train)
 
-    utility.plotStatistics(statistics)
+    utility.plotTrainingStatistics(statistics)
 
     return
 
