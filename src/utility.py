@@ -165,7 +165,6 @@ def plotTrainingStatistics(statistics):
     matplotlib.pyplot.title("Training Loss")
     matplotlib.pyplot.xlabel("Epoch")
     matplotlib.pyplot.ylabel("Loss")
-    matplotlib.pyplot.ylim([0, 6])
 
     figure.add_subplot(2, 2, 4)
     matplotlib.pyplot.plot(losses_validation)
@@ -173,7 +172,6 @@ def plotTrainingStatistics(statistics):
     matplotlib.pyplot.title("Validation Loss")
     matplotlib.pyplot.xlabel("Epoch")
     matplotlib.pyplot.ylabel("Loss")
-    matplotlib.pyplot.ylim([0, 6])
 
     figure_manager.full_screen_toggle()
 
@@ -185,21 +183,23 @@ def plotTrainingStatistics(statistics):
 
     return
 
-def saveTesting(model_dir, predictions, labels, statistics):
+def saveTesting(model_dir, prediction_indices, label_indices, classes, statistics):
     if not os.path.isdir(model_dir):
         os.makedirs(model_dir, exist_ok = True)
 
-    model_file_path_labels = os.path.join(model_dir, header.model_file_name_labels)
-    model_file_path_predictions = os.path.join(model_dir, header.model_file_name_predictions)
+    model_file_path_classes = os.path.join(model_dir, header.model_file_name_classes)
+    model_file_path_label_indices = os.path.join(model_dir, header.model_file_name_label_indices)
+    model_file_path_prediction_indices = os.path.join(model_dir, header.model_file_name_prediction_indices)
     model_file_path_statistics_test = os.path.join(model_dir, header.model_file_name_statistics_test)
 
-    torch.save(labels, model_file_path_labels)
-    torch.save(predictions, model_file_path_predictions)
+    torch.save(classes, model_file_path_classes)
+    torch.save(label_indices, model_file_path_label_indices)
+    torch.save(prediction_indices, model_file_path_prediction_indices)
 
     with open(model_file_path_statistics_test, "w") as file_statistics_test:
         json.dump(statistics, file_statistics_test, indent = 4)
 
-    logger.log_info("Saved testing results and statistics to \"" + model_dir + "\".")
+    logger.log_info("Saved testing data and statistics to \"" + model_dir + "\".")
 
     return
 

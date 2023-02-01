@@ -13,16 +13,17 @@ evaluate_save_plot = False
 evaluate_show_plot = True
 
 model_file_name_accuracy_validation = "accuracy_validation.pth"
+model_file_name_classes = "classes.pth"
 model_file_name_criterion = "criterion.pth"
 model_file_name_data_loader_train = "data_loader_train.pth"
 model_file_name_data_loader_validation = "data_loader_validation.pth"
 model_file_name_epoch = "epoch.pth"
-model_file_name_labels = "labels.pth"
+model_file_name_label_indices = "label_indices.pth"
 model_file_name_learning_rate_scheduler = "learning_rate_scheduler.pth"
 model_file_name_model = "model.pth"
 model_file_name_model_best = "model_best.pth"
 model_file_name_optimizer = "optimizer.pth"
-model_file_name_predictions = "predictions.pth"
+model_file_name_prediction_indices = "prediction_indices.pth"
 model_file_name_statistics_test = "statistics_test.json"
 model_file_name_statistics_train = "statistics_train.json"
 
