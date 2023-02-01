@@ -148,7 +148,7 @@ def main():
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.train_learning_rate_scheduler_mode, header.train_learning_rate_scheduler_factor, header.train_learning_rate_scheduler_patient, header.train_learning_rate_scheduler_threshold, header.train_learning_rate_scheduler_threshold_mode, header.train_learning_rate_scheduler_cooldown, header.train_learning_rate_scheduler_min_learning_rate, header.train_learning_rate_scheduler_min_learning_rate_decay, header.train_learning_rate_scheduler_verbose)
 
     if not header.train_dry_run:
-        (data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation, statistics) = utility.load(header.train_model_dir, model, optimizer, learning_rate_scheduler)
+        (data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation, statistics) = utility.loadTraining(header.train_model_dir, model, optimizer, learning_rate_scheduler)
         logger.log_info_raw("\n")
 
     if accuracy_validation == None:
@@ -213,7 +213,7 @@ def main():
             accuracy_validation = epoch_accuracy_validation
 
         if not header.train_dry_run:
-            utility.save(header.train_model_dir, model, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics)
+            utility.saveTraining(header.train_model_dir, model, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics)
 
         logger.log_info_raw("\n")
 

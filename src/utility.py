@@ -15,13 +15,13 @@ def computeL2Norm(parameters):
 
     return torch.square(torch.cat(parameters_list)).sum().item()
 
-def load(model_dir, model, optimizer, learning_rate_scheduler):
+def loadTraining(model_dir, model, optimizer, learning_rate_scheduler):
     accuracy_validation = None
     criterion = None
     data_loader_train = None
     data_loader_validation = None
     epoch = None
-    statistics = None
+    statistics_train = None
 
     if os.path.isdir(model_dir):
         model_file_path_accuracy_validation = os.path.join(model_dir, header.model_file_name_accuracy_validation)
@@ -142,7 +142,7 @@ def plotTrainingStatistics(statistics):
 
     return
 
-def save(model_dir, model, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics):
+def saveTraining(model_dir, model, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics):
     if not os.path.isdir(model_dir):
         os.makedirs(model_dir, exist_ok = True)
 
