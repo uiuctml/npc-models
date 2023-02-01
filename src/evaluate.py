@@ -20,12 +20,11 @@ def main():
 
     with open(model_file_path_statistics_test, "r") as file_statistics_test:
         statistics_test = json.load(file_statistics_test)
+        utility.plotTestingStatistics(statistics_test)
 
     with open(model_file_path_statistics_train, "r") as file_statistics_train:
         statistics_train = json.load(file_statistics_train)
-
-    utility.plotTestingStatistics(statistics_test)
-    utility.plotTrainingStatistics(statistics_train)
+        utility.plotTrainingStatistics(statistics_train)
 
     return
 

@@ -18,7 +18,7 @@ def train(model, data_loader, epoch, criterion, optimizer, device, statistics):
     running_loss = 0
     running_corrects = 0
     progress_bar_accuracy = tqdm.tqdm(total = 1, position = 3, leave = False)
-    progress_bar_loss = tqdm.tqdm(total = 10, position = 2, leave = False)
+    progress_bar_loss = tqdm.tqdm(total = 6, position = 2, leave = False)
     progress_bar_progress = tqdm.tqdm(total = batch_count, position = 1, leave = False)
     progress_bar_accuracy.set_description_str("[INFO]: Training accuracy")
     progress_bar_loss.set_description_str("[INFO]: Training loss")
@@ -79,7 +79,7 @@ def validate(model, data_loader, epoch, criterion, device, statistics):
     running_loss = 0
     running_corrects = 0
     progress_bar_accuracy = tqdm.tqdm(total = 1, position = 3, leave = False)
-    progress_bar_loss = tqdm.tqdm(total = 10, position = 2, leave = False)
+    progress_bar_loss = tqdm.tqdm(total = 6, position = 2, leave = False)
     progress_bar_progress = tqdm.tqdm(total = batch_count, position = 1, leave = False)
     progress_bar_accuracy.set_description_str("[INFO]: Validation accuracy")
     progress_bar_loss.set_description_str("[INFO]: Validation loss")

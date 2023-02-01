@@ -149,6 +149,7 @@ def plotTrainingStatistics(statistics):
     matplotlib.pyplot.title("Training Accuracy")
     matplotlib.pyplot.xlabel("Epoch")
     matplotlib.pyplot.ylabel("Accuracy")
+    matplotlib.pyplot.ylim([0, 1])
 
     figure.add_subplot(2, 2, 2)
     matplotlib.pyplot.plot(accuracies_validation)
@@ -156,6 +157,7 @@ def plotTrainingStatistics(statistics):
     matplotlib.pyplot.title("Validation Accuracy")
     matplotlib.pyplot.xlabel("Epoch")
     matplotlib.pyplot.ylabel("Accuracy")
+    matplotlib.pyplot.ylim([0, 1])
 
     figure.add_subplot(2, 2, 3)
     matplotlib.pyplot.plot(losses_training)
@@ -163,6 +165,7 @@ def plotTrainingStatistics(statistics):
     matplotlib.pyplot.title("Training Loss")
     matplotlib.pyplot.xlabel("Epoch")
     matplotlib.pyplot.ylabel("Loss")
+    matplotlib.pyplot.ylim([0, 6])
 
     figure.add_subplot(2, 2, 4)
     matplotlib.pyplot.plot(losses_validation)
@@ -170,6 +173,7 @@ def plotTrainingStatistics(statistics):
     matplotlib.pyplot.title("Validation Loss")
     matplotlib.pyplot.xlabel("Epoch")
     matplotlib.pyplot.ylabel("Loss")
+    matplotlib.pyplot.ylim([0, 6])
 
     figure_manager.full_screen_toggle()
 
