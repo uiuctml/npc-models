@@ -15,6 +15,16 @@ def computeL2Norm(parameters):
 
     return torch.square(torch.cat(parameters_list)).sum().item()
 
+def loadTesting(model_dir, model):
+    if os.path.isdir(model_dir):
+        model_file_path_model = os.path.join(model_dir, header.model_file_name_model)
+
+        if os.path.isfile(model_file_path_model) and model != None:
+            model.load_state_dict(torch.load(model_file_path_model))
+            logger.log_info("Loaded testing model state from \"" + model_dir + "\".")
+
+    return
+
 def loadTraining(model_dir, model, optimizer, learning_rate_scheduler):
     accuracy_validation = None
     criterion = None
@@ -36,7 +46,7 @@ def loadTraining(model_dir, model, optimizer, learning_rate_scheduler):
 
         if os.path.isfile(model_file_path_model) and model != None:
             model.load_state_dict(torch.load(model_file_path_model))
-            logger.log_info("Loaded model state from \"" + model_dir + "\".")
+            logger.log_info("Loaded training model state from \"" + model_dir + "\".")
 
         if os.path.isfile(model_file_path_data_loader_train):
             data_loader_train = torch.load(model_file_path_data_loader_train)
@@ -44,27 +54,27 @@ def loadTraining(model_dir, model, optimizer, learning_rate_scheduler):
 
         if os.path.isfile(model_file_path_data_loader_validation):
             data_loader_validation = torch.load(model_file_path_data_loader_validation)
-            logger.log_info("Loaded validation data loader from \"" + model_dir + "\".")
+            logger.log_info("Loaded training validation data loader from \"" + model_dir + "\".")
 
         if os.path.isfile(model_file_path_epoch):
             epoch = torch.load(model_file_path_epoch)
-            logger.log_info("Loaded epoch from \"" + model_dir + "\".")
+            logger.log_info("Loaded training epoch from \"" + model_dir + "\".")
 
         if os.path.isfile(model_file_path_criterion):
             criterion = torch.load(model_file_path_criterion)
-            logger.log_info("Loaded criterion from \"" + model_dir + "\".")
+            logger.log_info("Loaded training criterion from \"" + model_dir + "\".")
 
         if os.path.isfile(model_file_path_optimizer) and optimizer != None:
             optimizer.load_state_dict(torch.load(model_file_path_optimizer))
-            logger.log_info("Loaded optimizer state from \"" + model_dir + "\".")
+            logger.log_info("Loaded training optimizer state from \"" + model_dir + "\".")
 
         if os.path.isfile(model_file_path_learning_rate_scheduler) and learning_rate_scheduler != None:
             learning_rate_scheduler.load_state_dict(torch.load(model_file_path_learning_rate_scheduler))
-            logger.log_info("Loaded learning rate scheduler state from \"" + model_dir + "\".")
+            logger.log_info("Loaded training learning rate scheduler state from \"" + model_dir + "\".")
 
         if os.path.isfile(model_file_path_accuracy_validation):
             accuracy_validation = torch.load(model_file_path_accuracy_validation)
-            logger.log_info("Loaded highest accuracy validation from \"" + model_dir + "\".")
+            logger.log_info("Loaded training highest accuracy validation from \"" + model_dir + "\".")
 
         if os.path.isfile(model_file_path_statistics_train):
             with open(model_file_path_statistics_train, "r") as file_statistics_train:
