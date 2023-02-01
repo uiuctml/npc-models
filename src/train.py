@@ -183,6 +183,7 @@ def main():
     progress_bar.refresh()
 
     while epoch <= header.train_epochs:
+        best = False
         statistics_epoch_train = (0, 0)
         statistics_epoch_validation = (0, 0)
 
@@ -211,9 +212,10 @@ def main():
 
         if epoch_accuracy_validation > accuracy_validation:
             accuracy_validation = epoch_accuracy_validation
+            best = True
 
         if not header.train_dry_run:
-            utility.saveTraining(header.train_model_dir, model, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics)
+            utility.saveTraining(header.train_model_dir, model, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics, best)
 
         logger.log_info_raw("\n")
 

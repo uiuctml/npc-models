@@ -18,11 +18,11 @@ def computeL2Norm(parameters):
 
 def loadTesting(model_dir, model):
     if os.path.isdir(model_dir):
-        model_file_path_model = os.path.join(model_dir, header.model_file_name_model)
+        model_file_path_model_best = os.path.join(model_dir, header.model_file_name_model_best)
 
-        if os.path.isfile(model_file_path_model) and model != None:
-            model.load_state_dict(torch.load(model_file_path_model))
-            logger.log_info("Loaded testing model state from \"" + model_dir + "\".")
+        if os.path.isfile(model_file_path_model_best) and model != None:
+            model.load_state_dict(torch.load(model_file_path_model_best))
+            logger.log_info("Loaded best training model state from \"" + model_dir + "\".")
 
     return
 
@@ -199,7 +199,7 @@ def saveTesting(model_dir, predictions, labels, statistics):
 
     return
 
-def saveTraining(model_dir, model, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics):
+def saveTraining(model_dir, model, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics, best):
     if not os.path.isdir(model_dir):
         os.makedirs(model_dir, exist_ok = True)
 
@@ -210,8 +210,12 @@ def saveTraining(model_dir, model, data_loader_train, data_loader_validation, ep
     model_file_path_epoch = os.path.join(model_dir, header.model_file_name_epoch)
     model_file_path_learning_rate_scheduler = os.path.join(model_dir, header.model_file_name_learning_rate_scheduler)
     model_file_path_model = os.path.join(model_dir, header.model_file_name_model)
+    model_file_path_model_best = os.path.join(model_dir, header.model_file_name_model_best)
     model_file_path_optimizer = os.path.join(model_dir, header.model_file_name_optimizer)
     model_file_path_statistics_train = os.path.join(model_dir, header.model_file_name_statistics_train)
+
+    if best:
+        torch.save(model.state_dict(), model_file_path_model_best)
 
     torch.save(model.state_dict(), model_file_path_model)
     torch.save(data_loader_train, model_file_path_data_loader_train)
