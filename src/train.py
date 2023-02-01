@@ -46,7 +46,7 @@ def train(model, data_loader, epoch, criterion, optimizer, device, statistics):
             optimizer.step()
 
         corrects = torch.sum(predictions == labels.data).item()
-        accuracy_value = corrects / header.train_data_loader_batch_size
+        accuracy_value = corrects / input.size(0)
         loss_value = loss.item()
 
         running_loss += loss_value
@@ -97,7 +97,7 @@ def validate(model, data_loader, epoch, criterion, device, statistics):
             loss = criterion(output, labels)
 
         corrects = torch.sum(predictions == labels.data).item()
-        accuracy_value = corrects / header.train_data_loader_batch_size
+        accuracy_value = corrects / input.size(0)
         loss_value = loss.item()
 
         running_loss += loss_value
