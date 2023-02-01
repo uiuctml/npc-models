@@ -8,7 +8,7 @@ dataset_split_percentage_train = 0.8
 dataset_split_percentage_validation = 1 - dataset_split_percentage_train
 dataset_view_row_count = 5
 
-evaluate_model_dir = "../model.01.31.euler.d"
+evaluate_model_dir = "../model"
 evaluate_save_plot = False
 evaluate_show_plot = True
 

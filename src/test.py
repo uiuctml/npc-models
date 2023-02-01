@@ -3,6 +3,8 @@
 import header
 import logger
 import math
+import os
+import sys
 import torch
 import torch.nn
 import torch.optim
@@ -57,6 +59,11 @@ def test(model, data_loader, device, statistics):
     return (running_corrects, predictions_all, labels_all)
 
 def main():
+    if len(sys.argv) > 1 and os.path.isdir(sys.argv[1]):
+        header.test_model_dir = sys.argv[1]
+
+    logger.log_info("Testing model in \"" + header.test_model_dir + "\".")
+
     dataset_transforms = torchvision.transforms.Compose([
         torchvision.transforms.Resize((header.test_model_input_height, header.test_model_input_width)),
         torchvision.transforms.ToTensor(),
@@ -73,7 +80,6 @@ def main():
     model = model.to(device)
 
     utility.loadTesting(header.test_model_dir, model)
-    logger.log_info_raw("\n")
 
     if header.log_level >= logger.LogLevel.debug:
         model_input_size = (header.test_model_input_channels, header.test_model_input_height, header.test_model_input_width)
