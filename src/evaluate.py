@@ -6,13 +6,19 @@ import os
 import utility
 
 def main():
+    model_file_path_statistics_test = os.path.join(header.evaluate_model_dir, header.model_file_name_statistics_test)
     model_file_path_statistics_train = os.path.join(header.evaluate_model_dir, header.model_file_name_statistics_train)
-    statistics = None
+    statistics_test = None
+    statistics_train = None
+
+    with open(model_file_path_statistics_test, "r") as file_statistics_test:
+        statistics_test = json.load(file_statistics_test)
 
     with open(model_file_path_statistics_train, "r") as file_statistics_train:
-        statistics = json.load(file_statistics_train)
+        statistics_train = json.load(file_statistics_train)
 
-    utility.plotTrainingStatistics(statistics)
+    utility.plotTestingStatistics(statistics_test)
+    utility.plotTrainingStatistics(statistics_train)
 
     return
 

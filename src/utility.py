@@ -3,7 +3,8 @@ import header
 import json
 import logger
 import math
-import matplotlib.pyplot as plt
+import matplotlib.pyplot
+import numpy
 import os
 import torch
 
@@ -83,6 +84,34 @@ def loadTraining(model_dir, model, optimizer, learning_rate_scheduler):
 
     return (data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation, statistics_train)
 
+def plotTestingStatistics(statistics):
+    if statistics == None:
+        return
+
+    accuracies = statistics["testing_accuracies"]
+    accuracy_mean = numpy.nanmean(accuracies)
+
+    figure = matplotlib.pyplot.figure()
+    figure_manager = matplotlib.pyplot.get_current_fig_manager()
+
+    matplotlib.pyplot.plot(accuracies)
+    matplotlib.pyplot.axhline(y = accuracy_mean, color = "red")
+    matplotlib.pyplot.title("Testing Statistics for \"" + header.evaluate_model_dir + "\"")
+    matplotlib.pyplot.xlabel("Batch")
+    matplotlib.pyplot.ylabel("Accuracy")
+    matplotlib.pyplot.ylim([0, 1])
+    matplotlib.pyplot.yticks(list(matplotlib.pyplot.yticks()[0]) + [accuracy_mean])
+
+    figure_manager.full_screen_toggle()
+
+    if header.evaluate_show_plot:
+        matplotlib.pyplot.show()
+
+    if header.evaluate_save_plot:
+        figure.savefig(header.evaluate_model_dir.split("/")[-1] + "_test.png")
+
+    return
+
 def plotTrainingStatistics(statistics):
     if statistics == None:
         return
@@ -109,46 +138,64 @@ def plotTrainingStatistics(statistics):
         losses_validation += statistics[epoch]["validation_losses"]
         losses_validation_xticks.append(len(losses_validation) + 1)
 
-    figure = plt.figure(figsize = (2, 2))
-    figure_manager = plt.get_current_fig_manager()
+    figure = matplotlib.pyplot.figure(figsize = (2, 2))
+    figure_manager = matplotlib.pyplot.get_current_fig_manager()
 
     figure.suptitle("Training Statistics for \"" + header.evaluate_model_dir + "\"")
 
     figure.add_subplot(2, 2, 1)
-    plt.plot(accuracies_training)
-    plt.xticks(accuracies_training_xticks, range(0, len(accuracies_training_xticks)))
-    plt.title("Training Accuracy")
-    plt.xlabel("Epochs")
-    plt.ylabel("Accuracy")
+    matplotlib.pyplot.plot(accuracies_training)
+    matplotlib.pyplot.xticks(accuracies_training_xticks, range(0, len(accuracies_training_xticks)))
+    matplotlib.pyplot.title("Training Accuracy")
+    matplotlib.pyplot.xlabel("Epoch")
+    matplotlib.pyplot.ylabel("Accuracy")
 
     figure.add_subplot(2, 2, 2)
-    plt.plot(accuracies_validation)
-    plt.xticks(accuracies_validation_xticks, range(0, len(accuracies_validation_xticks)))
-    plt.title("Validation Accuracy")
-    plt.xlabel("Epochs")
-    plt.ylabel("Accuracy")
+    matplotlib.pyplot.plot(accuracies_validation)
+    matplotlib.pyplot.xticks(accuracies_validation_xticks, range(0, len(accuracies_validation_xticks)))
+    matplotlib.pyplot.title("Validation Accuracy")
+    matplotlib.pyplot.xlabel("Epoch")
+    matplotlib.pyplot.ylabel("Accuracy")
 
     figure.add_subplot(2, 2, 3)
-    plt.plot(losses_training)
-    plt.xticks(losses_training_xticks, range(0, len(losses_training_xticks)))
-    plt.title("Training Loss")
-    plt.xlabel("Epochs")
-    plt.ylabel("Loss")
+    matplotlib.pyplot.plot(losses_training)
+    matplotlib.pyplot.xticks(losses_training_xticks, range(0, len(losses_training_xticks)))
+    matplotlib.pyplot.title("Training Loss")
+    matplotlib.pyplot.xlabel("Epoch")
+    matplotlib.pyplot.ylabel("Loss")
 
     figure.add_subplot(2, 2, 4)
-    plt.plot(losses_validation)
-    plt.xticks(losses_validation_xticks, range(0, len(losses_validation_xticks)))
-    plt.title("Validation Loss")
-    plt.xlabel("Epochs")
-    plt.ylabel("Loss")
+    matplotlib.pyplot.plot(losses_validation)
+    matplotlib.pyplot.xticks(losses_validation_xticks, range(0, len(losses_validation_xticks)))
+    matplotlib.pyplot.title("Validation Loss")
+    matplotlib.pyplot.xlabel("Epoch")
+    matplotlib.pyplot.ylabel("Loss")
 
     figure_manager.full_screen_toggle()
 
     if header.evaluate_show_plot:
-        plt.show()
+        matplotlib.pyplot.show()
 
     if header.evaluate_save_plot:
-        figure.savefig(header.evaluate_model_dir.split("/")[-1] + ".png")
+        figure.savefig(header.evaluate_model_dir.split("/")[-1] + "_train.png")
+
+    return
+
+def saveTesting(model_dir, predictions, labels, statistics):
+    if not os.path.isdir(model_dir):
+        os.makedirs(model_dir, exist_ok = True)
+
+    model_file_path_labels = os.path.join(model_dir, header.model_file_name_labels)
+    model_file_path_predictions = os.path.join(model_dir, header.model_file_name_predictions)
+    model_file_path_statistics_test = os.path.join(model_dir, header.model_file_name_statistics_test)
+
+    torch.save(labels, model_file_path_labels)
+    torch.save(predictions, model_file_path_predictions)
+
+    with open(model_file_path_statistics_test, "w") as file_statistics_test:
+        json.dump(statistics, file_statistics_test, indent = 4)
+
+    logger.log_info("Saved testing results and statistics to \"" + model_dir + "\".")
 
     return
 
@@ -188,19 +235,19 @@ def viewDataset(dataset, data_loader):
 
     figure_rows = header.dataset_view_row_count
     figure_cols = math.ceil(header.train_data_loader_batch_size / header.dataset_view_row_count)
-    figure = plt.figure(figsize = (figure_cols, figure_rows))
-    figure_manager = plt.get_current_fig_manager()
+    figure = matplotlib.pyplot.figure(figsize = (figure_cols, figure_rows))
+    figure_manager = matplotlib.pyplot.get_current_fig_manager()
     input, labels = next(iter(data_loader))
     input = input.numpy().transpose((0, 2, 3, 1))
     class_list = list(dataset.classes[label] for label in labels)
 
     for i in range(0, header.train_data_loader_batch_size):
         figure.add_subplot(figure_cols, figure_rows, i + 1)
-        plt.title(class_list[i])
-        plt.axis("off")
-        plt.imshow(input[i].squeeze())
+        matplotlib.pyplot.title(class_list[i])
+        matplotlib.pyplot.axis("off")
+        matplotlib.pyplot.imshow(input[i].squeeze())
 
     figure_manager.full_screen_toggle()
-    plt.show()
+    matplotlib.pyplot.show()
 
     return

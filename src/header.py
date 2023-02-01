@@ -8,18 +8,20 @@ dataset_split_percentage_train = 0.8
 dataset_split_percentage_validation = 1 - dataset_split_percentage_train
 dataset_view_row_count = 5
 
-evaluate_model_dir = "../model"
-evaluate_save_plot = True
-evaluate_show_plot = False
+evaluate_model_dir = "../model.01.31.euler.d"
+evaluate_save_plot = False
+evaluate_show_plot = True
 
 model_file_name_accuracy_validation = "accuracy_validation.pth"
 model_file_name_criterion = "criterion.pth"
 model_file_name_data_loader_train = "data_loader_train.pth"
 model_file_name_data_loader_validation = "data_loader_validation.pth"
 model_file_name_epoch = "epoch.pth"
+model_file_name_labels = "labels.pth"
 model_file_name_learning_rate_scheduler = "learning_rate_scheduler.pth"
 model_file_name_model = "model.pth"
 model_file_name_optimizer = "optimizer.pth"
+model_file_name_predictions = "predictions.pth"
 model_file_name_statistics_test = "statistics_test.json"
 model_file_name_statistics_train = "statistics_train.json"
 
@@ -54,7 +56,7 @@ train_use_l2_loss = False
 test_data_loader_batch_size = train_data_loader_batch_size
 test_data_loader_shuffle = train_data_loader_shuffle
 test_data_loader_worker_count = multiprocessing.cpu_count()
-test_model_dir = "../model.01.30.euler.d"
+test_model_dir = "../model"
 test_model_input_height = train_model_input_height
 test_model_input_width = train_model_input_width
 test_model_input_channels = train_model_input_channels

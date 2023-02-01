@@ -11,14 +11,16 @@ import torchvision
 import tqdm
 import utility
 
-def test(model, data_loader, device, predictions):
+def test(model, data_loader, device, statistics):
     accuracies = []
     batch_count = math.ceil(len(data_loader.dataset) / header.test_data_loader_batch_size)
     running_corrects = 0
-    progress_bar_accuracy = tqdm.tqdm(total = 1, position = 3, leave = False)
-    progress_bar_progress = tqdm.tqdm(total = batch_count, position = 1, leave = False)
-    progress_bar_accuracy.set_description_str("[INFO]: Validation accuracy")
-    progress_bar_progress.set_description_str("[INFO]: Validation progress")
+    predictions_all = []
+    labels_all = []
+    progress_bar_accuracy = tqdm.tqdm(total = 1, position = 1, leave = False)
+    progress_bar_progress = tqdm.tqdm(total = batch_count, position = 0, leave = False)
+    progress_bar_accuracy.set_description_str("[INFO]: Testing accuracy")
+    progress_bar_progress.set_description_str("[INFO]: Testing progress")
 
     model.eval()
 
@@ -31,8 +33,11 @@ def test(model, data_loader, device, predictions):
                 output = model(input)
                 (_, predictions) = torch.max(output, 1)
 
+            predictions_all += predictions.tolist()
+            labels_all += labels.data.tolist()
+
             corrects = torch.sum(predictions == labels.data).item()
-            accuracy_value = corrects / header.test_data_loader_batch_size
+            accuracy_value = corrects / input.size(0)
 
             running_corrects += corrects
 
@@ -44,12 +49,12 @@ def test(model, data_loader, device, predictions):
 
             accuracies.append(accuracy_value)
 
-    predictions["accuracies"] = accuracies
+    statistics["testing_accuracies"] = accuracies
 
     progress_bar_accuracy.close()
     progress_bar_progress.close()
 
-    return running_corrects / len(data_loader.dataset)
+    return (running_corrects, predictions_all, labels_all)
 
 def main():
     dataset_transforms = torchvision.transforms.Compose([
@@ -61,13 +66,13 @@ def main():
     device = torch.device("cuda")
     data_loader = torch.utils.data.DataLoader(dataset, batch_size = header.test_data_loader_batch_size, shuffle = header.test_data_loader_shuffle, num_workers = header.test_data_loader_worker_count, pin_memory = True)   
     model = torchvision.models.resnet152(weights = header.test_model_pretrained_weights)
-    predictions = {}
+    statistics = {}
 
     model.fc = torch.nn.Sequential(torch.nn.Dropout(p = header.train_dropout_probability), torch.nn.Linear(model.fc.in_features, len(dataset.classes)))
     model = torch.nn.DataParallel(model)
     model = model.to(device)
 
-    utility.load(header.test_model_dir, model, None, None)
+    utility.loadTesting(header.test_model_dir, model)
     logger.log_info_raw("\n")
 
     if header.log_level >= logger.LogLevel.debug:
@@ -76,9 +81,13 @@ def main():
 
     utility.viewDataset(dataset, data_loader)
 
-    accuracy = test(model, data_loader, device, predictions)
+    (running_corrects, predictions, labels) = test(model, data_loader, device, statistics)
+
+    accuracy = running_corrects / len(data_loader.dataset)
 
     logger.log_info("Testing accuracy: " + str(accuracy) + ".")
+
+    utility.saveTesting(header.test_model_dir, predictions, labels, statistics)
 
     return
 
