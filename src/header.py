@@ -8,22 +8,35 @@ dataset_split_percentage_train = 0.8
 dataset_split_percentage_validation = 1 - dataset_split_percentage_train
 dataset_view_row_count = 5
 
+evaluate_label_excluded = set([
+    "information--stairs--g1",
+    "warning--restricted-zone--g1",
+    "information--no-parking--g3",
+    "regulatory--weight-limit-with-trucks--g1",
+    "regulatory--no-right-turn--g3",
+    "regulatory--truck-speed-limit-60--g1",
+    "warning--shared-lane-motorcycles-bicycles--g1",
+    "regulatory--end-of-maximum-speed-limit-70--g1",
+    "information--central-lane--g1",
+    "information--dead-end-except-bicycles--g1"
+])
 evaluate_model_dir = "../model"
-evaluate_save_plot = False
-evaluate_show_plot = True
+evaluate_save_plot = True
+evaluate_show_plot = False
 
 model_file_name_accuracy_validation = "accuracy_validation.pth"
+model_file_name_class_indices_test = "class_indices_test.pth"
 model_file_name_classes = "classes.pth"
 model_file_name_criterion = "criterion.pth"
 model_file_name_data_loader_train = "data_loader_train.pth"
 model_file_name_data_loader_validation = "data_loader_validation.pth"
 model_file_name_epoch = "epoch.pth"
-model_file_name_label_indices = "label_indices.pth"
 model_file_name_learning_rate_scheduler = "learning_rate_scheduler.pth"
 model_file_name_model = "model.pth"
 model_file_name_model_best = "model_best.pth"
 model_file_name_optimizer = "optimizer.pth"
-model_file_name_prediction_indices = "prediction_indices.pth"
+model_file_name_outputs_test = "outputs_test.pth"
+model_file_name_statistics_evaluate = "statistics_evaluate.json"
 model_file_name_statistics_test = "statistics_test.json"
 model_file_name_statistics_train = "statistics_train.json"
 

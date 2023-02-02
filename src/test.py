@@ -16,9 +16,9 @@ import utility
 def test(model, data_loader, device, statistics):
     accuracies = []
     batch_count = math.ceil(len(data_loader.dataset) / header.test_data_loader_batch_size)
+    class_indices = []
     running_corrects = 0
-    prediction_indices = []
-    label_indices = []
+    outputs = []
     progress_bar_accuracy = tqdm.tqdm(total = 1, position = 1, leave = False)
     progress_bar_progress = tqdm.tqdm(total = batch_count, position = 0, leave = False)
     progress_bar_accuracy.set_description_str("[INFO]: Testing accuracy")
@@ -35,9 +35,6 @@ def test(model, data_loader, device, statistics):
                 output = model(input)
                 (_, predictions) = torch.max(output, 1)
 
-            prediction_indices += predictions.tolist()
-            label_indices += labels.data.tolist()
-
             corrects = torch.sum(predictions == labels.data).item()
             accuracy_value = corrects / input.size(0)
 
@@ -50,13 +47,15 @@ def test(model, data_loader, device, statistics):
             progress_bar_progress.refresh()
 
             accuracies.append(accuracy_value)
+            class_indices.append(labels.data.tolist())
+            outputs.append(output.tolist())
 
     statistics["testing_accuracies"] = accuracies
 
     progress_bar_accuracy.close()
     progress_bar_progress.close()
 
-    return (running_corrects, prediction_indices, label_indices)
+    return (running_corrects, outputs, class_indices)
 
 def main():
     if len(sys.argv) > 1 and os.path.isdir(sys.argv[1]):
@@ -87,13 +86,13 @@ def main():
 
     utility.viewDataset(dataset, data_loader)
 
-    (running_corrects, prediction_indices, label_indices) = test(model, data_loader, device, statistics)
+    (running_corrects, outputs, class_indices) = test(model, data_loader, device, statistics)
 
     accuracy = running_corrects / len(data_loader.dataset)
 
     logger.log_info("Testing accuracy: " + str(accuracy) + ".")
 
-    utility.saveTesting(header.test_model_dir, prediction_indices, label_indices, dataset.classes.tolist(), statistics)
+    utility.saveTesting(header.test_model_dir, outputs, class_indices, dataset.classes, statistics)
 
     return
 

@@ -16,6 +16,30 @@ def computeL2Norm(parameters):
 
     return torch.square(torch.cat(parameters_list)).sum().item()
 
+def loadEvaluation(model_dir):
+    classes = None
+    class_indices_test = None
+    outputs_test = None
+
+    if os.path.isdir(model_dir):
+        model_file_path_class_indices_test = os.path.join(model_dir, header.model_file_name_class_indices_test)
+        model_file_path_classes = os.path.join(model_dir, header.model_file_name_classes)
+        model_file_path_outputs_test = os.path.join(model_dir, header.model_file_name_outputs_test)
+
+        if os.path.isfile(model_file_path_class_indices_test):
+            class_indices_test = torch.load(model_file_path_class_indices_test)
+            logger.log_info("Loaded testing class indices from \"" + model_dir + "\".")
+
+        if os.path.isfile(model_file_path_classes):
+            classes = torch.load(model_file_path_classes)
+            logger.log_info("Loaded classes from \"" + model_dir + "\".")
+
+        if os.path.isfile(model_file_path_outputs_test):
+            outputs_test = torch.load(model_file_path_outputs_test)
+            logger.log_info("Loaded testing outputs from \"" + model_dir + "\".")
+
+    return (outputs_test, class_indices_test, classes)
+
 def loadTesting(model_dir, model):
     if os.path.isdir(model_dir):
         model_file_path_model_best = os.path.join(model_dir, header.model_file_name_model_best)
@@ -83,6 +107,31 @@ def loadTraining(model_dir, model, optimizer, learning_rate_scheduler):
                 logger.log_info("Loaded training statistics from \"" + model_dir + "\".")
 
     return (data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation, statistics_train)
+
+def plotEvaluationStatistics(statistics):
+    if statistics == None:
+        return
+
+    average_precisions = list(statistics.values())
+    average_precisions_indices = range(0, len(average_precisions))
+
+    figure = matplotlib.pyplot.figure()
+    figure_manager = matplotlib.pyplot.get_current_fig_manager()
+
+    matplotlib.pyplot.bar(average_precisions_indices, average_precisions)
+    matplotlib.pyplot.title("Evaluation Statistics for \"" + header.evaluate_model_dir + "\"")
+    matplotlib.pyplot.xlabel("Class")
+    matplotlib.pyplot.ylabel("Average Precision")
+
+    figure_manager.full_screen_toggle()
+
+    if header.evaluate_show_plot:
+        matplotlib.pyplot.show()
+
+    if header.evaluate_save_plot:
+        figure.savefig(header.evaluate_model_dir.split("/")[-1] + "_evaluate.png")
+
+    return
 
 def plotTestingStatistics(statistics):
     if statistics == None:
@@ -183,18 +232,31 @@ def plotTrainingStatistics(statistics):
 
     return
 
-def saveTesting(model_dir, prediction_indices, label_indices, classes, statistics):
+def saveEvaluation(model_dir, statistics):
     if not os.path.isdir(model_dir):
         os.makedirs(model_dir, exist_ok = True)
 
+    model_file_path_statistics_evaluate = os.path.join(model_dir, header.model_file_name_statistics_evaluate)
+
+    with open(model_file_path_statistics_evaluate, "w") as file_statistics_evaluate:
+        json.dump(statistics, file_statistics_evaluate, indent = 4)
+
+    logger.log_info("Saved evaluation statistics to \"" + model_dir + "\".")
+
+    return
+
+def saveTesting(model_dir, outputs, class_indices, classes, statistics):
+    if not os.path.isdir(model_dir):
+        os.makedirs(model_dir, exist_ok = True)
+
+    model_file_path_class_indices_test = os.path.join(model_dir, header.model_file_name_class_indices_test)
     model_file_path_classes = os.path.join(model_dir, header.model_file_name_classes)
-    model_file_path_label_indices = os.path.join(model_dir, header.model_file_name_label_indices)
-    model_file_path_prediction_indices = os.path.join(model_dir, header.model_file_name_prediction_indices)
+    model_file_path_outputs_test = os.path.join(model_dir, header.model_file_name_outputs_test)
     model_file_path_statistics_test = os.path.join(model_dir, header.model_file_name_statistics_test)
 
+    torch.save(class_indices, model_file_path_class_indices_test)
     torch.save(classes, model_file_path_classes)
-    torch.save(label_indices, model_file_path_label_indices)
-    torch.save(prediction_indices, model_file_path_prediction_indices)
+    torch.save(outputs, model_file_path_outputs_test)
 
     with open(model_file_path_statistics_test, "w") as file_statistics_test:
         json.dump(statistics, file_statistics_test, indent = 4)
