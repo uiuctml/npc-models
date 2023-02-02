@@ -108,6 +108,21 @@ def loadTraining(model_dir, model, optimizer, learning_rate_scheduler):
 
     return (data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation, statistics_train)
 
+def loadTrainingBest(model_dir, model):
+    if os.path.isdir(model_dir):
+        model_file_path_model_best = os.path.join(model_dir, header.model_file_name_model_best)
+
+        if os.path.isfile(model_file_path_model_best) and model != None:
+            model_state_dict = torch.load(model_file_path_model_best)
+
+            del model_state_dict["fc.weight"]
+            del model_state_dict["fc.bias"]
+
+            model.load_state_dict(model_state_dict)
+            logger.log_info("Loaded best training model state from \"" + model_dir + "\".")
+
+    return
+
 def plotEvaluationStatistics(statistics):
     if statistics == None:
         return
