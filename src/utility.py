@@ -115,10 +115,10 @@ def loadTrainingBest(model_dir, model):
         if os.path.isfile(model_file_path_model_best) and model != None:
             model_state_dict = torch.load(model_file_path_model_best)
 
-            del model_state_dict["fc.weight"]
-            del model_state_dict["fc.bias"]
+            del model_state_dict["module.fc.1.weight"]
+            del model_state_dict["module.fc.1.bias"]
 
-            model.load_state_dict(model_state_dict)
+            model.load_state_dict(model_state_dict, strict = False)
             logger.log_info("Loaded best training model state from \"" + model_dir + "\".")
 
     return
