@@ -2,8 +2,9 @@ import logger
 import multiprocessing
 
 dataset_dir = "../../mapillary-dataset"
-dataset_dir_train_validation = dataset_dir + "/images" + "/split" + "/train_val"
-dataset_dir_test = dataset_dir + "/images" + "/split" + "/test"
+dataset_dir_split = dataset_dir + "/images" + "/split" + "/original"
+dataset_dir_train_validation = dataset_dir_split + "/train_val"
+dataset_dir_test = dataset_dir_split + "/test"
 dataset_split_percentage_train = 0.8
 dataset_split_percentage_validation = 1 - dataset_split_percentage_train
 dataset_view_row_count = 5
@@ -56,7 +57,7 @@ train_data_loader_worker_count = multiprocessing.cpu_count()
 train_dropout_probability = 0.5
 train_dry_run = False
 train_epochs = 35
-train_fine_tuning = False
+train_fine_tuning = True
 train_learning_rate_scheduler_mode = "min"
 train_learning_rate_scheduler_factor = 0.1
 train_learning_rate_scheduler_patient = 1
@@ -66,7 +67,7 @@ train_learning_rate_scheduler_cooldown = 0
 train_learning_rate_scheduler_min_learning_rate = 1e-6
 train_learning_rate_scheduler_min_learning_rate_decay = 1e-8
 train_learning_rate_scheduler_verbose = True
-train_load_best = True
+train_load_best = False
 train_l2_lambda = 1e-3
 train_model_dir = "../model"
 train_model_dir_best = "../model"
