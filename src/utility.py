@@ -131,6 +131,7 @@ def plotEvaluationStatistics(statistics):
     average_precisions_indices = range(0, len(average_precisions))
     average_precisions_split = numpy.array_split(average_precisions, header.plot_subplot_count_evaluate)
     average_precisions_indices_split = numpy.array_split(average_precisions_indices, header.plot_subplot_count_evaluate)
+    mean_average_precision = numpy.mean(average_precisions)
 
     figure = matplotlib.pyplot.figure()
     figure_manager = matplotlib.pyplot.get_current_fig_manager()
@@ -141,9 +142,12 @@ def plotEvaluationStatistics(statistics):
 
     for i in range(0, header.plot_subplot_count_evaluate):
         figure.add_subplot(subplot_rows, subplot_cols, i + 1)
+        matplotlib.pyplot.axhline(y = mean_average_precision, color = "red")
         matplotlib.pyplot.bar(average_precisions_indices_split[i], average_precisions_split[i])
         matplotlib.pyplot.xlabel("Class")
         matplotlib.pyplot.ylabel("Average Precision")
+        matplotlib.pyplot.ylim([0, 1])
+        matplotlib.pyplot.yticks(list(matplotlib.pyplot.yticks()[0]) + [mean_average_precision])
 
     figure_manager.full_screen_toggle()
 
