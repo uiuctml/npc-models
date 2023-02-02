@@ -112,21 +112,31 @@ def plotEvaluationStatistics(statistics):
     if statistics == None:
         return
 
-    average_precisions = list(statistics.values())
+    average_precisions = numpy.array(list(statistics.values()))
     average_precisions_indices = range(0, len(average_precisions))
+    average_precisions_split = numpy.array_split(average_precisions, header.plot_subplot_count_evaluate)
+    average_precisions_indices_split = numpy.array_split(average_precisions_indices, header.plot_subplot_count_evaluate)
 
     figure = matplotlib.pyplot.figure()
     figure_manager = matplotlib.pyplot.get_current_fig_manager()
+    subplot_rows = math.ceil(header.plot_subplot_count_evaluate / header.plot_subplot_col_count_evaluate)
+    subplot_cols = header.plot_subplot_col_count_evaluate
 
-    matplotlib.pyplot.bar(average_precisions_indices, average_precisions)
-    matplotlib.pyplot.title("Evaluation Statistics for \"" + header.plot_model_dir + "\"")
-    matplotlib.pyplot.xlabel("Class")
-    matplotlib.pyplot.ylabel("Average Precision")
+    figure.suptitle("Evaluation Statistics for \"" + header.plot_model_dir + "\"")
+
+    for i in range(0, header.plot_subplot_count_evaluate):
+        figure.add_subplot(subplot_rows, subplot_cols, i + 1)
+        matplotlib.pyplot.bar(average_precisions_indices_split[i], average_precisions_split[i])
+        matplotlib.pyplot.xlabel("Class")
+        matplotlib.pyplot.ylabel("Average Precision")
 
     figure_manager.full_screen_toggle()
 
-    matplotlib.pyplot.show()
-    figure.savefig(header.plot_model_dir.split("/")[-1] + "_evaluate.png")
+    if header.plot_show_evaluate:
+        matplotlib.pyplot.show()
+
+    if header.plot_save_evaluate:
+        figure.savefig(header.plot_model_dir.split("/")[-1] + "_evaluate.png")
 
     return
 
@@ -150,8 +160,11 @@ def plotTestingStatistics(statistics):
 
     figure_manager.full_screen_toggle()
 
-    matplotlib.pyplot.show()
-    figure.savefig(header.plot_model_dir.split("/")[-1] + "_test.png")
+    if header.plot_show_test:
+        matplotlib.pyplot.show()
+
+    if header.plot_save_test:
+        figure.savefig(header.plot_model_dir.split("/")[-1] + "_test.png")
 
     return
 
@@ -181,7 +194,7 @@ def plotTrainingStatistics(statistics):
         losses_validation += statistics[epoch]["validation_losses"]
         losses_validation_xticks.append(len(losses_validation) + 1)
 
-    figure = matplotlib.pyplot.figure(figsize = (2, 2))
+    figure = matplotlib.pyplot.figure()
     figure_manager = matplotlib.pyplot.get_current_fig_manager()
 
     figure.suptitle("Training Statistics for \"" + header.plot_model_dir + "\"")
@@ -218,8 +231,11 @@ def plotTrainingStatistics(statistics):
 
     figure_manager.full_screen_toggle()
 
-    matplotlib.pyplot.show()
-    figure.savefig(header.plot_model_dir.split("/")[-1] + "_train.png")
+    if header.plot_show_train:
+        matplotlib.pyplot.show()
+
+    if header.plot_save_train:
+        figure.savefig(header.plot_model_dir.split("/")[-1] + "_train.png")
 
     return
 
@@ -296,7 +312,7 @@ def viewDataset(dataset, data_loader):
 
     figure_rows = header.dataset_view_row_count
     figure_cols = math.ceil(header.train_data_loader_batch_size / header.dataset_view_row_count)
-    figure = matplotlib.pyplot.figure(figsize = (figure_cols, figure_rows))
+    figure = matplotlib.pyplot.figure()
     figure_manager = matplotlib.pyplot.get_current_fig_manager()
     input, labels = next(iter(data_loader))
     input = input.numpy().transpose((0, 2, 3, 1))

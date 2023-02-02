@@ -41,6 +41,14 @@ model_file_name_statistics_train = "statistics_train.json"
 log_level = logger.LogLevel.info
 
 plot_model_dir = "../model"
+plot_save_evaluate = True
+plot_save_test = True
+plot_save_train = True
+plot_show_evaluate = True
+plot_show_test = True
+plot_show_train = True
+plot_subplot_count_evaluate = 9
+plot_subplot_col_count_evaluate = 3
 
 train_data_loader_batch_size = 32
 train_data_loader_shuffle = True
