@@ -144,6 +144,13 @@ def main():
     model = torch.nn.DataParallel(model)
     model = model.to(device)
 
+    if header.train_load_best:
+        utility.loadTesting(header.train_model_dir_best, model)
+
+    if not header.train_fine_tuning:
+        for parameter in model.parameters():
+            parameter.requires_grad = False
+
     optimizer = torch.optim.SGD(model.parameters(), lr = header.train_optimizer_learning_rate, momentum = header.train_optimizer_momentum, weight_decay = header.train_optimizer_weight_decay)
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.train_learning_rate_scheduler_mode, header.train_learning_rate_scheduler_factor, header.train_learning_rate_scheduler_patient, header.train_learning_rate_scheduler_threshold, header.train_learning_rate_scheduler_threshold_mode, header.train_learning_rate_scheduler_cooldown, header.train_learning_rate_scheduler_min_learning_rate, header.train_learning_rate_scheduler_min_learning_rate_decay, header.train_learning_rate_scheduler_verbose)
 
