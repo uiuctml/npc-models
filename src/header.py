@@ -21,8 +21,6 @@ evaluate_label_excluded = set([
     "information--dead-end-except-bicycles--g1"
 ])
 evaluate_model_dir = "../model"
-evaluate_save_plot = True
-evaluate_show_plot = False
 
 model_file_name_accuracy_validation = "accuracy_validation.pth"
 model_file_name_class_indices_test = "class_indices_test.pth"
@@ -41,6 +39,8 @@ model_file_name_statistics_test = "statistics_test.json"
 model_file_name_statistics_train = "statistics_train.json"
 
 log_level = logger.LogLevel.info
+
+plot_model_dir = "../model"
 
 train_data_loader_batch_size = 32
 train_data_loader_shuffle = True

@@ -61,6 +61,10 @@ def main():
     if len(sys.argv) > 1 and os.path.isdir(sys.argv[1]):
         header.test_model_dir = sys.argv[1]
 
+    if not os.path.isdir(header.test_model_dir):
+        logger.log_error("Invalid model directory \"" + header.test_model_dir + "\".")
+        return
+
     logger.log_info("Testing model in \"" + header.test_model_dir + "\".")
 
     dataset_transforms = torchvision.transforms.Compose([

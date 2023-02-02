@@ -119,17 +119,14 @@ def plotEvaluationStatistics(statistics):
     figure_manager = matplotlib.pyplot.get_current_fig_manager()
 
     matplotlib.pyplot.bar(average_precisions_indices, average_precisions)
-    matplotlib.pyplot.title("Evaluation Statistics for \"" + header.evaluate_model_dir + "\"")
+    matplotlib.pyplot.title("Evaluation Statistics for \"" + header.plot_model_dir + "\"")
     matplotlib.pyplot.xlabel("Class")
     matplotlib.pyplot.ylabel("Average Precision")
 
     figure_manager.full_screen_toggle()
 
-    if header.evaluate_show_plot:
-        matplotlib.pyplot.show()
-
-    if header.evaluate_save_plot:
-        figure.savefig(header.evaluate_model_dir.split("/")[-1] + "_evaluate.png")
+    matplotlib.pyplot.show()
+    figure.savefig(header.plot_model_dir.split("/")[-1] + "_evaluate.png")
 
     return
 
@@ -145,7 +142,7 @@ def plotTestingStatistics(statistics):
 
     matplotlib.pyplot.plot(accuracies)
     matplotlib.pyplot.axhline(y = accuracy_mean, color = "red")
-    matplotlib.pyplot.title("Testing Statistics for \"" + header.evaluate_model_dir + "\"")
+    matplotlib.pyplot.title("Testing Statistics for \"" + header.plot_model_dir + "\"")
     matplotlib.pyplot.xlabel("Batch")
     matplotlib.pyplot.ylabel("Accuracy")
     matplotlib.pyplot.ylim([0, 1])
@@ -153,11 +150,8 @@ def plotTestingStatistics(statistics):
 
     figure_manager.full_screen_toggle()
 
-    if header.evaluate_show_plot:
-        matplotlib.pyplot.show()
-
-    if header.evaluate_save_plot:
-        figure.savefig(header.evaluate_model_dir.split("/")[-1] + "_test.png")
+    matplotlib.pyplot.show()
+    figure.savefig(header.plot_model_dir.split("/")[-1] + "_test.png")
 
     return
 
@@ -190,7 +184,7 @@ def plotTrainingStatistics(statistics):
     figure = matplotlib.pyplot.figure(figsize = (2, 2))
     figure_manager = matplotlib.pyplot.get_current_fig_manager()
 
-    figure.suptitle("Training Statistics for \"" + header.evaluate_model_dir + "\"")
+    figure.suptitle("Training Statistics for \"" + header.plot_model_dir + "\"")
 
     figure.add_subplot(2, 2, 1)
     matplotlib.pyplot.plot(accuracies_training)
@@ -224,11 +218,8 @@ def plotTrainingStatistics(statistics):
 
     figure_manager.full_screen_toggle()
 
-    if header.evaluate_show_plot:
-        matplotlib.pyplot.show()
-
-    if header.evaluate_save_plot:
-        figure.savefig(header.evaluate_model_dir.split("/")[-1] + "_train.png")
+    matplotlib.pyplot.show()
+    figure.savefig(header.plot_model_dir.split("/")[-1] + "_train.png")
 
     return
 
