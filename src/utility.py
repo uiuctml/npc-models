@@ -7,6 +7,7 @@ import matplotlib.pyplot
 import numpy
 import os
 import torch
+import type
 
 def computeL2Norm(parameters):
     parameters_list = []
@@ -335,7 +336,7 @@ def saveTraining(model_dir, model, data_loader_train, data_loader_validation, ep
     return
 
 def viewDataset(dataset, data_loader):
-    if header.log_level < logger.LogLevel.trace:
+    if header.log_level < type.LogLevel.trace:
         return
 
     figure_rows = header.dataset_view_row_count

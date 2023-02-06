@@ -3,6 +3,7 @@
 import header
 import logger
 import math
+import network
 import os
 import sys
 import torch
@@ -11,6 +12,7 @@ import torch.optim
 import torchsummary
 import torchvision
 import tqdm
+import type
 import utility
 
 def test(model, data_loader, device, statistics):
@@ -78,13 +80,11 @@ def main():
     model = torchvision.models.resnet152(weights = header.test_model_pretrained_weights)
     statistics = {}
 
-    model.fc = torch.nn.Sequential(torch.nn.Dropout(p = header.train_dropout_probability), torch.nn.Linear(model.fc.in_features, len(dataset.classes)))
-    model = torch.nn.DataParallel(model)
-    model = model.to(device)
+    model = network.configure(header.train_network_revision, model, dataset, device)
 
     utility.loadTesting(header.test_model_dir, model)
 
-    if header.log_level >= logger.LogLevel.debug:
+    if header.log_level >= type.LogLevel.debug:
         model_input_size = (header.test_model_input_channels, header.test_model_input_height, header.test_model_input_width)
         torchsummary.summary(model, input_size = model_input_size)
 

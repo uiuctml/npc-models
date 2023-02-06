@@ -1,5 +1,5 @@
-import logger
 import multiprocessing
+import type
 
 dataset_dir = "../../mapillary-dataset"
 dataset_dir_split = dataset_dir + "/images" + "/split" + "/original"
@@ -39,7 +39,7 @@ model_file_name_statistics_evaluate = "statistics_evaluate.json"
 model_file_name_statistics_test = "statistics_test.json"
 model_file_name_statistics_train = "statistics_train.json"
 
-log_level = logger.LogLevel.info
+log_level = type.LogLevel.info
 
 plot_model_dir = "../model"
 plot_save_evaluate = True
@@ -75,6 +75,7 @@ train_model_input_height = 224
 train_model_input_width = train_model_input_height
 train_model_input_channels = 3
 train_model_pretrained_weights = "IMAGENET1K_V2"
+train_network_revision = type.NetworkRevision.revision_1
 train_optimizer_learning_rate = 0.001
 train_optimizer_momentum = 0.9
 train_optimizer_weight_decay = 1e-5
@@ -88,3 +89,4 @@ test_model_input_height = train_model_input_height
 test_model_input_width = train_model_input_width
 test_model_input_channels = train_model_input_channels
 test_model_pretrained_weights = train_model_pretrained_weights
+train_network_revision = type.NetworkRevision.revision_1

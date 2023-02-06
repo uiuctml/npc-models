@@ -3,12 +3,14 @@
 import header
 import logger
 import math
+import network
 import torch
 import torch.nn
 import torch.optim
 import torchsummary
 import torchvision
 import tqdm
+import type
 import utility
 
 def train(model, data_loader, epoch, criterion, optimizer, device, statistics):
@@ -148,9 +150,7 @@ def main():
         for parameter in model.parameters():
             parameter.requires_grad = False
 
-    model.fc = torch.nn.Sequential(torch.nn.Dropout(p = header.train_dropout_probability), torch.nn.Linear(model.fc.in_features, len(dataset.classes)))
-    model = torch.nn.DataParallel(model)
-    model = model.to(device)
+    model = network.configure(header.train_network_revision, model, dataset, device)
 
     optimizer = torch.optim.SGD(model.parameters(), lr = header.train_optimizer_learning_rate, momentum = header.train_optimizer_momentum, weight_decay = header.train_optimizer_weight_decay)
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.train_learning_rate_scheduler_mode, header.train_learning_rate_scheduler_factor, header.train_learning_rate_scheduler_patient, header.train_learning_rate_scheduler_threshold, header.train_learning_rate_scheduler_threshold_mode, header.train_learning_rate_scheduler_cooldown, header.train_learning_rate_scheduler_min_learning_rate, header.train_learning_rate_scheduler_min_learning_rate_decay, header.train_learning_rate_scheduler_verbose)
@@ -178,7 +178,7 @@ def main():
     if statistics == None:
         statistics = {}
 
-    if header.log_level >= logger.LogLevel.debug:
+    if header.log_level >= type.LogLevel.debug:
         model_input_size = (header.train_model_input_channels, header.train_model_input_height, header.train_model_input_width)
         torchsummary.summary(model, input_size = model_input_size)
 
