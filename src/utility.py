@@ -123,9 +123,12 @@ def loadTrainingBest(model_dir, model):
 
     return
 
-def plotEvaluationStatistics(statistics):
+def plotEvaluationStatistics(model_dir, statistics):
     if statistics == None:
         return
+
+    if not os.path.isdir(model_dir):
+        os.makedirs(model_dir, exist_ok = True)
 
     average_precisions = numpy.array(list(statistics.values()))
     average_precisions_indices = range(0, len(average_precisions))
@@ -138,7 +141,7 @@ def plotEvaluationStatistics(statistics):
     subplot_rows = math.ceil(header.plot_subplot_count_evaluate / header.plot_subplot_col_count_evaluate)
     subplot_cols = header.plot_subplot_col_count_evaluate
 
-    figure.suptitle("Evaluation Statistics for \"" + header.plot_model_dir + "\"")
+    figure.suptitle("Evaluation Statistics for \"" + header.plot_model_dir.split("/")[-1] + "\"")
 
     for i in range(0, header.plot_subplot_count_evaluate):
         figure.add_subplot(subplot_rows, subplot_cols, i + 1)
@@ -155,13 +158,16 @@ def plotEvaluationStatistics(statistics):
         matplotlib.pyplot.show()
 
     if header.plot_save_evaluate:
-        figure.savefig(header.plot_model_dir.split("/")[-1] + "_evaluate.png")
+        figure.savefig(os.path.join(model_dir, "evaluate.png"))
 
     return
 
-def plotTestingStatistics(statistics):
+def plotTestingStatistics(model_dir, statistics):
     if statistics == None:
         return
+
+    if not os.path.isdir(model_dir):
+        os.makedirs(model_dir, exist_ok = True)
 
     accuracies = statistics["testing_accuracies"]
     accuracy_mean = numpy.nanmean(accuracies)
@@ -171,7 +177,7 @@ def plotTestingStatistics(statistics):
 
     matplotlib.pyplot.plot(accuracies)
     matplotlib.pyplot.axhline(y = accuracy_mean, color = "red")
-    matplotlib.pyplot.title("Testing Statistics for \"" + header.plot_model_dir + "\"")
+    matplotlib.pyplot.title("Testing Statistics for \"" + header.plot_model_dir.split("/")[-1] + "\"")
     matplotlib.pyplot.xlabel("Batch")
     matplotlib.pyplot.ylabel("Accuracy")
     matplotlib.pyplot.ylim([0, 1])
@@ -183,13 +189,16 @@ def plotTestingStatistics(statistics):
         matplotlib.pyplot.show()
 
     if header.plot_save_test:
-        figure.savefig(header.plot_model_dir.split("/")[-1] + "_test.png")
+        figure.savefig(os.path.join(model_dir, "test.png"))
 
     return
 
-def plotTrainingStatistics(statistics):
+def plotTrainingStatistics(model_dir, statistics):
     if statistics == None:
         return
+
+    if not os.path.isdir(model_dir):
+        os.makedirs(model_dir, exist_ok = True)
 
     accuracies_training = []
     accuracies_training_xticks = [0]
@@ -216,7 +225,7 @@ def plotTrainingStatistics(statistics):
     figure = matplotlib.pyplot.figure()
     figure_manager = matplotlib.pyplot.get_current_fig_manager()
 
-    figure.suptitle("Training Statistics for \"" + header.plot_model_dir + "\"")
+    figure.suptitle("Training Statistics for \"" + header.plot_model_dir.split("/")[-1] + "\"")
 
     figure.add_subplot(2, 2, 1)
     matplotlib.pyplot.plot(accuracies_training)
@@ -254,7 +263,7 @@ def plotTrainingStatistics(statistics):
         matplotlib.pyplot.show()
 
     if header.plot_save_train:
-        figure.savefig(header.plot_model_dir.split("/")[-1] + "_train.png")
+        figure.savefig(os.path.join(model_dir, "train.png"))
 
     return
 

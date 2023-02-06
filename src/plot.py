@@ -30,21 +30,21 @@ def main():
     if os.path.isfile(model_file_path_statistics_train):
         with open(model_file_path_statistics_train, "r") as file_statistics_train:
             statistics_train = json.load(file_statistics_train)
-            utility.plotTrainingStatistics(statistics_train)
+            utility.plotTrainingStatistics(header.plot_model_dir, statistics_train)
     else:
         logger.log_warn("Training statistics file missing.")
 
     if os.path.isfile(model_file_path_statistics_test):
         with open(model_file_path_statistics_test, "r") as file_statistics_test:
             statistics_test = json.load(file_statistics_test)
-            utility.plotTestingStatistics(statistics_test)
+            utility.plotTestingStatistics(header.plot_model_dir, statistics_test)
     else:
         logger.log_warn("Testing statistics file missing.")
 
     if os.path.isfile(model_file_path_statistics_evaluate):
         with open(model_file_path_statistics_evaluate, "r") as file_statistics_evaluate:
             statistics_evaluate = json.load(file_statistics_evaluate)
-            utility.plotEvaluationStatistics(statistics_evaluate)
+            utility.plotEvaluationStatistics(header.plot_model_dir, statistics_evaluate)
     else:
         logger.log_warn("Evaluation statistics file missing.")
 
