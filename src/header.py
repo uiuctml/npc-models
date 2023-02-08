@@ -89,4 +89,4 @@ test_model_input_height = train_model_input_height
 test_model_input_width = train_model_input_width
 test_model_input_channels = train_model_input_channels
 test_model_pretrained_weights = train_model_pretrained_weights
-train_network_revision = type.NetworkRevision.revision_1
+test_network_revision = type.NetworkRevision.revision_1
