@@ -181,6 +181,7 @@ def main():
     ])
     device = torch.device("cuda")
     epoch = None
+    progress_bar = None
     statistics_test = {}
     statistics_train = None
 
@@ -234,10 +235,11 @@ def main():
     utility.viewDataset(dataset_train_validation, data_loader_validation)
     utility.viewDataset(dataset_test, data_loader_test)
 
-    progress_bar = tqdm.tqdm(total = header.train_epochs, position = 0)
-    progress_bar.set_description_str("[INFO]: Epoch")
-    progress_bar.n = epoch
-    progress_bar.refresh()
+    if epoch <= header.train_epochs:
+        progress_bar = tqdm.tqdm(total = header.train_epochs, position = 0)
+        progress_bar.set_description_str("[INFO]: Epoch")
+        progress_bar.n = epoch
+        progress_bar.refresh()
 
     while epoch <= header.train_epochs:
         best = False
@@ -273,13 +275,15 @@ def main():
 
         logger.log_info_raw("\n")
 
-        if epoch <= header.train_epochs:
+        if progress_bar != None and epoch <= header.train_epochs:
             progress_bar.n = epoch
             progress_bar.refresh()
 
-    progress_bar.close()
+    if progress_bar != None:
+        progress_bar.close()
 
     logger.log_info("Highest validation accuracy: " + str(accuracy_validation) + ".")
+    logger.log_info_raw("\n")
 
     statistics_epoch_test = (0, [], [])
 
