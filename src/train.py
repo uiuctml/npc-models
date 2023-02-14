@@ -207,9 +207,6 @@ def main():
         epoch_accuracy_train = statistics_epoch_train[1] / len(data_loader_train.dataset)
         epoch_accuracy_validation = statistics_epoch_validation[1] / len(data_loader_validation.dataset)
 
-        progress_bar.n = epoch
-        progress_bar.refresh()
-
         logger.log_info("Training loss: " + str(epoch_loss_train) + ".")
         logger.log_info("Validation loss: " + str(epoch_loss_validation) + ".")
         logger.log_info("Training accuracy: " + str(epoch_accuracy_train) + ".")
@@ -226,6 +223,10 @@ def main():
             utility.saveTraining(header.train_model_dir, model, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics, best)
 
         logger.log_info_raw("\n")
+
+        if epoch <= header.train_epochs:
+            progress_bar.n = epoch
+            progress_bar.refresh()
 
     progress_bar.close()
 
