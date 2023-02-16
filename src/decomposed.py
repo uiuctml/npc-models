@@ -131,7 +131,6 @@ def train(model, dataset, data_loader, epoch, criterions, optimizer, device, sta
             optimizer.step()
 
         accuracy_value_list = []
-        corrects_list = []
 
         for i in range(0, len(dataset.config["datasets"])):
             corrects = torch.sum(predictions_list[i] == labels[:, i].data).item()
@@ -144,7 +143,6 @@ def train(model, dataset, data_loader, epoch, criterions, optimizer, device, sta
             progress_bar_loss_list[i].refresh()
 
             accuracy_value_list.append(accuracy_value)
-            corrects_list.append(corrects)
             running_corrects_list[i] += corrects
 
         loss_overall_value = loss_overall.item()
@@ -227,7 +225,6 @@ def validate(model, dataset, data_loader, epoch, criterions, device, statistics)
             loss_overall /= len(outputs)
 
         accuracy_value_list = []
-        corrects_list = []
 
         for i in range(0, len(dataset.config["datasets"])):
             corrects = torch.sum(predictions_list[i] == labels[:, i].data).item()
@@ -240,7 +237,6 @@ def validate(model, dataset, data_loader, epoch, criterions, device, statistics)
             progress_bar_loss_list[i].refresh()
 
             accuracy_value_list.append(accuracy_value)
-            corrects_list.append(corrects)
             running_corrects_list[i] += corrects
 
         loss_overall_value = loss_overall.item()
