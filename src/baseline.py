@@ -83,6 +83,11 @@ def train(model, data_loader, epoch, criterion, optimizer, device, statistics):
             (_, predictions) = torch.max(output, 1)
             loss = criterion(output, labels)
 
+            logger.log_trace("output:", output)
+            logger.log_trace("labels:", labels)
+            logger.log_trace("output.shape:", output.shape)
+            logger.log_trace("labels.shape:", labels.shape)
+
             if header.baseline_use_l2_loss:
                 l2_norm = utility.computeL2Norm(model.parameters())
                 loss_l2 = header.baseline_l2_lambda * l2_norm
@@ -172,6 +177,7 @@ def validate(model, data_loader, epoch, criterion, device, statistics):
 def main():
     accuracy_validation = None
     criterion = None
+    data_loader_test = None
     data_loader_train = None
     data_loader_validation = None
     dataset_transforms = torchvision.transforms.Compose([
@@ -188,9 +194,7 @@ def main():
     dataset_test = torchvision.datasets.ImageFolder(root = header.dataset_dir_test, transform = dataset_transforms)
     dataset_train_validation = torchvision.datasets.ImageFolder(root = header.dataset_dir_train_validation, transform = dataset_transforms)
 
-    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.baseline_data_loader_batch_size, shuffle = header.baseline_data_loader_shuffle, num_workers = header.baseline_data_loader_worker_count, pin_memory = True)
-
-    model = torchvision.models.resnet152(weights = header.baseline_model_pretrained_weights)
+    model = network.BaselineNetworkA(dataset_train_validation)
 
     if header.baseline_load_best:
         utility.loadTrainingBest(header.baseline_model_dir_best, model)
@@ -199,13 +203,14 @@ def main():
         for parameter in model.parameters():
             parameter.requires_grad = False
 
-    model = network.configure(header.baseline_network_revision, model, dataset_train_validation, device)
+    model = torch.nn.DataParallel(model)
+    model = model.to(device)
 
     optimizer = torch.optim.SGD(model.parameters(), lr = header.baseline_optimizer_learning_rate, momentum = header.baseline_optimizer_momentum, weight_decay = header.baseline_optimizer_weight_decay)
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.baseline_learning_rate_scheduler_mode, header.baseline_learning_rate_scheduler_factor, header.baseline_learning_rate_scheduler_patient, header.baseline_learning_rate_scheduler_threshold, header.baseline_learning_rate_scheduler_threshold_mode, header.baseline_learning_rate_scheduler_cooldown, header.baseline_learning_rate_scheduler_min_learning_rate, header.baseline_learning_rate_scheduler_min_learning_rate_decay, header.baseline_learning_rate_scheduler_verbose)
 
     if not header.baseline_dry_run:
-        (data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation, statistics_train) = utility.loadTraining(header.baseline_model_dir, model, optimizer, learning_rate_scheduler)
+        (data_loader_test, data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation, statistics_train) = utility.loadTraining(header.baseline_model_dir, model, optimizer, learning_rate_scheduler)
         logger.log_info_raw("\n")
 
     if accuracy_validation == None:
@@ -215,11 +220,14 @@ def main():
         criterion = torch.nn.CrossEntropyLoss()
 
     if data_loader_train == None or data_loader_validation == None:
-        dataset_split_lengths = [header.dataset_split_percentage_train, header.dataset_split_percentage_validation]
+        dataset_split_lengths = [header.baseline_dataset_split_percentage_train, header.baseline_dataset_split_percentage_validation]
         (dataset_subset_train, dataset_subset_validation) = torch.utils.data.random_split(dataset_train_validation, dataset_split_lengths)
 
         data_loader_train = torch.utils.data.DataLoader(dataset_subset_train, batch_size = header.baseline_data_loader_batch_size, shuffle = header.baseline_data_loader_shuffle, num_workers = header.baseline_data_loader_worker_count, pin_memory = True)
         data_loader_validation = torch.utils.data.DataLoader(dataset_subset_validation, batch_size = header.baseline_data_loader_batch_size, shuffle = header.baseline_data_loader_shuffle, num_workers = header.baseline_data_loader_worker_count, pin_memory = True)
+
+    if data_loader_test == None:
+        data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.baseline_data_loader_batch_size, shuffle = header.baseline_data_loader_shuffle, num_workers = header.baseline_data_loader_worker_count, pin_memory = True)
 
     if epoch == None:
         epoch = 1
@@ -231,9 +239,9 @@ def main():
         model_input_size = (header.baseline_model_input_channels, header.baseline_model_input_height, header.baseline_model_input_width)
         torchsummary.summary(model, input_size = model_input_size)
 
-    utility.viewDataset(dataset_train_validation, data_loader_train)
-    utility.viewDataset(dataset_train_validation, data_loader_validation)
-    utility.viewDataset(dataset_test, data_loader_test)
+    utility.viewDatasetBaseline(dataset_train_validation, data_loader_train, header.baseline_data_loader_batch_size)
+    utility.viewDatasetBaseline(dataset_train_validation, data_loader_validation, header.baseline_data_loader_batch_size)
+    utility.viewDatasetBaseline(dataset_test, data_loader_test, header.baseline_data_loader_batch_size)
 
     if epoch <= header.baseline_epochs:
         progress_bar = tqdm.tqdm(total = header.baseline_epochs, position = 0)
@@ -271,7 +279,7 @@ def main():
             best = True
 
         if not header.baseline_dry_run:
-            utility.saveTraining(header.baseline_model_dir, model, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics_train, best)
+            utility.saveTraining(header.baseline_model_dir, model, data_loader_test, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics_train, best)
 
         logger.log_info_raw("\n")
 
@@ -287,7 +295,9 @@ def main():
 
     statistics_epoch_test = (0, [], [])
 
-    logger.log_info("Testing model in \"" + header.baseline_model_dir + "\".")
+    utility.loadTesting(header.baseline_model_dir, model)
+
+    logger.log_info("Testing best model in \"" + header.baseline_model_dir + "\".")
 
     if not header.baseline_dry_run:
         statistics_epoch_test = test(model, data_loader_test, device, statistics_test)

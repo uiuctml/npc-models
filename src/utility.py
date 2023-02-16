@@ -6,6 +6,7 @@ import math
 import matplotlib.pyplot
 import numpy
 import os
+import textwrap
 import torch
 import type
 
@@ -54,6 +55,7 @@ def loadTesting(model_dir, model):
 def loadTraining(model_dir, model, optimizer, learning_rate_scheduler):
     accuracy_validation = None
     criterion = None
+    data_loader_test = None
     data_loader_train = None
     data_loader_validation = None
     epoch = None
@@ -62,6 +64,7 @@ def loadTraining(model_dir, model, optimizer, learning_rate_scheduler):
     if os.path.isdir(model_dir):
         model_file_path_accuracy_validation = os.path.join(model_dir, header.model_file_name_accuracy_validation)
         model_file_path_criterion = os.path.join(model_dir, header.model_file_name_criterion)
+        model_file_path_data_loader_test = os.path.join(model_dir, header.model_file_name_data_loader_test)
         model_file_path_data_loader_train = os.path.join(model_dir, header.model_file_name_data_loader_train)
         model_file_path_data_loader_validation = os.path.join(model_dir, header.model_file_name_data_loader_validation)
         model_file_path_epoch = os.path.join(model_dir, header.model_file_name_epoch)
@@ -74,9 +77,13 @@ def loadTraining(model_dir, model, optimizer, learning_rate_scheduler):
             model.load_state_dict(torch.load(model_file_path_model))
             logger.log_info("Loaded training model state from \"" + model_dir + "\".")
 
+        if os.path.isfile(model_file_path_data_loader_test):
+            data_loader_test = torch.load(model_file_path_data_loader_test)
+            logger.log_info("Loaded training test data loader from \"" + model_dir + "\".")
+
         if os.path.isfile(model_file_path_data_loader_train):
             data_loader_train = torch.load(model_file_path_data_loader_train)
-            logger.log_info("Loaded training data loader from \"" + model_dir + "\".")
+            logger.log_info("Loaded training train data loader from \"" + model_dir + "\".")
 
         if os.path.isfile(model_file_path_data_loader_validation):
             data_loader_validation = torch.load(model_file_path_data_loader_validation)
@@ -107,7 +114,7 @@ def loadTraining(model_dir, model, optimizer, learning_rate_scheduler):
                 statistics_train = json.load(file_statistics_train)
                 logger.log_info("Loaded training statistics from \"" + model_dir + "\".")
 
-    return (data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation, statistics_train)
+    return (data_loader_test, data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation, statistics_train)
 
 def loadTrainingBest(model_dir, model):
     if os.path.isdir(model_dir):
@@ -301,12 +308,13 @@ def saveTesting(model_dir, outputs, class_indices, classes, statistics):
 
     return
 
-def saveTraining(model_dir, model, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics, best):
+def saveTraining(model_dir, model, data_loader_test, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics, best):
     if not os.path.isdir(model_dir):
         os.makedirs(model_dir, exist_ok = True)
 
     model_file_path_accuracy_validation = os.path.join(model_dir, header.model_file_name_accuracy_validation)
     model_file_path_criterion = os.path.join(model_dir, header.model_file_name_criterion)
+    model_file_path_data_loader_test = os.path.join(model_dir, header.model_file_name_data_loader_test)
     model_file_path_data_loader_train = os.path.join(model_dir, header.model_file_name_data_loader_train)
     model_file_path_data_loader_validation = os.path.join(model_dir, header.model_file_name_data_loader_validation)
     model_file_path_epoch = os.path.join(model_dir, header.model_file_name_epoch)
@@ -320,6 +328,7 @@ def saveTraining(model_dir, model, data_loader_train, data_loader_validation, ep
         torch.save(model.state_dict(), model_file_path_model_best)
 
     torch.save(model.state_dict(), model_file_path_model)
+    torch.save(data_loader_test, model_file_path_data_loader_test)
     torch.save(data_loader_train, model_file_path_data_loader_train)
     torch.save(data_loader_validation, model_file_path_data_loader_validation)
     torch.save(epoch, model_file_path_epoch)
@@ -335,23 +344,59 @@ def saveTraining(model_dir, model, data_loader_train, data_loader_validation, ep
 
     return
 
-def viewDataset(dataset, data_loader):
+def viewDatasetBaseline(dataset, data_loader, batch_size):
     if header.log_level < type.LogLevel.trace:
         return
 
     figure_rows = header.dataset_view_row_count
-    figure_cols = math.ceil(header.train_data_loader_batch_size / header.dataset_view_row_count)
+    figure_cols = math.ceil(batch_size / header.dataset_view_row_count)
     figure = matplotlib.pyplot.figure()
     figure_manager = matplotlib.pyplot.get_current_fig_manager()
     input, labels = next(iter(data_loader))
     input = input.numpy().transpose((0, 2, 3, 1))
     class_list = list(dataset.classes[label] for label in labels)
 
-    for i in range(0, header.train_data_loader_batch_size):
-        figure.add_subplot(figure_cols, figure_rows, i + 1)
+    for i in range(0, batch_size):
+        figure.add_subplot(figure_rows, figure_cols, i + 1)
         matplotlib.pyplot.title(class_list[i])
         matplotlib.pyplot.axis("off")
-        matplotlib.pyplot.imshow(input[i].squeeze())
+        matplotlib.pyplot.imshow(numpy.clip(input[i].squeeze(), 0, 1))
+
+    figure_manager.full_screen_toggle()
+    matplotlib.pyplot.show()
+
+    return
+
+def viewDatasetDecomposed(dataset, data_loader, batch_size):
+    if header.log_level < type.LogLevel.trace:
+        return
+
+    figure_rows = header.dataset_view_row_count
+    figure_cols = math.ceil(batch_size / header.dataset_view_row_count)
+    figure = matplotlib.pyplot.figure()
+    figure_manager = matplotlib.pyplot.get_current_fig_manager()
+    input, labels = next(iter(data_loader))
+    input = input.numpy().transpose((0, 2, 3, 1))
+
+    class_list = []
+
+    for label in labels:
+        class_name = ""
+
+        for i in range(0, len(label)):
+            if class_name != "":
+                class_name += header.dataset_delimiter_file_name
+
+            class_name += dataset.classes[i][label[i]]
+
+        class_name = "\n".join(textwrap.wrap(class_name, 30))
+        class_list.append(class_name)
+
+    for i in range(0, batch_size):
+        figure.add_subplot(figure_rows, figure_cols, i + 1)
+        matplotlib.pyplot.title(class_list[i], fontsize = 5)
+        matplotlib.pyplot.axis("off")
+        matplotlib.pyplot.imshow(numpy.clip(input[i].squeeze(), 0, 1))
 
     figure_manager.full_screen_toggle()
     matplotlib.pyplot.show()

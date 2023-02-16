@@ -1,9 +1,5 @@
 import enum
 
-class NetworkRevision(enum.Enum):
-    revision_0 = 0
-    revision_1 = 1
-
 class LogLevel(enum.Enum):
     all = 6
     trace = 5
