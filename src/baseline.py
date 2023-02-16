@@ -15,12 +15,11 @@ import utility
 
 def test(model, data_loader, device, statistics):
     accuracies = []
-    batch_count = math.ceil(len(data_loader.dataset) / header.baseline_data_loader_batch_size)
     class_indices = []
     running_corrects = 0
     outputs = []
     progress_bar_accuracy = tqdm.tqdm(total = 1, position = 1, leave = False)
-    progress_bar_progress = tqdm.tqdm(total = batch_count, position = 0, leave = False)
+    progress_bar_progress = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
     progress_bar_accuracy.set_description_str("[INFO]: Testing accuracy")
     progress_bar_progress.set_description_str("[INFO]: Testing progress")
 
@@ -59,13 +58,12 @@ def test(model, data_loader, device, statistics):
 
 def train(model, data_loader, epoch, criterion, optimizer, device, statistics):
     accuracies = []
-    batch_count = math.ceil(len(data_loader.dataset) / header.baseline_data_loader_batch_size)
     losses = []
     running_loss = 0
     running_corrects = 0
     progress_bar_accuracy = tqdm.tqdm(total = 1, position = 3, leave = False)
     progress_bar_loss = tqdm.tqdm(total = 10, position = 2, leave = False)
-    progress_bar_progress = tqdm.tqdm(total = batch_count, position = 1, leave = False)
+    progress_bar_progress = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
     progress_bar_accuracy.set_description_str("[INFO]: Training accuracy")
     progress_bar_loss.set_description_str("[INFO]: Training loss")
     progress_bar_progress.set_description_str("[INFO]: Training progress")
@@ -125,13 +123,12 @@ def train(model, data_loader, epoch, criterion, optimizer, device, statistics):
 
 def validate(model, data_loader, epoch, criterion, device, statistics):
     accuracies = []
-    batch_count = math.ceil(len(data_loader.dataset) / header.baseline_data_loader_batch_size)
     losses = []
     running_loss = 0
     running_corrects = 0
     progress_bar_accuracy = tqdm.tqdm(total = 1, position = 3, leave = False)
     progress_bar_loss = tqdm.tqdm(total = 10, position = 2, leave = False)
-    progress_bar_progress = tqdm.tqdm(total = batch_count, position = 1, leave = False)
+    progress_bar_progress = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
     progress_bar_accuracy.set_description_str("[INFO]: Validation accuracy")
     progress_bar_loss.set_description_str("[INFO]: Validation loss")
     progress_bar_progress.set_description_str("[INFO]: Validation progress")
@@ -259,10 +256,8 @@ def main():
             statistics_epoch_train = train(model, data_loader_train, epoch, criterion, optimizer, device, statistics_train)
             statistics_epoch_validation = validate(model, data_loader_validation, epoch, criterion, device, statistics_train)
 
-        batch_count_train = math.ceil(len(data_loader_train.dataset) / header.baseline_data_loader_batch_size)
-        batch_count_validation = math.ceil(len(data_loader_validation.dataset) / header.baseline_data_loader_batch_size)
-        epoch_loss_train = statistics_epoch_train[0] / batch_count_train
-        epoch_loss_validation = statistics_epoch_validation[0] / batch_count_validation
+        epoch_loss_train = statistics_epoch_train[0] / len(data_loader_train)
+        epoch_loss_validation = statistics_epoch_validation[0] / len(data_loader_validation)
         epoch_accuracy_train = statistics_epoch_train[1] / len(data_loader_train.dataset)
         epoch_accuracy_validation = statistics_epoch_validation[1] / len(data_loader_validation.dataset)
 

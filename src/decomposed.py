@@ -60,7 +60,6 @@ def test(model, data_loader, device, statistics):
 
 def train(model, dataset, data_loader, epoch, criterions, optimizer, device, statistics):
     accuracies = []
-    batch_count = math.ceil(len(data_loader.dataset) / header.decomposed_data_loader_batch_size)
     losses = []
     running_loss = 0
     running_corrects_list = []
@@ -69,7 +68,7 @@ def train(model, dataset, data_loader, epoch, criterions, optimizer, device, sta
     progress_bar_loss_list = []
     progress_bar_loss_position = 3
     progress_bar_loss_overall = tqdm.tqdm(total = 10, position = 2, leave = False)
-    progress_bar_progress = tqdm.tqdm(total = batch_count, position = 1, leave = False)
+    progress_bar_progress = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
     progress_bar_loss_overall.set_description_str("[INFO]: Training overall loss")
     progress_bar_progress.set_description_str("[INFO]: Training progress")
 
@@ -174,7 +173,6 @@ def train(model, dataset, data_loader, epoch, criterions, optimizer, device, sta
 
 def validate(model, dataset, data_loader, epoch, criterions, device, statistics):
     accuracies = []
-    batch_count = math.ceil(len(data_loader.dataset) / header.decomposed_data_loader_batch_size)
     losses = []
     running_loss = 0
     running_corrects_list = []
@@ -183,7 +181,7 @@ def validate(model, dataset, data_loader, epoch, criterions, device, statistics)
     progress_bar_loss_list = []
     progress_bar_loss_position = 3
     progress_bar_loss_overall = tqdm.tqdm(total = 10, position = 2, leave = False)
-    progress_bar_progress = tqdm.tqdm(total = batch_count, position = 1, leave = False)
+    progress_bar_progress = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
     progress_bar_loss_overall.set_description_str("[INFO]: Validation overall loss")
     progress_bar_progress.set_description_str("[INFO]: Validation progress")
 
@@ -354,10 +352,8 @@ def main():
             statistics_epoch_train = train(model, dataset_generated, data_loader_train, epoch, criterions, optimizer, device, statistics_train)
             statistics_epoch_validation = validate(model, dataset_generated, data_loader_validation, epoch, criterions, device, statistics_train)
 
-        batch_count_train = math.ceil(len(data_loader_train.dataset) / header.decomposed_data_loader_batch_size)
-        batch_count_validation = math.ceil(len(data_loader_validation.dataset) / header.decomposed_data_loader_batch_size)
-        epoch_loss_train = statistics_epoch_train[0] / batch_count_train
-        epoch_loss_validation = statistics_epoch_validation[0] / batch_count_validation
+        epoch_loss_train = statistics_epoch_train[0] / len(data_loader_train)
+        epoch_loss_validation = statistics_epoch_validation[0] / len(data_loader_validation)
         epoch_accuracy_train = statistics_epoch_train[1] / len(data_loader_train.dataset)
         epoch_accuracy_validation = statistics_epoch_validation[1] / len(data_loader_validation.dataset)
 
