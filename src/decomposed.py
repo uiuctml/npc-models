@@ -348,21 +348,29 @@ def main():
             statistics_epoch_train = train(model, dataset_generated, data_loader_train, epoch, criterions, optimizer, device, statistics_train)
             statistics_epoch_validation = validate(model, dataset_generated, data_loader_validation, epoch, criterions, device, statistics_train)
 
+        epoch_mean_accuracy_validation = 0
         epoch_loss_train = statistics_epoch_train[0] / len(data_loader_train)
         epoch_loss_validation = statistics_epoch_validation[0] / len(data_loader_validation)
-        epoch_accuracy_train = statistics_epoch_train[1] / len(data_loader_train.dataset)
-        epoch_accuracy_validation = statistics_epoch_validation[1] / len(data_loader_validation.dataset)
 
         logger.log_info("Training loss: " + str(epoch_loss_train) + ".")
+
+        for (i, dataset_entry) in enumerate(dataset_generated.config["datasets"]):
+            epoch_accuracy_train = statistics_epoch_train[1][i] / len(data_loader_train.dataset)
+            logger.log_info("Training accuracy for \"" + dataset_entry["name"] + "\": " + str(epoch_accuracy_train) + ".")
+
         logger.log_info("Validation loss: " + str(epoch_loss_validation) + ".")
-        logger.log_info("Training accuracy: " + str(epoch_accuracy_train) + ".")
-        logger.log_info("Validation accuracy: " + str(epoch_accuracy_validation) + ".")
+
+        for (i, dataset_entry) in enumerate(dataset_generated.config["datasets"]):
+            epoch_accuracy_validation = statistics_epoch_validation[1][i] / len(data_loader_validation.dataset)
+            epoch_mean_accuracy_validation += epoch_accuracy_validation
+            logger.log_info("Validation accuracy for \"" + dataset_entry["name"] + "\": " + str(epoch_accuracy_validation) + ".")
 
         learning_rate_scheduler.step(epoch_loss_validation)
         epoch += 1
+        epoch_mean_accuracy_validation /= len(dataset_generated.config["datasets"])
 
-        if epoch_accuracy_validation > accuracy_validation:
-            accuracy_validation = epoch_accuracy_validation
+        if epoch_mean_accuracy_validation > accuracy_validation:
+            accuracy_validation = epoch_mean_accuracy_validation
             best = True
 
         if not header.decomposed_dry_run:
