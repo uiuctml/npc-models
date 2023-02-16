@@ -14,49 +14,71 @@ import tqdm
 import type
 import utility
 
-def test(model, data_loader, device, statistics):
+def test(model, dataset, data_loader, device, statistics):
     accuracies = []
-    batch_count = math.ceil(len(data_loader.dataset) / header.decomposed_data_loader_batch_size)
-    class_indices = []
-    running_corrects = 0
-    outputs = []
-    progress_bar_accuracy = tqdm.tqdm(total = 1, position = 1, leave = False)
-    progress_bar_progress = tqdm.tqdm(total = batch_count, position = 0, leave = False)
-    progress_bar_accuracy.set_description_str("[INFO]: Testing accuracy")
+    class_indices_list = []
+    running_corrects_list = []
+    outputs_list = []
+    progress_bar_accuracy_list = []
+    progress_bar_accuracy_position = 1
+    progress_bar_progress = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
     progress_bar_progress.set_description_str("[INFO]: Testing progress")
+
+    for dataset_entry in dataset.config["datasets"]:
+        progress_bar_accuracy = tqdm.tqdm(total = 1, position = progress_bar_accuracy_position, leave = False)
+        progress_bar_accuracy.set_description_str("[INFO]: Testing accuracy for \"" + dataset_entry["name"] + "\"")
+
+        class_indices_list.append([])
+        outputs_list.append([])
+        running_corrects_list.append(0)
+        progress_bar_accuracy_list.append(progress_bar_accuracy)
+
+        progress_bar_accuracy_position += 1
 
     model.eval()
 
     with torch.no_grad():
-        for (i, (input, labels)) in enumerate(data_loader):
+        for (batch_index, (input, labels)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
             labels = labels.to(device, non_blocking = True)
 
             with torch.set_grad_enabled(False):
-                output = model(input)
-                (_, predictions) = torch.max(output, 1)
+                predictions_list = []
 
-            corrects = torch.sum(predictions == labels.data).item()
-            accuracy_value = corrects / input.size(0)
+                outputs = model(input)
 
-            running_corrects += corrects
+                for i in range(0, len(dataset.config["datasets"])):
+                    (_, predictions) = torch.max(outputs[i], 1)
+                    predictions_list.append(predictions)
 
-            progress_bar_accuracy.n = round(accuracy_value, 4)
-            progress_bar_progress.n = i + 1
+            accuracy_value_list = []
 
-            progress_bar_accuracy.refresh()
+            for i in range(0, len(dataset.config["datasets"])):
+                corrects = torch.sum(predictions_list[i] == labels[:, i].data).item()
+                accuracy_value = corrects / input.size(0)
+
+                progress_bar_accuracy_list[i].n = round(accuracy_value, 4)
+                progress_bar_accuracy_list[i].refresh()
+
+                accuracy_value_list.append(accuracy_value)
+                running_corrects_list[i] += corrects
+
+                class_indices_list[i] = labels[:, i].data.tolist()
+                outputs_list[i] = outputs[i].tolist()
+
+            progress_bar_progress.n = batch_index + 1
             progress_bar_progress.refresh()
 
-            accuracies.append(accuracy_value)
-            class_indices.append(labels.data.tolist())
-            outputs.append(output.tolist())
+            accuracies.append(accuracy_value_list)
 
     statistics["testing_accuracies"] = accuracies
 
-    progress_bar_accuracy.close()
+    for i in range(0, len(dataset.config["datasets"])):
+        progress_bar_accuracy_list[i].close()
+
     progress_bar_progress.close()
 
-    return (running_corrects, outputs, class_indices)
+    return (running_corrects_list, outputs_list, class_indices_list)
 
 def train(model, dataset, data_loader, epoch, criterions, optimizer, device, statistics):
     accuracies = []
@@ -397,12 +419,12 @@ def main():
     if not header.decomposed_dry_run:
         statistics_epoch_test = test(model, data_loader_test, device, statistics_test)
 
-    accuracy_test = statistics_epoch_test[0] / len(data_loader_test.dataset)
-
-    logger.log_info("Testing accuracy: " + str(accuracy_test) + ".")
+    for (i, dataset_entry) in enumerate(dataset_generated.config["datasets"]):
+            accuracy_test = statistics_epoch_test[0][i] / len(data_loader_test.dataset)
+            logger.log_info("Testing accuracy for \"" + dataset_entry["name"] + "\": " + str(accuracy_test) + ".")
 
     if not header.decomposed_dry_run:
-        utility.saveTesting(header.decomposed_model_dir, statistics_epoch_test[1], statistics_epoch_test[2], dataset_test.classes, statistics_test)
+        utility.saveTesting(header.decomposed_model_dir, statistics_epoch_test[1], statistics_epoch_test[2], dataset_generated.classes, statistics_test)
 
     return
 
