@@ -362,30 +362,29 @@ def main():
 
     while epoch <= header.decomposed_epochs:
         best = False
-        statistics_epoch_train = (0, 0)
-        statistics_epoch_validation = (0, 0)
+        epoch_loss_validation = 0
+        epoch_mean_accuracy_validation = 0
 
         if not header.decomposed_dry_run:
             statistics_train["epoch_" + str(epoch)] = {}
             statistics_epoch_train = train(model, dataset_generated, data_loader_train, epoch, criterions, optimizer, device, statistics_train)
             statistics_epoch_validation = validate(model, dataset_generated, data_loader_validation, epoch, criterions, device, statistics_train)
 
-        epoch_mean_accuracy_validation = 0
-        epoch_loss_train = statistics_epoch_train[0] / len(data_loader_train)
-        epoch_loss_validation = statistics_epoch_validation[0] / len(data_loader_validation)
+            epoch_loss_train = statistics_epoch_train[0] / len(data_loader_train)
+            epoch_loss_validation = statistics_epoch_validation[0] / len(data_loader_validation)
 
-        logger.log_info("Training loss: " + str(epoch_loss_train) + ".")
+            logger.log_info("Training loss: " + str(epoch_loss_train) + ".")
 
-        for (i, dataset_entry) in enumerate(dataset_generated.config["datasets"]):
-            epoch_accuracy_train = statistics_epoch_train[1][i] / len(data_loader_train.dataset)
-            logger.log_info("Training accuracy for \"" + dataset_entry["name"] + "\": " + str(epoch_accuracy_train) + ".")
+            for (i, dataset_entry) in enumerate(dataset_generated.config["datasets"]):
+                epoch_accuracy_train = statistics_epoch_train[1][i] / len(data_loader_train.dataset)
+                logger.log_info("Training accuracy for \"" + dataset_entry["name"] + "\": " + str(epoch_accuracy_train) + ".")
 
-        logger.log_info("Validation loss: " + str(epoch_loss_validation) + ".")
+            logger.log_info("Validation loss: " + str(epoch_loss_validation) + ".")
 
-        for (i, dataset_entry) in enumerate(dataset_generated.config["datasets"]):
-            epoch_accuracy_validation = statistics_epoch_validation[1][i] / len(data_loader_validation.dataset)
-            epoch_mean_accuracy_validation += epoch_accuracy_validation
-            logger.log_info("Validation accuracy for \"" + dataset_entry["name"] + "\": " + str(epoch_accuracy_validation) + ".")
+            for (i, dataset_entry) in enumerate(dataset_generated.config["datasets"]):
+                epoch_accuracy_validation = statistics_epoch_validation[1][i] / len(data_loader_validation.dataset)
+                epoch_mean_accuracy_validation += epoch_accuracy_validation
+                logger.log_info("Validation accuracy for \"" + dataset_entry["name"] + "\": " + str(epoch_accuracy_validation) + ".")
 
         learning_rate_scheduler.step(epoch_loss_validation)
         epoch += 1
@@ -400,11 +399,11 @@ def main():
 
         logger.log_info_raw("\n")
 
-        if progress_bar != None and epoch <= header.decomposed_epochs:
+        if progress_bar is not None and epoch <= header.decomposed_epochs:
             progress_bar.n = epoch
             progress_bar.refresh()
 
-    if progress_bar != None:
+    if progress_bar is not None:
         progress_bar.close()
 
     logger.log_info("Highest validation accuracy: " + str(accuracy_validation) + ".")
@@ -419,11 +418,10 @@ def main():
     if not header.decomposed_dry_run:
         statistics_epoch_test = test(model, data_loader_test, device, statistics_test)
 
-    for (i, dataset_entry) in enumerate(dataset_generated.config["datasets"]):
-            accuracy_test = statistics_epoch_test[0][i] / len(data_loader_test.dataset)
-            logger.log_info("Testing accuracy for \"" + dataset_entry["name"] + "\": " + str(accuracy_test) + ".")
+        for (i, dataset_entry) in enumerate(dataset_generated.config["datasets"]):
+                accuracy_test = statistics_epoch_test[0][i] / len(data_loader_test.dataset)
+                logger.log_info("Testing accuracy for \"" + dataset_entry["name"] + "\": " + str(accuracy_test) + ".")
 
-    if not header.decomposed_dry_run:
         utility.saveTesting(header.decomposed_model_dir, statistics_epoch_test[1], statistics_epoch_test[2], dataset_generated.classes, statistics_test)
 
     return
