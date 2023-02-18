@@ -416,7 +416,7 @@ def main():
     logger.log_info("Testing best model in \"" + header.decomposed_model_dir + "\".")
 
     if not header.decomposed_dry_run:
-        statistics_epoch_test = test(model, data_loader_test, device, statistics_test)
+        statistics_epoch_test = test(model, dataset_generated, data_loader_test, device, statistics_test)
 
         for (i, dataset_entry) in enumerate(dataset_generated.config["datasets"]):
                 accuracy_test = statistics_epoch_test[0][i] / len(data_loader_test.dataset)
