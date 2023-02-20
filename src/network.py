@@ -1,8 +1,6 @@
 import header
-import logger
 import torch.nn
 import torchvision
-import type
 
 class BaselineNetworkA(torch.nn.Module):
     def __init__(self, dataset):

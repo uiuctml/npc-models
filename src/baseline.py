@@ -2,174 +2,18 @@
 
 import header
 import logger
-import math
 import network
 import torch
 import torch.nn
 import torch.optim
 import torchsummary
 import torchvision
+import test
 import tqdm
+import train
 import type
 import utility
-
-def test(model, data_loader, device, statistics):
-    accuracies = []
-    class_indices = []
-    running_corrects = 0
-    outputs = []
-    progress_bar_accuracy = tqdm.tqdm(total = 1, position = 1, leave = False)
-    progress_bar_progress = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
-    progress_bar_accuracy.set_description_str("[INFO]: Testing accuracy")
-    progress_bar_progress.set_description_str("[INFO]: Testing progress")
-
-    model.eval()
-
-    with torch.no_grad():
-        for (i, (input, labels)) in enumerate(data_loader):
-            input = input.to(device, non_blocking = True)
-            labels = labels.to(device, non_blocking = True)
-
-            with torch.set_grad_enabled(False):
-                output = model(input)
-                (_, predictions) = torch.max(output, 1)
-
-            corrects = torch.sum(predictions == labels.data).item()
-            accuracy_value = corrects / input.size(0)
-
-            running_corrects += corrects
-
-            progress_bar_accuracy.n = round(accuracy_value, 4)
-            progress_bar_progress.n = i + 1
-
-            progress_bar_accuracy.refresh()
-            progress_bar_progress.refresh()
-
-            accuracies.append(accuracy_value)
-            class_indices.append(labels.data.tolist())
-            outputs.append(output.tolist())
-
-    statistics["testing_accuracies"] = accuracies
-
-    progress_bar_accuracy.close()
-    progress_bar_progress.close()
-
-    return (running_corrects, outputs, class_indices)
-
-def train(model, data_loader, epoch, criterion, optimizer, device, statistics):
-    accuracies = []
-    losses = []
-    running_loss = 0
-    running_corrects = 0
-    progress_bar_accuracy = tqdm.tqdm(total = 1, position = 3, leave = False)
-    progress_bar_loss = tqdm.tqdm(total = 10, position = 2, leave = False)
-    progress_bar_progress = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
-    progress_bar_accuracy.set_description_str("[INFO]: Training accuracy")
-    progress_bar_loss.set_description_str("[INFO]: Training loss")
-    progress_bar_progress.set_description_str("[INFO]: Training progress")
-
-    model.train()
-
-    for (i, (input, labels)) in enumerate(data_loader):
-        input = input.to(device, non_blocking = True)
-        labels = labels.to(device, non_blocking = True)
-
-        optimizer.zero_grad()
-
-        with torch.set_grad_enabled(True):
-            output = model(input)
-            (_, predictions) = torch.max(output, 1)
-            loss = criterion(output, labels)
-
-            logger.log_trace("output:", output)
-            logger.log_trace("labels:", labels)
-            logger.log_trace("output.shape:", output.shape)
-            logger.log_trace("labels.shape:", labels.shape)
-
-            if header.baseline_use_l2_loss:
-                l2_norm = utility.computeL2Norm(model.parameters())
-                loss_l2 = header.baseline_l2_lambda * l2_norm
-                loss += loss_l2
-
-            loss.backward()
-            optimizer.step()
-
-        corrects = torch.sum(predictions == labels.data).item()
-        accuracy_value = corrects / input.size(0)
-        loss_value = loss.item()
-
-        running_loss += loss_value
-        running_corrects += corrects
-
-        progress_bar_accuracy.n = round(accuracy_value, 4)
-        progress_bar_loss.n = round(loss_value, 4)
-        progress_bar_progress.n = i + 1
-
-        progress_bar_accuracy.refresh()
-        progress_bar_loss.refresh()
-        progress_bar_progress.refresh()
-
-        accuracies.append(accuracy_value)
-        losses.append(loss_value)
-
-    progress_bar_accuracy.close()
-    progress_bar_loss.close()
-    progress_bar_progress.close()
-
-    statistics["epoch_" + str(epoch)]["training_accuracies"] = accuracies
-    statistics["epoch_" + str(epoch)]["training_losses"] = losses
-
-    return (running_loss, running_corrects)
-
-def validate(model, data_loader, epoch, criterion, device, statistics):
-    accuracies = []
-    losses = []
-    running_loss = 0
-    running_corrects = 0
-    progress_bar_accuracy = tqdm.tqdm(total = 1, position = 3, leave = False)
-    progress_bar_loss = tqdm.tqdm(total = 10, position = 2, leave = False)
-    progress_bar_progress = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
-    progress_bar_accuracy.set_description_str("[INFO]: Validation accuracy")
-    progress_bar_loss.set_description_str("[INFO]: Validation loss")
-    progress_bar_progress.set_description_str("[INFO]: Validation progress")
-
-    model.eval()
-
-    for (i, (input, labels)) in enumerate(data_loader):
-        input = input.to(device, non_blocking = True)
-        labels = labels.to(device, non_blocking = True)
-
-        with torch.set_grad_enabled(False):
-            output = model(input)
-            (_, predictions) = torch.max(output, 1)
-            loss = criterion(output, labels)
-
-        corrects = torch.sum(predictions == labels.data).item()
-        accuracy_value = corrects / input.size(0)
-        loss_value = loss.item()
-
-        running_loss += loss_value
-        running_corrects += corrects
-
-        progress_bar_accuracy.n = round(accuracy_value, 4)
-        progress_bar_loss.n = round(loss_value, 4)
-        progress_bar_progress.n = i + 1
-
-        progress_bar_accuracy.refresh()
-        progress_bar_loss.refresh()
-        progress_bar_progress.refresh()
-
-        accuracies.append(accuracy_value)
-        losses.append(loss_value)
-
-    progress_bar_accuracy.close()
-    progress_bar_loss.close()
-    progress_bar_progress.close()
-
-    statistics["epoch_" + str(epoch)]["validation_accuracies"] = accuracies
-    statistics["epoch_" + str(epoch)]["validation_losses"] = losses
-
-    return (running_loss, running_corrects)
+import validate
 
 def main():
     accuracy_validation = None
@@ -253,8 +97,8 @@ def main():
 
         if not header.baseline_dry_run:
             statistics_train["epoch_" + str(epoch)] = {}
-            statistics_epoch_train = train(model, data_loader_train, epoch, criterion, optimizer, device, statistics_train)
-            statistics_epoch_validation = validate(model, data_loader_validation, epoch, criterion, device, statistics_train)
+            statistics_epoch_train = train.trainBaseline(model, data_loader_train, epoch, criterion, optimizer, device, statistics_train)
+            statistics_epoch_validation = validate.validateBaseline(model, data_loader_validation, epoch, criterion, device, statistics_train)
 
         epoch_loss_train = statistics_epoch_train[0] / len(data_loader_train)
         epoch_loss_validation = statistics_epoch_validation[0] / len(data_loader_validation)
@@ -295,7 +139,7 @@ def main():
     logger.log_info("Testing best model in \"" + header.baseline_model_dir + "\".")
 
     if not header.baseline_dry_run:
-        statistics_epoch_test = test(model, data_loader_test, device, statistics_test)
+        statistics_epoch_test = test.testBaseline(model, data_loader_test, device, statistics_test)
 
     accuracy_test = statistics_epoch_test[0] / len(data_loader_test.dataset)
 
