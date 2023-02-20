@@ -124,11 +124,11 @@ def main():
 
         logger.log_info_raw("\n")
 
-        if progress_bar != None and epoch <= header.baseline_epochs:
+        if progress_bar is not None and epoch <= header.baseline_epochs:
             progress_bar.n = epoch
             progress_bar.refresh()
 
-    if progress_bar != None:
+    if progress_bar is not None:
         progress_bar.close()
 
     logger.log_info("Highest validation accuracy: " + str(accuracy_validation) + ".")
@@ -150,16 +150,16 @@ def main():
     if not header.baseline_dry_run:
         utility.saveTesting(header.baseline_model_dir, statistics_epoch_test[1], statistics_epoch_test[2], dataset_test.classes, statistics_test)
 
-    (outputs_test, class_indices_test, classes) = utility.loadEvaluation(header.evaluate_model_dir)
+    (outputs_test, class_indices_test, classes) = utility.loadEvaluation(header.baseline_model_dir)
 
-    logger.log_info("Evaluating model in \"" + header.evaluate_model_dir + "\".")
+    logger.log_info("Evaluating model in \"" + header.baseline_model_dir + "\".")
 
     mean_average_precision = evaluate.evaluateBaseline(outputs_test, class_indices_test, classes, statistics_evaluate)
 
     logger.log_info("Mean average precision: " + str(mean_average_precision.item()) + ".")
 
     if not header.baseline_dry_run:
-        utility.saveEvaluation(header.evaluate_model_dir, statistics_evaluate)
+        utility.saveEvaluation(header.baseline_model_dir, statistics_evaluate)
 
     return
 

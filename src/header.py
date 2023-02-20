@@ -86,7 +86,6 @@ evaluate_label_excluded = set([
     "information--central-lane--g1",
     "information--dead-end-except-bicycles--g1"
 ])
-evaluate_model_dir = "../model"
 
 model_file_name_accuracy_validation = "accuracy_validation.pth"
 model_file_name_class_indices_test = "class_indices_test.pth"
@@ -107,7 +106,7 @@ model_file_name_statistics_train = "statistics_train.json"
 
 log_level = type.LogLevel.info
 
-plot_model_dir = "../model"
+plot_model_dir = "../model.baseline"
 plot_save_evaluate = True
 plot_save_test = True
 plot_save_train = True
