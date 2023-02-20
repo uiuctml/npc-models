@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import evaluate
 import header
 import logger
 import network
@@ -29,6 +30,7 @@ def main():
     device = torch.device("cuda")
     epoch = None
     progress_bar = None
+    statistics_evaluate = {}
     statistics_test = {}
     statistics_train = None
 
@@ -147,6 +149,17 @@ def main():
 
     if not header.baseline_dry_run:
         utility.saveTesting(header.baseline_model_dir, statistics_epoch_test[1], statistics_epoch_test[2], dataset_test.classes, statistics_test)
+
+    (outputs_test, class_indices_test, classes) = utility.loadEvaluation(header.evaluate_model_dir)
+
+    logger.log_info("Evaluating model in \"" + header.evaluate_model_dir + "\".")
+
+    mean_average_precision = evaluate.evaluateBaseline(outputs_test, class_indices_test, classes, statistics_evaluate)
+
+    logger.log_info("Mean average precision: " + str(mean_average_precision.item()) + ".")
+
+    if not header.baseline_dry_run:
+        utility.saveEvaluation(header.evaluate_model_dir, statistics_evaluate)
 
     return
 

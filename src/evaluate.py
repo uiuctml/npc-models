@@ -1,27 +1,9 @@
-#!/usr/bin/env python3
 
 import header
-import logger
-import os
-import sys
 import torch
 import torchmetrics.classification
-import utility
 
-def main():
-    if len(sys.argv) > 1 and os.path.isdir(sys.argv[1]):
-        header.evaluate_model_dir = sys.argv[1]
-
-    if not os.path.isdir(header.evaluate_model_dir):
-        logger.log_error("Invalid model directory \"" + header.evaluate_model_dir + "\".")
-        return
-
-    logger.log_info("Evaluating model in \"" + header.evaluate_model_dir + "\".")
-
-    statistics = {}
-
-    (outputs_test, class_indices_test, classes) = utility.loadEvaluation(header.evaluate_model_dir)
-
+def evaluateBaseline(outputs, class_indices, classes, statistics):
     class_indices_test_excluded_removed = []
     class_indices_test_flatten = []
     class_indices_test_name = []
@@ -30,10 +12,10 @@ def main():
     outputs_test_excluded_removed = []
     outputs_test_flatten = []
 
-    for output in outputs_test:
+    for output in outputs:
         outputs_test_flatten += output
 
-    for class_index in class_indices_test:
+    for class_index in class_indices:
         class_indices_test_flatten += class_index
 
     for batch_index in range(0, len(outputs_test_flatten)):
@@ -56,23 +38,16 @@ def main():
     for class_name in class_indices_test_name:
         class_indices_test_reindexed.append(classes_excluded_removed.index(class_name))
 
-    outputs_test = torch.tensor(outputs_test_excluded_removed)
-    class_indices_test = torch.tensor(class_indices_test_reindexed)
+    outputs = torch.tensor(outputs_test_excluded_removed)
+    class_indices = torch.tensor(class_indices_test_reindexed)
 
     metric_average_precision = torchmetrics.classification.MulticlassAveragePrecision(num_classes = len(classes_excluded_removed), average = None, thresholds = None)
     metric_mean_average_precision = torchmetrics.classification.MulticlassAveragePrecision(num_classes = len(classes_excluded_removed), average = "macro", thresholds = None)
 
-    average_precision = metric_average_precision(outputs_test, class_indices_test)
-    mean_average_precision = metric_mean_average_precision(outputs_test, class_indices_test)
+    average_precision = metric_average_precision(outputs, class_indices)
+    mean_average_precision = metric_mean_average_precision(outputs, class_indices)
 
     for class_index in range(0, len(classes_excluded_removed)):
         statistics[classes_excluded_removed[class_index]] = average_precision[class_index].item()
 
-    logger.log_info("Mean average precision: " + str(mean_average_precision.item()) + ".")
-
-    utility.saveEvaluation(header.evaluate_model_dir, statistics)
-
-    return
-
-if __name__ == "__main__":
-    main()
+    return mean_average_precision
