@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import evaluate
 import dataset
 import header
 import logger
@@ -30,6 +31,7 @@ def main():
     device = torch.device("cuda")
     epoch = None
     progress_bar = None
+    statistics_evaluate = {}
     statistics_test = {}
     statistics_train = None
 
@@ -154,6 +156,18 @@ def main():
                 logger.log_info("Testing accuracy for \"" + dataset_entry["name"] + "\": " + str(accuracy_test) + ".")
 
         utility.saveTesting(header.decomposed_model_dir, statistics_epoch_test[1], statistics_epoch_test[2], dataset_generated.classes, statistics_test)
+
+    (outputs_test, class_indices_test, classes) = utility.loadEvaluation(header.decomposed_model_dir)
+
+    logger.log_info("Evaluating model in \"" + header.decomposed_model_dir + "\".")
+
+    mean_average_precisions = evaluate.evaluateDecomposed(dataset_generated, outputs_test, class_indices_test, classes, statistics_evaluate)
+
+    for dataset_name in mean_average_precisions.keys():
+        logger.log_info("Mean average precision for \"" + dataset_name + "\": " + str(mean_average_precisions[dataset_name].item()) + ".")
+
+    if not header.decomposed_dry_run:
+        utility.saveEvaluation(header.decomposed_model_dir, statistics_evaluate)
 
     return
 
