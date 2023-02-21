@@ -34,10 +34,8 @@ def main():
     statistics_test = {}
     statistics_train = None
 
-    dataset_test = torchvision.datasets.ImageFolder(root = header.dataset_dir_test, transform = dataset_transforms)
-    dataset_train_validation = torchvision.datasets.ImageFolder(root = header.dataset_dir_train_validation, transform = dataset_transforms)
-
-    model = network.BaselineNetworkA(dataset_train_validation)
+    dataset = torchvision.datasets.ImageFolder(root = header.dataset_dir, transform = dataset_transforms)
+    model = network.BaselineNetworkA(dataset)
 
     if header.baseline_load_best:
         utility.loadTrainingBest(header.baseline_model_dir_best, model)
@@ -62,15 +60,13 @@ def main():
     if criterion == None:
         criterion = torch.nn.CrossEntropyLoss()
 
-    if data_loader_train == None or data_loader_validation == None:
-        dataset_split_lengths = [header.baseline_dataset_split_percentage_train, header.baseline_dataset_split_percentage_validation]
-        (dataset_subset_train, dataset_subset_validation) = torch.utils.data.random_split(dataset_train_validation, dataset_split_lengths)
+    if data_loader_train == None or data_loader_validation == None or data_loader_test == None:
+        dataset_split_lengths = [header.baseline_dataset_split_percentage_test, header.baseline_dataset_split_percentage_train, header.baseline_dataset_split_percentage_validation]
+        (dataset_subset_test, dataset_subset_train, dataset_subset_validation) = torch.utils.data.random_split(dataset, dataset_split_lengths)
 
-        data_loader_train = torch.utils.data.DataLoader(dataset_subset_train, batch_size = header.baseline_data_loader_batch_size, shuffle = header.baseline_data_loader_shuffle, num_workers = header.baseline_data_loader_worker_count, pin_memory = True)
-        data_loader_validation = torch.utils.data.DataLoader(dataset_subset_validation, batch_size = header.baseline_data_loader_batch_size, shuffle = header.baseline_data_loader_shuffle, num_workers = header.baseline_data_loader_worker_count, pin_memory = True)
-
-    if data_loader_test == None:
-        data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.baseline_data_loader_batch_size, shuffle = header.baseline_data_loader_shuffle, num_workers = header.baseline_data_loader_worker_count, pin_memory = True)
+        data_loader_test = torch.utils.data.DataLoader(dataset_subset_test, batch_size = header.decomposed_data_loader_batch_size, shuffle = header.decomposed_data_loader_shuffle, num_workers = header.decomposed_data_loader_worker_count, pin_memory = True)
+        data_loader_train = torch.utils.data.DataLoader(dataset_subset_train, batch_size = header.decomposed_data_loader_batch_size, shuffle = header.decomposed_data_loader_shuffle, num_workers = header.decomposed_data_loader_worker_count, pin_memory = True)
+        data_loader_validation = torch.utils.data.DataLoader(dataset_subset_validation, batch_size = header.decomposed_data_loader_batch_size, shuffle = header.decomposed_data_loader_shuffle, num_workers = header.decomposed_data_loader_worker_count, pin_memory = True)
 
     if epoch == None:
         epoch = 1
@@ -82,9 +78,9 @@ def main():
         model_input_size = (header.baseline_model_input_channels, header.baseline_model_input_height, header.baseline_model_input_width)
         torchsummary.summary(model, input_size = model_input_size)
 
-    utility.viewDatasetBaseline(dataset_train_validation, data_loader_train, header.baseline_data_loader_batch_size)
-    utility.viewDatasetBaseline(dataset_train_validation, data_loader_validation, header.baseline_data_loader_batch_size)
-    utility.viewDatasetBaseline(dataset_test, data_loader_test, header.baseline_data_loader_batch_size)
+    utility.viewDatasetBaseline(dataset, data_loader_train, header.baseline_data_loader_batch_size)
+    utility.viewDatasetBaseline(dataset, data_loader_validation, header.baseline_data_loader_batch_size)
+    utility.viewDatasetBaseline(dataset, data_loader_test, header.baseline_data_loader_batch_size)
 
     if epoch <= header.baseline_epochs:
         progress_bar = tqdm.tqdm(total = header.baseline_epochs, position = 0)
@@ -148,7 +144,7 @@ def main():
     logger.log_info("Testing accuracy: " + str(accuracy_test) + ".")
 
     if not header.baseline_dry_run:
-        utility.saveTesting(header.baseline_model_dir, statistics_epoch_test[1], statistics_epoch_test[2], dataset_test.classes, statistics_test)
+        utility.saveTesting(header.baseline_model_dir, statistics_epoch_test[1], statistics_epoch_test[2], dataset.classes, statistics_test)
 
     (outputs_test, class_indices_test, classes) = utility.loadEvaluation(header.baseline_model_dir)
 
