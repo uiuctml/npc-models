@@ -1,5 +1,9 @@
 import multiprocessing
 import type
+import utility
+
+run_name_baseline = utility.generateRunName("baseline")
+run_name_decomposed = utility.generateRunName("decomposed")
 
 config_baseline = {
     "data_loader_batch_size": 32,
@@ -25,8 +29,8 @@ config_baseline = {
     "load_best": False,
     "log_level": type.LogLevel.info,
     "l2_lambda": 1e-3,
-    "model_dir": "../model.baseline",
-    "model_dir_best": "../model.baseline",
+    "model_dir": "../model." + run_name_baseline + ".d",
+    "model_dir_best": "../model." + run_name_baseline + ".d",
     "model_file_name_accuracy_validation": "accuracy_validation.pth",
     "model_file_name_class_indices_test": "class_indices_test.pth",
     "model_file_name_classes": "classes.pth",
@@ -80,8 +84,8 @@ config_decomposed = {
     "load_best": False,
     "log_level": type.LogLevel.info,
     "l2_lambda": 1e-3,
-    "model_dir": "../model.decomposed",
-    "model_dir_best": "../model.decomposed",
+    "model_dir": "../model." + run_name_decomposed + ".d",
+    "model_dir_best": "../model." + run_name_decomposed + ".d",
     "model_file_name_accuracy_validation": "accuracy_validation.pth",
     "model_file_name_class_indices_test": "class_indices_test.pth",
     "model_file_name_classes": "classes.pth",

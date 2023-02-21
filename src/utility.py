@@ -1,4 +1,5 @@
 
+import datetime
 import header
 import json
 import logger
@@ -6,6 +7,7 @@ import math
 import matplotlib.pyplot
 import numpy
 import os
+import socket
 import textwrap
 import torch
 import type
@@ -17,6 +19,19 @@ def computeL2Norm(parameters):
         parameters_list.append(parameter.view(-1))
 
     return torch.square(torch.cat(parameters_list)).sum().item()
+
+def generateRunName(model_name):
+    date_time_list = list(datetime.datetime.now().timetuple())[:-4]
+    run_name = model_name
+
+    for entry in date_time_list:
+        run_name += "."
+        run_name += str(entry)
+
+    run_name += "."
+    run_name += socket.gethostname()
+
+    return run_name
 
 def loadEvaluation(model_dir):
     classes = None
