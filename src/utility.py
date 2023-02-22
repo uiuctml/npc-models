@@ -49,18 +49,23 @@ def wAndBGenerateRunName(model_name):
 
     return run_name
 
-def loadCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer):
+def loadCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer):
     if wandb.run.resumed:
         if not os.path.isdir(dir_checkpoints):
             os.makedirs(dir_checkpoints, exist_ok = True)
 
-        wandb.restore(file_name_checkpoint, root = dir_checkpoints)
+        try:
+            wandb.restore(file_name_checkpoint, root = dir_checkpoints)
+        except:
+            logger.log_warn("Failed to restore checkpoint \"" + file_name_checkpoint + "\" from Weights & Biases.")
 
         file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
 
         if os.path.isfile(file_path_checkpoint):
             checkpoint = torch.load(file_path_checkpoint)
             accuracy_validation_best = checkpoint["accuracy_validation_best"]
+            batch_step_train = checkpoint["batch_step_train"]
+            batch_step_validate = checkpoint["batch_step_validate"]
             criterion = checkpoint["criterion"]
             data_loader_test = checkpoint["data_loader_test"]
             data_loader_train = checkpoint["data_loader_train"]
@@ -72,7 +77,7 @@ def loadCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_be
 
             logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
 
-    return (accuracy_validation_best, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch)
+    return (accuracy_validation_best, batch_step_train, batch_step_validate, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch)
 
 def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
     if not os.path.isdir(dir_checkpoints):
@@ -90,12 +95,14 @@ def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
 
     return
 
-def saveCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer):
+def saveCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer):
     if not os.path.isdir(dir_checkpoints):
         os.makedirs(dir_checkpoints, exist_ok = True)
 
     checkpoint = {
         "accuracy_validation_best": accuracy_validation_best,
+        "batch_step_train": batch_step_train,
+        "batch_step_validate": batch_step_validate,
         "criterion": criterion,
         "data_loader_test": data_loader_test,
         "data_loader_train": data_loader_train,
@@ -108,7 +115,11 @@ def saveCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_be
     file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
 
     torch.save(checkpoint, file_path_checkpoint)
-    wandb.save(file_path_checkpoint, base_path = dir_checkpoints)
+
+    try:
+        wandb.save(file_path_checkpoint, base_path = dir_checkpoints)
+    except:
+        logger.log_warn("Failed to saved checkpoint \"" + file_name_checkpoint + "\" to Weights & Biases.")
 
     logger.log_info("Saved checkpoint \"" + file_name_checkpoint + "\".")
 
