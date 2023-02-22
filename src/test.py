@@ -1,17 +1,19 @@
+import logger
 import torch
 import tqdm
+import utility
+import wandb
 
-def testBaseline(model, data_loader, device, statistics):
-    accuracies = []
-    class_indices = []
-    running_corrects = 0
-    outputs = []
-    progress_bar_accuracy = tqdm.tqdm(total = 1, position = 1, leave = False)
-    progress_bar_progress = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
-    progress_bar_accuracy.set_description_str("[INFO]: Testing accuracy")
-    progress_bar_progress.set_description_str("[INFO]: Testing progress")
+def testBaseline(model, dataset, data_loader, device):
+    utility.loadCheckpointBest(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint_best, model)
+
+    accuracy_epoch = 0
+    ground_truths_epoch = []
+    predictions_epoch = []
+    progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
 
     model.eval()
+    progress_bar.set_description_str("[INFO]: Testing progress")
 
     with torch.no_grad():
         for (i, (input, labels)) in enumerate(data_loader):
@@ -23,28 +25,33 @@ def testBaseline(model, data_loader, device, statistics):
                 (_, predictions) = torch.max(output, 1)
 
             corrects = torch.sum(predictions == labels.data).item()
-            accuracy_value = corrects / input.size(0)
 
-            running_corrects += corrects
+            accuracy_batch = corrects / input.size(0)
+            accuracy_epoch += corrects
 
-            progress_bar_accuracy.n = round(accuracy_value, 4)
-            progress_bar_progress.n = i + 1
+            progress_bar.n = i + 1
+            progress_bar.refresh()
 
-            progress_bar_accuracy.refresh()
-            progress_bar_progress.refresh()
+            wandb.log({"testing/batch/accuracy": accuracy_batch})
 
-            accuracies.append(accuracy_value)
-            class_indices.append(labels.data.tolist())
-            outputs.append(output.tolist())
+            ground_truths_epoch += labels.data.tolist()
+            predictions_epoch += output.tolist()
 
-    statistics["testing_accuracies"] = accuracies
+    accuracy_epoch /= len(data_loader.dataset)
 
-    progress_bar_accuracy.close()
-    progress_bar_progress.close()
+    progress_bar.close()
 
-    return (running_corrects, outputs, class_indices)
+    pr_curve = wandb.plot.pr_curve(ground_truths_epoch, predictions_epoch, labels = dataset.classes, title = "Precision vs. Recall")
+    roc_curve = wandb.plot.roc_curve(ground_truths_epoch, predictions_epoch, labels = dataset.classes, title = "Receiver Operating Characteristic")
 
-def testDecomposed(model, dataset, data_loader, device, statistics):
+    logger.log_info("Testing accuracy: " + str(accuracy_epoch) + ".")
+    wandb.log({"testing/epoch/accuracy": accuracy_epoch})
+    wandb.log({"testing/epoch/pr_curve": pr_curve})
+    wandb.log({"testing/epoch/roc_curve": roc_curve})
+
+    return
+
+def testDecomposed(model, dataset, data_loader, device):
     accuracies = []
     class_indices_list = []
     running_corrects_list = []

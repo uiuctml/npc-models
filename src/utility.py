@@ -1,6 +1,5 @@
 
 import datetime
-import json
 import logger
 import os
 import socket
@@ -28,171 +27,67 @@ def generateRunName(model_name):
 
     return run_name
 
-def loadEvaluation(model_dir):
-    classes = None
-    class_indices_test = None
-    outputs_test = None
+def loadCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer):
+    if wandb.run.resumed:
+        if not os.path.isdir(dir_checkpoints):
+            os.makedirs(dir_checkpoints, exist_ok = True)
 
-    if os.path.isdir(model_dir):
-        model_file_path_class_indices_test = os.path.join(model_dir, wandb.config.model_file_name_class_indices_test)
-        model_file_path_classes = os.path.join(model_dir, wandb.config.model_file_name_classes)
-        model_file_path_outputs_test = os.path.join(model_dir, wandb.config.model_file_name_outputs_test)
+        wandb.restore(file_name_checkpoint, root = dir_checkpoints)
 
-        if os.path.isfile(model_file_path_class_indices_test):
-            class_indices_test = torch.load(model_file_path_class_indices_test)
-            logger.log_info("Loaded testing class indices from \"" + model_dir + "\".")
+        file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
 
-        if os.path.isfile(model_file_path_classes):
-            classes = torch.load(model_file_path_classes)
-            logger.log_info("Loaded classes from \"" + model_dir + "\".")
+        if os.path.isfile(file_path_checkpoint):
+            checkpoint = torch.load(file_path_checkpoint)
+            accuracy_validation_best = checkpoint["accuracy_validation_best"]
+            criterion = checkpoint["criterion"]
+            data_loader_test = checkpoint["data_loader_test"]
+            data_loader_train = checkpoint["data_loader_train"]
+            data_loader_validation = checkpoint["data_loader_validation"]
+            epoch = checkpoint["epoch"]
+            learning_rate_scheduler.load_state_dict(checkpoint["learning_rate_scheduler_state_dict"])
+            model.load_state_dict(checkpoint["model_state_dict"])
+            optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
 
-        if os.path.isfile(model_file_path_outputs_test):
-            outputs_test = torch.load(model_file_path_outputs_test)
-            logger.log_info("Loaded testing outputs from \"" + model_dir + "\".")
+            logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
 
-    return (outputs_test, class_indices_test, classes)
+    return (accuracy_validation_best, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch)
 
-def loadTesting(model_dir, model):
-    if os.path.isdir(model_dir):
-        model_file_path_model_best = os.path.join(model_dir, wandb.config.model_file_name_model_best)
+def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
+    if not os.path.isdir(dir_checkpoints):
+        os.makedirs(dir_checkpoints, exist_ok = True)
 
-        if os.path.isfile(model_file_path_model_best) and model != None:
-            model.load_state_dict(torch.load(model_file_path_model_best))
-            logger.log_info("Loaded best training model state from \"" + model_dir + "\".")
+    wandb.restore(file_name_checkpoint, root = dir_checkpoints)
 
-    return
+    file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
 
-def loadTraining(model_dir, model, optimizer, learning_rate_scheduler):
-    accuracy_validation = None
-    criterion = None
-    data_loader_test = None
-    data_loader_train = None
-    data_loader_validation = None
-    epoch = None
-    statistics_train = None
+    if os.path.isfile(file_path_checkpoint):
+        checkpoint = torch.load(file_path_checkpoint)
+        model.load_state_dict(checkpoint["model_state_dict"])
 
-    if os.path.isdir(model_dir):
-        model_file_path_accuracy_validation = os.path.join(model_dir, wandb.config.model_file_name_accuracy_validation)
-        model_file_path_criterion = os.path.join(model_dir, wandb.config.model_file_name_criterion)
-        model_file_path_data_loader_test = os.path.join(model_dir, wandb.config.model_file_name_data_loader_test)
-        model_file_path_data_loader_train = os.path.join(model_dir, wandb.config.model_file_name_data_loader_train)
-        model_file_path_data_loader_validation = os.path.join(model_dir, wandb.config.model_file_name_data_loader_validation)
-        model_file_path_epoch = os.path.join(model_dir, wandb.config.model_file_name_epoch)
-        model_file_path_learning_rate_scheduler = os.path.join(model_dir, wandb.config.model_file_name_learning_rate_scheduler)
-        model_file_path_model = os.path.join(model_dir, wandb.config.model_file_name_model)
-        model_file_path_optimizer = os.path.join(model_dir, wandb.config.model_file_name_optimizer)
-        model_file_path_statistics_train = os.path.join(model_dir, wandb.config.model_file_name_statistics_train)
-
-        if os.path.isfile(model_file_path_model) and model != None:
-            model.load_state_dict(torch.load(model_file_path_model))
-            logger.log_info("Loaded training model state from \"" + model_dir + "\".")
-
-        if os.path.isfile(model_file_path_data_loader_test):
-            data_loader_test = torch.load(model_file_path_data_loader_test)
-            logger.log_info("Loaded training test data loader from \"" + model_dir + "\".")
-
-        if os.path.isfile(model_file_path_data_loader_train):
-            data_loader_train = torch.load(model_file_path_data_loader_train)
-            logger.log_info("Loaded training train data loader from \"" + model_dir + "\".")
-
-        if os.path.isfile(model_file_path_data_loader_validation):
-            data_loader_validation = torch.load(model_file_path_data_loader_validation)
-            logger.log_info("Loaded training validation data loader from \"" + model_dir + "\".")
-
-        if os.path.isfile(model_file_path_epoch):
-            epoch = torch.load(model_file_path_epoch)
-            logger.log_info("Loaded training epoch from \"" + model_dir + "\".")
-
-        if os.path.isfile(model_file_path_criterion):
-            criterion = torch.load(model_file_path_criterion)
-            logger.log_info("Loaded training criterion from \"" + model_dir + "\".")
-
-        if os.path.isfile(model_file_path_optimizer) and optimizer != None:
-            optimizer.load_state_dict(torch.load(model_file_path_optimizer))
-            logger.log_info("Loaded training optimizer state from \"" + model_dir + "\".")
-
-        if os.path.isfile(model_file_path_learning_rate_scheduler) and learning_rate_scheduler != None:
-            learning_rate_scheduler.load_state_dict(torch.load(model_file_path_learning_rate_scheduler))
-            logger.log_info("Loaded training learning rate scheduler state from \"" + model_dir + "\".")
-
-        if os.path.isfile(model_file_path_accuracy_validation):
-            accuracy_validation = torch.load(model_file_path_accuracy_validation)
-            logger.log_info("Loaded training highest accuracy validation from \"" + model_dir + "\".")
-
-        if os.path.isfile(model_file_path_statistics_train):
-            with open(model_file_path_statistics_train, "r") as file_statistics_train:
-                statistics_train = json.load(file_statistics_train)
-                logger.log_info("Loaded training statistics from \"" + model_dir + "\".")
-
-    return (data_loader_test, data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation, statistics_train)
-
-def loadTrainingBest(model_dir, model):
-    if os.path.isdir(model_dir):
-        model_file_path_model_best = os.path.join(model_dir, wandb.config.model_file_name_model_best)
-
-        if os.path.isfile(model_file_path_model_best) and model != None:
-            model_state_dict = torch.load(model_file_path_model_best)
-
-            del model_state_dict["module.fc.1.weight"]
-            del model_state_dict["module.fc.1.bias"]
-
-            model.load_state_dict(model_state_dict, strict = False)
-            logger.log_info("Loaded best training model state from \"" + model_dir + "\".")
+        logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
 
     return
 
-def saveTesting(model_dir, outputs, class_indices, classes, statistics):
-    if not os.path.isdir(model_dir):
-        os.makedirs(model_dir, exist_ok = True)
+def saveCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer):
+    if not os.path.isdir(dir_checkpoints):
+        os.makedirs(dir_checkpoints, exist_ok = True)
 
-    model_file_path_class_indices_test = os.path.join(model_dir, wandb.config.model_file_name_class_indices_test)
-    model_file_path_classes = os.path.join(model_dir, wandb.config.model_file_name_classes)
-    model_file_path_outputs_test = os.path.join(model_dir, wandb.config.model_file_name_outputs_test)
-    model_file_path_statistics_test = os.path.join(model_dir, wandb.config.model_file_name_statistics_test)
+    checkpoint = {
+        "accuracy_validation_best": accuracy_validation_best,
+        "criterion": criterion,
+        "data_loader_test": data_loader_test,
+        "data_loader_train": data_loader_train,
+        "data_loader_validation": data_loader_validation,
+        "epoch": epoch,
+        "learning_rate_scheduler_state_dict": learning_rate_scheduler.state_dict(),
+        "model_state_dict": model.state_dict(),
+        "optimizer_state_dict": optimizer.state_dict()
+    }
+    file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
 
-    torch.save(class_indices, model_file_path_class_indices_test)
-    torch.save(classes, model_file_path_classes)
-    torch.save(outputs, model_file_path_outputs_test)
+    torch.save(checkpoint, file_path_checkpoint)
+    wandb.save(file_path_checkpoint, base_path = dir_checkpoints)
 
-    with open(model_file_path_statistics_test, "w") as file_statistics_test:
-        json.dump(statistics, file_statistics_test, indent = 4)
-
-    logger.log_info("Saved testing data and statistics to \"" + model_dir + "\".")
-
-    return
-
-def saveTraining(model_dir, model, data_loader_test, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics, best):
-    if not os.path.isdir(model_dir):
-        os.makedirs(model_dir, exist_ok = True)
-
-    model_file_path_accuracy_validation = os.path.join(model_dir, wandb.config.model_file_name_accuracy_validation)
-    model_file_path_criterion = os.path.join(model_dir, wandb.config.model_file_name_criterion)
-    model_file_path_data_loader_test = os.path.join(model_dir, wandb.config.model_file_name_data_loader_test)
-    model_file_path_data_loader_train = os.path.join(model_dir, wandb.config.model_file_name_data_loader_train)
-    model_file_path_data_loader_validation = os.path.join(model_dir, wandb.config.model_file_name_data_loader_validation)
-    model_file_path_epoch = os.path.join(model_dir, wandb.config.model_file_name_epoch)
-    model_file_path_learning_rate_scheduler = os.path.join(model_dir, wandb.config.model_file_name_learning_rate_scheduler)
-    model_file_path_model = os.path.join(model_dir, wandb.config.model_file_name_model)
-    model_file_path_model_best = os.path.join(model_dir, wandb.config.model_file_name_model_best)
-    model_file_path_optimizer = os.path.join(model_dir, wandb.config.model_file_name_optimizer)
-    model_file_path_statistics_train = os.path.join(model_dir, wandb.config.model_file_name_statistics_train)
-
-    if best:
-        torch.save(model.state_dict(), model_file_path_model_best)
-
-    torch.save(model.state_dict(), model_file_path_model)
-    torch.save(data_loader_test, model_file_path_data_loader_test)
-    torch.save(data_loader_train, model_file_path_data_loader_train)
-    torch.save(data_loader_validation, model_file_path_data_loader_validation)
-    torch.save(epoch, model_file_path_epoch)
-    torch.save(criterion, model_file_path_criterion)
-    torch.save(optimizer.state_dict(), model_file_path_optimizer)
-    torch.save(learning_rate_scheduler.state_dict(), model_file_path_learning_rate_scheduler)
-    torch.save(accuracy_validation, model_file_path_accuracy_validation)
-
-    with open(model_file_path_statistics_train, "w") as file_statistics_train:
-        json.dump(statistics, file_statistics_train, indent = 4)
-
-    logger.log_info("Saved training states and statistics to \"" + model_dir + "\".")
+    logger.log_info("Saved checkpoint \"" + file_name_checkpoint + "\".")
 
     return

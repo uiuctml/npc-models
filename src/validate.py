@@ -1,20 +1,15 @@
 import math
 import torch
 import tqdm
+import wandb
 
-def validateBaseline(model, data_loader, epoch, criterion, device, statistics):
-    accuracies = []
-    losses = []
-    running_loss = 0
-    running_corrects = 0
-    progress_bar_accuracy = tqdm.tqdm(total = 1, position = 3, leave = False)
-    progress_bar_loss = tqdm.tqdm(total = 10, position = 2, leave = False)
-    progress_bar_progress = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
-    progress_bar_accuracy.set_description_str("[INFO]: Validation accuracy")
-    progress_bar_loss.set_description_str("[INFO]: Validation loss")
-    progress_bar_progress.set_description_str("[INFO]: Validation progress")
+def validateBaseline(model, data_loader, criterion, device):
+    accuracy_epoch = 0
+    loss_epoch = 0
+    progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
 
     model.eval()
+    progress_bar.set_description_str("[INFO]: Validation progress")
 
     for (i, (input, labels)) in enumerate(data_loader):
         input = input.to(device, non_blocking = True)
@@ -26,33 +21,30 @@ def validateBaseline(model, data_loader, epoch, criterion, device, statistics):
             loss = criterion(output, labels)
 
         corrects = torch.sum(predictions == labels.data).item()
-        accuracy_value = corrects / input.size(0)
-        loss_value = loss.item()
 
-        running_loss += loss_value
-        running_corrects += corrects
+        accuracy_batch = corrects / input.size(0)
+        loss_batch = loss.item()
 
-        progress_bar_accuracy.n = round(accuracy_value, 4)
-        progress_bar_loss.n = round(loss_value, 4)
-        progress_bar_progress.n = i + 1
+        accuracy_epoch += corrects
+        loss_epoch += loss_batch
 
-        progress_bar_accuracy.refresh()
-        progress_bar_loss.refresh()
-        progress_bar_progress.refresh()
+        progress_bar.n = i + 1
+        progress_bar.refresh()
 
-        accuracies.append(accuracy_value)
-        losses.append(loss_value)
+        wandb.log({"validation/batch/accuracy": accuracy_batch})
+        wandb.log({"validation/batch/loss": loss_batch})
 
-    progress_bar_accuracy.close()
-    progress_bar_loss.close()
-    progress_bar_progress.close()
+    accuracy_epoch /= len(data_loader.dataset)
+    loss_epoch /= len(data_loader)
 
-    statistics["epoch_" + str(epoch)]["validation_accuracies"] = accuracies
-    statistics["epoch_" + str(epoch)]["validation_losses"] = losses
+    progress_bar.close()
 
-    return (running_loss, running_corrects)
+    wandb.log({"validation/epoch/accuracy": accuracy_epoch})
+    wandb.log({"validation/epoch/loss": loss_epoch})
 
-def validateDecomposed(model, dataset, data_loader, epoch, criterions, device, statistics):
+    return (accuracy_epoch, loss_epoch)
+
+def validateDecomposed(model, dataset, data_loader, epoch, criterions, device):
     accuracies = []
     losses = []
     running_loss = 0

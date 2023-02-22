@@ -2,6 +2,6 @@
 *.pth
 .idea/
 .vscode/
-model*/
+checkpoints/
 wandb/
 __pycache__/
