@@ -1,9 +1,9 @@
-import header
 import logger
 import math
 import torch
 import tqdm
 import utility
+import wandb
 
 def trainBaseline(model, data_loader, epoch, criterion, optimizer, device, statistics):
     accuracies = []
@@ -35,9 +35,9 @@ def trainBaseline(model, data_loader, epoch, criterion, optimizer, device, stati
             logger.log_trace("output.shape:", output.shape)
             logger.log_trace("labels.shape:", labels.shape)
 
-            if header.baseline_use_l2_loss:
+            if wandb.config.use_l2_loss:
                 l2_norm = utility.computeL2Norm(model.parameters())
-                loss_l2 = header.baseline_l2_lambda * l2_norm
+                loss_l2 = wandb.config.l2_lambda * l2_norm
                 loss += loss_l2
 
             loss.backward()
@@ -121,9 +121,9 @@ def trainDecomposed(model, dataset, data_loader, epoch, criterions, optimizer, d
                 (_, predictions) = torch.max(outputs[i], 1)
                 loss = criterions[i](outputs[i], labels[:, i])
 
-                if header.decomposed_use_l2_loss:
+                if wandb.config.use_l2_loss:
                     l2_norm = utility.computeL2Norm(model.parameters())
-                    loss_l2 = header.decomposed_l2_lambda * l2_norm
+                    loss_l2 = wandb.config.l2_lambda * l2_norm
                     loss += loss_l2
 
                 loss_list.append(loss)

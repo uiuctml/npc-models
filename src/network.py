@@ -1,11 +1,11 @@
-import header
 import torch.nn
 import torchvision
+import wandb
 
 class BaselineNetworkA(torch.nn.Module):
     def __init__(self, dataset):
         super().__init__()
-        self.net = torchvision.models.resnet152(weights = header.baseline_model_pretrained_weights)
+        self.net = torchvision.models.resnet152(weights = wandb.config.model_pretrained_weights)
         net_fc_in_features = self.net.fc.in_features
         self.net.fc = torch.nn.Linear(net_fc_in_features, len(dataset.classes))
 
@@ -17,9 +17,9 @@ class BaselineNetworkA(torch.nn.Module):
 class BaselineNetworkB(torch.nn.Module):
     def __init__(self, dataset):
         super().__init__()
-        self.net = torchvision.models.resnet152(weights = header.baseline_model_pretrained_weights)
+        self.net = torchvision.models.resnet152(weights = wandb.config.model_pretrained_weights)
         net_fc_in_features = self.net.fc.in_features
-        self.net.fc = torch.nn.Sequential(torch.nn.Dropout(p = header.train_dropout_probability), torch.nn.Linear(net_fc_in_features, len(dataset.classes)))
+        self.net.fc = torch.nn.Sequential(torch.nn.Dropout(p = wandb.config.train_dropout_probability), torch.nn.Linear(net_fc_in_features, len(dataset.classes)))
 
         return
 
@@ -29,7 +29,7 @@ class BaselineNetworkB(torch.nn.Module):
 class DecomposedNetworkA(torch.nn.Module):
     def __init__(self, dataset):
         super().__init__()
-        self.net = torchvision.models.resnet152(weights = header.decomposed_model_pretrained_weights)
+        self.net = torchvision.models.resnet152(weights = wandb.config.model_pretrained_weights)
         net_fc_in_features = self.net.fc.in_features
         self.net.fc = torch.nn.Identity()
 

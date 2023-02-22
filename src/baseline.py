@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
+import config
 import evaluate
-import header
 import logger
 import network
 import torch
@@ -15,15 +15,19 @@ import train
 import type
 import utility
 import validate
+import wandb
 
 def main():
+    wandb.login()
+    wandb.init(project = config.project_name, name = config.run_name_baseline, config = config.config_baseline)
+
     accuracy_validation = None
     criterion = None
     data_loader_test = None
     data_loader_train = None
     data_loader_validation = None
     dataset_transforms = torchvision.transforms.Compose([
-        torchvision.transforms.Resize((header.baseline_model_input_height, header.baseline_model_input_width)),
+        torchvision.transforms.Resize((wandb.config.model_input_height, wandb.config.model_input_width)),
         torchvision.transforms.ToTensor(),
         torchvision.transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
@@ -34,24 +38,24 @@ def main():
     statistics_test = {}
     statistics_train = None
 
-    dataset = torchvision.datasets.ImageFolder(root = header.dataset_dir, transform = dataset_transforms)
+    dataset = torchvision.datasets.ImageFolder(root = wandb.config.dataset_dir, transform = dataset_transforms)
     model = network.BaselineNetworkA(dataset)
 
-    if header.baseline_load_best:
-        utility.loadTrainingBest(header.baseline_model_dir_best, model)
+    if wandb.config.load_best:
+        utility.loadTrainingBest(wandb.config.model_dir_best, model)
 
-    if not header.baseline_fine_tuning:
+    if not wandb.config.fine_tuning:
         for parameter in model.parameters():
             parameter.requires_grad = False
 
     model = torch.nn.DataParallel(model)
     model = model.to(device)
 
-    optimizer = torch.optim.SGD(model.parameters(), lr = header.baseline_optimizer_learning_rate, momentum = header.baseline_optimizer_momentum, weight_decay = header.baseline_optimizer_weight_decay)
-    learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.baseline_learning_rate_scheduler_mode, header.baseline_learning_rate_scheduler_factor, header.baseline_learning_rate_scheduler_patient, header.baseline_learning_rate_scheduler_threshold, header.baseline_learning_rate_scheduler_threshold_mode, header.baseline_learning_rate_scheduler_cooldown, header.baseline_learning_rate_scheduler_min_learning_rate, header.baseline_learning_rate_scheduler_min_learning_rate_decay, header.baseline_learning_rate_scheduler_verbose)
+    optimizer = torch.optim.SGD(model.parameters(), lr = wandb.config.optimizer_learning_rate, momentum = wandb.config.optimizer_momentum, weight_decay = wandb.config.optimizer_weight_decay)
+    learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, wandb.config.learning_rate_scheduler_mode, wandb.config.learning_rate_scheduler_factor, wandb.config.learning_rate_scheduler_patient, wandb.config.learning_rate_scheduler_threshold, wandb.config.learning_rate_scheduler_threshold_mode, wandb.config.learning_rate_scheduler_cooldown, wandb.config.learning_rate_scheduler_min_learning_rate, wandb.config.learning_rate_scheduler_min_learning_rate_decay, wandb.config.learning_rate_scheduler_verbose)
 
-    if not header.baseline_dry_run:
-        (data_loader_test, data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation, statistics_train) = utility.loadTraining(header.baseline_model_dir, model, optimizer, learning_rate_scheduler)
+    if not wandb.config.dry_run:
+        (data_loader_test, data_loader_train, data_loader_validation, epoch, criterion, accuracy_validation, statistics_train) = utility.loadTraining(wandb.config.model_dir, model, optimizer, learning_rate_scheduler)
         logger.log_info_raw("\n")
 
     if accuracy_validation == None:
@@ -61,12 +65,12 @@ def main():
         criterion = torch.nn.CrossEntropyLoss()
 
     if data_loader_train == None or data_loader_validation == None or data_loader_test == None:
-        dataset_split_lengths = [header.baseline_dataset_split_percentage_test, header.baseline_dataset_split_percentage_train, header.baseline_dataset_split_percentage_validation]
+        dataset_split_lengths = [wandb.config.dataset_split_percentage_test, wandb.config.dataset_split_percentage_train, wandb.config.dataset_split_percentage_validation]
         (dataset_subset_test, dataset_subset_train, dataset_subset_validation) = torch.utils.data.random_split(dataset, dataset_split_lengths)
 
-        data_loader_test = torch.utils.data.DataLoader(dataset_subset_test, batch_size = header.decomposed_data_loader_batch_size, shuffle = header.decomposed_data_loader_shuffle, num_workers = header.decomposed_data_loader_worker_count, pin_memory = True)
-        data_loader_train = torch.utils.data.DataLoader(dataset_subset_train, batch_size = header.decomposed_data_loader_batch_size, shuffle = header.decomposed_data_loader_shuffle, num_workers = header.decomposed_data_loader_worker_count, pin_memory = True)
-        data_loader_validation = torch.utils.data.DataLoader(dataset_subset_validation, batch_size = header.decomposed_data_loader_batch_size, shuffle = header.decomposed_data_loader_shuffle, num_workers = header.decomposed_data_loader_worker_count, pin_memory = True)
+        data_loader_test = torch.utils.data.DataLoader(dataset_subset_test, batch_size = wandb.config.data_loader_batch_size, shuffle = wandb.config.data_loader_shuffle, num_workers = wandb.config.data_loader_worker_count, pin_memory = True)
+        data_loader_train = torch.utils.data.DataLoader(dataset_subset_train, batch_size = wandb.config.data_loader_batch_size, shuffle = wandb.config.data_loader_shuffle, num_workers = wandb.config.data_loader_worker_count, pin_memory = True)
+        data_loader_validation = torch.utils.data.DataLoader(dataset_subset_validation, batch_size = wandb.config.data_loader_batch_size, shuffle = wandb.config.data_loader_shuffle, num_workers = wandb.config.data_loader_worker_count, pin_memory = True)
 
     if epoch == None:
         epoch = 1
@@ -74,26 +78,22 @@ def main():
     if statistics_train == None:
         statistics_train = {}
 
-    if header.log_level >= type.LogLevel.debug:
-        model_input_size = (header.baseline_model_input_channels, header.baseline_model_input_height, header.baseline_model_input_width)
+    if config.log_level >= type.LogLevel.debug:
+        model_input_size = (wandb.config.model_input_channels, wandb.config.model_input_height, wandb.config.model_input_width)
         torchsummary.summary(model, input_size = model_input_size)
 
-    utility.viewDatasetBaseline(dataset, data_loader_train, header.baseline_data_loader_batch_size)
-    utility.viewDatasetBaseline(dataset, data_loader_validation, header.baseline_data_loader_batch_size)
-    utility.viewDatasetBaseline(dataset, data_loader_test, header.baseline_data_loader_batch_size)
-
-    if epoch <= header.baseline_epochs:
-        progress_bar = tqdm.tqdm(total = header.baseline_epochs, position = 0)
+    if epoch <= wandb.config.epochs:
+        progress_bar = tqdm.tqdm(total = wandb.config.epochs, position = 0)
         progress_bar.set_description_str("[INFO]: Epoch")
         progress_bar.n = epoch
         progress_bar.refresh()
 
-    while epoch <= header.baseline_epochs:
+    while epoch <= wandb.config.epochs:
         best = False
         statistics_epoch_train = (0, 0)
         statistics_epoch_validation = (0, 0)
 
-        if not header.baseline_dry_run:
+        if not wandb.config.dry_run:
             statistics_train["epoch_" + str(epoch)] = {}
             statistics_epoch_train = train.trainBaseline(model, data_loader_train, epoch, criterion, optimizer, device, statistics_train)
             statistics_epoch_validation = validate.validateBaseline(model, data_loader_validation, epoch, criterion, device, statistics_train)
@@ -115,12 +115,12 @@ def main():
             accuracy_validation = epoch_accuracy_validation
             best = True
 
-        if not header.baseline_dry_run:
-            utility.saveTraining(header.baseline_model_dir, model, data_loader_test, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics_train, best)
+        if not wandb.config.dry_run:
+            utility.saveTraining(wandb.config.model_dir, model, data_loader_test, data_loader_train, data_loader_validation, epoch, criterion, optimizer, learning_rate_scheduler, accuracy_validation, statistics_train, best)
 
         logger.log_info_raw("\n")
 
-        if progress_bar is not None and epoch <= header.baseline_epochs:
+        if progress_bar is not None and epoch <= wandb.config.epochs:
             progress_bar.n = epoch
             progress_bar.refresh()
 
@@ -132,30 +132,32 @@ def main():
 
     statistics_epoch_test = (0, [], [])
 
-    utility.loadTesting(header.baseline_model_dir, model)
+    utility.loadTesting(wandb.config.model_dir, model)
 
-    logger.log_info("Testing best model in \"" + header.baseline_model_dir + "\".")
+    logger.log_info("Testing best model in \"" + wandb.config.model_dir + "\".")
 
-    if not header.baseline_dry_run:
+    if not wandb.config.dry_run:
         statistics_epoch_test = test.testBaseline(model, data_loader_test, device, statistics_test)
 
     accuracy_test = statistics_epoch_test[0] / len(data_loader_test.dataset)
 
     logger.log_info("Testing accuracy: " + str(accuracy_test) + ".")
 
-    if not header.baseline_dry_run:
-        utility.saveTesting(header.baseline_model_dir, statistics_epoch_test[1], statistics_epoch_test[2], dataset.classes, statistics_test)
+    if not wandb.config.dry_run:
+        utility.saveTesting(wandb.config.model_dir, statistics_epoch_test[1], statistics_epoch_test[2], dataset.classes, statistics_test)
 
-    (outputs_test, class_indices_test, classes) = utility.loadEvaluation(header.baseline_model_dir)
+    (outputs_test, class_indices_test, classes) = utility.loadEvaluation(wandb.config.model_dir)
 
-    logger.log_info("Evaluating model in \"" + header.baseline_model_dir + "\".")
+    logger.log_info("Evaluating model in \"" + wandb.config.model_dir + "\".")
 
     mean_average_precision = evaluate.evaluateBaseline(outputs_test, class_indices_test, classes, statistics_evaluate)
 
     logger.log_info("Mean average precision: " + str(mean_average_precision.item()) + ".")
 
-    if not header.baseline_dry_run:
-        utility.saveEvaluation(header.baseline_model_dir, statistics_evaluate)
+    if not wandb.config.dry_run:
+        utility.saveEvaluation(wandb.config.model_dir, statistics_evaluate)
+
+    wandb.finish()
 
     return
 

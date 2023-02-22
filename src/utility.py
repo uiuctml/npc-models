@@ -1,16 +1,11 @@
 
 import datetime
-import header
 import json
 import logger
-import math
-import matplotlib.pyplot
-import numpy
 import os
 import socket
-import textwrap
 import torch
-import type
+import wandb
 
 def computeL2Norm(parameters):
     parameters_list = []
@@ -39,9 +34,9 @@ def loadEvaluation(model_dir):
     outputs_test = None
 
     if os.path.isdir(model_dir):
-        model_file_path_class_indices_test = os.path.join(model_dir, header.model_file_name_class_indices_test)
-        model_file_path_classes = os.path.join(model_dir, header.model_file_name_classes)
-        model_file_path_outputs_test = os.path.join(model_dir, header.model_file_name_outputs_test)
+        model_file_path_class_indices_test = os.path.join(model_dir, wandb.config.model_file_name_class_indices_test)
+        model_file_path_classes = os.path.join(model_dir, wandb.config.model_file_name_classes)
+        model_file_path_outputs_test = os.path.join(model_dir, wandb.config.model_file_name_outputs_test)
 
         if os.path.isfile(model_file_path_class_indices_test):
             class_indices_test = torch.load(model_file_path_class_indices_test)
@@ -59,7 +54,7 @@ def loadEvaluation(model_dir):
 
 def loadTesting(model_dir, model):
     if os.path.isdir(model_dir):
-        model_file_path_model_best = os.path.join(model_dir, header.model_file_name_model_best)
+        model_file_path_model_best = os.path.join(model_dir, wandb.config.model_file_name_model_best)
 
         if os.path.isfile(model_file_path_model_best) and model != None:
             model.load_state_dict(torch.load(model_file_path_model_best))
@@ -77,16 +72,16 @@ def loadTraining(model_dir, model, optimizer, learning_rate_scheduler):
     statistics_train = None
 
     if os.path.isdir(model_dir):
-        model_file_path_accuracy_validation = os.path.join(model_dir, header.model_file_name_accuracy_validation)
-        model_file_path_criterion = os.path.join(model_dir, header.model_file_name_criterion)
-        model_file_path_data_loader_test = os.path.join(model_dir, header.model_file_name_data_loader_test)
-        model_file_path_data_loader_train = os.path.join(model_dir, header.model_file_name_data_loader_train)
-        model_file_path_data_loader_validation = os.path.join(model_dir, header.model_file_name_data_loader_validation)
-        model_file_path_epoch = os.path.join(model_dir, header.model_file_name_epoch)
-        model_file_path_learning_rate_scheduler = os.path.join(model_dir, header.model_file_name_learning_rate_scheduler)
-        model_file_path_model = os.path.join(model_dir, header.model_file_name_model)
-        model_file_path_optimizer = os.path.join(model_dir, header.model_file_name_optimizer)
-        model_file_path_statistics_train = os.path.join(model_dir, header.model_file_name_statistics_train)
+        model_file_path_accuracy_validation = os.path.join(model_dir, wandb.config.model_file_name_accuracy_validation)
+        model_file_path_criterion = os.path.join(model_dir, wandb.config.model_file_name_criterion)
+        model_file_path_data_loader_test = os.path.join(model_dir, wandb.config.model_file_name_data_loader_test)
+        model_file_path_data_loader_train = os.path.join(model_dir, wandb.config.model_file_name_data_loader_train)
+        model_file_path_data_loader_validation = os.path.join(model_dir, wandb.config.model_file_name_data_loader_validation)
+        model_file_path_epoch = os.path.join(model_dir, wandb.config.model_file_name_epoch)
+        model_file_path_learning_rate_scheduler = os.path.join(model_dir, wandb.config.model_file_name_learning_rate_scheduler)
+        model_file_path_model = os.path.join(model_dir, wandb.config.model_file_name_model)
+        model_file_path_optimizer = os.path.join(model_dir, wandb.config.model_file_name_optimizer)
+        model_file_path_statistics_train = os.path.join(model_dir, wandb.config.model_file_name_statistics_train)
 
         if os.path.isfile(model_file_path_model) and model != None:
             model.load_state_dict(torch.load(model_file_path_model))
@@ -133,7 +128,7 @@ def loadTraining(model_dir, model, optimizer, learning_rate_scheduler):
 
 def loadTrainingBest(model_dir, model):
     if os.path.isdir(model_dir):
-        model_file_path_model_best = os.path.join(model_dir, header.model_file_name_model_best)
+        model_file_path_model_best = os.path.join(model_dir, wandb.config.model_file_name_model_best)
 
         if os.path.isfile(model_file_path_model_best) and model != None:
             model_state_dict = torch.load(model_file_path_model_best)
@@ -146,171 +141,14 @@ def loadTrainingBest(model_dir, model):
 
     return
 
-def plotEvaluationStatistics(model_dir, statistics):
-    if statistics == None:
-        return
-
-    if not os.path.isdir(model_dir):
-        os.makedirs(model_dir, exist_ok = True)
-
-    average_precisions = numpy.array(list(statistics.values()))
-    average_precisions_indices = range(0, len(average_precisions))
-    average_precisions_split = numpy.array_split(average_precisions, header.plot_subplot_count_evaluate)
-    average_precisions_indices_split = numpy.array_split(average_precisions_indices, header.plot_subplot_count_evaluate)
-    mean_average_precision = numpy.mean(average_precisions)
-
-    figure = matplotlib.pyplot.figure()
-    figure_manager = matplotlib.pyplot.get_current_fig_manager()
-    subplot_rows = math.ceil(header.plot_subplot_count_evaluate / header.plot_subplot_col_count_evaluate)
-    subplot_cols = header.plot_subplot_col_count_evaluate
-
-    figure.suptitle("Evaluation Statistics for \"" + header.plot_model_dir.split("/")[-1] + "\"")
-
-    for i in range(0, header.plot_subplot_count_evaluate):
-        figure.add_subplot(subplot_rows, subplot_cols, i + 1)
-        matplotlib.pyplot.axhline(y = mean_average_precision, color = "red")
-        matplotlib.pyplot.bar(average_precisions_indices_split[i], average_precisions_split[i])
-        matplotlib.pyplot.xlabel("Class")
-        matplotlib.pyplot.ylabel("Average Precision")
-        matplotlib.pyplot.ylim([0, 1])
-        matplotlib.pyplot.yticks(list(matplotlib.pyplot.yticks()[0]) + [mean_average_precision])
-
-    figure_manager.full_screen_toggle()
-
-    if header.plot_show_evaluate:
-        matplotlib.pyplot.show()
-
-    if header.plot_save_evaluate:
-        figure.savefig(os.path.join(model_dir, "evaluate.png"))
-
-    return
-
-def plotTestingStatistics(model_dir, statistics):
-    if statistics == None:
-        return
-
-    if not os.path.isdir(model_dir):
-        os.makedirs(model_dir, exist_ok = True)
-
-    accuracies = statistics["testing_accuracies"]
-    accuracy_mean = numpy.nanmean(accuracies)
-
-    figure = matplotlib.pyplot.figure()
-    figure_manager = matplotlib.pyplot.get_current_fig_manager()
-
-    matplotlib.pyplot.plot(accuracies)
-    matplotlib.pyplot.axhline(y = accuracy_mean, color = "red")
-    matplotlib.pyplot.title("Testing Statistics for \"" + header.plot_model_dir.split("/")[-1] + "\"")
-    matplotlib.pyplot.xlabel("Batch")
-    matplotlib.pyplot.ylabel("Accuracy")
-    matplotlib.pyplot.ylim([0, 1])
-    matplotlib.pyplot.yticks(list(matplotlib.pyplot.yticks()[0]) + [accuracy_mean])
-
-    figure_manager.full_screen_toggle()
-
-    if header.plot_show_test:
-        matplotlib.pyplot.show()
-
-    if header.plot_save_test:
-        figure.savefig(os.path.join(model_dir, "test.png"))
-
-    return
-
-def plotTrainingStatistics(model_dir, statistics):
-    if statistics == None:
-        return
-
-    if not os.path.isdir(model_dir):
-        os.makedirs(model_dir, exist_ok = True)
-
-    accuracies_training = []
-    accuracies_training_xticks = [0]
-    accuracies_validation = []
-    accuracies_validation_xticks = [0]
-    losses_training = []
-    losses_training_xticks = [0]
-    losses_validation = []
-    losses_validation_xticks = [0]
-
-    for epoch in statistics.keys():
-        accuracies_training += statistics[epoch]["training_accuracies"]
-        accuracies_training_xticks.append(len(accuracies_training) + 1)
-
-        accuracies_validation += statistics[epoch]["validation_accuracies"]
-        accuracies_validation_xticks.append(len(accuracies_validation) + 1)
-
-        losses_training += statistics[epoch]["training_losses"]
-        losses_training_xticks.append(len(losses_training) + 1)
-
-        losses_validation += statistics[epoch]["validation_losses"]
-        losses_validation_xticks.append(len(losses_validation) + 1)
-
-    figure = matplotlib.pyplot.figure()
-    figure_manager = matplotlib.pyplot.get_current_fig_manager()
-
-    figure.suptitle("Training Statistics for \"" + header.plot_model_dir.split("/")[-1] + "\"")
-
-    figure.add_subplot(2, 2, 1)
-    matplotlib.pyplot.plot(accuracies_training)
-    matplotlib.pyplot.xticks(accuracies_training_xticks, range(0, len(accuracies_training_xticks)))
-    matplotlib.pyplot.title("Training Accuracy")
-    matplotlib.pyplot.xlabel("Epoch")
-    matplotlib.pyplot.ylabel("Accuracy")
-    matplotlib.pyplot.ylim([0, 1])
-
-    figure.add_subplot(2, 2, 2)
-    matplotlib.pyplot.plot(accuracies_validation)
-    matplotlib.pyplot.xticks(accuracies_validation_xticks, range(0, len(accuracies_validation_xticks)))
-    matplotlib.pyplot.title("Validation Accuracy")
-    matplotlib.pyplot.xlabel("Epoch")
-    matplotlib.pyplot.ylabel("Accuracy")
-    matplotlib.pyplot.ylim([0, 1])
-
-    figure.add_subplot(2, 2, 3)
-    matplotlib.pyplot.plot(losses_training)
-    matplotlib.pyplot.xticks(losses_training_xticks, range(0, len(losses_training_xticks)))
-    matplotlib.pyplot.title("Training Loss")
-    matplotlib.pyplot.xlabel("Epoch")
-    matplotlib.pyplot.ylabel("Loss")
-
-    figure.add_subplot(2, 2, 4)
-    matplotlib.pyplot.plot(losses_validation)
-    matplotlib.pyplot.xticks(losses_validation_xticks, range(0, len(losses_validation_xticks)))
-    matplotlib.pyplot.title("Validation Loss")
-    matplotlib.pyplot.xlabel("Epoch")
-    matplotlib.pyplot.ylabel("Loss")
-
-    figure_manager.full_screen_toggle()
-
-    if header.plot_show_train:
-        matplotlib.pyplot.show()
-
-    if header.plot_save_train:
-        figure.savefig(os.path.join(model_dir, "train.png"))
-
-    return
-
-def saveEvaluation(model_dir, statistics):
-    if not os.path.isdir(model_dir):
-        os.makedirs(model_dir, exist_ok = True)
-
-    model_file_path_statistics_evaluate = os.path.join(model_dir, header.model_file_name_statistics_evaluate)
-
-    with open(model_file_path_statistics_evaluate, "w") as file_statistics_evaluate:
-        json.dump(statistics, file_statistics_evaluate, indent = 4)
-
-    logger.log_info("Saved evaluation statistics to \"" + model_dir + "\".")
-
-    return
-
 def saveTesting(model_dir, outputs, class_indices, classes, statistics):
     if not os.path.isdir(model_dir):
         os.makedirs(model_dir, exist_ok = True)
 
-    model_file_path_class_indices_test = os.path.join(model_dir, header.model_file_name_class_indices_test)
-    model_file_path_classes = os.path.join(model_dir, header.model_file_name_classes)
-    model_file_path_outputs_test = os.path.join(model_dir, header.model_file_name_outputs_test)
-    model_file_path_statistics_test = os.path.join(model_dir, header.model_file_name_statistics_test)
+    model_file_path_class_indices_test = os.path.join(model_dir, wandb.config.model_file_name_class_indices_test)
+    model_file_path_classes = os.path.join(model_dir, wandb.config.model_file_name_classes)
+    model_file_path_outputs_test = os.path.join(model_dir, wandb.config.model_file_name_outputs_test)
+    model_file_path_statistics_test = os.path.join(model_dir, wandb.config.model_file_name_statistics_test)
 
     torch.save(class_indices, model_file_path_class_indices_test)
     torch.save(classes, model_file_path_classes)
@@ -327,17 +165,17 @@ def saveTraining(model_dir, model, data_loader_test, data_loader_train, data_loa
     if not os.path.isdir(model_dir):
         os.makedirs(model_dir, exist_ok = True)
 
-    model_file_path_accuracy_validation = os.path.join(model_dir, header.model_file_name_accuracy_validation)
-    model_file_path_criterion = os.path.join(model_dir, header.model_file_name_criterion)
-    model_file_path_data_loader_test = os.path.join(model_dir, header.model_file_name_data_loader_test)
-    model_file_path_data_loader_train = os.path.join(model_dir, header.model_file_name_data_loader_train)
-    model_file_path_data_loader_validation = os.path.join(model_dir, header.model_file_name_data_loader_validation)
-    model_file_path_epoch = os.path.join(model_dir, header.model_file_name_epoch)
-    model_file_path_learning_rate_scheduler = os.path.join(model_dir, header.model_file_name_learning_rate_scheduler)
-    model_file_path_model = os.path.join(model_dir, header.model_file_name_model)
-    model_file_path_model_best = os.path.join(model_dir, header.model_file_name_model_best)
-    model_file_path_optimizer = os.path.join(model_dir, header.model_file_name_optimizer)
-    model_file_path_statistics_train = os.path.join(model_dir, header.model_file_name_statistics_train)
+    model_file_path_accuracy_validation = os.path.join(model_dir, wandb.config.model_file_name_accuracy_validation)
+    model_file_path_criterion = os.path.join(model_dir, wandb.config.model_file_name_criterion)
+    model_file_path_data_loader_test = os.path.join(model_dir, wandb.config.model_file_name_data_loader_test)
+    model_file_path_data_loader_train = os.path.join(model_dir, wandb.config.model_file_name_data_loader_train)
+    model_file_path_data_loader_validation = os.path.join(model_dir, wandb.config.model_file_name_data_loader_validation)
+    model_file_path_epoch = os.path.join(model_dir, wandb.config.model_file_name_epoch)
+    model_file_path_learning_rate_scheduler = os.path.join(model_dir, wandb.config.model_file_name_learning_rate_scheduler)
+    model_file_path_model = os.path.join(model_dir, wandb.config.model_file_name_model)
+    model_file_path_model_best = os.path.join(model_dir, wandb.config.model_file_name_model_best)
+    model_file_path_optimizer = os.path.join(model_dir, wandb.config.model_file_name_optimizer)
+    model_file_path_statistics_train = os.path.join(model_dir, wandb.config.model_file_name_statistics_train)
 
     if best:
         torch.save(model.state_dict(), model_file_path_model_best)
@@ -356,64 +194,5 @@ def saveTraining(model_dir, model, data_loader_test, data_loader_train, data_loa
         json.dump(statistics, file_statistics_train, indent = 4)
 
     logger.log_info("Saved training states and statistics to \"" + model_dir + "\".")
-
-    return
-
-def viewDatasetBaseline(dataset, data_loader, batch_size):
-    if header.log_level < type.LogLevel.trace:
-        return
-
-    figure_rows = header.dataset_view_row_count
-    figure_cols = math.ceil(batch_size / header.dataset_view_row_count)
-    figure = matplotlib.pyplot.figure()
-    figure_manager = matplotlib.pyplot.get_current_fig_manager()
-    input, labels = next(iter(data_loader))
-    input = input.numpy().transpose((0, 2, 3, 1))
-    class_list = list(dataset.classes[label] for label in labels)
-
-    for i in range(0, batch_size):
-        figure.add_subplot(figure_rows, figure_cols, i + 1)
-        matplotlib.pyplot.title(class_list[i])
-        matplotlib.pyplot.axis("off")
-        matplotlib.pyplot.imshow(numpy.clip(input[i].squeeze(), 0, 1))
-
-    figure_manager.full_screen_toggle()
-    matplotlib.pyplot.show()
-
-    return
-
-def viewDatasetDecomposed(dataset, data_loader, batch_size):
-    if header.log_level < type.LogLevel.trace:
-        return
-
-    figure_rows = header.dataset_view_row_count
-    figure_cols = math.ceil(batch_size / header.dataset_view_row_count)
-    figure = matplotlib.pyplot.figure()
-    figure_manager = matplotlib.pyplot.get_current_fig_manager()
-    input, labels = next(iter(data_loader))
-    input = input.numpy().transpose((0, 2, 3, 1))
-
-    class_list = []
-
-    for label in labels:
-        class_name = ""
-
-        for i in range(0, len(label)):
-            if class_name != "":
-                class_name += header.dataset_delimiter_file_name
-
-            class_name += dataset.classes[i][label[i]]
-
-        class_name = "\n".join(textwrap.wrap(class_name, 30))
-        class_list.append(class_name)
-
-    for i in range(0, batch_size):
-        figure.add_subplot(figure_rows, figure_cols, i + 1)
-        matplotlib.pyplot.title(class_list[i], fontsize = 5)
-        matplotlib.pyplot.axis("off")
-        matplotlib.pyplot.imshow(numpy.clip(input[i].squeeze(), 0, 1))
-
-    figure_manager.full_screen_toggle()
-    matplotlib.pyplot.show()
 
     return

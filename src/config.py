@@ -2,6 +2,8 @@ import multiprocessing
 import type
 import utility
 
+log_level = type.LogLevel.info
+project_name = "mapillary-dataset-network"
 run_name_baseline = utility.generateRunName("baseline")
 run_name_decomposed = utility.generateRunName("decomposed")
 
@@ -27,7 +29,6 @@ config_baseline = {
     "learning_rate_scheduler_min_learning_rate_decay": 1e-8,
     "learning_rate_scheduler_verbose": True,
     "load_best": False,
-    "log_level": type.LogLevel.info,
     "l2_lambda": 1e-3,
     "model_dir": "../model." + run_name_baseline + ".d",
     "model_dir_best": "../model." + run_name_baseline + ".d",
@@ -82,7 +83,6 @@ config_decomposed = {
     "learning_rate_scheduler_min_learning_rate_decay": 1e-8,
     "learning_rate_scheduler_verbose": True,
     "load_best": False,
-    "log_level": type.LogLevel.info,
     "l2_lambda": 1e-3,
     "model_dir": "../model." + run_name_decomposed + ".d",
     "model_dir_best": "../model." + run_name_decomposed + ".d",
