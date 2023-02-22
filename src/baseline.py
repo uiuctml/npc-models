@@ -154,9 +154,6 @@ def main():
 
     logger.log_info("Mean average precision: " + str(mean_average_precision.item()) + ".")
 
-    if not wandb.config.dry_run:
-        utility.saveEvaluation(wandb.config.model_dir, statistics_evaluate)
-
     wandb.finish()
 
     return

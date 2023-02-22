@@ -1,10 +1,10 @@
-import header
 import json
 import logger
 import os
 import PIL
 import PIL.Image
 import torch
+import wandb
 
 class DatasetGenerated(torch.utils.data.Dataset):
     def __init__(self, root, transform):
@@ -19,7 +19,7 @@ class DatasetGenerated(torch.utils.data.Dataset):
             logger.log_error("Invalid dataset directory.")
             return
 
-        file_dataset_config = open(os.path.join(root, header.dataset_config_file_name), "r")
+        file_dataset_config = open(os.path.join(root, wandb.config.dataset_config_file_name), "r")
         self.config = json.load(file_dataset_config)
         file_dataset_config.close()            
 
@@ -30,10 +30,10 @@ class DatasetGenerated(torch.utils.data.Dataset):
             self.labels.append([])
 
         for file_name in os.listdir(root):
-            if file_name == header.dataset_config_file_name:
+            if file_name == wandb.config.dataset_config_file_name:
                 continue
 
-            file_name_split = file_name.split(header.dataset_delimiter_file_name)
+            file_name_split = file_name.split(wandb.config.dataset_delimiter_file_name)
 
             if len(file_name_split) < len(self.labels):
                 logger.log_warn("Invalid data \"" + file_name + "\"")
