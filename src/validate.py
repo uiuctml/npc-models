@@ -3,7 +3,7 @@ import torch
 import tqdm
 import wandb
 
-def validateBaseline(model, data_loader, criterion, device):
+def validateBaseline(model, data_loader, criterion, device, batch_step):
     accuracy_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
@@ -32,7 +32,10 @@ def validateBaseline(model, data_loader, criterion, device):
         progress_bar.refresh()
 
         wandb.log({"validation/batch/accuracy": accuracy_batch})
+        wandb.log({"validation/batch/step": batch_step})
         wandb.log({"validation/batch/loss": loss_batch})
+
+        batch_step += 1
 
     accuracy_epoch /= len(data_loader.dataset)
     loss_epoch /= len(data_loader)
@@ -42,7 +45,7 @@ def validateBaseline(model, data_loader, criterion, device):
     wandb.log({"validation/epoch/accuracy": accuracy_epoch})
     wandb.log({"validation/epoch/loss": loss_epoch})
 
-    return (accuracy_epoch, loss_epoch)
+    return (accuracy_epoch, loss_epoch, batch_step)
 
 def validateDecomposed(model, dataset, data_loader, epoch, criterions, device):
     accuracies = []

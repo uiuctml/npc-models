@@ -5,7 +5,7 @@ import tqdm
 import utility
 import wandb
 
-def trainBaseline(model, data_loader, criterion, optimizer, device):
+def trainBaseline(model, data_loader, criterion, optimizer, device, batch_step):
     accuracy_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
@@ -44,7 +44,10 @@ def trainBaseline(model, data_loader, criterion, optimizer, device):
         progress_bar.refresh()
 
         wandb.log({"training/batch/accuracy": accuracy_batch})
+        wandb.log({"training/batch/step": batch_step})
         wandb.log({"training/batch/loss": loss_batch})
+
+        batch_step += 1
 
     accuracy_epoch /= len(data_loader.dataset)
     loss_epoch /= len(data_loader)
@@ -54,7 +57,7 @@ def trainBaseline(model, data_loader, criterion, optimizer, device):
     wandb.log({"training/epoch/accuracy": accuracy_epoch})
     wandb.log({"training/epoch/loss": loss_epoch})
 
-    return
+    return batch_step
 
 def trainDecomposed(model, dataset, data_loader, epoch, criterions, optimizer, device):
     accuracies = []

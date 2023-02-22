@@ -14,7 +14,29 @@ def computeL2Norm(parameters):
 
     return torch.square(torch.cat(parameters_list)).sum().item()
 
-def generateRunName(model_name):
+def wAndBDefineMetrics():
+    wandb.define_metric("testing/batch/step")
+    wandb.define_metric("testing/epoch/step")
+    wandb.define_metric("training/batch/step")
+    wandb.define_metric("training/epoch/step")
+    wandb.define_metric("validation/batch/step")
+    wandb.define_metric("validation/epoch/step")
+
+    wandb.define_metric("testing/batch/accuracy", step_metric = "testing/batch/step")
+    wandb.define_metric("testing/epoch/accuracy", step_metric = "testing/epoch/step")
+    wandb.define_metric("training/batch/accuracy", step_metric = "training/batch/step")
+    wandb.define_metric("training/batch/loss", step_metric = "training/batch/step")
+    wandb.define_metric("training/epoch/accuracy", step_metric = "training/epoch/step")
+    wandb.define_metric("training/epoch/loss", step_metric = "training/epoch/step")
+    wandb.define_metric("validation/batch/accuracy", step_metric = "validation/batch/step")
+    wandb.define_metric("validation/batch/loss", step_metric = "validation/batch/step")
+    wandb.define_metric("validation/epoch/accuracy", step_metric = "validation/epoch/step")
+    wandb.define_metric("validation/epoch/accuracy_best", step_metric = "validation/epoch/step")
+    wandb.define_metric("validation/epoch/loss", step_metric = "validation/epoch/step")
+
+    return
+
+def wAndBGenerateRunName(model_name):
     date_time_list = list(datetime.datetime.now().timetuple())[:-4]
     run_name = model_name
 

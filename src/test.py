@@ -4,7 +4,7 @@ import tqdm
 import utility
 import wandb
 
-def testBaseline(model, dataset, data_loader, device):
+def testBaseline(model, dataset, data_loader, device, batch_step):
     utility.loadCheckpointBest(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint_best, model)
 
     accuracy_epoch = 0
@@ -33,9 +33,12 @@ def testBaseline(model, dataset, data_loader, device):
             progress_bar.refresh()
 
             wandb.log({"testing/batch/accuracy": accuracy_batch})
+            wandb.log({"testing/batch/step": batch_step})
 
             ground_truths_epoch += labels.data.tolist()
             predictions_epoch += output.tolist()
+
+            batch_step += 1
 
     accuracy_epoch /= len(data_loader.dataset)
 
@@ -44,12 +47,14 @@ def testBaseline(model, dataset, data_loader, device):
     pr_curve = wandb.plot.pr_curve(ground_truths_epoch, predictions_epoch, labels = dataset.classes, title = "Precision vs. Recall")
     roc_curve = wandb.plot.roc_curve(ground_truths_epoch, predictions_epoch, labels = dataset.classes, title = "Receiver Operating Characteristic")
 
-    logger.log_info("Testing accuracy: " + str(accuracy_epoch) + ".")
     wandb.log({"testing/epoch/accuracy": accuracy_epoch})
     wandb.log({"testing/epoch/pr_curve": pr_curve})
     wandb.log({"testing/epoch/roc_curve": roc_curve})
 
-    return
+    logger.log_info("Testing accuracy: " + str(accuracy_epoch) + ".")
+    wandb.summary["testing/epoch/accuracy"] = accuracy_epoch
+
+    return batch_step
 
 def testDecomposed(model, dataset, data_loader, device):
     accuracies = []

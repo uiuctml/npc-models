@@ -4,8 +4,8 @@ import utility
 
 log_level = type.LogLevel.info
 project_name = "mapillary-dataset-network"
-run_name_baseline = utility.generateRunName("baseline")
-run_name_decomposed = utility.generateRunName("decomposed")
+run_name_baseline = utility.wAndBGenerateRunName("baseline")
+run_name_decomposed = utility.wAndBGenerateRunName("decomposed")
 
 config_baseline = {
     "data_loader_batch_size": 32,

@@ -25,9 +25,15 @@ def main():
 
     wandb.login()
     wandb.init(project = config.project_name, name = config.run_name_baseline, config = config.config_baseline, resume = True)
+
+    utility.wAndBDefineMetrics()
+
     logger.log_info("Started run \"" + config.run_name_baseline + "\".")
 
     accuracy_validation_best = 0
+    batch_step_test = 1
+    batch_step_train = 1
+    batch_step_validate = 1
     criterion = torch.nn.CrossEntropyLoss()
     data_loader_test = None
     data_loader_train = None
@@ -73,13 +79,17 @@ def main():
         progress_bar.refresh()
 
     while epoch <= wandb.config.epochs:
-        train.trainBaseline(model, data_loader_train, criterion, optimizer, device)
-        (accuracy_validation_epoch, loss_validation_epoch) = validate.validateBaseline(model, data_loader_validation, criterion, device)
+        wandb.log({"training/epoch/step": epoch})
+        wandb.log({"validation/epoch/step": epoch})
+
+        batch_step_train = train.trainBaseline(model, data_loader_train, criterion, optimizer, device, batch_step_train)
+        (accuracy_validation_epoch, loss_validation_epoch, batch_step_validate) = validate.validateBaseline(model, data_loader_validation, criterion, device, batch_step_validate)
 
         learning_rate_scheduler.step(loss_validation_epoch)
 
         if accuracy_validation_epoch > accuracy_validation_best:
             accuracy_validation_best = accuracy_validation_epoch
+            wandb.log({"validation/epoch/accuracy_best": accuracy_validation_best})
             utility.saveCheckpoint(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint_best, accuracy_validation_best, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
 
         utility.saveCheckpoint(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint, accuracy_validation_best, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
@@ -94,8 +104,10 @@ def main():
         progress_bar.close()
 
     logger.log_info("Best validation accuracy: " + str(accuracy_validation_best) + ".")
+    wandb.summary["validation/epoch/accuracy_best"] = accuracy_validation_best
 
-    test.testBaseline(model, dataset, data_loader_test, device)
+    wandb.log({"testing/epoch/step": 1})
+    batch_step_test = test.testBaseline(model, dataset, data_loader_test, device, batch_step_test)
 
     wandb.finish()
 
