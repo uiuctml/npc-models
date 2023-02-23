@@ -59,7 +59,7 @@ def main():
     for _ in dataset.config["datasets"]:
         criterions.append(torch.nn.CrossEntropyLoss())
 
-    (accuracy_validation_best, batch_step_train, batch_step_validate, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch) = utility.loadCheckpoint(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
+    (accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch) = utility.loadCheckpoint(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
 
     if config.log_level >= type.LogLevel.debug:
         model_input_size = (wandb.config.model_input_channels, wandb.config.model_input_height, wandb.config.model_input_width)
@@ -76,70 +76,37 @@ def main():
         wandb.log({"validation/epoch/step": epoch})
 
         batch_step_train = train.trainDecomposed(model, dataset, data_loader_train, criterions, optimizer, device, batch_step_train)
-        batch_step_validate = validate.validateDecomposed(model, dataset, data_loader_validation, criterions, device, batch_step_validate)
+        (accuracy_validation_epoch_list, loss_overall_validation_epoch, batch_step_validate) = validate.validateDecomposed(model, dataset, data_loader_validation, criterions, device, batch_step_validate)
 
-        epoch_loss_train = statistics_epoch_train[0] / len(data_loader_train)
-        epoch_loss_validation = statistics_epoch_validation[0] / len(data_loader_validation)
+        learning_rate_scheduler.step(loss_overall_validation_epoch)
 
-        logger.log_info("Training loss: " + str(epoch_loss_train) + ".")
+        accuracy_validation_epoch_mean = sum(accuracy_validation_epoch_list) / len(accuracy_validation_epoch_list)
 
-        for (i, dataset_entry) in enumerate(dataset.config["datasets"]):
-            epoch_accuracy_train = statistics_epoch_train[1][i] / len(data_loader_train.dataset)
-            logger.log_info("Training accuracy for \"" + dataset_entry["name"] + "\": " + str(epoch_accuracy_train) + ".")
+        if accuracy_validation_epoch_mean > accuracy_validation_best:
+            accuracy_validation_best = accuracy_validation_epoch_mean
+            wandb.log({"validation/epoch/accuracy_best": accuracy_validation_best})
+            utility.saveCheckpoint(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint_best, accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
 
-        logger.log_info("Validation loss: " + str(epoch_loss_validation) + ".")
+        utility.saveCheckpoint(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
 
-        for (i, dataset_entry) in enumerate(dataset.config["datasets"]):
-            epoch_accuracy_validation = statistics_epoch_validation[1][i] / len(data_loader_validation.dataset)
-            epoch_mean_accuracy_validation += epoch_accuracy_validation
-            logger.log_info("Validation accuracy for \"" + dataset_entry["name"] + "\": " + str(epoch_accuracy_validation) + ".")
-
-        learning_rate_scheduler.step(epoch_loss_validation)
-        epoch += 1
-        epoch_mean_accuracy_validation /= len(dataset.config["datasets"])
-
-        if epoch_mean_accuracy_validation > accuracy_validation_best:
-            accuracy_validation_best = epoch_mean_accuracy_validation
-            best = True
-
-        if not wandb.config.dry_run:
-            utility.saveTraining(wandb.config.model_dir, model, data_loader_test, data_loader_train, data_loader_validation, epoch, criterions, optimizer, learning_rate_scheduler, accuracy_validation_best, statistics_train, best)
-
-        logger.log_info_raw("\n")
-
-        if progress_bar is not None and epoch <= wandb.config.epochs:
+        if progress_bar is not None:
             progress_bar.n = epoch
             progress_bar.refresh()
+
+        epoch += 1
 
     if progress_bar is not None:
         progress_bar.close()
 
-    logger.log_info("Highest validation accuracy: " + str(accuracy_validation_best) + ".")
-    logger.log_info_raw("\n")
+    logger.log_info("Best validation accuracy: " + str(accuracy_validation_best) + ".")
+    wandb.summary["validation/epoch/accuracy_best"] = accuracy_validation_best
 
-    statistics_epoch_test = (0, [], [])
+    wandb.log({"testing/epoch/step": 1})
+    statistics_epoch_test = test.testDecomposed(model, dataset, data_loader_test, device, statistics_test)
 
-    utility.loadTesting(wandb.config.model_dir, model)
-
-    logger.log_info("Testing best model in \"" + wandb.config.model_dir + "\".")
-
-    if not wandb.config.dry_run:
-        statistics_epoch_test = test.testDecomposed(model, dataset, data_loader_test, device, statistics_test)
-
-        for (i, dataset_entry) in enumerate(dataset.config["datasets"]):
-                accuracy_test = statistics_epoch_test[0][i] / len(data_loader_test.dataset)
-                logger.log_info("Testing accuracy for \"" + dataset_entry["name"] + "\": " + str(accuracy_test) + ".")
-
-        utility.saveTesting(wandb.config.model_dir, statistics_epoch_test[1], statistics_epoch_test[2], dataset.classes, statistics_test)
-
-    (outputs_test, class_indices_test, classes) = utility.loadEvaluation(wandb.config.model_dir)
-
-    logger.log_info("Evaluating model in \"" + wandb.config.model_dir + "\".")
-
-    mean_average_precisions = evaluate.evaluateDecomposed(dataset, outputs_test, class_indices_test, classes, statistics_evaluate)
-
-    for dataset_name in mean_average_precisions.keys():
-        logger.log_info("Mean average precision for \"" + dataset_name + "\": " + str(mean_average_precisions[dataset_name].item()) + ".")
+    for (i, dataset_entry) in enumerate(dataset.config["datasets"]):
+            accuracy_test = statistics_epoch_test[0][i] / len(data_loader_test.dataset)
+            logger.log_info("Testing accuracy for \"" + dataset_entry["name"] + "\": " + str(accuracy_test) + ".")
 
     wandb.finish()
 
