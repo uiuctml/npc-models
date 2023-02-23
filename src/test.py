@@ -102,14 +102,14 @@ def testDecomposed(model, dataset, data_loader, device, batch_step):
 
     for (i, dataset_entry) in enumerate(dataset.config["datasets"]):
         accuracy_epoch_list[i] /= len(data_loader.dataset)
-        pr_curve = wandb.plot.pr_curve(ground_truths_epoch_list[i], predictions_epoch_list[i], labels = dataset.classes, title = "Precision vs. Recall")
-        roc_curve = wandb.plot.roc_curve(ground_truths_epoch_list[i], predictions_epoch_list[i], labels = dataset.classes, title = "Receiver Operating Characteristic")
+        pr_curve = wandb.plot.pr_curve(ground_truths_epoch_list[i], predictions_epoch_list[i], labels = dataset.classes[i], title = "Precision vs. Recall")
+        roc_curve = wandb.plot.roc_curve(ground_truths_epoch_list[i], predictions_epoch_list[i], labels = dataset.classes[i], title = "Receiver Operating Characteristic")
 
         wandb.log({"testing/epoch/" + dataset_entry["name"] + "/accuracy": accuracy_epoch_list[i]})
         wandb.log({"testing/epoch/" + dataset_entry["name"] + "/pr_curve": pr_curve})
         wandb.log({"testing/epoch/" + dataset_entry["name"] + "/roc_curve": roc_curve})
 
-        logger.log_info("Testing accuracy for \"" + dataset_entry["name"] + "\"" + str(accuracy_epoch_list[i]) + ".")
+        logger.log_info("Testing accuracy for \"" + dataset_entry["name"] + "\": " + str(accuracy_epoch_list[i]) + ".")
         wandb.summary["testing/epoch/" + dataset_entry["name"] + "/accuracy"] = accuracy_epoch_list[i]
 
     return batch_step

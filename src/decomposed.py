@@ -19,13 +19,16 @@ import validate
 import wandb
 
 def main():
+    resume = False
+
     if len(sys.argv) > 1:
         config.run_name_decomposed = sys.argv[1]
         config.config_decomposed["file_name_checkpoint"] = config.run_name_decomposed + ".tar"
         config.config_decomposed["file_name_checkpoint_best"] = config.run_name_decomposed + ".best.tar"
+        resume = True
 
     wandb.login()
-    wandb.init(project = config.project_name, name = config.run_name_decomposed, config = config.config_decomposed, resume = True)
+    wandb.init(project = config.project_name, name = config.run_name_decomposed, config = config.config_decomposed, resume = resume)
 
     utility.wAndBDefineMetrics()
 
@@ -41,7 +44,7 @@ def main():
         torchvision.transforms.ToTensor(),
         torchvision.transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
-    dataset = dset.DatasetGenerated(root = wandb.config.dataset_dir, transform = dataset_transforms)
+    dataset = dset.DatasetGenerated(root = wandb.config.dir_dataset, transform = dataset_transforms)
     dataset_split_lengths = [wandb.config.dataset_split_percentage_test, wandb.config.dataset_split_percentage_train, wandb.config.dataset_split_percentage_validation]
     (dataset_subset_test, dataset_subset_train, dataset_subset_validation) = torch.utils.data.random_split(dataset, dataset_split_lengths)
     data_loader_test = torch.utils.data.DataLoader(dataset_subset_test, batch_size = wandb.config.data_loader_batch_size, shuffle = wandb.config.data_loader_shuffle, num_workers = wandb.config.data_loader_worker_count, pin_memory = True)
@@ -68,10 +71,12 @@ def main():
     if epoch <= wandb.config.epochs:
         progress_bar = tqdm.tqdm(total = wandb.config.epochs, position = 0)
         progress_bar.set_description_str("[INFO]: Epoch")
-        progress_bar.n = epoch
-        progress_bar.refresh()
 
     while epoch <= wandb.config.epochs:
+        if progress_bar is not None:
+            progress_bar.n = epoch
+            progress_bar.refresh()
+
         wandb.log({"training/epoch/step": epoch})
         wandb.log({"validation/epoch/step": epoch})
 
@@ -88,10 +93,6 @@ def main():
             utility.saveCheckpoint(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint_best, accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
 
         utility.saveCheckpoint(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
-
-        if progress_bar is not None:
-            progress_bar.n = epoch
-            progress_bar.refresh()
 
         epoch += 1
 

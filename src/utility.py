@@ -22,17 +22,12 @@ def wAndBDefineMetrics():
     wandb.define_metric("validation/batch/step")
     wandb.define_metric("validation/epoch/step")
 
-    wandb.define_metric("testing/batch/accuracy", step_metric = "testing/batch/step")
-    wandb.define_metric("testing/epoch/accuracy", step_metric = "testing/epoch/step")
-    wandb.define_metric("training/batch/accuracy", step_metric = "training/batch/step")
-    wandb.define_metric("training/batch/loss", step_metric = "training/batch/step")
-    wandb.define_metric("training/epoch/accuracy", step_metric = "training/epoch/step")
-    wandb.define_metric("training/epoch/loss", step_metric = "training/epoch/step")
-    wandb.define_metric("validation/batch/accuracy", step_metric = "validation/batch/step")
-    wandb.define_metric("validation/batch/loss", step_metric = "validation/batch/step")
-    wandb.define_metric("validation/epoch/accuracy", step_metric = "validation/epoch/step")
-    wandb.define_metric("validation/epoch/accuracy_best", step_metric = "validation/epoch/step")
-    wandb.define_metric("validation/epoch/loss", step_metric = "validation/epoch/step")
+    wandb.define_metric("testing/batch/*", step_metric = "testing/batch/step")
+    wandb.define_metric("testing/epoch/*", step_metric = "testing/epoch/step")
+    wandb.define_metric("training/batch/*", step_metric = "training/batch/step")
+    wandb.define_metric("training/epoch/*", step_metric = "training/epoch/step")
+    wandb.define_metric("validation/batch/*", step_metric = "validation/batch/step")
+    wandb.define_metric("validation/epoch/*", step_metric = "validation/epoch/step")
 
     return
 

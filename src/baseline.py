@@ -18,13 +18,16 @@ import validate
 import wandb
 
 def main():
+    resume = False
+
     if len(sys.argv) > 1:
         config.run_name_baseline = sys.argv[1]
         config.config_baseline["file_name_checkpoint"] = config.run_name_baseline + ".tar"
         config.config_baseline["file_name_checkpoint_best"] = config.run_name_baseline + ".best.tar"
+        resume = True
 
     wandb.login()
-    wandb.init(project = config.project_name, name = config.run_name_baseline, config = config.config_baseline, resume = True)
+    wandb.init(project = config.project_name, name = config.run_name_baseline, config = config.config_baseline, resume = resume)
 
     utility.wAndBDefineMetrics()
 
@@ -64,10 +67,12 @@ def main():
     if epoch <= wandb.config.epochs:
         progress_bar = tqdm.tqdm(total = wandb.config.epochs, position = 0)
         progress_bar.set_description_str("[INFO]: Epoch")
-        progress_bar.n = epoch
-        progress_bar.refresh()
 
     while epoch <= wandb.config.epochs:
+        if progress_bar is not None:
+            progress_bar.n = epoch
+            progress_bar.refresh()
+
         wandb.log({"training/epoch/step": epoch})
         wandb.log({"validation/epoch/step": epoch})
 
@@ -82,10 +87,6 @@ def main():
             utility.saveCheckpoint(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint_best, accuracy_validation_best, batch_step_train, batch_step_validate, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
 
         utility.saveCheckpoint(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
-
-        if progress_bar is not None:
-            progress_bar.n = epoch
-            progress_bar.refresh()
 
         epoch += 1
 
