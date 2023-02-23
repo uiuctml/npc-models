@@ -5,7 +5,7 @@ import utility
 import wandb
 
 def testBaseline(model, dataset, data_loader, device, batch_step):
-    utility.loadCheckpointBest(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint_best, model)
+    data_loader = utility.loadCheckpointBest(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint_best, data_loader, model)
 
     accuracy_epoch = 0
     ground_truths_epoch = []

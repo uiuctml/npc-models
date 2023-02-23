@@ -74,7 +74,7 @@ def loadCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_be
 
     return (accuracy_validation_best, batch_step_train, batch_step_validate, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch)
 
-def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
+def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, data_loader_test, model):
     if not os.path.isdir(dir_checkpoints):
         os.makedirs(dir_checkpoints, exist_ok = True)
 
@@ -87,11 +87,12 @@ def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
 
     if os.path.isfile(file_path_checkpoint):
         checkpoint = torch.load(file_path_checkpoint)
+        data_loader_test = checkpoint["data_loader_test"]
         model.load_state_dict(checkpoint["model_state_dict"])
 
         logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
 
-    return
+    return data_loader_test
 
 def saveCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer):
     if not os.path.isdir(dir_checkpoints):
