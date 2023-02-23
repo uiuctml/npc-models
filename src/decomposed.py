@@ -102,11 +102,7 @@ def main():
     wandb.summary["validation/epoch/accuracy_best"] = accuracy_validation_best
 
     wandb.log({"testing/epoch/step": 1})
-    statistics_epoch_test = test.testDecomposed(model, dataset, data_loader_test, device, statistics_test)
-
-    for (i, dataset_entry) in enumerate(dataset.config["datasets"]):
-            accuracy_test = statistics_epoch_test[0][i] / len(data_loader_test.dataset)
-            logger.log_info("Testing accuracy for \"" + dataset_entry["name"] + "\": " + str(accuracy_test) + ".")
+    batch_step_test = test.testDecomposed(model, dataset, data_loader_test, device, batch_step_test)
 
     wandb.finish()
 
