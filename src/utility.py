@@ -78,7 +78,10 @@ def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
     if not os.path.isdir(dir_checkpoints):
         os.makedirs(dir_checkpoints, exist_ok = True)
 
-    wandb.restore(file_name_checkpoint, root = dir_checkpoints)
+    try:
+        wandb.restore(file_name_checkpoint, root = dir_checkpoints)
+    except:
+        logger.log_warn("Failed to restore checkpoint \"" + file_name_checkpoint + "\" from Weights & Biases.")
 
     file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
 
