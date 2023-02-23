@@ -62,7 +62,7 @@ def main():
         torchsummary.summary(model, input_size = model_input_size)
 
     if epoch <= wandb.config.epochs:
-        progress_bar = tqdm.tqdm(total = wandb.config.epochs, position = 0, leave = True)
+        progress_bar = tqdm.tqdm(total = wandb.config.epochs, position = 0)
         progress_bar.set_description_str("[INFO]: Epoch")
         progress_bar.n = epoch
         progress_bar.refresh()
