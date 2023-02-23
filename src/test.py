@@ -56,7 +56,7 @@ def testBaseline(model, dataset, data_loader, device, batch_step):
     return batch_step
 
 def testDecomposed(model, dataset, data_loader, device, batch_step):
-    utility.loadCheckpointBest(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint_best, model)
+    data_loader = utility.loadCheckpointBest(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint_best, data_loader, model)
 
     accuracy_epoch_list = []
     ground_truths_epoch_list = []
