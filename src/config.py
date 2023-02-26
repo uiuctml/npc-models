@@ -4,6 +4,7 @@ import utility
 
 log_level = type.LogLevel.info
 project_name = "mapillary-dataset-network"
+run_mode = "online"
 run_name_baseline = utility.wAndBGenerateRunName("baseline")
 run_name_decomposed = utility.wAndBGenerateRunName("decomposed")
 

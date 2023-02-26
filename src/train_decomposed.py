@@ -28,7 +28,7 @@ def main():
         resume = True
 
     wandb.login()
-    wandb.init(project = config.project_name, name = config.run_name_decomposed, config = config.config_decomposed, resume = resume)
+    wandb.init(project = config.project_name, name = config.run_name_decomposed, config = config.config_decomposed, resume = resume, mode = config.run_mode)
 
     utility.wAndBDefineMetrics()
 
