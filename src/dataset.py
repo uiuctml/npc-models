@@ -7,7 +7,7 @@ import torch
 import wandb
 
 class DatasetGenerated(torch.utils.data.Dataset):
-    def __init__(self, root, transform):
+    def __init__(self, root, transform = None):
         self.classes = []
         self.config = {}
         self.file_paths = []
@@ -52,8 +52,10 @@ class DatasetGenerated(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         image = PIL.Image.open(self.file_paths[index]).convert("RGB")
-        image = self.transform(image)
         labels = []
+
+        if self.transform is not None:
+            image = self.transform(image)
 
         for label in self.labels:
             labels.append(int(label[index]))
