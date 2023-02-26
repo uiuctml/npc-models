@@ -3,8 +3,9 @@ import torch
 import tqdm
 import utility
 import wandb
+import sklearn.metrics
 
-def testBaseline(model, dataset, data_loader, device, batch_step):
+def testBaseline(model, data_loader, device, batch_step):
     data_loader = utility.loadCheckpointBest(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint_best, data_loader, model)
 
     accuracy_epoch = 0
@@ -36,22 +37,26 @@ def testBaseline(model, dataset, data_loader, device, batch_step):
             wandb.log({"testing/batch/step": batch_step})
 
             ground_truths_epoch += labels.data.tolist()
-            predictions_epoch += output.tolist()
+            predictions_epoch += predictions.tolist()
 
             batch_step += 1
 
     progress_bar.close()
 
     accuracy_epoch /= len(data_loader.dataset)
-    pr_curve = wandb.plot.pr_curve(ground_truths_epoch, predictions_epoch, labels = dataset.classes, title = "Precision vs. Recall")
-    roc_curve = wandb.plot.roc_curve(ground_truths_epoch, predictions_epoch, labels = dataset.classes, title = "Receiver Operating Characteristic")
+    precision_epoch = sklearn.metrics.precision_score(ground_truths_epoch, predictions_epoch, average = "macro", zero_division = 0)
+    recall_epoch = sklearn.metrics.recall_score(ground_truths_epoch, predictions_epoch, average = "macro", zero_division = 0)
 
     wandb.log({"testing/epoch/accuracy": accuracy_epoch})
-    wandb.log({"testing/epoch/pr_curve": pr_curve})
-    wandb.log({"testing/epoch/roc_curve": roc_curve})
+    wandb.log({"testing/epoch/precision": precision_epoch})
+    wandb.log({"testing/epoch/recall": recall_epoch})
+    wandb.summary["testing/epoch/accuracy"] = accuracy_epoch
+    wandb.summary["testing/epoch/precision"] = precision_epoch
+    wandb.summary["testing/epoch/recall"] = recall_epoch
 
     logger.log_info("Testing accuracy: " + str(accuracy_epoch) + ".")
-    wandb.summary["testing/epoch/accuracy"] = accuracy_epoch
+    logger.log_info("Testing precision: " + str(precision_epoch) + ".")
+    logger.log_info("Testing recall: " + str(recall_epoch) + ".")
 
     return batch_step
 
@@ -89,7 +94,7 @@ def testDecomposed(model, dataset, data_loader, device, batch_step):
                     wandb.log({"testing/batch/" + dataset_entry["name"] + "/accuracy": accuracy_batch})
 
                     ground_truths_epoch_list[i] += labels[:, i].data.tolist()
-                    predictions_epoch_list[i] += outputs[i].tolist()
+                    predictions_epoch_list[i] += predictions.tolist()
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
@@ -102,14 +107,18 @@ def testDecomposed(model, dataset, data_loader, device, batch_step):
 
     for (i, dataset_entry) in enumerate(dataset.config["datasets"]):
         accuracy_epoch_list[i] /= len(data_loader.dataset)
-        pr_curve = wandb.plot.pr_curve(ground_truths_epoch_list[i], predictions_epoch_list[i], labels = dataset.classes[i], title = "Precision vs. Recall")
-        roc_curve = wandb.plot.roc_curve(ground_truths_epoch_list[i], predictions_epoch_list[i], labels = dataset.classes[i], title = "Receiver Operating Characteristic")
+        precision_epoch = sklearn.metrics.precision_score(ground_truths_epoch_list[i], predictions_epoch_list[i], average = "macro", zero_division = 0)
+        recall_epoch = sklearn.metrics.recall_score(ground_truths_epoch_list[i], predictions_epoch_list[i], average = "macro", zero_division = 0)
 
         wandb.log({"testing/epoch/" + dataset_entry["name"] + "/accuracy": accuracy_epoch_list[i]})
-        wandb.log({"testing/epoch/" + dataset_entry["name"] + "/pr_curve": pr_curve})
-        wandb.log({"testing/epoch/" + dataset_entry["name"] + "/roc_curve": roc_curve})
+        wandb.log({"testing/epoch/" + dataset_entry["name"] + "/precision": precision_epoch})
+        wandb.log({"testing/epoch/" + dataset_entry["name"] + "/recall": recall_epoch})
+        wandb.summary["testing/epoch/" + dataset_entry["name"] + "/accuracy"] = accuracy_epoch_list[i]
+        wandb.summary["testing/epoch/" + dataset_entry["name"] + "/precision"] = precision_epoch
+        wandb.summary["testing/epoch/" + dataset_entry["name"] + "/recall"] = recall_epoch
 
         logger.log_info("Testing accuracy for \"" + dataset_entry["name"] + "\": " + str(accuracy_epoch_list[i]) + ".")
-        wandb.summary["testing/epoch/" + dataset_entry["name"] + "/accuracy"] = accuracy_epoch_list[i]
+        logger.log_info("Testing precision for \"" + dataset_entry["name"] + "\": " + str(precision_epoch) + ".")
+        logger.log_info("Testing recall for \"" + dataset_entry["name"] + "\": " + str(recall_epoch) + ".")
 
     return batch_step
