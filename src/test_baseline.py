@@ -27,7 +27,7 @@ def main():
     model = torch.nn.DataParallel(model)
     model = model.to(device)
 
-    test.testBaseline(model, None, device, 1)
+    test.testBaseline(model, device, 1)
 
     return
 

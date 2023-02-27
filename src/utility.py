@@ -74,7 +74,7 @@ def loadCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_be
 
     return (accuracy_validation_best, batch_step_train, batch_step_validate, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch)
 
-def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, data_loader_test, model):
+def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
     if not os.path.isdir(dir_checkpoints):
         os.makedirs(dir_checkpoints, exist_ok = True)
 
@@ -83,6 +83,7 @@ def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, data_loader_test, 
     except:
         logger.log_warn("Failed to restore checkpoint \"" + file_name_checkpoint + "\" from Weights & Biases.")
 
+    data_loader_test = None
     file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
 
     if os.path.isfile(file_path_checkpoint):

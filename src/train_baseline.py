@@ -97,7 +97,7 @@ def main():
     wandb.summary["validation/epoch/accuracy_best"] = accuracy_validation_best
 
     wandb.log({"testing/epoch/step": 1})
-    batch_step_test = test.testBaseline(model, data_loader_test, device, batch_step_test)
+    batch_step_test = test.testBaseline(model, device, batch_step_test)
 
     wandb.finish()
 

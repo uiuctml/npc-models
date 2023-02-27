@@ -27,7 +27,7 @@ def main():
     model = torch.nn.DataParallel(model)
     model = model.to(device)
 
-    test.testDecomposed(model, dataset, None, device, 1)
+    test.testDecomposed(model, dataset, device, 1)
 
     return
 
