@@ -52,7 +52,9 @@ def loadCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_be
         try:
             wandb.restore(file_name_checkpoint, root = dir_checkpoints)
         except:
-            logger.log_warn("Failed to restore checkpoint \"" + file_name_checkpoint + "\" from Weights & Biases.")
+            pass
+        else:
+            logger.log_info("Restored checkpoint \"" + file_name_checkpoint + "\" from Weights & Biases.")
 
         file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
 
@@ -81,7 +83,9 @@ def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
     try:
         wandb.restore(file_name_checkpoint, root = dir_checkpoints)
     except:
-        logger.log_warn("Failed to restore checkpoint \"" + file_name_checkpoint + "\" from Weights & Biases.")
+        pass
+    else:
+        logger.log_info("Restored checkpoint \"" + file_name_checkpoint + "\" from Weights & Biases.")
 
     data_loader_test = None
     file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
@@ -119,7 +123,9 @@ def saveCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_be
     try:
         wandb.save(file_path_checkpoint, base_path = dir_checkpoints)
     except:
-        logger.log_warn("Failed to saved checkpoint \"" + file_name_checkpoint + "\" to Weights & Biases.")
+        pass
+    else:
+        logger.log_info("Saved checkpoint \"" + file_name_checkpoint + "\" to Weights & Biases.")
 
     logger.log_info("Saved checkpoint \"" + file_name_checkpoint + "\".")
 
