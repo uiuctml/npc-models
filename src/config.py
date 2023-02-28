@@ -2,7 +2,7 @@ import multiprocessing
 import type
 import utility
 
-log_level = type.LogLevel.info
+log_level = type.LogLevel.debug
 project_name = "mapillary-dataset-network"
 run_mode = "online"
 run_name_baseline = utility.wAndBGenerateRunName("baseline")

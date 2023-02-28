@@ -60,7 +60,7 @@ def main():
 
     (accuracy_validation_best, batch_step_train, batch_step_validate, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch) = utility.loadCheckpoint(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
 
-    if config.log_level >= type.LogLevel.debug:
+    if config.log_level >= type.LogLevel.trace:
         model_input_size = (wandb.config.model_input_channels, wandb.config.model_input_height, wandb.config.model_input_width)
         torchsummary.summary(model, input_size = model_input_size)
 
