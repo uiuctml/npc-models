@@ -19,9 +19,9 @@ class DatasetGenerated(torch.utils.data.Dataset):
             logger.log_error("Invalid dataset directory.")
             return
 
-        file_dataset_config = open(os.path.join(root, wandb.config.dataset_config_file_name), "r")
-        self.config = json.load(file_dataset_config)
-        file_dataset_config.close()            
+        file_config_dataset = open(os.path.join(root, wandb.config.file_name_config_dataset), "r")
+        self.config = json.load(file_config_dataset)
+        file_config_dataset.close()
 
         for dataset in self.config["datasets"]:
             dataset_labels = dataset["labels"]
@@ -30,7 +30,7 @@ class DatasetGenerated(torch.utils.data.Dataset):
             self.labels.append([])
 
         for file_name in os.listdir(root):
-            if file_name == wandb.config.dataset_config_file_name:
+            if file_name == wandb.config.file_name_config_dataset or file_name == wandb.config.file_name_config_dataset_generation:
                 continue
 
             file_name_split = file_name.split(wandb.config.dataset_delimiter_file_name)
