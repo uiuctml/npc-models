@@ -48,6 +48,7 @@ config_decomposed = {
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dataset_delimiter_file_name": "---",
     "dataset_delimiter_label": "--",
+    "dataset_label_undefined_keyword": "undefined",
     "dataset_split_percentage_train": 0.8,
     "dataset_split_percentage_validation": 0.1,
     "dataset_split_percentage_test": 0.1,
