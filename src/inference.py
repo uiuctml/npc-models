@@ -13,14 +13,29 @@ import utility
 import wandb
 
 def main():
-    if len(sys.argv) > 1:
-        config.run_name_decomposed = sys.argv[1]
+    if len(sys.argv) > 2:
+        if sys.argv[1].split(".")[0] != config.run_name_baseline_keyword:
+            logger.log_error("Invalid baseline run name. Quit.")
+            return
+
+        if sys.argv[2].split(".")[0] != config.run_name_decomposed_keyword:
+            logger.log_error("Invalid decomposed run name. Quit.")
+            return
+
+        config.run_name_baseline = sys.argv[1]
+        config.run_name_decomposed = sys.argv[2]
+
+        config.config_baseline["file_name_checkpoint"] = config.run_name_baseline + ".tar"
+        config.config_baseline["file_name_checkpoint_best"] = config.run_name_baseline + ".best.tar"
         config.config_decomposed["file_name_checkpoint"] = config.run_name_decomposed + ".tar"
         config.config_decomposed["file_name_checkpoint_best"] = config.run_name_decomposed + ".best.tar"
     else:
-        logger.log_error("Run name missing. Quit.")
+        logger.log_error("Run names missing. Quit.")
         return
 
+    wandb.init(config = config.config_baseline, mode = "disabled")
+
+    wandb.finish()
     wandb.init(config = config.config_decomposed, mode = "disabled")
 
     accuracy_epoch_decomposed = 0
@@ -39,6 +54,8 @@ def main():
 
     data_loader = torch.utils.data.DataLoader(data_loader.dataset, batch_size = wandb.config.data_loader_batch_size, shuffle = wandb.config.data_loader_shuffle, num_workers = wandb.config.data_loader_worker_count, pin_memory = True)
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
+
+    wandb.finish()
 
     model_decomposed.eval()
     progress_bar.set_description_str("[INFO]: Inference progress")
