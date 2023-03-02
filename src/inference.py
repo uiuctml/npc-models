@@ -57,9 +57,8 @@ def save(image, ground_truth_label_counts, ground_truth_label, correct):
 
     return
 
-def annotateInput(input, output_baseline, output_decomposed, outputs_decomposed, labels_original, labels_decomposed, classes_original, dataset_decomposed, config_dataset_generation):
-    show = True
-    ground_truth_label_counts = {}
+def annotateInput(input, output_baseline, output_decomposed, outputs_decomposed, labels_original, labels_decomposed, classes_original, dataset_decomposed, config_dataset_generation, ground_truth_label_counts):
+    show = False
     ground_truths_label_original = []
     ground_truths_label_decomposed_task = []
     predictions_confidence_decomposed_task = []
@@ -175,6 +174,7 @@ def main():
         return
 
     device = torch.device("cuda")
+    ground_truth_label_counts = {}
 
     wandb.init(config = config.config_baseline, mode = "disabled")
 
@@ -205,6 +205,7 @@ def main():
     data_loader = torch.utils.data.DataLoader(data_loader.dataset, batch_size = wandb.config.data_loader_batch_size, shuffle = wandb.config.data_loader_shuffle, num_workers = wandb.config.data_loader_worker_count, pin_memory = True)
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
 
+    model_baseline.eval()
     model_decomposed.eval()
     progress_bar.set_description_str("[INFO]: Inference progress")
 
@@ -218,7 +219,7 @@ def main():
                 outputs_decomposed = model_decomposed(input)
                 (output_decomposed, labels_original) = decision.make(outputs_decomposed, labels, input.size(0))
 
-                annotateInput(input, output_baseline, output_decomposed, outputs_decomposed, labels_original, labels, decision.classes, data_loader.dataset.dataset, decision.config)
+                annotateInput(input, output_baseline, output_decomposed, outputs_decomposed, labels_original, labels, decision.classes, data_loader.dataset.dataset, decision.config, ground_truth_label_counts)
 
                 (_, predictions_baseline) = torch.max(output_baseline, 1)
                 (_, predictions_decomposed) = torch.max(output_decomposed, 1)
