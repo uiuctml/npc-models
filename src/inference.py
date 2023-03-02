@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
 import config
+import cv2
 import dataset as dset
 import decision as deci
 import logger
 import network
+import numpy
 import sys
 import torch
 import torch.nn
@@ -12,6 +14,107 @@ import torchvision
 import tqdm
 import utility
 import wandb
+
+def resize(image, width = None, height = None, inter = cv2.INTER_AREA):
+    width_image = image.shape[1]
+    width_resize = image.shape[1]
+    height_image = image.shape[0]
+    height_resize = image.shape[0]
+
+    if width is None and height is None:
+        return image
+
+    if width is None:
+        resize_ratio = height / height_image
+        width_resize = int(width_image * resize_ratio)
+        height_resize = height
+    else:
+        resize_ratio = width / width_image
+        width_resize = width
+        height_resize = int(height_image * resize_ratio)
+
+    return cv2.resize(image, (width_resize, height_resize), interpolation=inter)
+
+def annotateInput(input, output_baseline, output_decomposed, outputs_decomposed, labels_original, labels_decomposed, classes_original, dataset_decomposed):
+    ground_truths_label_original = []
+    ground_truths_label_decomposed_task = []
+    predictions_confidence_decomposed_task = []
+    predictions_label_baseline = []
+    predictions_label_decomposed = []
+    predictions_label_decomposed_task = []
+    softmax = torch.nn.Softmax(dim = 1)
+
+    for _ in dataset_decomposed.config["datasets"]:
+        ground_truths_label_decomposed_task.append([])
+
+    output_baseline = softmax(output_baseline)
+    (predictions_confidence_baseline, predictions_index_baseline) = torch.max(output_baseline, 1)
+    (predictions_confidence_decomposed, predictions_index_decomposed) = torch.max(output_decomposed, 1)
+
+    for prediction_index_baseline in predictions_index_baseline:
+        predictions_label_baseline.append(classes_original[prediction_index_baseline])
+
+    for prediction_index_decomposed in predictions_index_decomposed:
+        predictions_label_decomposed.append(classes_original[prediction_index_decomposed])
+
+    for label_original in labels_original:
+        ground_truths_label_original.append(classes_original[label_original])
+
+    for label_decomposed_batch in labels_decomposed:
+        for (task_index, label_decomposed) in enumerate(label_decomposed_batch):
+                ground_truths_label_decomposed_task[task_index].append(dataset_decomposed.classes[task_index][label_decomposed])
+
+    for (task_index, output_decomposed_task) in enumerate(outputs_decomposed):
+        (prediction_confidence_decomposed_task, predictions_index_decomposed_task) = torch.max(output_decomposed_task, 1)
+
+        prediction_label_decomposed_task = []
+
+        for prediction_index_decomposed_task in predictions_index_decomposed_task:
+            prediction_label_decomposed_task.append(dataset_decomposed.classes[task_index][prediction_index_decomposed_task])
+
+        predictions_confidence_decomposed_task.append(prediction_confidence_decomposed_task)
+        predictions_label_decomposed_task.append(prediction_label_decomposed_task)
+
+    input_cpu = input.cpu().numpy()
+    mean = numpy.array([0.5, 0.5, 0.5])
+    std = numpy.array([0.5, 0.5, 0.5])
+
+    cv2.namedWindow(wandb.config.dir_dataset, cv2.WINDOW_NORMAL)
+
+    for (batch_index, input_batch) in enumerate(input_cpu):
+        input_batch = numpy.transpose(input_batch, (1, 2, 0))
+        input_batch = mean + std * input_batch 
+        input_batch = numpy.clip(input_batch, 0, 1)
+        input_batch = input_batch.astype(numpy.float32)
+        input_batch = cv2.cvtColor(input_batch, cv2.COLOR_RGB2BGR)
+        input_batch = resize(input_batch, height = 900)
+
+        text_position_y = 30
+        text_position_y_increment = 20
+
+        input_batch = cv2.putText(input_batch, "Baseline Prediction: " + str(round(predictions_confidence_baseline[batch_index].item() * 100, 2)) + "% " + predictions_label_baseline[batch_index], (20, text_position_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2, cv2.LINE_AA)
+        text_position_y += text_position_y_increment
+
+        input_batch = cv2.putText(input_batch, "Decomposed Prediction: " + str(round(predictions_confidence_decomposed[batch_index].item() * 100, 2)) + "% " + predictions_label_decomposed[batch_index], (20, text_position_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2, cv2.LINE_AA)
+        text_position_y += text_position_y_increment
+
+        for (task_index, dataset_entry) in enumerate(dataset_decomposed.config["datasets"]):
+            input_batch = cv2.putText(input_batch, "Decomposed Prediction for \"" + dataset_entry["name"] + "\": " + str(round(predictions_confidence_decomposed_task[task_index][batch_index].item() * 100, 2)) + "% " + predictions_label_decomposed_task[task_index][batch_index], (20, text_position_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2, cv2.LINE_AA)
+            text_position_y += text_position_y_increment
+
+        input_batch = cv2.putText(input_batch, "Ground Truth: " + ground_truths_label_original[batch_index], (20, text_position_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
+        text_position_y += text_position_y_increment
+
+        for (task_index, dataset_entry) in enumerate(dataset_decomposed.config["datasets"]):
+            input_batch = cv2.putText(input_batch, "Ground Truth for \"" + dataset_entry["name"] + "\": " + ground_truths_label_decomposed_task[task_index][batch_index], (20, text_position_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
+            text_position_y += text_position_y_increment
+
+        cv2.imshow(wandb.config.dir_dataset, input_batch)
+        cv2.waitKey(0)
+
+    cv2.destroyAllWindows()
+
+    return
 
 def main():
     if len(sys.argv) > 2:
@@ -76,13 +179,15 @@ def main():
             with torch.set_grad_enabled(False):
                 output_baseline = model_baseline(input)
                 outputs_decomposed = model_decomposed(input)
-                (output_decomposed, labels) = decision.make(outputs_decomposed, labels, input.size(0))
+                (output_decomposed, labels_original) = decision.make(outputs_decomposed, labels, input.size(0))
+
+                annotateInput(input, output_baseline, output_decomposed, outputs_decomposed, labels_original, labels, decision.classes, data_loader.dataset.dataset)
 
                 (_, predictions_baseline) = torch.max(output_baseline, 1)
                 (_, predictions_decomposed) = torch.max(output_decomposed, 1)
 
-                corrects_baseline = torch.sum(predictions_baseline == labels.data).item()
-                corrects_decomposed = torch.sum(predictions_decomposed == labels.data).item()
+                corrects_baseline = torch.sum(predictions_baseline == labels_original.data).item()
+                corrects_decomposed = torch.sum(predictions_decomposed == labels_original.data).item()
 
             accuracy_batch_baseline = corrects_baseline / input.size(0)
             accuracy_batch_decomposed = corrects_decomposed / input.size(0)
