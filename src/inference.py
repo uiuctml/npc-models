@@ -57,8 +57,8 @@ def save(image, ground_truth_label_counts, ground_truth_label, correct):
 
     return
 
-def annotateInput(input, output_baseline, output_decomposed, outputs_decomposed, labels_original, labels_decomposed, classes_original, dataset_decomposed):
-    show = False
+def annotateInput(input, output_baseline, output_decomposed, outputs_decomposed, labels_original, labels_decomposed, classes_original, dataset_decomposed, config_dataset_generation):
+    show = True
     ground_truth_label_counts = {}
     ground_truths_label_original = []
     ground_truths_label_decomposed_task = []
@@ -138,6 +138,10 @@ def annotateInput(input, output_baseline, output_decomposed, outputs_decomposed,
             input_batch = cv2.putText(input_batch, "Ground Truth for \"" + dataset_entry["name"] + "\": " + ground_truths_label_decomposed_task[task_index][batch_index], (20, text_position_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
             text_position_y += text_position_y_increment
 
+        for (task_index, dataset_entry) in enumerate(dataset_decomposed.config["datasets"]):
+            input_batch = cv2.putText(input_batch, "Weight for \"" + dataset_entry["name"] + "\": " + str(round(config_dataset_generation[ground_truths_label_original[batch_index]]["weights"][dataset_entry["name"]], 2)), (20, text_position_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 100, 100), 2, cv2.LINE_AA)
+            text_position_y += text_position_y_increment
+
         if show:
             cv2.imshow(wandb.config.dir_dataset, input_batch)
             cv2.waitKey(0)
@@ -214,7 +218,7 @@ def main():
                 outputs_decomposed = model_decomposed(input)
                 (output_decomposed, labels_original) = decision.make(outputs_decomposed, labels, input.size(0))
 
-                annotateInput(input, output_baseline, output_decomposed, outputs_decomposed, labels_original, labels, decision.classes, data_loader.dataset.dataset)
+                annotateInput(input, output_baseline, output_decomposed, outputs_decomposed, labels_original, labels, decision.classes, data_loader.dataset.dataset, decision.config)
 
                 (_, predictions_baseline) = torch.max(output_baseline, 1)
                 (_, predictions_decomposed) = torch.max(output_decomposed, 1)
