@@ -7,6 +7,7 @@ import decision as deci
 import logger
 import network
 import numpy
+import os
 import sys
 import torch
 import torch.nn
@@ -35,7 +36,30 @@ def resize(image, width = None, height = None, inter = cv2.INTER_AREA):
 
     return cv2.resize(image, (width_resize, height_resize), interpolation=inter)
 
+def save(image, ground_truth_label_counts, ground_truth_label, correct):
+    output_dir = ""
+
+    if ground_truth_label not in ground_truth_label_counts:
+        ground_truth_label_counts[ground_truth_label] = 0
+
+    if correct:
+        output_dir = os.path.join("output", "correct", ground_truth_label)
+    else:
+        output_dir = os.path.join("output", "incorrect", ground_truth_label)
+
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir, exist_ok = True)
+
+    output_file_path = os.path.join(output_dir, ground_truth_label + "_" + str(ground_truth_label_counts[ground_truth_label]) + ".png")
+    cv2.imwrite(output_file_path, image)
+
+    ground_truth_label_counts[ground_truth_label] += 1
+
+    return
+
 def annotateInput(input, output_baseline, output_decomposed, outputs_decomposed, labels_original, labels_decomposed, classes_original, dataset_decomposed):
+    show = False
+    ground_truth_label_counts = {}
     ground_truths_label_original = []
     ground_truths_label_decomposed_task = []
     predictions_confidence_decomposed_task = []
@@ -82,15 +106,20 @@ def annotateInput(input, output_baseline, output_decomposed, outputs_decomposed,
     cv2.namedWindow(wandb.config.dir_dataset, cv2.WINDOW_NORMAL)
 
     for (batch_index, input_batch) in enumerate(input_cpu):
+        correct = False
         input_batch = numpy.transpose(input_batch, (1, 2, 0))
         input_batch = mean + std * input_batch 
         input_batch = numpy.clip(input_batch, 0, 1)
         input_batch = input_batch.astype(numpy.float32)
         input_batch = cv2.cvtColor(input_batch, cv2.COLOR_RGB2BGR)
+        input_batch *= 255.0
+        input_batch = input_batch.astype(numpy.uint8)
         input_batch = resize(input_batch, height = 900)
-
         text_position_y = 30
         text_position_y_increment = 20
+
+        if predictions_label_decomposed[batch_index] == ground_truths_label_original[batch_index]:
+            correct = True
 
         input_batch = cv2.putText(input_batch, "Baseline Prediction: " + str(round(predictions_confidence_baseline[batch_index].item() * 100, 2)) + "% " + predictions_label_baseline[batch_index], (20, text_position_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2, cv2.LINE_AA)
         text_position_y += text_position_y_increment
@@ -109,10 +138,14 @@ def annotateInput(input, output_baseline, output_decomposed, outputs_decomposed,
             input_batch = cv2.putText(input_batch, "Ground Truth for \"" + dataset_entry["name"] + "\": " + ground_truths_label_decomposed_task[task_index][batch_index], (20, text_position_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
             text_position_y += text_position_y_increment
 
-        cv2.imshow(wandb.config.dir_dataset, input_batch)
-        cv2.waitKey(0)
+        if show:
+            cv2.imshow(wandb.config.dir_dataset, input_batch)
+            cv2.waitKey(0)
+        else:
+            save(input_batch, ground_truth_label_counts, ground_truths_label_original[batch_index], correct)
 
-    cv2.destroyAllWindows()
+    if show:
+        cv2.destroyAllWindows()
 
     return
 
