@@ -7,6 +7,29 @@ import torch
 import wandb
 
 class DatasetGenerated(torch.utils.data.Dataset):
+    def constructOriginalKeyLabelMap(self):
+        self.classes_original = []
+        self.key_label_map = {}
+
+        dir_dataset_original = "../../mapillary-dataset/images/sliced/original"
+        dir_dataset_original_list = os.listdir(dir_dataset_original)
+
+        for dir_dataset_original_label in dir_dataset_original_list:
+            dir_dataset_original_label_list = os.listdir(os.path.join(dir_dataset_original, dir_dataset_original_label))
+
+            for dir_dataset_original_image in dir_dataset_original_label_list:
+                key = dir_dataset_original_image.split(".")[0]
+                self.key_label_map[key] = dir_dataset_original_label
+
+        file_config_dataset_generation = open(os.path.join(wandb.config.dir_dataset, wandb.config.file_name_config_dataset_generation), "r")
+        config_dataset_generation = json.load(file_config_dataset_generation)
+        file_config_dataset_generation.close()
+
+        for class_name in config_dataset_generation.keys():
+            self.classes_original.append(class_name)
+
+        return
+
     def __init__(self, root, transform = None):
         self.classes = []
         self.config = {}
@@ -18,6 +41,8 @@ class DatasetGenerated(torch.utils.data.Dataset):
         if not os.path.isdir(root):
             logger.log_error("Invalid dataset directory.")
             return
+
+        self.constructOriginalKeyLabelMap()
 
         file_config_dataset = open(os.path.join(root, wandb.config.file_name_config_dataset), "r")
         self.config = json.load(file_config_dataset)
@@ -60,7 +85,10 @@ class DatasetGenerated(torch.utils.data.Dataset):
         for label in self.labels:
             labels.append(int(label[index]))
 
-        return (image, torch.LongTensor(labels))
+        key = self.file_paths[index].split(".")[0].split(wandb.config.dataset_delimiter_file_name)[-1]
+        label_original = self.classes_original.index(self.key_label_map[key])
+
+        return (image, torch.LongTensor(labels), label_original)
 
     def getDatasetClassCount(self, dataset_name):
         for dataset in self.config["datasets"]:

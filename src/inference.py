@@ -202,6 +202,8 @@ def main():
         logger.log_error("Data loader missing.")
         return
 
+    data_loader.dataset.dataset.constructOriginalKeyLabelMap()
+
     data_loader = torch.utils.data.DataLoader(data_loader.dataset, batch_size = wandb.config.data_loader_batch_size, shuffle = wandb.config.data_loader_shuffle, num_workers = wandb.config.data_loader_worker_count, pin_memory = True)
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
 
@@ -210,14 +212,15 @@ def main():
     progress_bar.set_description_str("[INFO]: Inference progress")
 
     with torch.no_grad():
-        for (batch_index, (input, labels)) in enumerate(data_loader):
+        for (batch_index, (input, labels, labels_original)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
             labels = labels.to(device, non_blocking = True)
+            labels_original = labels_original.to(device, non_blocking = True)
 
             with torch.set_grad_enabled(False):
                 output_baseline = model_baseline(input)
                 outputs_decomposed = model_decomposed(input)
-                (output_decomposed, labels_original) = decision.make(outputs_decomposed, labels, input.size(0))
+                (output_decomposed, _) = decision.make(outputs_decomposed, labels, input.size(0))
 
                 annotateInput(input, output_baseline, output_decomposed, outputs_decomposed, labels_original, labels, decision.classes, data_loader.dataset.dataset, decision.config, ground_truth_label_counts)
 
