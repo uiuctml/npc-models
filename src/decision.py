@@ -62,7 +62,7 @@ class Decision():
 
             # Iterate through original classes
             for class_name in self.config.keys():
-                prediction_class = 0
+                prediction_class = 1
 
                 # Iterate through tasks
                 for (dataset_index, dataset_name) in enumerate(self.config[class_name]["labels"].keys()):
@@ -71,12 +71,8 @@ class Decision():
                     if label == "":
                         label = dataset_name + wandb.config.dataset_delimiter_label + wandb.config.dataset_label_undefined_keyword
 
-                    weight = self.config[class_name]["weights"][dataset_name]
                     label_index = self.dataset.classes[dataset_index].index(label)
-                    prediction = outputs_task[dataset_index][batch_index][label_index].item()
-                    prediction = prediction * weight
-                    # TODO reduction implementation
-                    prediction_class += prediction
+                    prediction_class *= outputs_task[dataset_index][batch_index][label_index].item()
 
                 output_batch.append(prediction_class)
 
