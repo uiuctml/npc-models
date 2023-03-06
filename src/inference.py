@@ -85,18 +85,27 @@ def annotateInput(input, output_baseline, output_decomposed, outputs_decomposed,
 
     for label_decomposed_batch in labels_decomposed:
         for (task_index, label_decomposed) in enumerate(label_decomposed_batch):
-                ground_truths_label_decomposed_task[task_index].append(dataset_decomposed.classes[task_index][label_decomposed])
+            ground_truths_label_decomposed_task[task_index].append(dataset_decomposed.classes[task_index][label_decomposed])
 
-    for (task_index, output_decomposed_task) in enumerate(outputs_decomposed):
-        (prediction_confidence_decomposed_task, predictions_index_decomposed_task) = torch.max(output_decomposed_task, 1)
+    for (task_index, output_decomposed_task_batch) in enumerate(outputs_decomposed):
+        prediction_label_decomposed_task_batch = []
+        prediction_confidence_decomposed_task_batch = []
 
-        prediction_label_decomposed_task = []
+        for (batch_index, output_decomposed_task) in enumerate(output_decomposed_task_batch):
+            task_name = dataset_decomposed.config["datasets"][task_index]["name"]
+            prediction_label_decomposed_original = predictions_label_decomposed[batch_index]
+            prediction_label_decomposed_task = config_dataset_generation[prediction_label_decomposed_original]["labels"][task_name]
 
-        for prediction_index_decomposed_task in predictions_index_decomposed_task:
-            prediction_label_decomposed_task.append(dataset_decomposed.classes[task_index][prediction_index_decomposed_task])
+            if prediction_label_decomposed_task == "":
+                prediction_label_decomposed_task = task_name + wandb.config.dataset_delimiter_label + wandb.config.dataset_label_undefined_keyword
 
-        predictions_confidence_decomposed_task.append(prediction_confidence_decomposed_task)
-        predictions_label_decomposed_task.append(prediction_label_decomposed_task)
+            prediction_index_decomposed_task = dataset_decomposed.config["datasets"][task_index]["labels"].index(prediction_label_decomposed_task)
+
+            prediction_confidence_decomposed_task_batch.append(output_decomposed_task[prediction_index_decomposed_task])
+            prediction_label_decomposed_task_batch.append(prediction_label_decomposed_task)
+
+        predictions_confidence_decomposed_task.append(prediction_confidence_decomposed_task_batch)
+        predictions_label_decomposed_task.append(prediction_label_decomposed_task_batch)
 
     input_cpu = input.cpu().numpy()
     mean = numpy.array([0.5, 0.5, 0.5])
@@ -230,8 +239,6 @@ def main():
                 corrects_baseline = torch.sum(predictions_baseline == labels_original.data).item()
                 corrects_decomposed = torch.sum(predictions_decomposed == labels_original.data).item()
 
-            accuracy_batch_baseline = corrects_baseline / input.size(0)
-            accuracy_batch_decomposed = corrects_decomposed / input.size(0)
             accuracy_epoch_baseline += corrects_baseline
             accuracy_epoch_decomposed += corrects_decomposed
 
