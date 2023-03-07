@@ -11,7 +11,7 @@ run_name_baseline = utility.wAndBGenerateRunName(run_name_baseline_keyword)
 run_name_decomposed = utility.wAndBGenerateRunName(run_name_decomposed_keyword)
 
 config_baseline = {
-    "data_loader_batch_size": 32,
+    "data_loader_batch_size": 512,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dir_checkpoints": "../checkpoints",
@@ -19,7 +19,7 @@ config_baseline = {
     "dir_dataset_train": "../../mapillary-dataset/images/split/original/train",
     "dir_dataset_validation": "../../mapillary-dataset/images/split/original/validate",
     "dropout_probability": 0.5,
-    "epochs": 35,
+    "epochs": 100,
     "file_name_checkpoint": run_name_baseline + ".tar",
     "file_name_checkpoint_best": run_name_baseline + ".best.tar",
     "fine_tuning": True,
@@ -44,7 +44,7 @@ config_baseline = {
 }
 
 config_decomposed = {
-    "data_loader_batch_size": 32,
+    "data_loader_batch_size": 512,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dataset_delimiter_file_name": "---",
@@ -56,7 +56,7 @@ config_decomposed = {
     "dir_checkpoints": "../checkpoints",
     "dir_dataset": "../../mapillary-dataset/images/sliced/generated",
     "dropout_probability": 0.5,
-    "epochs": 35,
+    "epochs": 100,
     "file_name_checkpoint": run_name_decomposed + ".tar",
     "file_name_checkpoint_best": run_name_decomposed + ".best.tar",
     "file_name_config_dataset": "dataset.json",
