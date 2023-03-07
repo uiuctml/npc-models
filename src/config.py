@@ -11,7 +11,7 @@ run_name_baseline = utility.wAndBGenerateRunName(run_name_baseline_keyword)
 run_name_decomposed = utility.wAndBGenerateRunName(run_name_decomposed_keyword)
 
 config_baseline = {
-    "data_loader_batch_size": 512,
+    "data_loader_batch_size": 768,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dir_checkpoints": "../checkpoints",
@@ -44,7 +44,7 @@ config_baseline = {
 }
 
 config_decomposed = {
-    "data_loader_batch_size": 512,
+    "data_loader_batch_size": 768,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dataset_delimiter_file_name": "---",
