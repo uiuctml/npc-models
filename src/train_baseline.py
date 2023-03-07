@@ -41,7 +41,6 @@ def main():
     dataset_transforms = torchvision.transforms.Compose([
         torchvision.transforms.Resize((wandb.config.model_input_height, wandb.config.model_input_width)),
         torchvision.transforms.ToTensor(),
-        torchvision.transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
     dataset = torchvision.datasets.ImageFolder(root = wandb.config.dir_dataset, transform = dataset_transforms)
     dataset_split_lengths = [wandb.config.dataset_split_percentage_test, wandb.config.dataset_split_percentage_train, wandb.config.dataset_split_percentage_validation]
