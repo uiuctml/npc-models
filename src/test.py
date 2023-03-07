@@ -5,18 +5,13 @@ import utility
 import wandb
 import sklearn.metrics
 
-def testBaseline(model, device, batch_step):
-    data_loader = utility.loadCheckpointBest(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint_best, model)
-
-    if data_loader is None:
-        logger.log_error("Data loader missing.")
-        return batch_step
-
+def testBaseline(model, data_loader, device, batch_step):
     accuracy_epoch = 0
-    data_loader = torch.utils.data.DataLoader(data_loader.dataset, batch_size = wandb.config.data_loader_batch_size, shuffle = wandb.config.data_loader_shuffle, num_workers = wandb.config.data_loader_worker_count, pin_memory = True)
     ground_truths_epoch = []
     predictions_epoch = []
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
+
+    utility.loadCheckpointBest(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint_best, model)
 
     model.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")

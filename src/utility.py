@@ -44,7 +44,7 @@ def wAndBGenerateRunName(model_name):
 
     return run_name
 
-def loadCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer):
+def loadCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer):
     if wandb.run.resumed:
         if not os.path.isdir(dir_checkpoints):
             os.makedirs(dir_checkpoints, exist_ok = True)
@@ -64,9 +64,6 @@ def loadCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_be
             batch_step_train = checkpoint["batch_step_train"]
             batch_step_validate = checkpoint["batch_step_validate"]
             criterion = checkpoint["criterion"]
-            data_loader_test = checkpoint["data_loader_test"]
-            data_loader_train = checkpoint["data_loader_train"]
-            data_loader_validation = checkpoint["data_loader_validation"]
             epoch = checkpoint["epoch"]
             learning_rate_scheduler.load_state_dict(checkpoint["learning_rate_scheduler_state_dict"])
             model.load_state_dict(checkpoint["model_state_dict"])
@@ -74,7 +71,7 @@ def loadCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_be
 
             logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
 
-    return (accuracy_validation_best, batch_step_train, batch_step_validate, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch)
+    return (accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch)
 
 def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
     if not os.path.isdir(dir_checkpoints):
@@ -87,19 +84,17 @@ def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
     else:
         logger.log_info("Restored checkpoint \"" + file_name_checkpoint + "\" from Weights & Biases.")
 
-    data_loader_test = None
     file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
 
     if os.path.isfile(file_path_checkpoint):
         checkpoint = torch.load(file_path_checkpoint)
-        data_loader_test = checkpoint["data_loader_test"]
         model.load_state_dict(checkpoint["model_state_dict"])
 
         logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
 
-    return data_loader_test
+    return
 
-def saveCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterion, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer):
+def saveCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer):
     if not os.path.isdir(dir_checkpoints):
         os.makedirs(dir_checkpoints, exist_ok = True)
 
@@ -108,9 +103,6 @@ def saveCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_be
         "batch_step_train": batch_step_train,
         "batch_step_validate": batch_step_validate,
         "criterion": criterion,
-        "data_loader_test": data_loader_test,
-        "data_loader_train": data_loader_train,
-        "data_loader_validation": data_loader_validation,
         "epoch": epoch,
         "learning_rate_scheduler_state_dict": learning_rate_scheduler.state_dict(),
         "model_state_dict": model.state_dict(),
