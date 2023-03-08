@@ -54,20 +54,20 @@ def validateBaseline(model, data_loader, criterion, device, batch_step):
 
     return (accuracy_epoch, loss_epoch, batch_step)
 
-def validateDecomposed(model, dataset, data_loader, criterions, device, batch_step):
+def validateDecomposed(model, config_dataset, data_loader, criterions, device, batch_step):
     accuracy_epoch_list = []
     loss_epoch_list = []
     loss_overall_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
 
-    for _ in dataset.config["datasets"]:
+    for _ in config_dataset["datasets"]:
         accuracy_epoch_list.append(0)
         loss_epoch_list.append(0)
 
     model.eval()
     progress_bar.set_description_str("[INFO]: Validation progress")
 
-    for (batch_index, (input, labels)) in enumerate(data_loader):
+    for (batch_index, (input, labels, _)) in enumerate(data_loader):
         loss_overall = 0
 
         input = input.to(device, non_blocking = True)
@@ -76,7 +76,7 @@ def validateDecomposed(model, dataset, data_loader, criterions, device, batch_st
         with torch.set_grad_enabled(False):
             outputs = model(input)
 
-            for (i, dataset_entry) in enumerate(dataset.config["datasets"]):
+            for (i, dataset_entry) in enumerate(config_dataset["datasets"]):
                 (_, predictions) = torch.max(outputs[i], 1)
                 loss = criterions[i](outputs[i], labels[:, i])
 
@@ -111,7 +111,7 @@ def validateDecomposed(model, dataset, data_loader, criterions, device, batch_st
 
     progress_bar.close()
 
-    for (i, dataset_entry) in enumerate(dataset.config["datasets"]):
+    for (i, dataset_entry) in enumerate(config_dataset["datasets"]):
         accuracy_epoch_list[i] /= len(data_loader.dataset)
         loss_epoch_list[i] /= len(data_loader)
         wandb.log({"validation/epoch/" + dataset_entry["name"] + "/accuracy": accuracy_epoch_list[i]})

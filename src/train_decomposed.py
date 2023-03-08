@@ -42,25 +42,27 @@ def main():
         torchvision.transforms.Resize((header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])),
         torchvision.transforms.ToTensor(),
     ])
-    dataset = dset.DatasetGenerated(root = header.config_decomposed["dir_dataset"], transform = dataset_transforms)
-    dataset_split_lengths = [header.config_decomposed["dataset_split_percentage_test"], header.config_decomposed["dataset_split_percentage_train"], header.config_decomposed["dataset_split_percentage_validation"]]
-    (dataset_subset_test, dataset_subset_train, dataset_subset_validation) = torch.utils.data.random_split(dataset, dataset_split_lengths)
-    data_loader_test = torch.utils.data.DataLoader(dataset_subset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
-    data_loader_train = torch.utils.data.DataLoader(dataset_subset_train, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
-    data_loader_validation = torch.utils.data.DataLoader(dataset_subset_validation, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
+    dataset_original = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_test"], dataset_transforms)
+    dataset_test = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_test"], dataset_original.classes, dataset_transforms)
+    dataset_train = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_train"], dataset_original.classes, dataset_transforms)
+    dataset_validation = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_validation"], dataset_original.classes, dataset_transforms)
+    config_dataset = dataset_train.config
+    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
+    data_loader_train = torch.utils.data.DataLoader(dataset_train, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
+    data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     epoch = 1
-    model = network.DecomposedNetworkA(dataset)
+    model = network.DecomposedNetworkA(config_dataset)
     model = torch.nn.DataParallel(model)
     model = model.to(device)
     optimizer = torch.optim.SGD(model.parameters(), lr = header.config_decomposed["optimizer_learning_rate"], momentum = header.config_decomposed["optimizer_momentum"], weight_decay = header.config_decomposed["optimizer_weight_decay"])
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.config_decomposed["learning_rate_scheduler_mode"], header.config_decomposed["learning_rate_scheduler_factor"], header.config_decomposed["learning_rate_scheduler_patient"], header.config_decomposed["learning_rate_scheduler_threshold"], header.config_decomposed["learning_rate_scheduler_threshold_mode"], header.config_decomposed["learning_rate_scheduler_cooldown"], header.config_decomposed["learning_rate_scheduler_min_learning_rate"], header.config_decomposed["learning_rate_scheduler_min_learning_rate_decay"], header.config_decomposed["learning_rate_scheduler_verbose"])
     progress_bar = None
 
-    for _ in dataset.config["datasets"]:
+    for _ in config_dataset["datasets"]:
         criterions.append(torch.nn.CrossEntropyLoss())
 
-    (accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch) = utility.loadCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
+    (accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch) = utility.loadCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch, learning_rate_scheduler, model, optimizer)
 
     if header.log_level >= type.LogLevel.trace:
         model_input_size = (header.config_decomposed["model_input_channels"], header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])
@@ -78,8 +80,8 @@ def main():
         wandb.log({"training/epoch/step": epoch})
         wandb.log({"validation/epoch/step": epoch})
 
-        batch_step_train = train.trainDecomposed(model, dataset, data_loader_train, criterions, optimizer, device, batch_step_train)
-        (accuracy_validation_epoch_list, loss_overall_validation_epoch, batch_step_validate) = validate.validateDecomposed(model, dataset, data_loader_validation, criterions, device, batch_step_validate)
+        batch_step_train = train.trainDecomposed(model, config_dataset, data_loader_train, criterions, optimizer, device, batch_step_train)
+        (accuracy_validation_epoch_list, loss_overall_validation_epoch, batch_step_validate) = validate.validateDecomposed(model, config_dataset, data_loader_validation, criterions, device, batch_step_validate)
 
         learning_rate_scheduler.step(loss_overall_validation_epoch)
 
@@ -88,9 +90,9 @@ def main():
         if accuracy_validation_epoch_mean > accuracy_validation_best:
             accuracy_validation_best = accuracy_validation_epoch_mean
             wandb.log({"validation/epoch/accuracy_best": accuracy_validation_best})
-            utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
+            utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch, learning_rate_scheduler, model, optimizer)
 
-        utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
+        utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch, learning_rate_scheduler, model, optimizer)
 
         epoch += 1
 
@@ -101,7 +103,7 @@ def main():
     wandb.summary["validation/epoch/accuracy_best"] = accuracy_validation_best
 
     wandb.log({"testing/epoch/step": 1})
-    batch_step_test = test.testDecomposed(model, dataset, device, batch_step_test)
+    batch_step_test = test.testDecomposed(model, config_dataset, data_loader_test, device, batch_step_test)
 
     wandb.finish()
 

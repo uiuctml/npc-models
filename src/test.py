@@ -61,20 +61,15 @@ def testBaseline(model, data_loader, device, batch_step):
 
     return batch_step
 
-def testDecomposed(model, dataset, device, batch_step):
-    data_loader = utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model)
-
-    if data_loader is None:
-        logger.log_error("Data loader missing.")
-        return batch_step
+def testDecomposed(model, config_dataset, data_loader, device, batch_step):
+    utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model)
 
     accuracy_epoch_list = []
-    data_loader = torch.utils.data.DataLoader(data_loader.dataset, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     ground_truths_epoch_list = []
     predictions_epoch_list = []
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
 
-    for _ in dataset.config["datasets"]:
+    for _ in config_dataset["datasets"]:
         accuracy_epoch_list.append(0)
         ground_truths_epoch_list.append([])
         predictions_epoch_list.append([])
@@ -90,7 +85,7 @@ def testDecomposed(model, dataset, device, batch_step):
             with torch.set_grad_enabled(False):
                 outputs = model(input)
 
-                for (i, dataset_entry) in enumerate(dataset.config["datasets"]):
+                for (i, dataset_entry) in enumerate(config_dataset["datasets"]):
                     (_, predictions) = torch.max(outputs[i], 1)
 
                     corrects = torch.sum(predictions == labels[:, i].data).item()
@@ -111,7 +106,7 @@ def testDecomposed(model, dataset, device, batch_step):
 
     progress_bar.close()
 
-    for (i, dataset_entry) in enumerate(dataset.config["datasets"]):
+    for (i, dataset_entry) in enumerate(config_dataset["datasets"]):
         accuracy_epoch_list[i] /= len(data_loader.dataset)
         precision_epoch = sklearn.metrics.precision_score(ground_truths_epoch_list[i], predictions_epoch_list[i], average = "macro", zero_division = 0)
         recall_epoch = sklearn.metrics.recall_score(ground_truths_epoch_list[i], predictions_epoch_list[i], average = "macro", zero_division = 0)

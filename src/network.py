@@ -3,12 +3,12 @@ import torch.nn
 import torchvision
 
 class BaselineNetworkA(torch.nn.Module):
-    def __init__(self, dataset):
+    def __init__(self, class_count):
         super().__init__()
 
         self.net = torchvision.models.resnet152(weights = header.config_baseline["model_pretrained_weights"])
         net_fc_in_features = self.net.fc.in_features
-        self.net.fc = torch.nn.Linear(net_fc_in_features, len(dataset.classes))
+        self.net.fc = torch.nn.Linear(net_fc_in_features, class_count)
 
         if not header.config_baseline["fine_tuning"]:
             for parameter in self.parameters():
@@ -20,12 +20,12 @@ class BaselineNetworkA(torch.nn.Module):
         return self.net(input)
 
 class BaselineNetworkB(torch.nn.Module):
-    def __init__(self, dataset):
+    def __init__(self, class_count):
         super().__init__()
 
         self.net = torchvision.models.resnet152(weights = header.config_baseline["model_pretrained_weights"])
         net_fc_in_features = self.net.fc.in_features
-        self.net.fc = torch.nn.Sequential(torch.nn.Dropout(p = header.config_baseline["train_dropout_probability"]), torch.nn.Linear(net_fc_in_features, len(dataset.classes)))
+        self.net.fc = torch.nn.Sequential(torch.nn.Dropout(p = header.config_baseline["train_dropout_probability"]), torch.nn.Linear(net_fc_in_features, class_count))
 
         if not header.config_baseline["fine_tuning"]:
             for parameter in self.parameters():
@@ -37,7 +37,7 @@ class BaselineNetworkB(torch.nn.Module):
         return self.net(input)
 
 class DecomposedNetworkA(torch.nn.Module):
-    def __init__(self, dataset):
+    def __init__(self, config_dataset):
         super().__init__()
 
         self.net = torchvision.models.resnet152(weights = header.config_decomposed["model_pretrained_weights"])
@@ -46,7 +46,7 @@ class DecomposedNetworkA(torch.nn.Module):
 
         layer_list = []
 
-        for dataset_entry in dataset.config["datasets"]:
+        for dataset_entry in config_dataset["datasets"]:
             dataset_name = dataset_entry["name"]
             dataset_labels = dataset_entry["labels"]
 

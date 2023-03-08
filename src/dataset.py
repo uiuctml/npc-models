@@ -7,9 +7,9 @@ import PIL.Image
 import torch
 
 class DatasetDecomposed(torch.utils.data.Dataset):
-    def __init__(self, root, dataset_original, transform = None):
+    def __init__(self, root, classes_original, transform = None):
         self.classes = []
-        self.classes_original = dataset_original.classes
+        self.classes_original = classes_original
         self.config = {}
         self.file_paths = []
         self.labels = []

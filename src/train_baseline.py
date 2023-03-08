@@ -41,15 +41,16 @@ def main():
         torchvision.transforms.Resize((header.config_baseline["model_input_height"], header.config_baseline["model_input_width"])),
         torchvision.transforms.ToTensor(),
     ])
-    dataset_test = torchvision.datasets.ImageFolder(root = header.config_baseline["dir_dataset_test"], transform = dataset_transforms)
-    dataset_train = torchvision.datasets.ImageFolder(root = header.config_baseline["dir_dataset_train"], transform = dataset_transforms)
-    dataset_validation = torchvision.datasets.ImageFolder(root = header.config_baseline["dir_dataset_validation"], transform = dataset_transforms)
+    dataset_test = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_test"], dataset_transforms)
+    dataset_train = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_train"], dataset_transforms)
+    dataset_validation = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_validation"], dataset_transforms)
+    class_count = len(dataset_train.classes)
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_baseline["data_loader_batch_size"], shuffle = False, num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
     data_loader_train = torch.utils.data.DataLoader(dataset_train, batch_size = header.config_baseline["data_loader_batch_size"], shuffle = header.config_baseline["data_loader_shuffle"], num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
     data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_baseline["data_loader_batch_size"], shuffle = header.config_baseline["data_loader_shuffle"], num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     epoch = 1
-    model = network.BaselineNetworkA(dataset_train)
+    model = network.BaselineNetworkA(class_count)
     model = torch.nn.DataParallel(model)
     model = model.to(device)
     optimizer = torch.optim.SGD(model.parameters(), lr = header.config_baseline["optimizer_learning_rate"], momentum = header.config_baseline["optimizer_momentum"], weight_decay = header.config_baseline["optimizer_weight_decay"])
