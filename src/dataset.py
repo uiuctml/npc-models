@@ -6,43 +6,20 @@ import PIL
 import PIL.Image
 import torch
 
-class DatasetGenerated(torch.utils.data.Dataset):
-    def constructOriginalKeyLabelMap(self):
-        self.classes_original = []
-        self.key_label_map = {}
-
-        dir_dataset_original = "../../mapillary-dataset/images/sliced/original"
-        dir_dataset_original_list = os.listdir(dir_dataset_original)
-
-        for dir_dataset_original_label in dir_dataset_original_list:
-            dir_dataset_original_label_list = os.listdir(os.path.join(dir_dataset_original, dir_dataset_original_label))
-
-            for dir_dataset_original_image in dir_dataset_original_label_list:
-                key = dir_dataset_original_image.split(".")[0]
-                self.key_label_map[key] = dir_dataset_original_label
-
-        file_config_dataset_generation = open(os.path.join(header.config_decomposed["dir_dataset"], header.config_decomposed["file_name_config_dataset_generation"]), "r")
-        config_dataset_generation = json.load(file_config_dataset_generation)
-        file_config_dataset_generation.close()
-
-        for class_name in config_dataset_generation.keys():
-            self.classes_original.append(class_name)
-
-        return
-
-    def __init__(self, root, transform = None):
+class DatasetDecomposed(torch.utils.data.Dataset):
+    def __init__(self, root, dataset_original, transform = None):
         self.classes = []
+        self.classes_original = dataset_original.classes
         self.config = {}
         self.file_paths = []
         self.labels = []
+        self.labels_original = []
         self.root = root
         self.transform = transform
 
         if not os.path.isdir(root):
             logger.log_error("Invalid dataset directory.")
             return
-
-        self.constructOriginalKeyLabelMap()
 
         file_config_dataset = open(os.path.join(root, header.config_decomposed["file_name_config_dataset"]), "r")
         self.config = json.load(file_config_dataset)
@@ -60,11 +37,16 @@ class DatasetGenerated(torch.utils.data.Dataset):
 
             file_name_split = file_name.split(header.config_decomposed["dataset_delimiter_file_name"])
 
-            if len(file_name_split) < len(self.labels):
+            # A valid data should contain decomposed labels, an original label, and a file key
+            if len(file_name_split) < len(self.labels) + 2:
                 logger.log_warn("Invalid data \"" + file_name + "\".")
                 continue
 
+            class_original = file_name_split[-2]
+            label_original = self.classes_original.index(class_original)
+
             self.file_paths.append(os.path.abspath(os.path.join(root, file_name)))
+            self.labels_original.append(label_original)
 
             for i in range(0, len(self.labels)):
                 label = self.classes[i].index(file_name_split[i])
@@ -85,7 +67,4 @@ class DatasetGenerated(torch.utils.data.Dataset):
         for label in self.labels:
             labels.append(int(label[index]))
 
-        key = self.file_paths[index].split(".")[0].split(header.config_decomposed["dataset_delimiter_file_name"])[-1]
-        label_original = self.classes_original.index(self.key_label_map[key])
-
-        return (image, torch.LongTensor(labels), label_original)
+        return (image, torch.LongTensor(labels), self.labels_original[index])
