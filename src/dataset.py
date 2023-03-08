@@ -1,4 +1,4 @@
-import config
+import header
 import json
 import logger
 import os
@@ -21,7 +21,7 @@ class DatasetGenerated(torch.utils.data.Dataset):
                 key = dir_dataset_original_image.split(".")[0]
                 self.key_label_map[key] = dir_dataset_original_label
 
-        file_config_dataset_generation = open(os.path.join(config.config_decomposed["dir_dataset"], config.config_decomposed["file_name_config_dataset_generation"]), "r")
+        file_config_dataset_generation = open(os.path.join(header.config_decomposed["dir_dataset"], header.config_decomposed["file_name_config_dataset_generation"]), "r")
         config_dataset_generation = json.load(file_config_dataset_generation)
         file_config_dataset_generation.close()
 
@@ -44,7 +44,7 @@ class DatasetGenerated(torch.utils.data.Dataset):
 
         self.constructOriginalKeyLabelMap()
 
-        file_config_dataset = open(os.path.join(root, config.config_decomposed["file_name_config_dataset"]), "r")
+        file_config_dataset = open(os.path.join(root, header.config_decomposed["file_name_config_dataset"]), "r")
         self.config = json.load(file_config_dataset)
         file_config_dataset.close()
 
@@ -55,10 +55,10 @@ class DatasetGenerated(torch.utils.data.Dataset):
             self.labels.append([])
 
         for file_name in os.listdir(root):
-            if file_name == config.config_decomposed["file_name_config_dataset"] or file_name == config.config_decomposed["file_name_config_dataset_generation"]:
+            if file_name == header.config_decomposed["file_name_config_dataset"] or file_name == header.config_decomposed["file_name_config_dataset_generation"]:
                 continue
 
-            file_name_split = file_name.split(config.config_decomposed["dataset_delimiter_file_name"])
+            file_name_split = file_name.split(header.config_decomposed["dataset_delimiter_file_name"])
 
             if len(file_name_split) < len(self.labels):
                 logger.log_warn("Invalid data \"" + file_name + "\".")
@@ -85,7 +85,7 @@ class DatasetGenerated(torch.utils.data.Dataset):
         for label in self.labels:
             labels.append(int(label[index]))
 
-        key = self.file_paths[index].split(".")[0].split(config.config_decomposed["dataset_delimiter_file_name"])[-1]
+        key = self.file_paths[index].split(".")[0].split(header.config_decomposed["dataset_delimiter_file_name"])[-1]
         label_original = self.classes_original.index(self.key_label_map[key])
 
         return (image, torch.LongTensor(labels), label_original)

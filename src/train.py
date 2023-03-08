@@ -1,4 +1,4 @@
-import config
+import header
 import math
 import torch
 import tqdm
@@ -24,9 +24,9 @@ def trainBaseline(model, data_loader, criterion, optimizer, device, batch_step):
             (_, predictions) = torch.max(output, 1)
             loss = criterion(output, labels)
 
-            if config.config_baseline["use_l2_loss"]:
+            if header.config_baseline["use_l2_loss"]:
                 l2_norm = utility.computeL2Norm(model.parameters())
-                loss_l2 = config.config_baseline["l2_lambda"] * l2_norm
+                loss_l2 = header.config_baseline["l2_lambda"] * l2_norm
                 loss += loss_l2
 
             loss.backward()
@@ -87,9 +87,9 @@ def trainDecomposed(model, dataset, data_loader, criterions, optimizer, device, 
                 (_, predictions) = torch.max(outputs[i], 1)
                 loss = criterions[i](outputs[i], labels[:, i])
 
-                if config.config_decomposed["use_l2_loss"]:
+                if header.config_decomposed["use_l2_loss"]:
                     l2_norm = utility.computeL2Norm(model.parameters())
-                    loss_l2 = config.config_decomposed["l2_lambda"] * l2_norm
+                    loss_l2 = header.config_decomposed["l2_lambda"] * l2_norm
                     loss += loss_l2
 
                 corrects = torch.sum(predictions == labels[:, i].data).item()

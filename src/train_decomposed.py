@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import config
+import header
 import dataset as dset
 import logger
 import network
@@ -22,19 +22,19 @@ def main():
     resume = False
 
     if len(sys.argv) > 1:
-        config.run_name_decomposed = sys.argv[1]
-        config.config_decomposed["file_name_checkpoint"] = config.run_name_decomposed + ".tar"
-        config.config_decomposed["file_name_checkpoint_best"] = config.run_name_decomposed + ".best.tar"
+        header.run_name_decomposed = sys.argv[1]
+        header.config_decomposed["file_name_checkpoint"] = header.run_name_decomposed + ".tar"
+        header.config_decomposed["file_name_checkpoint_best"] = header.run_name_decomposed + ".best.tar"
         resume = True
 
-    if config.run_mode == "online":
+    if header.run_mode == "online":
         wandb.login()
 
-    wandb.init(project = config.project_name, name = config.run_name_decomposed, config = config.config_decomposed, resume = resume, mode = config.run_mode)
+    wandb.init(project = header.project_name, name = header.run_name_decomposed, config = header.config_decomposed, resume = resume, mode = header.run_mode)
 
     utility.wAndBDefineMetrics()
 
-    logger.log_info("Started run \"" + config.run_name_decomposed + "\".")
+    logger.log_info("Started run \"" + header.run_name_decomposed + "\".")
 
     accuracy_validation_best = 0
     batch_step_test = 1
@@ -42,38 +42,38 @@ def main():
     batch_step_validate = 1
     criterions = []
     dataset_transforms = torchvision.transforms.Compose([
-        torchvision.transforms.Resize((config.config_decomposed["model_input_height"], config.config_decomposed["model_input_width"])),
+        torchvision.transforms.Resize((header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])),
         torchvision.transforms.ToTensor(),
     ])
-    dataset = dset.DatasetGenerated(root = config.config_decomposed["dir_dataset"], transform = dataset_transforms)
-    dataset_split_lengths = [config.config_decomposed["dataset_split_percentage_test"], config.config_decomposed["dataset_split_percentage_train"], config.config_decomposed["dataset_split_percentage_validation"]]
+    dataset = dset.DatasetGenerated(root = header.config_decomposed["dir_dataset"], transform = dataset_transforms)
+    dataset_split_lengths = [header.config_decomposed["dataset_split_percentage_test"], header.config_decomposed["dataset_split_percentage_train"], header.config_decomposed["dataset_split_percentage_validation"]]
     (dataset_subset_test, dataset_subset_train, dataset_subset_validation) = torch.utils.data.random_split(dataset, dataset_split_lengths)
-    data_loader_test = torch.utils.data.DataLoader(dataset_subset_test, batch_size = config.config_decomposed["data_loader_batch_size"], shuffle = config.config_decomposed["data_loader_shuffle"], num_workers = config.config_decomposed["data_loader_worker_count"], pin_memory = True)
-    data_loader_train = torch.utils.data.DataLoader(dataset_subset_train, batch_size = config.config_decomposed["data_loader_batch_size"], shuffle = config.config_decomposed["data_loader_shuffle"], num_workers = config.config_decomposed["data_loader_worker_count"], pin_memory = True)
-    data_loader_validation = torch.utils.data.DataLoader(dataset_subset_validation, batch_size = config.config_decomposed["data_loader_batch_size"], shuffle = config.config_decomposed["data_loader_shuffle"], num_workers = config.config_decomposed["data_loader_worker_count"], pin_memory = True)
+    data_loader_test = torch.utils.data.DataLoader(dataset_subset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
+    data_loader_train = torch.utils.data.DataLoader(dataset_subset_train, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
+    data_loader_validation = torch.utils.data.DataLoader(dataset_subset_validation, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     epoch = 1
     model = network.DecomposedNetworkA(dataset)
     model = torch.nn.DataParallel(model)
     model = model.to(device)
-    optimizer = torch.optim.SGD(model.parameters(), lr = config.config_decomposed["optimizer_learning_rate"], momentum = config.config_decomposed["optimizer_momentum"], weight_decay = config.config_decomposed["optimizer_weight_decay"])
-    learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, config.config_decomposed["learning_rate_scheduler_mode"], config.config_decomposed["learning_rate_scheduler_factor"], config.config_decomposed["learning_rate_scheduler_patient"], config.config_decomposed["learning_rate_scheduler_threshold"], config.config_decomposed["learning_rate_scheduler_threshold_mode"], config.config_decomposed["learning_rate_scheduler_cooldown"], config.config_decomposed["learning_rate_scheduler_min_learning_rate"], config.config_decomposed["learning_rate_scheduler_min_learning_rate_decay"], config.config_decomposed["learning_rate_scheduler_verbose"])
+    optimizer = torch.optim.SGD(model.parameters(), lr = header.config_decomposed["optimizer_learning_rate"], momentum = header.config_decomposed["optimizer_momentum"], weight_decay = header.config_decomposed["optimizer_weight_decay"])
+    learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.config_decomposed["learning_rate_scheduler_mode"], header.config_decomposed["learning_rate_scheduler_factor"], header.config_decomposed["learning_rate_scheduler_patient"], header.config_decomposed["learning_rate_scheduler_threshold"], header.config_decomposed["learning_rate_scheduler_threshold_mode"], header.config_decomposed["learning_rate_scheduler_cooldown"], header.config_decomposed["learning_rate_scheduler_min_learning_rate"], header.config_decomposed["learning_rate_scheduler_min_learning_rate_decay"], header.config_decomposed["learning_rate_scheduler_verbose"])
     progress_bar = None
 
     for _ in dataset.config["datasets"]:
         criterions.append(torch.nn.CrossEntropyLoss())
 
-    (accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch) = utility.loadCheckpoint(config.config_decomposed["dir_checkpoints"], config.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
+    (accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch) = utility.loadCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
 
-    if config.log_level >= type.LogLevel.trace:
-        model_input_size = (config.config_decomposed["model_input_channels"], config.config_decomposed["model_input_height"], config.config_decomposed["model_input_width"])
+    if header.log_level >= type.LogLevel.trace:
+        model_input_size = (header.config_decomposed["model_input_channels"], header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])
         torchsummary.summary(model, input_size = model_input_size)
 
-    if epoch <= config.config_decomposed["epochs"]:
-        progress_bar = tqdm.tqdm(total = config.config_decomposed["epochs"], position = 0)
+    if epoch <= header.config_decomposed["epochs"]:
+        progress_bar = tqdm.tqdm(total = header.config_decomposed["epochs"], position = 0)
         progress_bar.set_description_str("[INFO]: Epoch")
 
-    while epoch <= config.config_decomposed["epochs"]:
+    while epoch <= header.config_decomposed["epochs"]:
         if progress_bar is not None:
             progress_bar.n = epoch
             progress_bar.refresh()
@@ -91,9 +91,9 @@ def main():
         if accuracy_validation_epoch_mean > accuracy_validation_best:
             accuracy_validation_best = accuracy_validation_epoch_mean
             wandb.log({"validation/epoch/accuracy_best": accuracy_validation_best})
-            utility.saveCheckpoint(config.config_decomposed["dir_checkpoints"], config.config_decomposed["file_name_checkpoint_best"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
+            utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
 
-        utility.saveCheckpoint(config.config_decomposed["dir_checkpoints"], config.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
+        utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
 
         epoch += 1
 

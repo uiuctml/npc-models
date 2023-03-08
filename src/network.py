@@ -1,4 +1,4 @@
-import config
+import header
 import torch.nn
 import torchvision
 
@@ -6,11 +6,11 @@ class BaselineNetworkA(torch.nn.Module):
     def __init__(self, dataset):
         super().__init__()
 
-        self.net = torchvision.models.resnet152(weights = config.config_baseline["model_pretrained_weights"])
+        self.net = torchvision.models.resnet152(weights = header.config_baseline["model_pretrained_weights"])
         net_fc_in_features = self.net.fc.in_features
         self.net.fc = torch.nn.Linear(net_fc_in_features, len(dataset.classes))
 
-        if not config.config_baseline["fine_tuning"]:
+        if not header.config_baseline["fine_tuning"]:
             for parameter in self.parameters():
                 parameter.requires_grad = False
 
@@ -23,11 +23,11 @@ class BaselineNetworkB(torch.nn.Module):
     def __init__(self, dataset):
         super().__init__()
 
-        self.net = torchvision.models.resnet152(weights = config.config_baseline["model_pretrained_weights"])
+        self.net = torchvision.models.resnet152(weights = header.config_baseline["model_pretrained_weights"])
         net_fc_in_features = self.net.fc.in_features
-        self.net.fc = torch.nn.Sequential(torch.nn.Dropout(p = config.config_baseline["train_dropout_probability"]), torch.nn.Linear(net_fc_in_features, len(dataset.classes)))
+        self.net.fc = torch.nn.Sequential(torch.nn.Dropout(p = header.config_baseline["train_dropout_probability"]), torch.nn.Linear(net_fc_in_features, len(dataset.classes)))
 
-        if not config.config_baseline["fine_tuning"]:
+        if not header.config_baseline["fine_tuning"]:
             for parameter in self.parameters():
                 parameter.requires_grad = False
 
@@ -40,7 +40,7 @@ class DecomposedNetworkA(torch.nn.Module):
     def __init__(self, dataset):
         super().__init__()
 
-        self.net = torchvision.models.resnet152(weights = config.config_decomposed["model_pretrained_weights"])
+        self.net = torchvision.models.resnet152(weights = header.config_decomposed["model_pretrained_weights"])
         net_fc_in_features = self.net.fc.in_features
         self.net.fc = torch.nn.Identity()
 
@@ -57,7 +57,7 @@ class DecomposedNetworkA(torch.nn.Module):
 
         self.net.heads = torch.nn.ModuleList(layer_list)
 
-        if not config.config_decomposed["fine_tuning"]:
+        if not header.config_decomposed["fine_tuning"]:
             for parameter in self.parameters():
                 parameter.requires_grad = False
 

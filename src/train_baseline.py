@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import config
+import header
 import logger
 import network
 import sys
@@ -21,19 +21,19 @@ def main():
     resume = False
 
     if len(sys.argv) > 1:
-        config.run_name_baseline = sys.argv[1]
-        config.config_baseline["file_name_checkpoint"] = config.run_name_baseline + ".tar"
-        config.config_baseline["file_name_checkpoint_best"] = config.run_name_baseline + ".best.tar"
+        header.run_name_baseline = sys.argv[1]
+        header.config_baseline["file_name_checkpoint"] = header.run_name_baseline + ".tar"
+        header.config_baseline["file_name_checkpoint_best"] = header.run_name_baseline + ".best.tar"
         resume = True
 
-    if config.run_mode == "online":
+    if header.run_mode == "online":
         wandb.login()
 
-    wandb.init(project = config.project_name, name = config.run_name_baseline, config = config.config_baseline, resume = resume, mode = config.run_mode)
+    wandb.init(project = header.project_name, name = header.run_name_baseline, config = header.config_baseline, resume = resume, mode = header.run_mode)
 
     utility.wAndBDefineMetrics()
 
-    logger.log_info("Started run \"" + config.run_name_baseline + "\".")
+    logger.log_info("Started run \"" + header.run_name_baseline + "\".")
 
     accuracy_validation_best = 0
     batch_step_test = 1
@@ -41,35 +41,35 @@ def main():
     batch_step_validate = 1
     criterion = torch.nn.CrossEntropyLoss()
     dataset_transforms = torchvision.transforms.Compose([
-        torchvision.transforms.Resize((config.config_baseline["model_input_height"], config.config_baseline["model_input_width"])),
+        torchvision.transforms.Resize((header.config_baseline["model_input_height"], header.config_baseline["model_input_width"])),
         torchvision.transforms.ToTensor(),
     ])
-    dataset_test = torchvision.datasets.ImageFolder(root = config.config_baseline["dir_dataset_test"], transform = dataset_transforms)
-    dataset_train = torchvision.datasets.ImageFolder(root = config.config_baseline["dir_dataset_train"], transform = dataset_transforms)
-    dataset_validation = torchvision.datasets.ImageFolder(root = config.config_baseline["dir_dataset_validation"], transform = dataset_transforms)
-    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = config.config_baseline["data_loader_batch_size"], shuffle = False, num_workers = config.config_baseline["data_loader_worker_count"], pin_memory = True)
-    data_loader_train = torch.utils.data.DataLoader(dataset_train, batch_size = config.config_baseline["data_loader_batch_size"], shuffle = config.config_baseline["data_loader_shuffle"], num_workers = config.config_baseline["data_loader_worker_count"], pin_memory = True)
-    data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = config.config_baseline["data_loader_batch_size"], shuffle = config.config_baseline["data_loader_shuffle"], num_workers = config.config_baseline["data_loader_worker_count"], pin_memory = True)
+    dataset_test = torchvision.datasets.ImageFolder(root = header.config_baseline["dir_dataset_test"], transform = dataset_transforms)
+    dataset_train = torchvision.datasets.ImageFolder(root = header.config_baseline["dir_dataset_train"], transform = dataset_transforms)
+    dataset_validation = torchvision.datasets.ImageFolder(root = header.config_baseline["dir_dataset_validation"], transform = dataset_transforms)
+    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_baseline["data_loader_batch_size"], shuffle = False, num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
+    data_loader_train = torch.utils.data.DataLoader(dataset_train, batch_size = header.config_baseline["data_loader_batch_size"], shuffle = header.config_baseline["data_loader_shuffle"], num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
+    data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_baseline["data_loader_batch_size"], shuffle = header.config_baseline["data_loader_shuffle"], num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     epoch = 1
     model = network.BaselineNetworkA(dataset_train)
     model = torch.nn.DataParallel(model)
     model = model.to(device)
-    optimizer = torch.optim.SGD(model.parameters(), lr = config.config_baseline["optimizer_learning_rate"], momentum = config.config_baseline["optimizer_momentum"], weight_decay = config.config_baseline["optimizer_weight_decay"])
-    learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, config.config_baseline["learning_rate_scheduler_mode"], config.config_baseline["learning_rate_scheduler_factor"], config.config_baseline["learning_rate_scheduler_patient"], config.config_baseline["learning_rate_scheduler_threshold"], config.config_baseline["learning_rate_scheduler_threshold_mode"], config.config_baseline["learning_rate_scheduler_cooldown"], config.config_baseline["learning_rate_scheduler_min_learning_rate"], config.config_baseline["learning_rate_scheduler_min_learning_rate_decay"], config.config_baseline["learning_rate_scheduler_verbose"])
+    optimizer = torch.optim.SGD(model.parameters(), lr = header.config_baseline["optimizer_learning_rate"], momentum = header.config_baseline["optimizer_momentum"], weight_decay = header.config_baseline["optimizer_weight_decay"])
+    learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.config_baseline["learning_rate_scheduler_mode"], header.config_baseline["learning_rate_scheduler_factor"], header.config_baseline["learning_rate_scheduler_patient"], header.config_baseline["learning_rate_scheduler_threshold"], header.config_baseline["learning_rate_scheduler_threshold_mode"], header.config_baseline["learning_rate_scheduler_cooldown"], header.config_baseline["learning_rate_scheduler_min_learning_rate"], header.config_baseline["learning_rate_scheduler_min_learning_rate_decay"], header.config_baseline["learning_rate_scheduler_verbose"])
     progress_bar = None
 
-    (accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch) = utility.loadCheckpoint(config.config_baseline["dir_checkpoints"], config.config_baseline["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer)
+    (accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch) = utility.loadCheckpoint(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer)
 
-    if config.log_level >= type.LogLevel.trace:
-        model_input_size = (config.config_baseline["model_input_channels"], config.config_baseline["model_input_height"], config.config_baseline["model_input_width"])
+    if header.log_level >= type.LogLevel.trace:
+        model_input_size = (header.config_baseline["model_input_channels"], header.config_baseline["model_input_height"], header.config_baseline["model_input_width"])
         torchsummary.summary(model, input_size = model_input_size)
 
-    if epoch <= config.config_baseline["epochs"]:
-        progress_bar = tqdm.tqdm(total = config.config_baseline["epochs"], position = 0)
+    if epoch <= header.config_baseline["epochs"]:
+        progress_bar = tqdm.tqdm(total = header.config_baseline["epochs"], position = 0)
         progress_bar.set_description_str("[INFO]: Epoch")
 
-    while epoch <= config.config_baseline["epochs"]:
+    while epoch <= header.config_baseline["epochs"]:
         if progress_bar is not None:
             progress_bar.n = epoch
             progress_bar.refresh()
@@ -85,9 +85,9 @@ def main():
         if accuracy_validation_epoch > accuracy_validation_best:
             accuracy_validation_best = accuracy_validation_epoch
             wandb.log({"validation/epoch/accuracy_best": accuracy_validation_best})
-            utility.saveCheckpoint(config.config_baseline["dir_checkpoints"], config.config_baseline["file_name_checkpoint_best"], accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer)
+            utility.saveCheckpoint(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint_best"], accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer)
 
-        utility.saveCheckpoint(config.config_baseline["dir_checkpoints"], config.config_baseline["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer)
+        utility.saveCheckpoint(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer)
 
         epoch += 1
 

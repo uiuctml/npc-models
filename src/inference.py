@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-import config
 import cv2
 import dataset as dset
 import decision as deci
+import header
 import logger
 import network
 import numpy
@@ -163,21 +163,21 @@ def annotateInput(input, output_baseline, output_decomposed, outputs_decomposed,
 
 def main():
     if len(sys.argv) > 2:
-        if sys.argv[1].split(".")[0] != config.run_name_baseline_keyword:
+        if sys.argv[1].split(".")[0] != header.run_name_baseline_keyword:
             logger.log_error("Invalid baseline run name. Quit.")
             return
 
-        if sys.argv[2].split(".")[0] != config.run_name_decomposed_keyword:
+        if sys.argv[2].split(".")[0] != header.run_name_decomposed_keyword:
             logger.log_error("Invalid decomposed run name. Quit.")
             return
 
-        config.run_name_baseline = sys.argv[1]
-        config.run_name_decomposed = sys.argv[2]
+        header.run_name_baseline = sys.argv[1]
+        header.run_name_decomposed = sys.argv[2]
 
-        config.config_baseline["file_name_checkpoint"] = config.run_name_baseline + ".tar"
-        config.config_baseline["file_name_checkpoint_best"] = config.run_name_baseline + ".best.tar"
-        config.config_decomposed["file_name_checkpoint"] = config.run_name_decomposed + ".tar"
-        config.config_decomposed["file_name_checkpoint_best"] = config.run_name_decomposed + ".best.tar"
+        header.config_baseline["file_name_checkpoint"] = header.run_name_baseline + ".tar"
+        header.config_baseline["file_name_checkpoint_best"] = header.run_name_baseline + ".best.tar"
+        header.config_decomposed["file_name_checkpoint"] = header.run_name_decomposed + ".tar"
+        header.config_decomposed["file_name_checkpoint_best"] = header.run_name_decomposed + ".best.tar"
     else:
         logger.log_error("Run names missing. Quit.")
         return
@@ -185,7 +185,7 @@ def main():
     device = torch.device("cuda")
     ground_truth_label_counts = {}
 
-    wandb.init(config = config.config_baseline, mode = "disabled")
+    wandb.init(config = header.config_baseline, mode = "disabled")
 
     accuracy_epoch_baseline = 0
     dataset_baseline = torchvision.datasets.ImageFolder(root = wandb.config.dir_dataset)
@@ -196,7 +196,7 @@ def main():
     utility.loadCheckpointBest(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint_best, model_baseline)
 
     wandb.finish()
-    wandb.init(config = config.config_decomposed, mode = "disabled")
+    wandb.init(config = header.config_decomposed, mode = "disabled")
 
     accuracy_epoch_decomposed = 0
     dataset_decomposed = dset.DatasetGenerated(root = wandb.config.dir_dataset)

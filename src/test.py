@@ -1,4 +1,4 @@
-import config
+import header
 import logger
 import torch
 import tqdm
@@ -7,12 +7,12 @@ import wandb
 import sklearn.metrics
 
 def testBaseline(model, data_loader, device, batch_step):
+    utility.loadCheckpointBest(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint_best"], model)
+
     accuracy_epoch = 0
     ground_truths_epoch = []
     predictions_epoch = []
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
-
-    utility.loadCheckpointBest(config.config_baseline["dir_checkpoints"], config.config_baseline["file_name_checkpoint_best"], model)
 
     model.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")
@@ -62,14 +62,14 @@ def testBaseline(model, data_loader, device, batch_step):
     return batch_step
 
 def testDecomposed(model, dataset, device, batch_step):
-    data_loader = utility.loadCheckpointBest(config.config_decomposed["dir_checkpoints"], config.config_decomposed["file_name_checkpoint_best"], model)
+    data_loader = utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model)
 
     if data_loader is None:
         logger.log_error("Data loader missing.")
         return batch_step
 
     accuracy_epoch_list = []
-    data_loader = torch.utils.data.DataLoader(data_loader.dataset, batch_size = config.config_decomposed["data_loader_batch_size"], shuffle = config.config_decomposed["data_loader_shuffle"], num_workers = config.config_decomposed["data_loader_worker_count"], pin_memory = True)
+    data_loader = torch.utils.data.DataLoader(data_loader.dataset, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     ground_truths_epoch_list = []
     predictions_epoch_list = []
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)

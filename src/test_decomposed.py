@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import config
 import dataset as dset
+import header
 import logger
 import network
 import sys
@@ -12,16 +12,16 @@ import wandb
 
 def main():
     if len(sys.argv) > 1:
-        config.run_name_decomposed = sys.argv[1]
-        config.config_decomposed["file_name_checkpoint"] = config.run_name_decomposed + ".tar"
-        config.config_decomposed["file_name_checkpoint_best"] = config.run_name_decomposed + ".best.tar"
+        header.run_name_decomposed = sys.argv[1]
+        header.config_decomposed["file_name_checkpoint"] = header.run_name_decomposed + ".tar"
+        header.config_decomposed["file_name_checkpoint_best"] = header.run_name_decomposed + ".best.tar"
     else:
         logger.log_error("Run name missing. Quit.")
         return
 
-    wandb.init(config = config.config_decomposed, mode = "disabled")
+    wandb.init(config = header.config_decomposed, mode = "disabled")
 
-    dataset = dset.DatasetGenerated(root = config.config_decomposed["dir_dataset"])
+    dataset = dset.DatasetGenerated(root = header.config_decomposed["dir_dataset"])
     device = torch.device("cuda")
     model = network.DecomposedNetworkA(dataset)
     model = torch.nn.DataParallel(model)

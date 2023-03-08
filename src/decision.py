@@ -1,4 +1,4 @@
-import config
+import header
 import json
 import logger
 import os
@@ -14,7 +14,7 @@ class Decision():
         self.label_map = {}
         self.softmax = torch.nn.Softmax(dim = 1)
 
-        file_config_dataset_generation = open(os.path.join(config.config_decomposed["dir_dataset"], config.config_decomposed["file_name_config_dataset_generation"]), "r")
+        file_config_dataset_generation = open(os.path.join(header.config_decomposed["dir_dataset"], header.config_decomposed["file_name_config_dataset_generation"]), "r")
         self.config = json.load(file_config_dataset_generation)
         file_config_dataset_generation.close()
 
@@ -36,10 +36,10 @@ class Decision():
 
                 if label == "":
                     logger.log_warn("\"" + class_name + "\" contains an empty label for dataset \"" + dataset_name + "\".")
-                    label = dataset_name + config.config_decomposed["dataset_delimiter_label"] + config.config_decomposed["dataset_label_undefined_keyword"]
+                    label = dataset_name + header.config_decomposed["dataset_delimiter_label"] + header.config_decomposed["dataset_label_undefined_keyword"]
 
                 if labels != "":
-                    labels += config.config_decomposed["dataset_delimiter_file_name"]
+                    labels += header.config_decomposed["dataset_delimiter_file_name"]
                 
                 labels += str(self.dataset.classes[dataset_index].index(label))
             
@@ -69,7 +69,7 @@ class Decision():
                     label = self.config[class_name]["labels"][dataset_name]
 
                     if label == "":
-                        label = dataset_name + config.config_decomposed["dataset_delimiter_label"] + config.config_decomposed["dataset_label_undefined_keyword"]
+                        label = dataset_name + header.config_decomposed["dataset_delimiter_label"] + header.config_decomposed["dataset_label_undefined_keyword"]
 
                     label_index = self.dataset.classes[dataset_index].index(label)
                     prediction_class *= outputs_task[dataset_index][batch_index][label_index].item()
@@ -91,7 +91,7 @@ class Decision():
 
             for label in labels_batch:
                 if labels_key != "":
-                    labels_key += config.config_decomposed["dataset_delimiter_file_name"]
+                    labels_key += header.config_decomposed["dataset_delimiter_file_name"]
 
                 labels_key += str(label.item())
             
