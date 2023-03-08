@@ -61,7 +61,7 @@ class DatasetGenerated(torch.utils.data.Dataset):
             file_name_split = file_name.split(wandb.config.dataset_delimiter_file_name)
 
             if len(file_name_split) < len(self.labels):
-                logger.log_warn("Invalid data \"" + file_name + "\"")
+                logger.log_warn("Invalid data \"" + file_name + "\".")
                 continue
 
             self.file_paths.append(os.path.abspath(os.path.join(root, file_name)))
@@ -90,7 +90,3 @@ class DatasetGenerated(torch.utils.data.Dataset):
 
         return (image, torch.LongTensor(labels), label_original)
 
-    def getDatasetClassCount(self, dataset_name):
-        for dataset in self.config["datasets"]:
-            if dataset["name"] == dataset_name:
-                return len(dataset["labels"])
