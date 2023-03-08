@@ -1,8 +1,10 @@
 
 import datetime
+import header
 import logger
 import os
 import socket
+import sys
 import torch
 import wandb
 
@@ -13,23 +15,6 @@ def computeL2Norm(parameters):
         parameters_list.append(parameter.view(-1))
 
     return torch.square(torch.cat(parameters_list)).sum().item()
-
-def wAndBDefineMetrics():
-    wandb.define_metric("testing/batch/step")
-    wandb.define_metric("testing/epoch/step")
-    wandb.define_metric("training/batch/step")
-    wandb.define_metric("training/epoch/step")
-    wandb.define_metric("validation/batch/step")
-    wandb.define_metric("validation/epoch/step")
-
-    wandb.define_metric("testing/batch/*", step_metric = "testing/batch/step")
-    wandb.define_metric("testing/epoch/*", step_metric = "testing/epoch/step")
-    wandb.define_metric("training/batch/*", step_metric = "training/batch/step")
-    wandb.define_metric("training/epoch/*", step_metric = "training/epoch/step")
-    wandb.define_metric("validation/batch/*", step_metric = "validation/batch/step")
-    wandb.define_metric("validation/epoch/*", step_metric = "validation/epoch/step")
-
-    return
 
 def wAndBGenerateRunName(model_name):
     date_time_list = list(datetime.datetime.now().timetuple())[:-4]
@@ -43,6 +28,34 @@ def wAndBGenerateRunName(model_name):
     run_name += socket.gethostname()
 
     return run_name
+
+def initializeRunNameBaseline():
+    resume = False
+
+    if len(sys.argv) > 1:
+        header.run_name_baseline = sys.argv[1]
+        resume = True
+    else:
+        header.run_name_baseline = wAndBGenerateRunName(header.run_name_baseline_keyword)
+
+    header.config_baseline["file_name_checkpoint"] = header.run_name_baseline + ".tar"
+    header.config_baseline["file_name_checkpoint_best"] = header.run_name_baseline + ".best.tar"
+
+    return resume
+
+def initializeRunNameDecomposed():
+    resume = False
+
+    if len(sys.argv) > 1:
+        header.run_name_decomposed = sys.argv[1]
+        resume = True
+    else:
+        header.run_name_decomposed = wAndBGenerateRunName(header.run_name_decomposed_keyword)
+
+    header.config_decomposed["file_name_checkpoint"] = header.run_name_decomposed + ".tar"
+    header.config_decomposed["file_name_checkpoint_best"] = header.run_name_decomposed + ".best.tar"
+
+    return resume
 
 def loadCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer):
     if wandb.run.resumed:
@@ -120,5 +133,22 @@ def saveCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_be
         logger.log_info("Saved checkpoint \"" + file_name_checkpoint + "\" to Weights & Biases.")
 
     logger.log_info("Saved checkpoint \"" + file_name_checkpoint + "\".")
+
+    return
+
+def wAndBDefineMetrics():
+    wandb.define_metric("testing/batch/step")
+    wandb.define_metric("testing/epoch/step")
+    wandb.define_metric("training/batch/step")
+    wandb.define_metric("training/epoch/step")
+    wandb.define_metric("validation/batch/step")
+    wandb.define_metric("validation/epoch/step")
+
+    wandb.define_metric("testing/batch/*", step_metric = "testing/batch/step")
+    wandb.define_metric("testing/epoch/*", step_metric = "testing/epoch/step")
+    wandb.define_metric("training/batch/*", step_metric = "training/batch/step")
+    wandb.define_metric("training/epoch/*", step_metric = "training/epoch/step")
+    wandb.define_metric("validation/batch/*", step_metric = "validation/batch/step")
+    wandb.define_metric("validation/epoch/*", step_metric = "validation/epoch/step")
 
     return

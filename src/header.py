@@ -1,14 +1,13 @@
 import multiprocessing
 import type
-import utility
 
 log_level = type.LogLevel.debug
 project_name = "mapillary-dataset-network"
 run_mode = "online"
 run_name_baseline_keyword = "baseline"
 run_name_decomposed_keyword = "decomposed"
-run_name_baseline = utility.wAndBGenerateRunName(run_name_baseline_keyword)
-run_name_decomposed = utility.wAndBGenerateRunName(run_name_decomposed_keyword)
+run_name_baseline = ""
+run_name_decomposed = ""
 
 config_baseline = {
     "data_loader_batch_size": 768,

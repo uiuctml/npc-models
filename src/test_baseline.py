@@ -3,19 +3,15 @@
 import header
 import logger
 import network
-import sys
 import torch
 import torch.nn
 import torchvision
 import test
+import utility
 import wandb
 
 def main():
-    if len(sys.argv) > 1:
-        header.run_name_baseline = sys.argv[1]
-        header.config_baseline["file_name_checkpoint"] = header.run_name_baseline + ".tar"
-        header.config_baseline["file_name_checkpoint_best"] = header.run_name_baseline + ".best.tar"
-    else:
+    if not utility.initializeRunNameBaseline() or header.run_name_baseline == "":
         logger.log_error("Run name missing. Quit.")
         return
 

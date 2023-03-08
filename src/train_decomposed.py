@@ -4,7 +4,6 @@ import header
 import dataset as dset
 import logger
 import network
-import sys
 import torch
 import torch.nn
 import torch.optim
@@ -19,13 +18,11 @@ import validate
 import wandb
 
 def main():
-    resume = False
+    resume = utility.initializeRunNameDecomposed()
 
-    if len(sys.argv) > 1:
-        header.run_name_decomposed = sys.argv[1]
-        header.config_decomposed["file_name_checkpoint"] = header.run_name_decomposed + ".tar"
-        header.config_decomposed["file_name_checkpoint_best"] = header.run_name_decomposed + ".best.tar"
-        resume = True
+    if header.run_name_decomposed == "":
+        logger.log_error("Run name missing. Quit.")
+        return
 
     if header.run_mode == "online":
         wandb.login()

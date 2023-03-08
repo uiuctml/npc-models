@@ -4,18 +4,14 @@ import dataset as dset
 import header
 import logger
 import network
-import sys
 import torch
 import torch.nn
 import test
+import utility
 import wandb
 
 def main():
-    if len(sys.argv) > 1:
-        header.run_name_decomposed = sys.argv[1]
-        header.config_decomposed["file_name_checkpoint"] = header.run_name_decomposed + ".tar"
-        header.config_decomposed["file_name_checkpoint_best"] = header.run_name_decomposed + ".best.tar"
-    else:
+    if not utility.initializeRunNameDecomposed() or header.run_name_decomposed == "":
         logger.log_error("Run name missing. Quit.")
         return
 

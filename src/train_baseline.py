@@ -3,7 +3,6 @@
 import header
 import logger
 import network
-import sys
 import torch
 import torch.nn
 import torch.optim
@@ -18,13 +17,11 @@ import validate
 import wandb
 
 def main():
-    resume = False
+    resume = utility.initializeRunNameBaseline()
 
-    if len(sys.argv) > 1:
-        header.run_name_baseline = sys.argv[1]
-        header.config_baseline["file_name_checkpoint"] = header.run_name_baseline + ".tar"
-        header.config_baseline["file_name_checkpoint_best"] = header.run_name_baseline + ".best.tar"
-        resume = True
+    if header.run_name_baseline == "":
+        logger.log_error("Run name missing. Quit.")
+        return
 
     if header.run_mode == "online":
         wandb.login()
