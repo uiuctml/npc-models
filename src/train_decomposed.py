@@ -27,7 +27,9 @@ def main():
         config.config_decomposed["file_name_checkpoint_best"] = config.run_name_decomposed + ".best.tar"
         resume = True
 
-    wandb.login()
+    if config.run_mode == "online":
+        wandb.login()
+
     wandb.init(project = config.project_name, name = config.run_name_decomposed, config = config.config_decomposed, resume = resume, mode = config.run_mode)
 
     utility.wAndBDefineMetrics()
@@ -40,38 +42,38 @@ def main():
     batch_step_validate = 1
     criterions = []
     dataset_transforms = torchvision.transforms.Compose([
-        torchvision.transforms.Resize((wandb.config.model_input_height, wandb.config.model_input_width)),
+        torchvision.transforms.Resize((config.config_decomposed["model_input_height"], config.config_decomposed["model_input_width"])),
         torchvision.transforms.ToTensor(),
     ])
-    dataset = dset.DatasetGenerated(root = wandb.config.dir_dataset, transform = dataset_transforms)
-    dataset_split_lengths = [wandb.config.dataset_split_percentage_test, wandb.config.dataset_split_percentage_train, wandb.config.dataset_split_percentage_validation]
+    dataset = dset.DatasetGenerated(root = config.config_decomposed["dir_dataset"], transform = dataset_transforms)
+    dataset_split_lengths = [config.config_decomposed["dataset_split_percentage_test"], config.config_decomposed["dataset_split_percentage_train"], config.config_decomposed["dataset_split_percentage_validation"]]
     (dataset_subset_test, dataset_subset_train, dataset_subset_validation) = torch.utils.data.random_split(dataset, dataset_split_lengths)
-    data_loader_test = torch.utils.data.DataLoader(dataset_subset_test, batch_size = wandb.config.data_loader_batch_size, shuffle = wandb.config.data_loader_shuffle, num_workers = wandb.config.data_loader_worker_count, pin_memory = True)
-    data_loader_train = torch.utils.data.DataLoader(dataset_subset_train, batch_size = wandb.config.data_loader_batch_size, shuffle = wandb.config.data_loader_shuffle, num_workers = wandb.config.data_loader_worker_count, pin_memory = True)
-    data_loader_validation = torch.utils.data.DataLoader(dataset_subset_validation, batch_size = wandb.config.data_loader_batch_size, shuffle = wandb.config.data_loader_shuffle, num_workers = wandb.config.data_loader_worker_count, pin_memory = True)
+    data_loader_test = torch.utils.data.DataLoader(dataset_subset_test, batch_size = config.config_decomposed["data_loader_batch_size"], shuffle = config.config_decomposed["data_loader_shuffle"], num_workers = config.config_decomposed["data_loader_worker_count"], pin_memory = True)
+    data_loader_train = torch.utils.data.DataLoader(dataset_subset_train, batch_size = config.config_decomposed["data_loader_batch_size"], shuffle = config.config_decomposed["data_loader_shuffle"], num_workers = config.config_decomposed["data_loader_worker_count"], pin_memory = True)
+    data_loader_validation = torch.utils.data.DataLoader(dataset_subset_validation, batch_size = config.config_decomposed["data_loader_batch_size"], shuffle = config.config_decomposed["data_loader_shuffle"], num_workers = config.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     epoch = 1
     model = network.DecomposedNetworkA(dataset)
     model = torch.nn.DataParallel(model)
     model = model.to(device)
-    optimizer = torch.optim.SGD(model.parameters(), lr = wandb.config.optimizer_learning_rate, momentum = wandb.config.optimizer_momentum, weight_decay = wandb.config.optimizer_weight_decay)
-    learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, wandb.config.learning_rate_scheduler_mode, wandb.config.learning_rate_scheduler_factor, wandb.config.learning_rate_scheduler_patient, wandb.config.learning_rate_scheduler_threshold, wandb.config.learning_rate_scheduler_threshold_mode, wandb.config.learning_rate_scheduler_cooldown, wandb.config.learning_rate_scheduler_min_learning_rate, wandb.config.learning_rate_scheduler_min_learning_rate_decay, wandb.config.learning_rate_scheduler_verbose)
+    optimizer = torch.optim.SGD(model.parameters(), lr = config.config_decomposed["optimizer_learning_rate"], momentum = config.config_decomposed["optimizer_momentum"], weight_decay = config.config_decomposed["optimizer_weight_decay"])
+    learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, config.config_decomposed["learning_rate_scheduler_mode"], config.config_decomposed["learning_rate_scheduler_factor"], config.config_decomposed["learning_rate_scheduler_patient"], config.config_decomposed["learning_rate_scheduler_threshold"], config.config_decomposed["learning_rate_scheduler_threshold_mode"], config.config_decomposed["learning_rate_scheduler_cooldown"], config.config_decomposed["learning_rate_scheduler_min_learning_rate"], config.config_decomposed["learning_rate_scheduler_min_learning_rate_decay"], config.config_decomposed["learning_rate_scheduler_verbose"])
     progress_bar = None
 
     for _ in dataset.config["datasets"]:
         criterions.append(torch.nn.CrossEntropyLoss())
 
-    (accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch) = utility.loadCheckpoint(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
+    (accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch) = utility.loadCheckpoint(config.config_decomposed["dir_checkpoints"], config.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
 
     if config.log_level >= type.LogLevel.trace:
-        model_input_size = (wandb.config.model_input_channels, wandb.config.model_input_height, wandb.config.model_input_width)
+        model_input_size = (config.config_decomposed["model_input_channels"], config.config_decomposed["model_input_height"], config.config_decomposed["model_input_width"])
         torchsummary.summary(model, input_size = model_input_size)
 
-    if epoch <= wandb.config.epochs:
-        progress_bar = tqdm.tqdm(total = wandb.config.epochs, position = 0)
+    if epoch <= config.config_decomposed["epochs"]:
+        progress_bar = tqdm.tqdm(total = config.config_decomposed["epochs"], position = 0)
         progress_bar.set_description_str("[INFO]: Epoch")
 
-    while epoch <= wandb.config.epochs:
+    while epoch <= config.config_decomposed["epochs"]:
         if progress_bar is not None:
             progress_bar.n = epoch
             progress_bar.refresh()
@@ -89,9 +91,9 @@ def main():
         if accuracy_validation_epoch_mean > accuracy_validation_best:
             accuracy_validation_best = accuracy_validation_epoch_mean
             wandb.log({"validation/epoch/accuracy_best": accuracy_validation_best})
-            utility.saveCheckpoint(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint_best, accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
+            utility.saveCheckpoint(config.config_decomposed["dir_checkpoints"], config.config_decomposed["file_name_checkpoint_best"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
 
-        utility.saveCheckpoint(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
+        utility.saveCheckpoint(config.config_decomposed["dir_checkpoints"], config.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, data_loader_test, data_loader_train, data_loader_validation, epoch, learning_rate_scheduler, model, optimizer)
 
         epoch += 1
 

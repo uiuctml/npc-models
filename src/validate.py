@@ -1,3 +1,4 @@
+import config
 import math
 import torch
 import tqdm
@@ -21,9 +22,9 @@ def validateBaseline(model, data_loader, criterion, device, batch_step):
             (_, predictions) = torch.max(output, 1)
             loss = criterion(output, labels)
 
-            if wandb.config.use_l2_loss:
+            if config.config_baseline["use_l2_loss"]:
                 l2_norm = utility.computeL2Norm(model.parameters())
-                loss_l2 = wandb.config.l2_lambda * l2_norm
+                loss_l2 = config.config_baseline["l2_lambda"] * l2_norm
                 loss += loss_l2
 
         corrects = torch.sum(predictions == labels.data).item()
@@ -79,9 +80,9 @@ def validateDecomposed(model, dataset, data_loader, criterions, device, batch_st
                 (_, predictions) = torch.max(outputs[i], 1)
                 loss = criterions[i](outputs[i], labels[:, i])
 
-                if wandb.config.use_l2_loss:
+                if config.config_decomposed["use_l2_loss"]:
                     l2_norm = utility.computeL2Norm(model.parameters())
-                    loss_l2 = wandb.config.l2_lambda * l2_norm
+                    loss_l2 = config.config_decomposed["l2_lambda"] * l2_norm
                     loss += loss_l2
 
                 corrects = torch.sum(predictions == labels[:, i].data).item()

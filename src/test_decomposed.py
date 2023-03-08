@@ -21,7 +21,7 @@ def main():
 
     wandb.init(config = config.config_decomposed, mode = "disabled")
 
-    dataset = dset.DatasetGenerated(root = wandb.config.dir_dataset)
+    dataset = dset.DatasetGenerated(root = config.config_decomposed["dir_dataset"])
     device = torch.device("cuda")
     model = network.DecomposedNetworkA(dataset)
     model = torch.nn.DataParallel(model)

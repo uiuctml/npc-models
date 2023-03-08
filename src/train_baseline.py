@@ -26,7 +26,9 @@ def main():
         config.config_baseline["file_name_checkpoint_best"] = config.run_name_baseline + ".best.tar"
         resume = True
 
-    wandb.login()
+    if config.run_mode == "online":
+        wandb.login()
+
     wandb.init(project = config.project_name, name = config.run_name_baseline, config = config.config_baseline, resume = resume, mode = config.run_mode)
 
     utility.wAndBDefineMetrics()
@@ -39,35 +41,35 @@ def main():
     batch_step_validate = 1
     criterion = torch.nn.CrossEntropyLoss()
     dataset_transforms = torchvision.transforms.Compose([
-        torchvision.transforms.Resize((wandb.config.model_input_height, wandb.config.model_input_width)),
+        torchvision.transforms.Resize((config.config_baseline["model_input_height"], config.config_baseline["model_input_width"])),
         torchvision.transforms.ToTensor(),
     ])
-    dataset_test = torchvision.datasets.ImageFolder(root = wandb.config.dir_dataset_test, transform = dataset_transforms)
-    dataset_train = torchvision.datasets.ImageFolder(root = wandb.config.dir_dataset_train, transform = dataset_transforms)
-    dataset_validation = torchvision.datasets.ImageFolder(root = wandb.config.dir_dataset_validation, transform = dataset_transforms)
-    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = wandb.config.data_loader_batch_size, shuffle = False, num_workers = wandb.config.data_loader_worker_count, pin_memory = True)
-    data_loader_train = torch.utils.data.DataLoader(dataset_train, batch_size = wandb.config.data_loader_batch_size, shuffle = wandb.config.data_loader_shuffle, num_workers = wandb.config.data_loader_worker_count, pin_memory = True)
-    data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = wandb.config.data_loader_batch_size, shuffle = wandb.config.data_loader_shuffle, num_workers = wandb.config.data_loader_worker_count, pin_memory = True)
+    dataset_test = torchvision.datasets.ImageFolder(root = config.config_baseline["dir_dataset_test"], transform = dataset_transforms)
+    dataset_train = torchvision.datasets.ImageFolder(root = config.config_baseline["dir_dataset_train"], transform = dataset_transforms)
+    dataset_validation = torchvision.datasets.ImageFolder(root = config.config_baseline["dir_dataset_validation"], transform = dataset_transforms)
+    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = config.config_baseline["data_loader_batch_size"], shuffle = False, num_workers = config.config_baseline["data_loader_worker_count"], pin_memory = True)
+    data_loader_train = torch.utils.data.DataLoader(dataset_train, batch_size = config.config_baseline["data_loader_batch_size"], shuffle = config.config_baseline["data_loader_shuffle"], num_workers = config.config_baseline["data_loader_worker_count"], pin_memory = True)
+    data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = config.config_baseline["data_loader_batch_size"], shuffle = config.config_baseline["data_loader_shuffle"], num_workers = config.config_baseline["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     epoch = 1
     model = network.BaselineNetworkA(dataset_train)
     model = torch.nn.DataParallel(model)
     model = model.to(device)
-    optimizer = torch.optim.SGD(model.parameters(), lr = wandb.config.optimizer_learning_rate, momentum = wandb.config.optimizer_momentum, weight_decay = wandb.config.optimizer_weight_decay)
-    learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, wandb.config.learning_rate_scheduler_mode, wandb.config.learning_rate_scheduler_factor, wandb.config.learning_rate_scheduler_patient, wandb.config.learning_rate_scheduler_threshold, wandb.config.learning_rate_scheduler_threshold_mode, wandb.config.learning_rate_scheduler_cooldown, wandb.config.learning_rate_scheduler_min_learning_rate, wandb.config.learning_rate_scheduler_min_learning_rate_decay, wandb.config.learning_rate_scheduler_verbose)
+    optimizer = torch.optim.SGD(model.parameters(), lr = config.config_baseline["optimizer_learning_rate"], momentum = config.config_baseline["optimizer_momentum"], weight_decay = config.config_baseline["optimizer_weight_decay"])
+    learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, config.config_baseline["learning_rate_scheduler_mode"], config.config_baseline["learning_rate_scheduler_factor"], config.config_baseline["learning_rate_scheduler_patient"], config.config_baseline["learning_rate_scheduler_threshold"], config.config_baseline["learning_rate_scheduler_threshold_mode"], config.config_baseline["learning_rate_scheduler_cooldown"], config.config_baseline["learning_rate_scheduler_min_learning_rate"], config.config_baseline["learning_rate_scheduler_min_learning_rate_decay"], config.config_baseline["learning_rate_scheduler_verbose"])
     progress_bar = None
 
-    (accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch) = utility.loadCheckpoint(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer)
+    (accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch) = utility.loadCheckpoint(config.config_baseline["dir_checkpoints"], config.config_baseline["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer)
 
     if config.log_level >= type.LogLevel.trace:
-        model_input_size = (wandb.config.model_input_channels, wandb.config.model_input_height, wandb.config.model_input_width)
+        model_input_size = (config.config_baseline["model_input_channels"], config.config_baseline["model_input_height"], config.config_baseline["model_input_width"])
         torchsummary.summary(model, input_size = model_input_size)
 
-    if epoch <= wandb.config.epochs:
-        progress_bar = tqdm.tqdm(total = wandb.config.epochs, position = 0)
+    if epoch <= config.config_baseline["epochs"]:
+        progress_bar = tqdm.tqdm(total = config.config_baseline["epochs"], position = 0)
         progress_bar.set_description_str("[INFO]: Epoch")
 
-    while epoch <= wandb.config.epochs:
+    while epoch <= config.config_baseline["epochs"]:
         if progress_bar is not None:
             progress_bar.n = epoch
             progress_bar.refresh()
@@ -83,9 +85,9 @@ def main():
         if accuracy_validation_epoch > accuracy_validation_best:
             accuracy_validation_best = accuracy_validation_epoch
             wandb.log({"validation/epoch/accuracy_best": accuracy_validation_best})
-            utility.saveCheckpoint(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint_best, accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer)
+            utility.saveCheckpoint(config.config_baseline["dir_checkpoints"], config.config_baseline["file_name_checkpoint_best"], accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer)
 
-        utility.saveCheckpoint(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer)
+        utility.saveCheckpoint(config.config_baseline["dir_checkpoints"], config.config_baseline["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer)
 
         epoch += 1
 

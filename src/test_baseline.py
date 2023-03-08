@@ -21,7 +21,7 @@ def main():
 
     wandb.init(config = config.config_baseline, mode = "disabled")
 
-    dataset = torchvision.datasets.ImageFolder(root = wandb.config.dir_dataset)
+    dataset = torchvision.datasets.ImageFolder(root = config.config_baseline["dir_dataset"])
     device = torch.device("cuda")
     model = network.BaselineNetworkA(dataset)
     model = torch.nn.DataParallel(model)
