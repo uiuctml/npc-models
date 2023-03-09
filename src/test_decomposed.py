@@ -4,6 +4,7 @@ import dataset as dset
 import header
 import logger
 import network
+import sys
 import torch
 import torch.nn
 import torchvision
@@ -12,7 +13,12 @@ import utility
 import wandb
 
 def main():
-    if not utility.initializeRunNameDecomposed() or header.run_name_decomposed == "":
+    run_name = ""
+
+    if len(sys.argv) > 1:
+        run_name = sys.argv[1]
+
+    if not utility.initializeRunNameDecomposed(run_name) or header.run_name_decomposed == "":
         logger.log_error("Run name missing. Quit.")
         return
 

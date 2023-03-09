@@ -4,6 +4,7 @@ import header
 import dataset as dset
 import logger
 import network
+import sys
 import torch
 import torch.nn
 import torch.optim
@@ -18,7 +19,12 @@ import validate
 import wandb
 
 def main():
-    resume = utility.initializeRunNameDecomposed()
+    run_name = ""
+
+    if len(sys.argv) > 1:
+        run_name = sys.argv[1]
+
+    resume = utility.initializeRunNameDecomposed(run_name)
 
     if header.run_name_decomposed == "":
         logger.log_error("Run name missing. Quit.")

@@ -3,6 +3,7 @@
 import header
 import logger
 import network
+import sys
 import torch
 import torch.nn
 import torchvision
@@ -11,7 +12,12 @@ import utility
 import wandb
 
 def main():
-    if not utility.initializeRunNameBaseline() or header.run_name_baseline == "":
+    run_name = ""
+
+    if len(sys.argv) > 1:
+        run_name = sys.argv[1]
+
+    if not utility.initializeRunNameBaseline(run_name) or header.run_name_baseline == "":
         logger.log_error("Run name missing. Quit.")
         return
 

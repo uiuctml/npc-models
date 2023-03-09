@@ -4,7 +4,6 @@ import header
 import logger
 import os
 import socket
-import sys
 import torch
 import wandb
 
@@ -29,11 +28,15 @@ def wAndBGenerateRunName(model_name):
 
     return run_name
 
-def initializeRunNameBaseline():
+def initializeRunNameBaseline(run_name):
     resume = False
 
-    if len(sys.argv) > 1:
-        header.run_name_baseline = sys.argv[1]
+    if run_name != "":
+        if run_name.split(".")[0] != header.run_name_baseline_keyword:
+            logger.log_error("Invalid baseline run name. Quit.")
+            exit(1)
+
+        header.run_name_baseline = run_name
         resume = True
     else:
         header.run_name_baseline = wAndBGenerateRunName(header.run_name_baseline_keyword)
@@ -43,11 +46,15 @@ def initializeRunNameBaseline():
 
     return resume
 
-def initializeRunNameDecomposed():
+def initializeRunNameDecomposed(run_name):
     resume = False
 
-    if len(sys.argv) > 1:
-        header.run_name_decomposed = sys.argv[1]
+    if run_name != "":
+        if run_name.split(".")[0] != header.run_name_decomposed_keyword:
+            logger.log_error("Invalid decomposed run name. Quit.")
+            exit(1)
+
+        header.run_name_decomposed = run_name
         resume = True
     else:
         header.run_name_decomposed = wAndBGenerateRunName(header.run_name_decomposed_keyword)
