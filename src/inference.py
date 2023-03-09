@@ -188,12 +188,12 @@ def main():
     dataset_original = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_test"], dataset_transforms)
     dataset_test = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_test"], dataset_original.classes, dataset_transforms)
     config_dataset = dataset_test.config
-    class_original_count = len(dataset_original.classes)
+    class_count_original = len(dataset_original.classes)
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     composition = comp.Composition(dataset_test, device)
     ground_truth_label_counts = {}
-    model_baseline = network.BaselineNetworkA(class_original_count)
+    model_baseline = network.BaselineNetworkA(class_count_original)
     model_baseline = torch.nn.DataParallel(model_baseline)
     model_baseline = model_baseline.to(device)
     model_decomposed = network.DecomposedNetworkA(config_dataset)
@@ -218,7 +218,7 @@ def main():
             with torch.set_grad_enabled(False):
                 output_baseline = model_baseline(input)
                 outputs_decomposed = model_decomposed(input)
-                output_composed = composition.compose(outputs_decomposed, input.size(0))
+                output_composed = composition.compose(outputs_decomposed)
 
                 annotateInput(input, output_baseline, output_composed, outputs_decomposed, labels_original, labels, dataset_test, composition.config_generate, ground_truth_label_counts)
 

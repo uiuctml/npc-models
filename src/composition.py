@@ -17,35 +17,38 @@ class Composition():
 
         return
 
-    def compose(self, outputs_task, batch_size):
-        output = []
+    def compose(self, outputs_decomposed):
+        batch_size = outputs_decomposed[0].size(0)
+        output_composed = []
 
-        for i in range (0, len(outputs_task)):
-            outputs_task[i] = self.softmax(outputs_task[i])
+        # Apply softmax to decomposed outputs
+        for i in range (0, len(outputs_decomposed)):
+            outputs_decomposed[i] = self.softmax(outputs_decomposed[i])
 
         # Iterate through batches
         for batch_index in range(0, batch_size):
-            output_batch = []
+            output_composed_batch = []
 
             # Iterate through original classes
-            for class_name in self.config_generate.keys():
-                prediction_class = 1
+            for class_name_original in self.dataset.classes_original:
+                prediction_original = 1
 
-                # Iterate through tasks
-                for (dataset_index, dataset_name) in enumerate(self.config_generate[class_name]["labels"].keys()):
-                    label = self.config_generate[class_name]["labels"][dataset_name]
+                # Iterate through decomposed dataset
+                for (dataset_index, dataset) in enumerate(self.dataset.config["datasets"]):
+                    dataset_name = dataset["name"]
+                    class_name_decomposed = self.config_generate[class_name_original]["labels"][dataset_name]
 
-                    if label == "":
-                        label = dataset_name + header.config_decomposed["dataset_delimiter_label"] + header.config_decomposed["dataset_label_undefined_keyword"]
+                    if class_name_decomposed == "":
+                        class_name_decomposed = dataset_name + header.config_decomposed["dataset_delimiter_label"] + header.config_decomposed["dataset_label_undefined_keyword"]
 
-                    label_index = self.dataset.classes[dataset_index].index(label)
-                    prediction_class *= outputs_task[dataset_index][batch_index][label_index].item()
+                    class_index_decomposed = self.dataset.class_to_idx[dataset_index][class_name_decomposed]
+                    prediction_original *= outputs_decomposed[dataset_index][batch_index][class_index_decomposed].item()
 
-                output_batch.append(prediction_class)
+                output_composed_batch.append(prediction_original)
 
-            output.append(output_batch)
+            output_composed.append(output_composed_batch)
 
-        output = torch.Tensor(output)
-        output = output.to(self.device)
+        output_composed = torch.Tensor(output_composed)
+        output_composed = output_composed.to(self.device)
 
-        return output
+        return output_composed

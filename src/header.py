@@ -3,14 +3,14 @@ import type
 
 log_level = type.LogLevel.debug
 project_name = "mapillary-dataset-network"
-run_mode = "online"
+run_mode = "disabled"
 run_name_baseline_keyword = "baseline"
 run_name_decomposed_keyword = "decomposed"
 run_name_baseline = ""
 run_name_decomposed = ""
 
 config_baseline = {
-    "data_loader_batch_size": 768,
+    "data_loader_batch_size": 32,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dir_checkpoints": "../checkpoints",
@@ -43,7 +43,7 @@ config_baseline = {
 }
 
 config_decomposed = {
-    "data_loader_batch_size": 768,
+    "data_loader_batch_size": 32,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dataset_delimiter_file_name": "---",
