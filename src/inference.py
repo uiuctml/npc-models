@@ -180,27 +180,23 @@ def main():
         return
 
     accuracy_epoch_baseline = 0
-    accuracy_epoch_decomposed = 0
-    dataset_transforms_baseline = torchvision.transforms.Compose([
-        torchvision.transforms.Resize((header.config_baseline["model_input_height"], header.config_baseline["model_input_width"])),
-        torchvision.transforms.ToTensor(),
-    ])
-    dataset_transforms_decomposed = torchvision.transforms.Compose([
+    accuracy_epoch_composed = 0
+    dataset_transforms = torchvision.transforms.Compose([
         torchvision.transforms.Resize((header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])),
         torchvision.transforms.ToTensor(),
     ])
-    dataset_original = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_test"], dataset_transforms_baseline)
-    dataset_test = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_test"], dataset_original.classes, dataset_transforms_decomposed)
-    config_dataset_decomposed = dataset_test.config
-    class_count_baseline = len(dataset_original.classes)
+    dataset_original = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_test"], dataset_transforms)
+    dataset_test = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_test"], dataset_original.classes, dataset_transforms)
+    config_dataset = dataset_test.config
+    class_original_count = len(dataset_original.classes)
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     composition = comp.Composition(dataset_test, device)
     ground_truth_label_counts = {}
-    model_baseline = network.BaselineNetworkA(class_count_baseline)
+    model_baseline = network.BaselineNetworkA(class_original_count)
     model_baseline = torch.nn.DataParallel(model_baseline)
     model_baseline = model_baseline.to(device)
-    model_decomposed = network.DecomposedNetworkA(config_dataset_decomposed)
+    model_decomposed = network.DecomposedNetworkA(config_dataset)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
 
@@ -222,18 +218,18 @@ def main():
             with torch.set_grad_enabled(False):
                 output_baseline = model_baseline(input)
                 outputs_decomposed = model_decomposed(input)
-                output_decomposed = composition.compose(outputs_decomposed, input.size(0))
+                output_composed = composition.compose(outputs_decomposed, input.size(0))
 
-                annotateInput(input, output_baseline, output_decomposed, outputs_decomposed, labels_original, labels, dataset_test, composition.config_generate, ground_truth_label_counts)
+                annotateInput(input, output_baseline, output_composed, outputs_decomposed, labels_original, labels, dataset_test, composition.config_generate, ground_truth_label_counts)
 
                 (_, predictions_baseline) = torch.max(output_baseline, 1)
-                (_, predictions_decomposed) = torch.max(output_decomposed, 1)
+                (_, predictions_composed) = torch.max(output_composed, 1)
 
                 corrects_baseline = torch.sum(predictions_baseline == labels_original.data).item()
-                corrects_decomposed = torch.sum(predictions_decomposed == labels_original.data).item()
+                corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
 
             accuracy_epoch_baseline += corrects_baseline
-            accuracy_epoch_decomposed += corrects_decomposed
+            accuracy_epoch_composed += corrects_composed
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
@@ -241,10 +237,10 @@ def main():
     progress_bar.close()
 
     accuracy_epoch_baseline /= len(data_loader_test.dataset)
-    accuracy_epoch_decomposed /= len(data_loader_test.dataset)
+    accuracy_epoch_composed /= len(data_loader_test.dataset)
 
-    logger.log_info("Testing accuracy for baseline network: " + str(accuracy_epoch_baseline) + ".")
-    logger.log_info("Testing accuracy for decomposed network: " + str(accuracy_epoch_decomposed) + ".")
+    logger.log_info("Baseline inference accuracy: " + str(accuracy_epoch_baseline) + ".")
+    logger.log_info("Composed inference accuracy: " + str(accuracy_epoch_composed) + ".")
 
     return
 
