@@ -7,50 +7,18 @@ import torch.nn
 
 class Decision():
     def __init__(self, dataset, device):
-        self.classes = []
-        self.config = {}
+        self.config_generate = {}
         self.dataset = dataset
         self.device = device
-        self.label_map = {}
         self.softmax = torch.nn.Softmax(dim = 1)
 
-        file_config_dataset_generation = open(os.path.join(header.config_decomposed["dir_dataset"], header.config_decomposed["file_name_config_dataset_generation"]), "r")
-        self.config = json.load(file_config_dataset_generation)
-        file_config_dataset_generation.close()
-
-        for class_name in self.config.keys():
-            self.classes.append(class_name)
-
-        self.constructLabelMap()
+        file_config_generate = open(os.path.join(header.config_decomposed["dir_dataset"], header.config_decomposed["file_name_config_dataset_generation"]), "r")
+        self.config_generate = json.load(file_config_generate)
+        file_config_generate.close()
 
         return
 
-    def constructLabelMap(self):
-        self.label_map = {}
-
-        for class_name in self.config.keys():
-            labels = ""
-
-            for (dataset_index, dataset_name) in enumerate(self.config[class_name]["labels"].keys()):
-                label = self.config[class_name]["labels"][dataset_name]
-
-                if label == "":
-                    logger.log_warn("\"" + class_name + "\" contains an empty label for dataset \"" + dataset_name + "\".")
-                    label = dataset_name + header.config_decomposed["dataset_delimiter_label"] + header.config_decomposed["dataset_label_undefined_keyword"]
-
-                if labels != "":
-                    labels += header.config_decomposed["dataset_delimiter_file_name"]
-                
-                labels += str(self.dataset.classes[dataset_index].index(label))
-            
-            self.label_map[labels] = self.classes.index(class_name)
-
-        return
-
-    def make(self, outputs_task, labels_task, batch_size):
-        torch.set_printoptions(sci_mode = False)
-
-        labels = self.mapLabels(labels_task)
+    def make(self, outputs_task, batch_size):
         output = []
 
         for i in range (0, len(outputs_task)):
@@ -61,12 +29,12 @@ class Decision():
             output_batch = []
 
             # Iterate through original classes
-            for class_name in self.config.keys():
+            for class_name in self.config_generate.keys():
                 prediction_class = 1
 
                 # Iterate through tasks
-                for (dataset_index, dataset_name) in enumerate(self.config[class_name]["labels"].keys()):
-                    label = self.config[class_name]["labels"][dataset_name]
+                for (dataset_index, dataset_name) in enumerate(self.config_generate[class_name]["labels"].keys()):
+                    label = self.config_generate[class_name]["labels"][dataset_name]
 
                     if label == "":
                         label = dataset_name + header.config_decomposed["dataset_delimiter_label"] + header.config_decomposed["dataset_label_undefined_keyword"]
@@ -81,23 +49,4 @@ class Decision():
         output = torch.Tensor(output)
         output = output.to(self.device)
 
-        return (output, labels)
-
-    def mapLabels(self, labels):
-        labels_mapped = []
-
-        for labels_batch in labels:
-            labels_key = ""
-
-            for label in labels_batch:
-                if labels_key != "":
-                    labels_key += header.config_decomposed["dataset_delimiter_file_name"]
-
-                labels_key += str(label.item())
-            
-            labels_mapped.append(self.label_map[labels_key])
-
-        labels_mapped = torch.LongTensor(labels_mapped)
-        labels_mapped = labels_mapped.to(self.device)
-
-        return labels_mapped
+        return output
