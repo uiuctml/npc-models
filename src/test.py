@@ -78,7 +78,7 @@ def testDecomposed(model, config_dataset, data_loader, device, batch_step):
     progress_bar.set_description_str("[INFO]: Testing progress")
 
     with torch.no_grad():
-        for (batch_index, (input, labels)) in enumerate(data_loader):
+        for (batch_index, (input, labels, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
             labels = labels.to(device, non_blocking = True)
 
