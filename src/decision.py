@@ -12,7 +12,7 @@ class Decision():
         self.device = device
         self.softmax = torch.nn.Softmax(dim = 1)
 
-        file_config_generate = open(os.path.join(header.config_decomposed["dir_dataset"], header.config_decomposed["file_name_config_dataset_generation"]), "r")
+        file_config_generate = open(os.path.join(header.config_decomposed["dir_dataset_test"], header.config_decomposed["file_name_config_dataset_generation"]), "r")
         self.config_generate = json.load(file_config_generate)
         file_config_generate.close()
 

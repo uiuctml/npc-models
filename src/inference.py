@@ -14,7 +14,6 @@ import torch.nn
 import torchvision
 import tqdm
 import utility
-import wandb
 
 def resize(image, width = None, height = None, inter = cv2.INTER_AREA):
     width_image = image.shape[1]
@@ -57,7 +56,7 @@ def save(image, ground_truth_label_counts, ground_truth_label, correct):
 
     return
 
-def annotateInput(input, output_baseline, output_decomposed, outputs_decomposed, labels_original, labels_decomposed, classes_original, dataset_decomposed, config_dataset_generation, ground_truth_label_counts):
+def annotateInput(input, output_baseline, output_decomposed, outputs_decomposed, labels_original, labels_decomposed, dataset_decomposed, config_dataset_generation, ground_truth_label_counts):
     show = False
     ground_truths_label_original = []
     ground_truths_label_decomposed_task = []
@@ -75,13 +74,13 @@ def annotateInput(input, output_baseline, output_decomposed, outputs_decomposed,
     (predictions_confidence_decomposed, predictions_index_decomposed) = torch.max(output_decomposed, 1)
 
     for prediction_index_baseline in predictions_index_baseline:
-        predictions_label_baseline.append(classes_original[prediction_index_baseline])
+        predictions_label_baseline.append(dataset_decomposed.classes_original[prediction_index_baseline])
 
     for prediction_index_decomposed in predictions_index_decomposed:
-        predictions_label_decomposed.append(classes_original[prediction_index_decomposed])
+        predictions_label_decomposed.append(dataset_decomposed.classes_original[prediction_index_decomposed])
 
     for label_original in labels_original:
-        ground_truths_label_original.append(classes_original[label_original])
+        ground_truths_label_original.append(dataset_decomposed.classes_original[label_original])
 
     for label_decomposed_batch in labels_decomposed:
         for (task_index, label_decomposed) in enumerate(label_decomposed_batch):
@@ -97,7 +96,7 @@ def annotateInput(input, output_baseline, output_decomposed, outputs_decomposed,
             prediction_label_decomposed_task = config_dataset_generation[prediction_label_decomposed_original]["labels"][task_name]
 
             if prediction_label_decomposed_task == "":
-                prediction_label_decomposed_task = task_name + wandb.config.dataset_delimiter_label + wandb.config.dataset_label_undefined_keyword
+                prediction_label_decomposed_task = task_name + header.config_decomposed["dataset_delimiter_label"] + header.config_decomposed["dataset_label_undefined_keyword"]
 
             prediction_index_decomposed_task = dataset_decomposed.config["datasets"][task_index]["labels"].index(prediction_label_decomposed_task)
 
@@ -111,7 +110,7 @@ def annotateInput(input, output_baseline, output_decomposed, outputs_decomposed,
     mean = numpy.array([0.5, 0.5, 0.5])
     std = numpy.array([0.5, 0.5, 0.5])
 
-    cv2.namedWindow(wandb.config.dir_dataset, cv2.WINDOW_NORMAL)
+    cv2.namedWindow(header.config_decomposed["dir_dataset_test"], cv2.WINDOW_NORMAL)
 
     for (batch_index, input_batch) in enumerate(input_cpu):
         correct = False
@@ -151,7 +150,7 @@ def annotateInput(input, output_baseline, output_decomposed, outputs_decomposed,
             text_position_y += text_position_y_increment
 
         if show:
-            cv2.imshow(wandb.config.dir_dataset, input_batch)
+            cv2.imshow(header.config_decomposed["dir_dataset_test"], input_batch)
             cv2.waitKey(0)
         else:
             save(input_batch, ground_truth_label_counts, ground_truths_label_original[batch_index], correct)
@@ -162,66 +161,60 @@ def annotateInput(input, output_baseline, output_decomposed, outputs_decomposed,
     return
 
 def main():
+    run_name_baseline = ""
+    run_name_decomposed = ""
+
     if len(sys.argv) > 2:
-        if sys.argv[1].split(".")[0] != header.run_name_baseline_keyword:
-            logger.log_error("Invalid baseline run name. Quit.")
-            return
-
-        if sys.argv[2].split(".")[0] != header.run_name_decomposed_keyword:
-            logger.log_error("Invalid decomposed run name. Quit.")
-            return
-
-        header.run_name_baseline = sys.argv[1]
-        header.run_name_decomposed = sys.argv[2]
-
-        header.config_baseline["file_name_checkpoint"] = header.run_name_baseline + ".tar"
-        header.config_baseline["file_name_checkpoint_best"] = header.run_name_baseline + ".best.tar"
-        header.config_decomposed["file_name_checkpoint"] = header.run_name_decomposed + ".tar"
-        header.config_decomposed["file_name_checkpoint_best"] = header.run_name_decomposed + ".best.tar"
+        run_name_baseline = sys.argv[1]
+        run_name_decomposed = sys.argv[2]
     else:
         logger.log_error("Run names missing. Quit.")
         return
 
-    device = torch.device("cuda")
-    ground_truth_label_counts = {}
+    if not utility.initializeRunNameBaseline(run_name_baseline) or header.run_name_baseline == "":
+        logger.log_error("Baseline run name missing. Quit.")
+        return
 
-    wandb.init(config = header.config_baseline, mode = "disabled")
+    if not utility.initializeRunNameDecomposed(run_name_decomposed) or header.run_name_decomposed == "":
+        logger.log_error("Decomposed run name missing. Quit.")
+        return
 
     accuracy_epoch_baseline = 0
-    dataset_baseline = torchvision.datasets.ImageFolder(root = wandb.config.dir_dataset)
-    model_baseline = network.BaselineNetworkA(dataset_baseline)
+    accuracy_epoch_decomposed = 0
+    dataset_transforms_baseline = torchvision.transforms.Compose([
+        torchvision.transforms.Resize((header.config_baseline["model_input_height"], header.config_baseline["model_input_width"])),
+        torchvision.transforms.ToTensor(),
+    ])
+    dataset_transforms_decomposed = torchvision.transforms.Compose([
+        torchvision.transforms.Resize((header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])),
+        torchvision.transforms.ToTensor(),
+    ])
+    dataset_original = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_test"], dataset_transforms_baseline)
+    dataset_test = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_test"], dataset_original.classes, dataset_transforms_decomposed)
+    config_dataset_decomposed = dataset_test.config
+    class_count_baseline = len(dataset_original.classes)
+    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
+    device = torch.device("cuda")
+    decision = deci.Decision(dataset_test, device)
+    ground_truth_label_counts = {}
+    model_baseline = network.BaselineNetworkA(class_count_baseline)
     model_baseline = torch.nn.DataParallel(model_baseline)
     model_baseline = model_baseline.to(device)
-
-    utility.loadCheckpointBest(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint_best, model_baseline)
-
-    wandb.finish()
-    wandb.init(config = header.config_decomposed, mode = "disabled")
-
-    accuracy_epoch_decomposed = 0
-    dataset_decomposed = dset.DatasetGenerated(root = wandb.config.dir_dataset)
-    decision = deci.Decision(dataset_decomposed, device)
-    model_decomposed = network.DecomposedNetworkA(dataset_decomposed)
+    model_decomposed = network.DecomposedNetworkA(config_dataset_decomposed)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
 
-    data_loader = utility.loadCheckpointBest(wandb.config.dir_checkpoints, wandb.config.file_name_checkpoint_best, model_decomposed)
+    utility.loadCheckpointBest(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint_best"], model_baseline)
+    utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
 
-    if data_loader is None:
-        logger.log_error("Data loader missing.")
-        return
-
-    data_loader.dataset.dataset.constructOriginalKeyLabelMap()
-
-    data_loader = torch.utils.data.DataLoader(data_loader.dataset, batch_size = wandb.config.data_loader_batch_size, shuffle = wandb.config.data_loader_shuffle, num_workers = wandb.config.data_loader_worker_count, pin_memory = True)
-    progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
+    progress_bar = tqdm.tqdm(total = len(data_loader_test), position = 0, leave = False)
 
     model_baseline.eval()
     model_decomposed.eval()
     progress_bar.set_description_str("[INFO]: Inference progress")
 
     with torch.no_grad():
-        for (batch_index, (input, labels, labels_original)) in enumerate(data_loader):
+        for (batch_index, (input, labels, labels_original)) in enumerate(data_loader_test):
             input = input.to(device, non_blocking = True)
             labels = labels.to(device, non_blocking = True)
             labels_original = labels_original.to(device, non_blocking = True)
@@ -229,9 +222,9 @@ def main():
             with torch.set_grad_enabled(False):
                 output_baseline = model_baseline(input)
                 outputs_decomposed = model_decomposed(input)
-                (output_decomposed, _) = decision.make(outputs_decomposed, labels, input.size(0))
+                output_decomposed = decision.make(outputs_decomposed, input.size(0))
 
-                annotateInput(input, output_baseline, output_decomposed, outputs_decomposed, labels_original, labels, decision.classes, data_loader.dataset.dataset, decision.config, ground_truth_label_counts)
+                annotateInput(input, output_baseline, output_decomposed, outputs_decomposed, labels_original, labels, dataset_test, decision.config_generate, ground_truth_label_counts)
 
                 (_, predictions_baseline) = torch.max(output_baseline, 1)
                 (_, predictions_decomposed) = torch.max(output_decomposed, 1)
@@ -247,8 +240,8 @@ def main():
 
     progress_bar.close()
 
-    accuracy_epoch_baseline /= len(data_loader.dataset)
-    accuracy_epoch_decomposed /= len(data_loader.dataset)
+    accuracy_epoch_baseline /= len(data_loader_test.dataset)
+    accuracy_epoch_decomposed /= len(data_loader_test.dataset)
 
     logger.log_info("Testing accuracy for baseline network: " + str(accuracy_epoch_baseline) + ".")
     logger.log_info("Testing accuracy for decomposed network: " + str(accuracy_epoch_decomposed) + ".")
