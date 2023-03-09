@@ -44,29 +44,24 @@ class Composition():
 
     def compose(self, outputs_decomposed):
         batch_size = outputs_decomposed[0].size(0)
-        output_composed = []
+        output_composed = torch.Tensor()
+        output_composed = output_composed.to(self.device)
 
         for i in range (0, len(outputs_decomposed)):
             outputs_decomposed[i] = self.softmax(outputs_decomposed[i])
 
-        output_composed = torch.Tensor()
-        output_composed = output_composed.to(self.device)
-
         for (task_index, task_outputs) in enumerate(outputs_decomposed):
             task_class_indices = self.class_indices_decomposed[:, task_index]
+            task_class_indices = task_class_indices.repeat(1, batch_size)
+            task_class_indices = task_class_indices.view(batch_size, len(self.dataset.classes_original), -1)
 
-            task_outputs_batch = torch.Tensor()
-            task_outputs_batch = task_outputs_batch.to(self.device)
+            outputs_decomposed_task = outputs_decomposed[task_index].repeat(1, len(self.dataset.classes_original))
+            outputs_decomposed_task = outputs_decomposed_task.view(batch_size, len(self.dataset.classes_original), -1)
 
-            for batch_index in range(0, batch_size):
-                task_outputs = torch.gather(outputs_decomposed[task_index][batch_index], 0, task_class_indices)
-                task_outputs_batch = torch.cat([task_outputs_batch, task_outputs], 0)
+            task_outputs_batch = torch.gather(outputs_decomposed_task, 2, task_class_indices)
 
-            task_outputs_batch = torch.unsqueeze(task_outputs_batch, 0)
-            output_composed = torch.cat([output_composed, task_outputs_batch], 0)
+            output_composed = torch.cat([output_composed, task_outputs_batch], 2)
 
-        output_composed = torch.transpose(output_composed, 1, 0)
-        output_composed = torch.prod(output_composed, 1)
-        output_composed = output_composed.view(batch_size, len(self.dataset.classes_original))
+        output_composed = torch.prod(output_composed, 2)
 
         return output_composed
