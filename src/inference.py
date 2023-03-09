@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
+import composition as comp
 import cv2
 import dataset as dset
-import decision as deci
 import header
 import logger
 import network
@@ -195,7 +195,7 @@ def main():
     class_count_baseline = len(dataset_original.classes)
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
-    decision = deci.Decision(dataset_test, device)
+    composition = comp.Composition(dataset_test, device)
     ground_truth_label_counts = {}
     model_baseline = network.BaselineNetworkA(class_count_baseline)
     model_baseline = torch.nn.DataParallel(model_baseline)
@@ -222,9 +222,9 @@ def main():
             with torch.set_grad_enabled(False):
                 output_baseline = model_baseline(input)
                 outputs_decomposed = model_decomposed(input)
-                output_decomposed = decision.make(outputs_decomposed, input.size(0))
+                output_decomposed = composition.compose(outputs_decomposed, input.size(0))
 
-                annotateInput(input, output_baseline, output_decomposed, outputs_decomposed, labels_original, labels, dataset_test, decision.config_generate, ground_truth_label_counts)
+                annotateInput(input, output_baseline, output_decomposed, outputs_decomposed, labels_original, labels, dataset_test, composition.config_generate, ground_truth_label_counts)
 
                 (_, predictions_baseline) = torch.max(output_baseline, 1)
                 (_, predictions_decomposed) = torch.max(output_decomposed, 1)

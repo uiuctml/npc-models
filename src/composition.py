@@ -1,11 +1,10 @@
 import header
 import json
-import logger
 import os
 import torch
 import torch.nn
 
-class Decision():
+class Composition():
     def __init__(self, dataset, device):
         self.config_generate = {}
         self.dataset = dataset
@@ -18,7 +17,7 @@ class Decision():
 
         return
 
-    def make(self, outputs_task, batch_size):
+    def compose(self, outputs_task, batch_size):
         output = []
 
         for i in range (0, len(outputs_task)):
