@@ -6,6 +6,7 @@ import logger
 import network
 import torch
 import torch.nn
+import torchvision
 import test
 import utility
 import wandb
@@ -17,13 +18,20 @@ def main():
 
     wandb.init(config = header.config_decomposed, mode = "disabled")
 
-    dataset = dset.DatasetGenerated(root = header.config_decomposed["dir_dataset"])
+    dataset_transforms = torchvision.transforms.Compose([
+        torchvision.transforms.Resize((header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])),
+        torchvision.transforms.ToTensor(),
+    ])
+    dataset_original = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_test"], dataset_transforms)
+    dataset_test = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_test"], dataset_original.classes, dataset_transforms)
+    config_dataset = dataset_test.config
+    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
-    model = network.DecomposedNetworkA(dataset)
+    model = network.DecomposedNetworkA(config_dataset)
     model = torch.nn.DataParallel(model)
     model = model.to(device)
 
-    test.testDecomposed(model, dataset, device, 1)
+    test.testDecomposed(model, config_dataset, data_loader_test, device, 1)
 
     return
 
