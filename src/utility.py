@@ -1,4 +1,5 @@
 
+import cv2
 import datetime
 import header
 import logger
@@ -113,6 +114,26 @@ def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
         logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
 
     return
+
+def resize(image, width = None, height = None, inter = cv2.INTER_AREA):
+    width_image = image.shape[1]
+    width_resize = image.shape[1]
+    height_image = image.shape[0]
+    height_resize = image.shape[0]
+
+    if width is None and height is None:
+        return image
+
+    if width is None:
+        resize_ratio = height / height_image
+        width_resize = int(width_image * resize_ratio)
+        height_resize = height
+    else:
+        resize_ratio = width / width_image
+        width_resize = width
+        height_resize = int(height_image * resize_ratio)
+
+    return cv2.resize(image, (width_resize, height_resize), interpolation=inter)
 
 def saveCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer):
     if not os.path.isdir(dir_checkpoints):

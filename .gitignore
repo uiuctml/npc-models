@@ -3,5 +3,6 @@
 .idea/
 .vscode/
 checkpoints/
+output/
 wandb/
 __pycache__/
