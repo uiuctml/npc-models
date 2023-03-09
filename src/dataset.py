@@ -8,6 +8,8 @@ import torch
 
 class DatasetDecomposed(torch.utils.data.Dataset):
     def __init__(self, root, classes_original, transform = None):
+        self.class_to_idx = []
+        self.class_to_idx_original = {}
         self.classes = []
         self.classes_original = classes_original
         self.config = {}
@@ -31,6 +33,17 @@ class DatasetDecomposed(torch.utils.data.Dataset):
             self.classes.append(dataset_labels)
             self.labels.append([])
 
+        for classes_dataset in self.classes:
+            class_to_idx_dataset = {}
+
+            for (class_index, class_name) in enumerate(classes_dataset):
+                class_to_idx_dataset[class_name] = class_index
+
+            self.class_to_idx.append(class_to_idx_dataset)
+
+        for (class_index, class_name) in enumerate(self.classes_original):
+            self.class_to_idx_original[class_name] = class_index
+
         for file_name in os.listdir(root):
             if file_name == header.config_decomposed["file_name_config_dataset"] or file_name == header.config_decomposed["file_name_config_dataset_generation"]:
                 continue
@@ -43,13 +56,13 @@ class DatasetDecomposed(torch.utils.data.Dataset):
                 continue
 
             class_original = file_name_split[-2]
-            label_original = self.classes_original.index(class_original)
+            label_original = self.class_to_idx_original[class_original]
 
             self.file_paths.append(os.path.abspath(os.path.join(root, file_name)))
             self.labels_original.append(label_original)
 
             for i in range(0, len(self.labels)):
-                label = self.classes[i].index(file_name_split[i])
+                label = self.class_to_idx[i][file_name_split[i]]
                 self.labels[i].append(label)
 
         return
