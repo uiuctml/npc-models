@@ -48,16 +48,16 @@ class Composition():
         output_composed = output_composed.to(self.device)
 
         for task_index in range(0, len(outputs_decomposed)):
-            task_class_indices = self.class_indices_decomposed[:, task_index]
-            task_class_indices = task_class_indices.repeat(1, batch_size)
-            task_class_indices = task_class_indices.view(batch_size, len(self.dataset.classes_original), -1)
+            class_indices_task = self.class_indices_decomposed[:, task_index]
+            class_indices_task = class_indices_task.repeat(1, batch_size)
+            class_indices_task = class_indices_task.view(batch_size, len(self.dataset.classes_original), -1)
 
             outputs_decomposed[task_index] = self.softmax(outputs_decomposed[task_index])
             outputs_decomposed_task = outputs_decomposed[task_index].repeat(1, len(self.dataset.classes_original))
             outputs_decomposed_task = outputs_decomposed_task.view(batch_size, len(self.dataset.classes_original), -1)
 
-            task_outputs_batch = torch.gather(outputs_decomposed_task, 2, task_class_indices)
-            output_composed = torch.cat([output_composed, task_outputs_batch], 2)
+            outputs_task = torch.gather(outputs_decomposed_task, 2, class_indices_task)
+            output_composed = torch.cat([output_composed, outputs_task], 2)
 
         output_composed = torch.prod(output_composed, 2)
 
