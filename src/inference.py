@@ -95,7 +95,7 @@ def main():
             progress_bar.refresh()
 
             if header.visualize_show or header.visualize_save:
-                visualize.visualize(input, composition.config_generate, dataset_test, labels_decomposed, labels_original, output_baseline, outputs_decomposed, output_composed)
+                visualize.visualize(input, composition, dataset_test, labels_decomposed, labels_original, output_baseline, outputs_decomposed, output_composed)
 
     progress_bar.close()
 

@@ -42,10 +42,10 @@ class Composition():
 
         return
 
-    def compose(self, outputs_decomposed):
+    def gatherDecomposedPredictionConfidences(self, outputs_decomposed):
         batch_size = outputs_decomposed[0].size(0)
-        output_composed = torch.Tensor()
-        output_composed = output_composed.to(self.device)
+        outputs_decomposed_gathered = torch.Tensor()
+        outputs_decomposed_gathered = outputs_decomposed_gathered.to(self.device)
 
         for task_index in range(0, len(outputs_decomposed)):
             class_indices_task = self.class_indices_decomposed[:, task_index]
@@ -57,8 +57,12 @@ class Composition():
             outputs_decomposed_task = outputs_decomposed_task.view(batch_size, len(self.dataset.classes_original), -1)
 
             outputs_task = torch.gather(outputs_decomposed_task, 2, class_indices_task)
-            output_composed = torch.cat([output_composed, outputs_task], 2)
+            outputs_decomposed_gathered = torch.cat([outputs_decomposed_gathered, outputs_task], 2)
 
-        output_composed = torch.prod(output_composed, 2)
+        return outputs_decomposed_gathered
+
+    def compose(self, outputs_decomposed):
+        outputs_decomposed_gathered = self.gatherDecomposedPredictionConfidences(outputs_decomposed)
+        output_composed = torch.prod(outputs_decomposed_gathered, 2)
 
         return output_composed
