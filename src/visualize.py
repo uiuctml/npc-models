@@ -134,7 +134,7 @@ def visualize(input, config_dataset_generation, dataset_decomposed, ground_truth
             cv2.waitKey(0)
 
         if header.visualize_save:
-            if predictions_label_decomposed[batch_index] == ground_truths_label_original[batch_index]:
+            if predictions_label_composed[batch_index] == ground_truths_label_original[batch_index]:
                 saveImage(input_batch, header.visualize_dir_output_correct, ground_truths_label_original[batch_index])
             else:
                 saveImage(input_batch, header.visualize_dir_output_incorrect, ground_truths_label_original[batch_index])
