@@ -21,6 +21,21 @@ class Composition():
 
         return
 
+    def applySoftmax(self, output):
+        return self.softmax(output)
+
+    def applySoftmaxDecomposed(self, outputs_decomposed):
+        for task_index in range(0, len(outputs_decomposed)):
+            outputs_decomposed[task_index] = self.softmax(outputs_decomposed[task_index])
+
+        return outputs_decomposed
+
+    def compose(self, outputs_decomposed):
+        outputs_decomposed_gathered = self.gatherDecomposedPredictionConfidences(outputs_decomposed)
+        output_composed = torch.prod(outputs_decomposed_gathered, 2)
+
+        return output_composed
+
     def gatherDecomposedClassIndices(self):
         for class_name_original in self.dataset.classes_original:
             class_indices_decomposed = []
@@ -52,7 +67,6 @@ class Composition():
             class_indices_task = class_indices_task.repeat(1, batch_size)
             class_indices_task = class_indices_task.view(batch_size, len(self.dataset.classes_original), -1)
 
-            outputs_decomposed[task_index] = self.softmax(outputs_decomposed[task_index])
             outputs_decomposed_task = outputs_decomposed[task_index].repeat(1, len(self.dataset.classes_original))
             outputs_decomposed_task = outputs_decomposed_task.view(batch_size, len(self.dataset.classes_original), -1)
 
@@ -60,9 +74,3 @@ class Composition():
             outputs_decomposed_gathered = torch.cat([outputs_decomposed_gathered, outputs_task], 2)
 
         return outputs_decomposed_gathered
-
-    def compose(self, outputs_decomposed):
-        outputs_decomposed_gathered = self.gatherDecomposedPredictionConfidences(outputs_decomposed)
-        output_composed = torch.prod(outputs_decomposed_gathered, 2)
-
-        return output_composed

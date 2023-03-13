@@ -93,7 +93,6 @@ def transformInput(input):
 
 def visualize(input, composition, dataset_decomposed, ground_truths_index_decomposed, ground_truths_index_original, output_baseline, outputs_decomposed, output_composed):
     input = input.cpu().numpy()
-    output_baseline = composition.softmax(output_baseline)
 
     (predictions_confidence_baseline, predictions_index_baseline) = torch.max(output_baseline, 1)
     (predictions_confidence_composed, predictions_index_composed) = torch.max(output_composed, 1)

@@ -74,6 +74,10 @@ def main():
             with torch.set_grad_enabled(False):
                 output_baseline = model_baseline(input)
                 outputs_decomposed = model_decomposed(input)
+
+                output_baseline = composition.applySoftmax(output_baseline)
+                outputs_decomposed = composition.applySoftmaxDecomposed(outputs_decomposed)
+
                 output_composed = composition.compose(outputs_decomposed)
 
                 (_, predictions_baseline) = torch.max(output_baseline, 1)
