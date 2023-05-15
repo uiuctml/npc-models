@@ -16,9 +16,11 @@ def computeL2Norm(parameters):
 
     return torch.square(torch.cat(parameters_list)).sum().item()
 
-def wAndBGenerateRunName(model_name):
+def wAndBGenerateRunName(model_name, model_type):
     date_time_list = list(datetime.datetime.now().timetuple())[:-4]
     run_name = model_name
+    run_name += "."
+    run_name += model_type
 
     for entry in date_time_list:
         run_name += "."
@@ -40,7 +42,7 @@ def initializeRunNameBaseline(run_name):
         header.run_name_baseline = run_name
         resume = True
     else:
-        header.run_name_baseline = wAndBGenerateRunName(header.run_name_baseline_keyword)
+        header.run_name_baseline = wAndBGenerateRunName(header.run_name_baseline_keyword, header.config_baseline["model"])
 
     header.config_baseline["file_name_checkpoint"] = header.run_name_baseline + ".tar"
     header.config_baseline["file_name_checkpoint_best"] = header.run_name_baseline + ".best.tar"
@@ -58,7 +60,7 @@ def initializeRunNameDecomposed(run_name):
         header.run_name_decomposed = run_name
         resume = True
     else:
-        header.run_name_decomposed = wAndBGenerateRunName(header.run_name_decomposed_keyword)
+        header.run_name_decomposed = wAndBGenerateRunName(header.run_name_decomposed_keyword, header.config_decomposed["model"])
 
     header.config_decomposed["file_name_checkpoint"] = header.run_name_decomposed + ".tar"
     header.config_decomposed["file_name_checkpoint_best"] = header.run_name_decomposed + ".best.tar"

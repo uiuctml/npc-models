@@ -1,8 +1,10 @@
 import header
+import logger
 import torch.nn
 import torchvision
+import type
 
-class BaselineNetworkA(torch.nn.Module):
+class ResNet152(torch.nn.Module):
     def __init__(self, class_count):
         super().__init__()
 
@@ -19,7 +21,7 @@ class BaselineNetworkA(torch.nn.Module):
     def forward(self, input):
         return self.net(input)
 
-class BaselineNetworkB(torch.nn.Module):
+class ResNet152Dropout(torch.nn.Module):
     def __init__(self, class_count):
         super().__init__()
 
@@ -36,7 +38,24 @@ class BaselineNetworkB(torch.nn.Module):
     def forward(self, input):
         return self.net(input)
 
-class DecomposedNetworkA(torch.nn.Module):
+class ViTB32(torch.nn.Module):
+    def __init__(self, class_count):
+        super().__init__()
+
+        self.net = torchvision.models.vit_b_32(weights = header.config_baseline["model_pretrained_weights"])
+        net_heads_head_in_features = self.net.heads.head.in_features
+        self.net.heads.head = torch.nn.Linear(net_heads_head_in_features, class_count)
+
+        if not header.config_baseline["fine_tuning"]:
+            for parameter in self.parameters():
+                parameter.requires_grad = False
+
+        return
+
+    def forward(self, input):
+        return self.net(input)
+
+class ResNet152MTL(torch.nn.Module):
     def __init__(self, config_dataset):
         super().__init__()
 
@@ -72,3 +91,21 @@ class DecomposedNetworkA(torch.nn.Module):
             outputs_head.append(head_layer(output_neck))
 
         return outputs_head
+
+def createModelBaseline(*args, **kwargs):
+    if header.config_baseline["model"] == type.NetworkModelBaseline.resnet152.name:
+        return ResNet152(*args, **kwargs)
+    elif header.config_baseline["model"] == type.NetworkModelBaseline.resnet152_dropout.name:
+        return ResNet152Dropout(*args, **kwargs)
+    elif header.config_baseline["model"] == type.NetworkModelBaseline.vit_b_32.name:
+        return ViTB32(*args, **kwargs)
+    else:
+        logger.log_warn("Unknown baseline network model \"" + header.config_baseline["model"] + "\". Using \"" + type.NetworkModelBaseline.resnet152.name + "\".")
+        return ResNet152(*args, **kwargs)
+
+def createModelDecomposed(*args, **kwargs):
+    if header.config_decomposed["model"] == type.NetworkModelDecomposed.resnet152_mtl.name:
+        return ResNet152MTL(*args, **kwargs)
+    else:
+        logger.log_warn("Unknown decomposed network model \"" + header.config_baseline["model"] + "\". Using \"" + type.NetworkModelDecomposed.resnet152_mtl.name + "\".")
+        return ResNet152MTL(*args, **kwargs)

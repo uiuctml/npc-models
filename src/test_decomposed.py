@@ -33,7 +33,7 @@ def main():
     config_dataset = dataset_test.config
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
-    model = network.DecomposedNetworkA(config_dataset)
+    model = network.createModelDecomposed(config_dataset)
     model = torch.nn.DataParallel(model)
     model = model.to(device)
 
