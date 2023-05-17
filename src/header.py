@@ -38,8 +38,7 @@ config_baseline = {
     "model_input_channels": 3,
     "model_pretrained_weights": "IMAGENET1K_V1",
     "optimizer_learning_rate": 1e-3,
-    "optimizer_momentum": 0.9,
-    "optimizer_weight_decay": 1e-6,
+    "optimizer_weight_decay": 1e-4,
     "use_l2_loss": False
 }
 
@@ -77,8 +76,7 @@ config_decomposed = {
     "model_input_channels": 3,
     "model_pretrained_weights": "IMAGENET1K_V2",
     "optimizer_learning_rate": 1e-3,
-    "optimizer_momentum": 0.9,
-    "optimizer_weight_decay": 1e-6,
+    "optimizer_weight_decay": 1e-4,
     "use_l2_loss": False
 }
 

@@ -18,6 +18,8 @@ import utility
 import validate
 import wandb
 
+torch.backends.cuda.matmul.allow_tf32 = True
+
 def main():
     run_name = ""
 
