@@ -6,6 +6,68 @@ import utility
 import wandb
 import sklearn.metrics
 
+def testBaselineAdversarial(model, data_loader, device, batch_step):
+    utility.loadCheckpointBest(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint_best"], model)
+
+    accuracy_epoch = 0
+    ground_truths_epoch = []
+    input_adversarial = torch.load("attacked_images.pt")
+    predictions_epoch = []
+    progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
+
+    model.eval()
+    progress_bar.set_description_str("[INFO]: Testing progress")
+
+    with torch.no_grad():
+        input_adversarial_index = 0
+
+        for (batch_index, (input, labels)) in enumerate(data_loader):
+            input_adversarial_batch = input_adversarial[input_adversarial_index:input_adversarial_index + input.size(0)]
+            input_adversarial_batch = torch.stack(input_adversarial_batch)
+            input_adversarial_index += input.size(0)
+
+            input_adversarial_batch = input_adversarial_batch.to(device, non_blocking = True)
+            labels = labels.to(device, non_blocking = True)
+
+            with torch.set_grad_enabled(False):
+                output = model(input_adversarial_batch)
+                (_, predictions) = torch.max(output, 1)
+
+            corrects = torch.sum(predictions == labels.data).item()
+
+            accuracy_batch = corrects / input.size(0)
+            accuracy_epoch += corrects
+
+            progress_bar.n = batch_index + 1
+            progress_bar.refresh()
+
+            wandb.log({"testing/batch/accuracy": accuracy_batch})
+            wandb.log({"testing/batch/step": batch_step})
+
+            ground_truths_epoch += labels.data.tolist()
+            predictions_epoch += predictions.tolist()
+
+            batch_step += 1
+
+    progress_bar.close()
+
+    accuracy_epoch /= len(data_loader.dataset)
+    precision_epoch = sklearn.metrics.precision_score(ground_truths_epoch, predictions_epoch, average = "macro", zero_division = 0)
+    recall_epoch = sklearn.metrics.recall_score(ground_truths_epoch, predictions_epoch, average = "macro", zero_division = 0)
+
+    wandb.log({"testing/epoch/accuracy": accuracy_epoch})
+    wandb.log({"testing/epoch/precision": precision_epoch})
+    wandb.log({"testing/epoch/recall": recall_epoch})
+    wandb.summary["testing/epoch/accuracy"] = accuracy_epoch
+    wandb.summary["testing/epoch/precision"] = precision_epoch
+    wandb.summary["testing/epoch/recall"] = recall_epoch
+
+    logger.log_info("Testing accuracy: " + str(accuracy_epoch) + ".")
+    logger.log_info("Testing precision: " + str(precision_epoch) + ".")
+    logger.log_info("Testing recall: " + str(recall_epoch) + ".")
+
+    return batch_step
+
 def testBaseline(model, data_loader, device, batch_step):
     utility.loadCheckpointBest(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint_best"], model)
 
