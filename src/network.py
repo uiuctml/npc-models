@@ -74,7 +74,7 @@ class ResNet152MTL(torch.nn.Module):
 
             layer_list.append(layer_dict)
 
-        self.net.heads = torch.nn.ModuleList(layer_list)
+        self.net.heads_mtl = torch.nn.ModuleList(layer_list)
 
         if not header.config_decomposed["fine_tuning"]:
             for parameter in self.parameters():
@@ -86,7 +86,44 @@ class ResNet152MTL(torch.nn.Module):
         outputs_head = []
         output_neck = self.net(input)
 
-        for head in self.net.heads:
+        for head in self.net.heads_mtl:
+            head_layer = list(head.values())[0]
+            outputs_head.append(head_layer(output_neck))
+
+        return outputs_head
+
+class ViTB32MTL(torch.nn.Module):
+    def __init__(self, config_dataset):
+        super().__init__()
+
+        self.net = torchvision.models.vit_b_32(weights = header.config_baseline["model_pretrained_weights"])
+        net_heads_head_in_features = self.net.heads.head.in_features
+        self.net.heads.head = torch.nn.Identity()
+
+        layer_list = []
+
+        for dataset_entry in config_dataset["datasets"]:
+            dataset_name = dataset_entry["name"]
+            dataset_labels = dataset_entry["labels"]
+
+            layer = torch.nn.Linear(net_heads_head_in_features, len(dataset_labels))
+            layer_dict = torch.nn.ModuleDict({dataset_name: layer})
+
+            layer_list.append(layer_dict)
+
+        self.net.heads_mtl = torch.nn.ModuleList(layer_list)
+
+        if not header.config_decomposed["fine_tuning"]:
+            for parameter in self.parameters():
+                parameter.requires_grad = False
+
+        return
+
+    def forward(self, input):
+        outputs_head = []
+        output_neck = self.net(input)
+
+        for head in self.net.heads_mtl:
             head_layer = list(head.values())[0]
             outputs_head.append(head_layer(output_neck))
 
@@ -106,6 +143,8 @@ def createModelBaseline(*args, **kwargs):
 def createModelDecomposed(*args, **kwargs):
     if header.config_decomposed["model"] == type.NetworkModelDecomposed.resnet152_mtl.name:
         return ResNet152MTL(*args, **kwargs)
+    elif header.config_decomposed["model"] == type.NetworkModelDecomposed.vit_b_32_mtl.name:
+        return ViTB32MTL(*args, **kwargs)
     else:
         logger.log_warn("Unknown decomposed network model \"" + header.config_baseline["model"] + "\". Using \"" + type.NetworkModelDecomposed.resnet152_mtl.name + "\".")
         return ResNet152MTL(*args, **kwargs)
