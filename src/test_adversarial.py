@@ -6,11 +6,12 @@ import utility
 import wandb
 import sklearn.metrics
 
-def testBaseline(model, data_loader, device, batch_step):
+def testAdversarialBaseline(model, data_loader, device, batch_step):
     utility.loadCheckpointBest(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint_best"], model)
 
     accuracy_epoch = 0
     ground_truths_epoch = []
+    input_adversarial = torch.load("attacked_images.pt")
     predictions_epoch = []
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
 
@@ -18,12 +19,18 @@ def testBaseline(model, data_loader, device, batch_step):
     progress_bar.set_description_str("[INFO]: Testing progress")
 
     with torch.no_grad():
+        input_adversarial_index = 0
+
         for (batch_index, (input, labels)) in enumerate(data_loader):
-            input = input.to(device, non_blocking = True)
+            input_adversarial_batch = input_adversarial[input_adversarial_index:input_adversarial_index + input.size(0)]
+            input_adversarial_batch = torch.stack(input_adversarial_batch)
+            input_adversarial_index += input.size(0)
+
+            input_adversarial_batch = input_adversarial_batch.to(device, non_blocking = True)
             labels = labels.to(device, non_blocking = True)
 
             with torch.set_grad_enabled(False):
-                output = model(input)
+                output = model(input_adversarial_batch)
                 (_, predictions) = torch.max(output, 1)
 
             corrects = torch.sum(predictions == labels.data).item()
@@ -61,11 +68,12 @@ def testBaseline(model, data_loader, device, batch_step):
 
     return batch_step
 
-def testDecomposed(model, config_dataset, data_loader, device, batch_step):
+def testAdversarialDecomposed(model, config_dataset, data_loader, device, batch_step):
     utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model)
 
     accuracy_epoch_list = []
     ground_truths_epoch_list = []
+    input_adversarial = torch.load("attacked_images.pt")
     predictions_epoch_list = []
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
 
@@ -78,12 +86,18 @@ def testDecomposed(model, config_dataset, data_loader, device, batch_step):
     progress_bar.set_description_str("[INFO]: Testing progress")
 
     with torch.no_grad():
+        input_adversarial_index = 0
+
         for (batch_index, (input, labels, _)) in enumerate(data_loader):
-            input = input.to(device, non_blocking = True)
+            input_adversarial_batch = input_adversarial[input_adversarial_index:input_adversarial_index + input.size(0)]
+            input_adversarial_batch = torch.stack(input_adversarial_batch)
+            input_adversarial_index += input.size(0)
+
+            input_adversarial_batch = input_adversarial_batch.to(device, non_blocking = True)
             labels = labels.to(device, non_blocking = True)
 
             with torch.set_grad_enabled(False):
-                outputs = model(input)
+                outputs = model(input_adversarial_batch)
 
                 for (i, dataset_entry) in enumerate(config_dataset["datasets"]):
                     (_, predictions) = torch.max(outputs[i], 1)
