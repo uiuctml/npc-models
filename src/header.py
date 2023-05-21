@@ -8,6 +8,7 @@ run_name_baseline_keyword = "baseline"
 run_name_decomposed_keyword = "decomposed"
 run_name_baseline = ""
 run_name_decomposed = ""
+seed = 42
 
 config_baseline = {
     "data_loader_batch_size": 32,
@@ -40,6 +41,7 @@ config_baseline = {
     "optimizer_learning_rate": 1e-3,
     "optimizer_momentum": 0.9,
     "optimizer_weight_decay": 1e-6,
+    "seed": seed,
     "use_l2_loss": False
 }
 
@@ -79,6 +81,7 @@ config_decomposed = {
     "optimizer_learning_rate": 1e-3,
     "optimizer_momentum": 0.9,
     "optimizer_weight_decay": 1e-6,
+    "seed": seed,
     "use_l2_loss": False
 }
 

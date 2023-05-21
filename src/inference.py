@@ -13,9 +13,10 @@ import tqdm
 import utility
 import visualize
 
-torch.backends.cuda.matmul.allow_tf32 = True
-
 def main():
+    utility.setSeed(header.seed)
+    torch.backends.cuda.matmul.allow_tf32 = True
+
     run_name_baseline = ""
     run_name_decomposed = ""
 

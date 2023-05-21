@@ -18,9 +18,10 @@ import utility
 import validate
 import wandb
 
-torch.backends.cuda.matmul.allow_tf32 = True
-
 def main():
+    utility.setSeed(header.seed)
+    torch.backends.cuda.matmul.allow_tf32 = True
+
     run_name = ""
 
     if len(sys.argv) > 1:

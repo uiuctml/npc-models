@@ -3,7 +3,9 @@ import cv2
 import datetime
 import header
 import logger
+import numpy
 import os
+import random
 import socket
 import torch
 import wandb
@@ -163,6 +165,15 @@ def saveCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_be
         logger.log_info("Saved checkpoint \"" + file_name_checkpoint + "\" to Weights & Biases.")
 
     logger.log_info("Saved checkpoint \"" + file_name_checkpoint + "\".")
+
+    return
+
+def setSeed(seed):
+    torch.backends.cudnn.deterministic = True
+    random.seed(seed)
+    torch.manual_seed(seed)
+    numpy.random.seed(seed)
+    torch.cuda.manual_seed_all(seed)
 
     return
 
