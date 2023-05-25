@@ -51,7 +51,7 @@ def main():
         torchvision.transforms.Resize((header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])),
         torchvision.transforms.ToTensor(),
     ])
-    dataset_original = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_test"], dataset_transforms)
+    dataset_original = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_train"], dataset_transforms)
     dataset_test = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_test"], dataset_original.classes, dataset_transforms)
     dataset_train = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_train"], dataset_original.classes, dataset_transforms)
     dataset_validation = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_validation"], dataset_original.classes, dataset_transforms)
@@ -64,7 +64,7 @@ def main():
     model = network.createModelDecomposed(config_dataset)
     model = torch.nn.DataParallel(model)
     model = model.to(device)
-    optimizer = torch.optim.SGD(model.parameters(), lr = header.config_decomposed["optimizer_learning_rate"], momentum = header.config_decomposed["optimizer_momentum"], weight_decay = header.config_decomposed["optimizer_weight_decay"])
+    optimizer = torch.optim.SGD(model.module.getOptimizerParameters(), lr = header.config_decomposed["optimizer_learning_rate"], momentum = header.config_decomposed["optimizer_momentum"], weight_decay = header.config_decomposed["optimizer_weight_decay"])
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.config_decomposed["learning_rate_scheduler_mode"], header.config_decomposed["learning_rate_scheduler_factor"], header.config_decomposed["learning_rate_scheduler_patience"], header.config_decomposed["learning_rate_scheduler_threshold"], header.config_decomposed["learning_rate_scheduler_threshold_mode"], header.config_decomposed["learning_rate_scheduler_cooldown"], header.config_decomposed["learning_rate_scheduler_min_learning_rate"], header.config_decomposed["learning_rate_scheduler_min_learning_rate_decay"], header.config_decomposed["learning_rate_scheduler_verbose"])
     progress_bar = None
 
