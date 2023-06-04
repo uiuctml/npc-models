@@ -11,7 +11,7 @@ def testAdversarialBaseline(model, data_loader, device, batch_step):
 
     accuracy_epoch = 0
     ground_truths_epoch = []
-    input_adversarial = torch.load("attacked_images.pt")
+    input_adversarial = torch.load(header.config_baseline["file_path_input_adversarial"])
     predictions_epoch = []
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
 
@@ -73,7 +73,7 @@ def testAdversarialDecomposed(model, config_dataset, data_loader, device, batch_
 
     accuracy_epoch_list = []
     ground_truths_epoch_list = []
-    input_adversarial = torch.load("attacked_images.pt")
+    input_adversarial = torch.load(header.config_decomposed["file_path_input_adversarial"])
     predictions_epoch_list = []
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
 

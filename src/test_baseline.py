@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 
 import header
-import logger
 import network
-import sys
 import torch
 import torch.nn
 import torchvision
 import test
+import test_adversarial
 import utility
 import wandb
 
@@ -15,15 +14,7 @@ def main():
     utility.setSeed(header.seed)
     torch.backends.cuda.matmul.allow_tf32 = True
 
-    run_name = ""
-
-    if len(sys.argv) > 1:
-        run_name = sys.argv[1]
-
-    if not utility.initializeRunNameBaseline(run_name) or header.run_name_baseline == "":
-        logger.log_error("Run name missing. Quit.")
-        return
-
+    utility.processArgumentsBaseline()
     wandb.init(config = header.config_baseline, mode = "disabled")
 
     dataset_transforms = torchvision.transforms.Compose([
@@ -38,7 +29,10 @@ def main():
     model = torch.nn.DataParallel(model)
     model = model.to(device)
 
-    test.testBaseline(model, data_loader_test, device, 1)
+    if header.config_baseline["test_adversarial"]:
+        test_adversarial.testAdversarialBaseline(model, data_loader_test, device, 1)
+    else:
+        test.testBaseline(model, data_loader_test, device, 1)
 
     return
 

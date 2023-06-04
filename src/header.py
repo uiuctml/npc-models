@@ -22,6 +22,7 @@ config_baseline = {
     "epochs": 100,
     "file_name_checkpoint": run_name_baseline + ".tar",
     "file_name_checkpoint_best": run_name_baseline + ".best.tar",
+    "file_path_input_adversarial": "1e-2-50.pt",
     "fine_tuning": True,
     "learning_rate_scheduler_mode": "min",
     "learning_rate_scheduler_factor": 0.1,
@@ -42,6 +43,7 @@ config_baseline = {
     "optimizer_momentum": 0.9,
     "optimizer_weight_decay": 1e-6,
     "seed": seed,
+    "test_adversarial": False,
     "use_l2_loss": False
 }
 
@@ -62,6 +64,7 @@ config_decomposed = {
     "file_name_checkpoint_best": run_name_decomposed + ".best.tar",
     "file_name_config_dataset": "dataset.json",
     "file_name_config_dataset_generation": "generate.json",
+    "file_path_input_adversarial": "1e-2-50.pt",
     "fine_tuning": True,
     "learning_rate_scheduler_mode": "min",
     "learning_rate_scheduler_factor": 0.1,
@@ -82,6 +85,7 @@ config_decomposed = {
     "optimizer_momentum": 0.9,
     "optimizer_weight_decay": 1e-6,
     "seed": seed,
+    "test_adversarial": False,
     "use_l2_loss": False
 }
 

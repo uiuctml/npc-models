@@ -1,4 +1,4 @@
-
+import argparse
 import cv2
 import datetime
 import header
@@ -32,6 +32,19 @@ def wAndBGenerateRunName(model_name, model_type):
     run_name += socket.gethostname()
 
     return run_name
+
+
+def initializeArguments():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--run-name", "-r", type = str, default = "", help = "WandB run name.", required = True)
+    parser.add_argument("--adversarial-input-file", "-i", type = str, default = "", help = "Path to adversarial input file.")
+    parser.add_argument("--model", "-m", type = str, default = "", help = "Model type.")
+    parser.add_argument("--model-pretrained-weights", "-w", type = str, default = "", help = "Model pretrained weights.")
+    parser.add_argument("--test-adversarial", "-a", type = int, default = 0, help = "Whether to perform adversarial tests.")
+    parser.add_argument("--test-dataset-dir", "-d", type = str, default = "", help = "Directory of dataset testing split.")
+
+    return parser.parse_args()
 
 def initializeRunNameBaseline(run_name):
     resume = False
@@ -116,6 +129,72 @@ def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
         model.load_state_dict(checkpoint["model_state_dict"])
 
         logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
+
+    return
+
+def processArgumentsBaseline():
+    arguments = initializeArguments()
+
+    if not initializeRunNameBaseline(arguments.run_name) or header.run_name_baseline == "":
+        logger.log_error("Run name missing. Quit.")
+        exit(1)
+
+    if arguments.adversarial_input_file != "":
+        header.config_baseline["file_path_input_adversarial"] = arguments.adversarial_input_file
+
+    if arguments.model != "":
+        header.config_baseline["model"] = arguments.model
+
+    if arguments.model_pretrained_weights != "":
+        header.config_baseline["model_pretrained_weights"] = arguments.model_pretrained_weights
+
+    if arguments.test_adversarial == 0:
+        header.config_baseline["test_adversarial"] = False
+    else:
+        header.config_baseline["test_adversarial"] = True
+
+    if arguments.test_dataset_dir != "":
+        header.config_baseline["dir_dataset_test"] = arguments.test_dataset_dir
+
+    logger.log_info("WandB run name: \"" + header.run_name_baseline + "\".")
+    logger.log_info("Path to adversarial input file: \"" + header.config_baseline["file_path_input_adversarial"] + "\".")
+    logger.log_info("Model type: \"" + header.config_baseline["model"] + "\".")
+    logger.log_info("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
+    logger.log_info("Whether to perform adversarial tests: " + str(header.config_baseline["test_adversarial"]) + ".")
+    logger.log_info("Directory of dataset testing split: \"" + header.config_baseline["dir_dataset_test"] + "\".")
+
+    return
+
+def processArgumentsDecomposed():
+    arguments = initializeArguments()
+
+    if not initializeRunNameDecomposed(arguments.run_name) or header.run_name_decomposed == "":
+        logger.log_error("Run name missing. Quit.")
+        exit(1)
+
+    if arguments.adversarial_input_file != "":
+        header.config_decomposed["file_path_input_adversarial"] = arguments.adversarial_input_file
+
+    if arguments.model != "":
+        header.config_decomposed["model"] = arguments.model
+
+    if arguments.model_pretrained_weights != "":
+        header.config_decomposed["model_pretrained_weights"] = arguments.model_pretrained_weights
+
+    if arguments.test_adversarial == 0:
+        header.config_decomposed["test_adversarial"] = False
+    else:
+        header.config_decomposed["test_adversarial"] = True
+
+    if arguments.test_dataset_dir != "":
+        header.config_decomposed["dir_dataset_test"] = arguments.test_dataset_dir
+
+    logger.log_info("WandB run name: \"" + header.run_name_baseline + "\".")
+    logger.log_info("Path to adversarial input file: \"" + header.config_decomposed["file_path_input_adversarial"] + "\".")
+    logger.log_info("Model type: \"" + header.config_decomposed["model"] + "\".")
+    logger.log_info("Model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
+    logger.log_info("Whether to perform adversarial tests: " + str(header.config_decomposed["test_adversarial"]) + ".")
+    logger.log_info("Directory of dataset testing split: \"" + header.config_decomposed["dir_dataset_test"] + "\".")
 
     return
 

@@ -2,13 +2,12 @@
 
 import dataset as dset
 import header
-import logger
 import network
-import sys
 import torch
 import torch.nn
 import torchvision
 import test
+import test_adversarial
 import utility
 import wandb
 
@@ -16,15 +15,7 @@ def main():
     utility.setSeed(header.seed)
     torch.backends.cuda.matmul.allow_tf32 = True
 
-    run_name = ""
-
-    if len(sys.argv) > 1:
-        run_name = sys.argv[1]
-
-    if not utility.initializeRunNameDecomposed(run_name) or header.run_name_decomposed == "":
-        logger.log_error("Run name missing. Quit.")
-        return
-
+    utility.processArgumentsDecomposed()
     wandb.init(config = header.config_decomposed, mode = "disabled")
 
     dataset_transforms = torchvision.transforms.Compose([
@@ -40,7 +31,10 @@ def main():
     model = torch.nn.DataParallel(model)
     model = model.to(device)
 
-    test.testDecomposed(model, config_dataset, data_loader_test, device, 1)
+    if header.config_decomposed["test_adversarial"]:
+        test_adversarial.testAdversarialDecomposed(model, config_dataset, data_loader_test, device, 1)
+    else:
+        test.testDecomposed(model, config_dataset, data_loader_test, device, 1)
 
     return
 
