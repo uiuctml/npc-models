@@ -189,7 +189,7 @@ def processArgumentsTestDecomposed():
     if arguments.test_dataset_dir != "":
         header.config_decomposed["dir_dataset_test"] = arguments.test_dataset_dir
 
-    logger.log_info("WandB run name: \"" + header.run_name_baseline + "\".")
+    logger.log_info("WandB run name: \"" + header.run_name_decomposed + "\".")
     logger.log_info("Path to adversarial input file: \"" + header.config_decomposed["file_path_input_adversarial"] + "\".")
     logger.log_info("Model type: \"" + header.config_decomposed["model"] + "\".")
     logger.log_info("Model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
