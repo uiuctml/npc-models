@@ -41,6 +41,7 @@ def initializeArgumentsTest():
     parser.add_argument("--adversarial-input-file", "-i", type = str, default = "", help = "Path to adversarial input file.")
     parser.add_argument("--model", "-m", type = str, default = "", help = "Model type.")
     parser.add_argument("--model-pretrained-weights", "-w", type = str, default = "", help = "Model pretrained weights.")
+    parser.add_argument("--seed", "-s", type = int, default = 42, help = "Randomization seed.")
     parser.add_argument("--test-adversarial", "-a", type = int, default = 0, help = "Whether to perform adversarial tests.")
     parser.add_argument("--test-dataset-dir", "-d", type = str, default = "", help = "Directory of dataset testing split.")
 
@@ -201,6 +202,8 @@ def processArgumentsTestBaseline():
     if arguments.model_pretrained_weights != "":
         header.config_baseline["model_pretrained_weights"] = arguments.model_pretrained_weights
 
+    header.config_baseline["seed"] = arguments.seed
+
     if arguments.test_adversarial == 0:
         header.config_baseline["test_adversarial"] = False
     else:
@@ -213,6 +216,7 @@ def processArgumentsTestBaseline():
     logger.log_info("Path to adversarial input file: \"" + header.config_baseline["file_path_input_adversarial"] + "\".")
     logger.log_info("Model type: \"" + header.config_baseline["model"] + "\".")
     logger.log_info("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
+    logger.log_info("Randomization seed: \"" + header.config_baseline["seed"] + "\".")
     logger.log_info("Whether to perform adversarial tests: " + str(header.config_baseline["test_adversarial"]) + ".")
     logger.log_info("Directory of dataset testing split: \"" + header.config_baseline["dir_dataset_test"] + "\".")
 
@@ -234,6 +238,8 @@ def processArgumentsTestDecomposed():
     if arguments.model_pretrained_weights != "":
         header.config_decomposed["model_pretrained_weights"] = arguments.model_pretrained_weights
 
+    header.config_decomposed["seed"] = arguments.seed
+
     if arguments.test_adversarial == 0:
         header.config_decomposed["test_adversarial"] = False
     else:
@@ -246,6 +252,7 @@ def processArgumentsTestDecomposed():
     logger.log_info("Path to adversarial input file: \"" + header.config_decomposed["file_path_input_adversarial"] + "\".")
     logger.log_info("Model type: \"" + header.config_decomposed["model"] + "\".")
     logger.log_info("Model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
+    logger.log_info("Randomization seed: \"" + header.config_decomposed["seed"] + "\".")
     logger.log_info("Whether to perform adversarial tests: " + str(header.config_decomposed["test_adversarial"]) + ".")
     logger.log_info("Directory of dataset testing split: \"" + header.config_decomposed["dir_dataset_test"] + "\".")
 

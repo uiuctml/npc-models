@@ -11,10 +11,11 @@ import utility
 import wandb
 
 def main():
-    utility.setSeed(header.seed)
+    utility.processArgumentsTestBaseline()
+
+    utility.setSeed(header.config_baseline["seed"])
     torch.backends.cuda.matmul.allow_tf32 = True
 
-    utility.processArgumentsTestBaseline()
     wandb.init(config = header.config_baseline, mode = "disabled")
 
     dataset_transforms = torchvision.transforms.Compose([
