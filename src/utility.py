@@ -34,7 +34,7 @@ def wAndBGenerateRunName(model_name, model_type):
     return run_name
 
 
-def initializeArguments():
+def initializeArgumentsTest():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--run-name", "-r", type = str, default = "", help = "WandB run name.", required = True)
@@ -132,8 +132,8 @@ def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
 
     return
 
-def processArgumentsBaseline():
-    arguments = initializeArguments()
+def processArgumentsTestBaseline():
+    arguments = initializeArgumentsTest()
 
     if not initializeRunNameBaseline(arguments.run_name) or header.run_name_baseline == "":
         logger.log_error("Run name missing. Quit.")
@@ -165,8 +165,8 @@ def processArgumentsBaseline():
 
     return
 
-def processArgumentsDecomposed():
-    arguments = initializeArguments()
+def processArgumentsTestDecomposed():
+    arguments = initializeArgumentsTest()
 
     if not initializeRunNameDecomposed(arguments.run_name) or header.run_name_decomposed == "":
         logger.log_error("Run name missing. Quit.")
