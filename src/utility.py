@@ -159,8 +159,8 @@ def processArgumentsTrainBaseline():
     header.config_baseline["seed"] = arguments.seed
 
     logger.log_info("WandB run name: \"" + header.run_name_baseline + "\".")
-    logger.log_info("Whether to perform backbone fine-tuning: \"" + header.config_baseline["fine_tuning"] + "\".")
-    logger.log_info("Randomization seed: \"" + header.config_baseline["seed"] + "\".")
+    logger.log_info("Whether to perform backbone fine-tuning: " + str(header.config_baseline["fine_tuning"]) + ".")
+    logger.log_info("Randomization seed: " + str(header.config_baseline["seed"]) + ".")
 
     return resume
 
@@ -181,8 +181,8 @@ def processArgumentsTrainDecomposed():
     header.config_decomposed["seed"] = arguments.seed
 
     logger.log_info("WandB run name: \"" + header.run_name_decomposed + "\".")
-    logger.log_info("Whether to perform backbone fine-tuning: \"" + header.config_decomposed["fine_tuning"] + "\".")
-    logger.log_info("Randomization seed: \"" + header.config_decomposed["seed"] + "\".")
+    logger.log_info("Whether to perform backbone fine-tuning: " + str(header.config_decomposed["fine_tuning"]) + ".")
+    logger.log_info("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
 
     return resume
 
@@ -216,7 +216,7 @@ def processArgumentsTestBaseline():
     logger.log_info("Path to adversarial input file: \"" + header.config_baseline["file_path_input_adversarial"] + "\".")
     logger.log_info("Model type: \"" + header.config_baseline["model"] + "\".")
     logger.log_info("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
-    logger.log_info("Randomization seed: \"" + header.config_baseline["seed"] + "\".")
+    logger.log_info("Randomization seed: " + str(header.config_baseline["seed"]) + ".")
     logger.log_info("Whether to perform adversarial tests: " + str(header.config_baseline["test_adversarial"]) + ".")
     logger.log_info("Directory of dataset testing split: \"" + header.config_baseline["dir_dataset_test"] + "\".")
 
@@ -252,7 +252,7 @@ def processArgumentsTestDecomposed():
     logger.log_info("Path to adversarial input file: \"" + header.config_decomposed["file_path_input_adversarial"] + "\".")
     logger.log_info("Model type: \"" + header.config_decomposed["model"] + "\".")
     logger.log_info("Model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
-    logger.log_info("Randomization seed: \"" + header.config_decomposed["seed"] + "\".")
+    logger.log_info("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
     logger.log_info("Whether to perform adversarial tests: " + str(header.config_decomposed["test_adversarial"]) + ".")
     logger.log_info("Directory of dataset testing split: \"" + header.config_decomposed["dir_dataset_test"] + "\".")
 
