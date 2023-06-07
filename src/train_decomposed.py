@@ -4,7 +4,6 @@ import header
 import dataset as dset
 import logger
 import network
-import sys
 import torch
 import torch.nn
 import torch.optim
@@ -19,19 +18,10 @@ import validate
 import wandb
 
 def main():
-    utility.setSeed(header.seed)
+    resume = utility.processArgumentsTrainDecomposed()
+
+    utility.setSeed(header.config_decomposed["seed"])
     torch.backends.cuda.matmul.allow_tf32 = True
-
-    run_name = ""
-
-    if len(sys.argv) > 1:
-        run_name = sys.argv[1]
-
-    resume = utility.initializeRunNameDecomposed(run_name)
-
-    if header.run_name_decomposed == "":
-        logger.log_error("Run name missing. Quit.")
-        return
 
     if header.run_mode == "online":
         wandb.login()

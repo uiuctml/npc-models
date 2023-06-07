@@ -46,6 +46,15 @@ def initializeArgumentsTest():
 
     return parser.parse_args()
 
+def initializeArgumentsTrain():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--run-name", "-r", type = str, default = "", help = "WandB run name.")
+    parser.add_argument("--fine-tune", "-f", type = int, default = 1, help = "Whether to perform backbone fine-tuning.")
+    parser.add_argument("--seed", "-s", type = int, default = 42, help = "Randomization seed.")
+
+    return parser.parse_args()
+
 def initializeRunNameBaseline(run_name):
     resume = False
 
@@ -131,6 +140,50 @@ def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
         logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
 
     return
+
+def processArgumentsTrainBaseline():
+    arguments = initializeArgumentsTrain()
+
+    resume = initializeRunNameBaseline(arguments.run_name)
+
+    if header.run_name_baseline == "":
+        logger.log_error("Run name missing. Quit.")
+        exit(1)
+
+    if arguments.fine_tune == 0:
+        header.config_baseline["fine_tuning"] = False
+    else:
+        header.config_baseline["fine_tuning"] = True
+
+    header.config_baseline["seed"] = arguments.seed
+
+    logger.log_info("WandB run name: \"" + header.run_name_baseline + "\".")
+    logger.log_info("Whether to perform backbone fine-tuning: \"" + header.config_baseline["fine_tuning"] + "\".")
+    logger.log_info("Randomization seed: \"" + header.config_baseline["seed"] + "\".")
+
+    return resume
+
+def processArgumentsTrainDecomposed():
+    arguments = initializeArgumentsTrain()
+
+    resume = initializeRunNameDecomposed(arguments.run_name)
+
+    if header.run_name_decomposed == "":
+        logger.log_error("Run name missing. Quit.")
+        return
+
+    if arguments.fine_tune == 0:
+        header.config_decomposed["fine_tuning"] = False
+    else:
+        header.config_decomposed["fine_tuning"] = True
+
+    header.config_decomposed["seed"] = arguments.seed
+
+    logger.log_info("WandB run name: \"" + header.run_name_decomposed + "\".")
+    logger.log_info("Whether to perform backbone fine-tuning: \"" + header.config_decomposed["fine_tuning"] + "\".")
+    logger.log_info("Randomization seed: \"" + header.config_decomposed["seed"] + "\".")
+
+    return resume
 
 def processArgumentsTestBaseline():
     arguments = initializeArgumentsTest()
