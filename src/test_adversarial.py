@@ -15,6 +15,9 @@ def testAdversarialBaseline(model, data_loader, device, batch_step):
     predictions_epoch = []
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
 
+    for input_adversarial_image in input_adversarial:
+        input_adversarial_image = input_adversarial_image.float()
+
     model.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")
 
@@ -81,6 +84,9 @@ def testAdversarialDecomposed(model, config_dataset, data_loader, device, batch_
         accuracy_epoch_list.append(0)
         ground_truths_epoch_list.append([])
         predictions_epoch_list.append([])
+
+    for input_adversarial_image in input_adversarial:
+        input_adversarial_image = input_adversarial_image.float()
 
     model.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")
