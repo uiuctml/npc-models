@@ -57,3 +57,7 @@ cd src/
 ./test_decomposed.py
 
 ```
+
+## License
+
+The codebase is provided under the Creative Commons Attribution NonCommercial ShareAlike (CC BY-NC-SA) license, which can be viewed under `LICENSE`.
