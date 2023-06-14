@@ -11,9 +11,9 @@ This codebase was developed on Ubuntu 20.04 LTS and requires the following packa
  - (apt) python3-pip [20.0.2-5ubuntu1.8]
  - (apt) python3-opencv [4.2.0+dfsg-5]
  - (pip) scikit-image [0.18.0]
- - (pip) torch [4.64.1]
- - (pip) torchvision [4.64.1]
- - (pip) torchsummary [4.64.1]
+ - (pip) torch [1.13.1]
+ - (pip) torchsummary [1.5.1]
+ - (pip) torchvision [0.14.1]
  - (pip) tqdm [4.64.1]
 
 Before attempting to launch a script, please refer to `header.py` and ensure that all relevant parameters, such as model type, hyperparameters, testing split path, etc., are properly set.
