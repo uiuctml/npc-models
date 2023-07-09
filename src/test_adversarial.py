@@ -16,7 +16,7 @@ def testAdversarialBaseline(model, data_loader, device, batch_step):
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
 
     for i in range(0, len(input_adversarial)):
-        input_adversarial[i] = input_adversarial[i].float()
+        input_adversarial[i] = input_adversarial[i].float() / 255
 
     model.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")

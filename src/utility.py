@@ -33,7 +33,6 @@ def wAndBGenerateRunName(model_name, model_type):
 
     return run_name
 
-
 def initializeArgumentsTest():
     parser = argparse.ArgumentParser()
 
