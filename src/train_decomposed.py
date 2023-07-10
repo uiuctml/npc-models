@@ -37,10 +37,7 @@ def main():
     batch_step_train = 1
     batch_step_validate = 1
     criterions = []
-    dataset_transforms = torchvision.transforms.Compose([
-        torchvision.transforms.Resize((header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])),
-        torchvision.transforms.ToTensor(),
-    ])
+    dataset_transforms = utility.createTransformDecomposed()
     dataset_original = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_train"], dataset_transforms)
     dataset_test = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_test"], dataset_original.classes, dataset_transforms)
     dataset_train = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_train"], dataset_original.classes, dataset_transforms)

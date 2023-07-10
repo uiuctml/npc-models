@@ -36,10 +36,7 @@ def main():
     batch_step_train = 1
     batch_step_validate = 1
     criterion = torch.nn.CrossEntropyLoss()
-    dataset_transforms = torchvision.transforms.Compose([
-        torchvision.transforms.Resize((header.config_baseline["model_input_height"], header.config_baseline["model_input_width"])),
-        torchvision.transforms.ToTensor(),
-    ])
+    dataset_transforms = utility.createTransformBaseline()
     dataset_test = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_test"], dataset_transforms)
     dataset_train = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_train"], dataset_transforms)
     dataset_validation = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_validation"], dataset_transforms)

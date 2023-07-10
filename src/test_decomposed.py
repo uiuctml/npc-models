@@ -19,10 +19,7 @@ def main():
 
     wandb.init(config = header.config_decomposed, mode = "disabled")
 
-    dataset_transforms = torchvision.transforms.Compose([
-        torchvision.transforms.Resize((header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])),
-        torchvision.transforms.ToTensor(),
-    ])
+    dataset_transforms = utility.createTransformDecomposed()
     dataset_original = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_test"], dataset_transforms)
     dataset_test = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_test"], dataset_original.classes, dataset_transforms)
     config_dataset = dataset_test.config

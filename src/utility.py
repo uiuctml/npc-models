@@ -8,6 +8,7 @@ import os
 import random
 import socket
 import torch
+import torchvision
 import wandb
 
 def computeL2Norm(parameters):
@@ -17,6 +18,36 @@ def computeL2Norm(parameters):
         parameters_list.append(parameter.view(-1))
 
     return torch.square(torch.cat(parameters_list)).sum().item()
+
+def createTransformBaseline():
+    dataset_transforms = torchvision.transforms.Compose([
+        torchvision.transforms.Resize((header.config_baseline["model_input_height"], header.config_baseline["model_input_width"])),
+        torchvision.transforms.ToTensor()
+    ])
+
+    if header.config_baseline["input_grayscale"]:
+        dataset_transforms = torchvision.transforms.Compose([
+        torchvision.transforms.Resize((header.config_baseline["model_input_height"], header.config_baseline["model_input_width"])),
+        torchvision.transforms.Grayscale(3),
+        torchvision.transforms.ToTensor()
+    ])
+
+    return dataset_transforms
+
+def createTransformDecomposed():
+    dataset_transforms = torchvision.transforms.Compose([
+        torchvision.transforms.Resize((header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])),
+        torchvision.transforms.ToTensor()
+    ])
+
+    if header.config_decomposed["input_grayscale"]:
+        dataset_transforms = torchvision.transforms.Compose([
+        torchvision.transforms.Resize((header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])),
+        torchvision.transforms.Grayscale(3),
+        torchvision.transforms.ToTensor()
+    ])
+
+    return dataset_transforms
 
 def wAndBGenerateRunName(model_name, model_type):
     date_time_list = list(datetime.datetime.now().timetuple())[:-4]

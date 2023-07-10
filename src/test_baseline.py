@@ -18,10 +18,7 @@ def main():
 
     wandb.init(config = header.config_baseline, mode = "disabled")
 
-    dataset_transforms = torchvision.transforms.Compose([
-        torchvision.transforms.Resize((header.config_baseline["model_input_height"], header.config_baseline["model_input_width"])),
-        torchvision.transforms.ToTensor(),
-    ])
+    dataset_transforms = utility.createTransformBaseline()
     dataset_test = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_test"], dataset_transforms)
     class_count = len(dataset_test.classes)
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_baseline["data_loader_batch_size"], shuffle = False, num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
