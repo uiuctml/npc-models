@@ -24,16 +24,16 @@ def main():
         run_name_baseline = sys.argv[1]
         run_name_decomposed = sys.argv[2]
     else:
-        logger.log_error("Run names missing. Quit.")
-        return
+        logger.log_fatal("Run names missing. Quit.")
+        exit(1)
 
     if not utility.initializeRunNameBaseline(run_name_baseline) or header.run_name_baseline == "":
-        logger.log_error("Baseline run name missing. Quit.")
-        return
+        logger.log_fatal("Baseline run name missing. Quit.")
+        exit(1)
 
     if not utility.initializeRunNameDecomposed(run_name_decomposed) or header.run_name_decomposed == "":
-        logger.log_error("Decomposed run name missing. Quit.")
-        return
+        logger.log_fatal("Decomposed run name missing. Quit.")
+        exit(1)
 
     accuracy_epoch_baseline = 0
     accuracy_epoch_composed = 0

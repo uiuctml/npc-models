@@ -1,7 +1,7 @@
 import multiprocessing
 import type
 
-log_level = type.LogLevel.debug
+log_level = type.LogLevel.info
 project_name = "mapillary-dataset-network"
 run_mode = "disabled"
 run_name_baseline_keyword = "baseline"
@@ -9,6 +9,7 @@ run_name_decomposed_keyword = "decomposed"
 run_name_baseline = ""
 run_name_decomposed = ""
 seed = 42
+show_model_summary = False
 
 config_baseline = {
     "data_loader_batch_size": 32,

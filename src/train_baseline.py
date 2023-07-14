@@ -55,7 +55,7 @@ def main():
 
     (accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch) = utility.loadCheckpoint(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer)
 
-    if header.log_level >= type.LogLevel.trace:
+    if header.show_model_summary:
         model_input_size = (header.config_baseline["model_input_channels"], header.config_baseline["model_input_height"], header.config_baseline["model_input_width"])
         torchsummary.summary(model, input_size = model_input_size)
 

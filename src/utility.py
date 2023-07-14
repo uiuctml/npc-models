@@ -91,7 +91,7 @@ def initializeRunNameBaseline(run_name):
 
     if run_name != "":
         if run_name.split(".")[0] != header.run_name_baseline_keyword:
-            logger.log_error("Invalid baseline run name. Quit.")
+            logger.log_fatal("Invalid baseline run name. Quit.")
             exit(1)
 
         header.run_name_baseline = run_name
@@ -109,7 +109,7 @@ def initializeRunNameDecomposed(run_name):
 
     if run_name != "":
         if run_name.split(".")[0] != header.run_name_decomposed_keyword:
-            logger.log_error("Invalid decomposed run name. Quit.")
+            logger.log_fatal("Invalid decomposed run name. Quit.")
             exit(1)
 
         header.run_name_decomposed = run_name
@@ -148,6 +148,9 @@ def loadCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_be
             optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
 
             logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
+        else:
+            logger.log_fatal("Checkpoint file \"" + file_name_checkpoint + "\" missing.")
+            exit(1)
 
     return (accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch)
 
@@ -169,6 +172,9 @@ def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
         model.load_state_dict(checkpoint["model_state_dict"])
 
         logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
+    else:
+        logger.log_fatal("Checkpoint file \"" + file_name_checkpoint + "\" missing.")
+        exit(1)
 
     return
 
@@ -178,7 +184,7 @@ def processArgumentsTrainBaseline():
     resume = initializeRunNameBaseline(arguments.run_name)
 
     if header.run_name_baseline == "":
-        logger.log_error("Run name missing. Quit.")
+        logger.log_fatal("Run name missing. Quit.")
         exit(1)
 
     if arguments.fine_tune == 0:
@@ -188,9 +194,9 @@ def processArgumentsTrainBaseline():
 
     header.config_baseline["seed"] = arguments.seed
 
-    logger.log_info("WandB run name: \"" + header.run_name_baseline + "\".")
-    logger.log_info("Whether to perform backbone fine-tuning: " + str(header.config_baseline["fine_tuning"]) + ".")
-    logger.log_info("Randomization seed: " + str(header.config_baseline["seed"]) + ".")
+    logger.log_trace("WandB run name: \"" + header.run_name_baseline + "\".")
+    logger.log_trace("Whether to perform backbone fine-tuning: " + str(header.config_baseline["fine_tuning"]) + ".")
+    logger.log_trace("Randomization seed: " + str(header.config_baseline["seed"]) + ".")
 
     return resume
 
@@ -200,8 +206,8 @@ def processArgumentsTrainDecomposed():
     resume = initializeRunNameDecomposed(arguments.run_name)
 
     if header.run_name_decomposed == "":
-        logger.log_error("Run name missing. Quit.")
-        return
+        logger.log_fatal("Run name missing. Quit.")
+        exit(1)
 
     if arguments.fine_tune == 0:
         header.config_decomposed["fine_tuning"] = False
@@ -210,9 +216,9 @@ def processArgumentsTrainDecomposed():
 
     header.config_decomposed["seed"] = arguments.seed
 
-    logger.log_info("WandB run name: \"" + header.run_name_decomposed + "\".")
-    logger.log_info("Whether to perform backbone fine-tuning: " + str(header.config_decomposed["fine_tuning"]) + ".")
-    logger.log_info("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
+    logger.log_trace("WandB run name: \"" + header.run_name_decomposed + "\".")
+    logger.log_trace("Whether to perform backbone fine-tuning: " + str(header.config_decomposed["fine_tuning"]) + ".")
+    logger.log_trace("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
 
     return resume
 
@@ -220,7 +226,7 @@ def processArgumentsTestBaseline():
     arguments = initializeArgumentsTest()
 
     if not initializeRunNameBaseline(arguments.run_name) or header.run_name_baseline == "":
-        logger.log_error("Run name missing. Quit.")
+        logger.log_fatal("Run name missing. Quit.")
         exit(1)
 
     if arguments.adversarial_input_file != "":
@@ -242,13 +248,13 @@ def processArgumentsTestBaseline():
     if arguments.test_dataset_dir != "":
         header.config_baseline["dir_dataset_test"] = arguments.test_dataset_dir
 
-    logger.log_info("WandB run name: \"" + header.run_name_baseline + "\".")
-    logger.log_info("Path to adversarial input file: \"" + header.config_baseline["file_path_input_adversarial"] + "\".")
-    logger.log_info("Model type: \"" + header.config_baseline["model"] + "\".")
-    logger.log_info("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
-    logger.log_info("Randomization seed: " + str(header.config_baseline["seed"]) + ".")
-    logger.log_info("Whether to perform adversarial tests: " + str(header.config_baseline["test_adversarial"]) + ".")
-    logger.log_info("Directory of dataset testing split: \"" + header.config_baseline["dir_dataset_test"] + "\".")
+    logger.log_trace("WandB run name: \"" + header.run_name_baseline + "\".")
+    logger.log_trace("Path to adversarial input file: \"" + header.config_baseline["file_path_input_adversarial"] + "\".")
+    logger.log_trace("Model type: \"" + header.config_baseline["model"] + "\".")
+    logger.log_trace("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
+    logger.log_trace("Randomization seed: " + str(header.config_baseline["seed"]) + ".")
+    logger.log_trace("Whether to perform adversarial tests: " + str(header.config_baseline["test_adversarial"]) + ".")
+    logger.log_trace("Directory of dataset testing split: \"" + header.config_baseline["dir_dataset_test"] + "\".")
 
     return
 
@@ -256,7 +262,7 @@ def processArgumentsTestDecomposed():
     arguments = initializeArgumentsTest()
 
     if not initializeRunNameDecomposed(arguments.run_name) or header.run_name_decomposed == "":
-        logger.log_error("Run name missing. Quit.")
+        logger.log_fatal("Run name missing. Quit.")
         exit(1)
 
     if arguments.adversarial_input_file != "":
@@ -278,13 +284,13 @@ def processArgumentsTestDecomposed():
     if arguments.test_dataset_dir != "":
         header.config_decomposed["dir_dataset_test"] = arguments.test_dataset_dir
 
-    logger.log_info("WandB run name: \"" + header.run_name_decomposed + "\".")
-    logger.log_info("Path to adversarial input file: \"" + header.config_decomposed["file_path_input_adversarial"] + "\".")
-    logger.log_info("Model type: \"" + header.config_decomposed["model"] + "\".")
-    logger.log_info("Model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
-    logger.log_info("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
-    logger.log_info("Whether to perform adversarial tests: " + str(header.config_decomposed["test_adversarial"]) + ".")
-    logger.log_info("Directory of dataset testing split: \"" + header.config_decomposed["dir_dataset_test"] + "\".")
+    logger.log_trace("WandB run name: \"" + header.run_name_decomposed + "\".")
+    logger.log_trace("Path to adversarial input file: \"" + header.config_decomposed["file_path_input_adversarial"] + "\".")
+    logger.log_trace("Model type: \"" + header.config_decomposed["model"] + "\".")
+    logger.log_trace("Model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
+    logger.log_trace("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
+    logger.log_trace("Whether to perform adversarial tests: " + str(header.config_decomposed["test_adversarial"]) + ".")
+    logger.log_trace("Directory of dataset testing split: \"" + header.config_decomposed["dir_dataset_test"] + "\".")
 
     return
 

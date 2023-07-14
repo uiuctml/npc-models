@@ -56,8 +56,8 @@ def testBaseline(model, data_loader, device, batch_step):
     wandb.summary["testing/epoch/recall"] = recall_epoch
 
     logger.log_info("Testing accuracy: " + str(accuracy_epoch) + ".")
-    logger.log_info("Testing precision: " + str(precision_epoch) + ".")
-    logger.log_info("Testing recall: " + str(recall_epoch) + ".")
+    logger.log_trace("Testing precision: " + str(precision_epoch) + ".")
+    logger.log_trace("Testing recall: " + str(recall_epoch) + ".")
 
     return batch_step
 
@@ -119,7 +119,7 @@ def testDecomposed(model, config_dataset, data_loader, device, batch_step):
         wandb.summary["testing/epoch/" + dataset_entry["name"] + "/recall"] = recall_epoch
 
         logger.log_info("Testing accuracy for \"" + dataset_entry["name"] + "\": " + str(accuracy_epoch_list[i]) + ".")
-        logger.log_info("Testing precision for \"" + dataset_entry["name"] + "\": " + str(precision_epoch) + ".")
-        logger.log_info("Testing recall for \"" + dataset_entry["name"] + "\": " + str(recall_epoch) + ".")
+        logger.log_trace("Testing precision for \"" + dataset_entry["name"] + "\": " + str(precision_epoch) + ".")
+        logger.log_trace("Testing recall for \"" + dataset_entry["name"] + "\": " + str(recall_epoch) + ".")
 
     return batch_step

@@ -178,8 +178,8 @@ def createModelBaseline(*args, **kwargs):
     elif header.config_baseline["model"] == type.NetworkModelBaseline.vit_b_32.name:
         return ViTB32(*args, **kwargs)
     else:
-        logger.log_warn("Unknown baseline network model \"" + header.config_baseline["model"] + "\". Using \"" + type.NetworkModelBaseline.resnet152.name + "\".")
-        return ResNet152(*args, **kwargs)
+        logger.log_fatal("Unknown baseline network model \"" + header.config_baseline["model"] + "\".")
+        exit(1)
 
 def createModelDecomposed(*args, **kwargs):
     if header.config_decomposed["model"] == type.NetworkModelDecomposed.resnet152_mtl.name:
@@ -187,5 +187,5 @@ def createModelDecomposed(*args, **kwargs):
     elif header.config_decomposed["model"] == type.NetworkModelDecomposed.vit_b_32_mtl.name:
         return ViTB32MTL(*args, **kwargs)
     else:
-        logger.log_warn("Unknown decomposed network model \"" + header.config_decomposed["model"] + "\". Using \"" + type.NetworkModelDecomposed.resnet152_mtl.name + "\".")
-        return ResNet152MTL(*args, **kwargs)
+        logger.log_fatal("Unknown decomposed network model \"" + header.config_decomposed["model"] + "\".")
+        exit(1)
