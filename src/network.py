@@ -172,10 +172,16 @@ class ViTB32MTL(torch.nn.Module):
 
 def createModelBaseline(*args, **kwargs):
     if header.config_baseline["model"] == type.NetworkModelBaseline.resnet152.name:
+        header.config_baseline["model_pretrained_weights"] = "IMAGENET1K_V2"
+        logger.log_trace("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
         return ResNet152(*args, **kwargs)
     elif header.config_baseline["model"] == type.NetworkModelBaseline.resnet152_dropout.name:
+        header.config_baseline["model_pretrained_weights"] = "IMAGENET1K_V2"
+        logger.log_trace("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
         return ResNet152Dropout(*args, **kwargs)
     elif header.config_baseline["model"] == type.NetworkModelBaseline.vit_b_32.name:
+        header.config_baseline["model_pretrained_weights"] = "IMAGENET1K_V1"
+        logger.log_trace("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
         return ViTB32(*args, **kwargs)
     else:
         logger.log_fatal("Unknown baseline network model \"" + header.config_baseline["model"] + "\".")
@@ -183,8 +189,12 @@ def createModelBaseline(*args, **kwargs):
 
 def createModelDecomposed(*args, **kwargs):
     if header.config_decomposed["model"] == type.NetworkModelDecomposed.resnet152_mtl.name:
+        header.config_decomposed["model_pretrained_weights"] = "IMAGENET1K_V2"
+        logger.log_trace("Model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
         return ResNet152MTL(*args, **kwargs)
     elif header.config_decomposed["model"] == type.NetworkModelDecomposed.vit_b_32_mtl.name:
+        header.config_decomposed["model_pretrained_weights"] = "IMAGENET1K_V1"
+        logger.log_trace("Model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
         return ViTB32MTL(*args, **kwargs)
     else:
         logger.log_fatal("Unknown decomposed network model \"" + header.config_decomposed["model"] + "\".")
