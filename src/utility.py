@@ -67,20 +67,20 @@ def wAndBGenerateRunName(model_name, model_type):
 def initializeArgumentsTest():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--run-name", "-r", type = str, default = "", help = "WandB run name.", required = True)
-    parser.add_argument("--adversarial-input-file", "-i", type = str, default = "", help = "Path to adversarial input file.")
-    parser.add_argument("--seed", "-s", type = int, default = 42, help = "Randomization seed.")
-    parser.add_argument("--test-adversarial", "-a", type = int, default = 0, help = "Whether to perform adversarial tests.")
-    parser.add_argument("--test-dataset-dir", "-d", type = str, default = "", help = "Directory of dataset testing split.")
+    parser.add_argument("-r", "--run-name", type = str, default = "", help = "WandB run name.", required = True)
+    parser.add_argument("-i", "--adversarial-input-file", type = str, default = "", help = "Path to adversarial input file.")
+    parser.add_argument("-s", "--seed", type = int, default = 42, help = "Randomization seed.")
+    parser.add_argument("-a", "--test-adversarial", type = int, default = 0, help = "Whether to perform adversarial tests.")
+    parser.add_argument("-d", "--test-dataset-dir", type = str, default = "", help = "Directory of dataset testing split.")
 
     return parser.parse_args()
 
 def initializeArgumentsTrain():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--run-name", "-r", type = str, default = "", help = "WandB run name.")
-    parser.add_argument("--fine-tune", "-f", type = int, default = 1, help = "Whether to perform backbone fine-tuning.")
-    parser.add_argument("--seed", "-s", type = int, default = 42, help = "Randomization seed.")
+    parser.add_argument("-r", "--run-name", type = str, default = "", help = "WandB run name.")
+    parser.add_argument("-f", "--fine-tune", type = int, default = 1, help = "Whether to perform backbone fine-tuning.")
+    parser.add_argument("-s", "--seed", type = int, default = 42, help = "Randomization seed.")
 
     return parser.parse_args()
 
