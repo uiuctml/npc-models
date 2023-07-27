@@ -37,7 +37,7 @@ def main():
     batch_step_train = 1
     batch_step_validate = 1
     criterions = []
-    dataset_transforms = utility.createTransformDecomposed()
+    dataset_transforms = utility.createTransform(header.config_decomposed)
     dataset_original = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_train"], dataset_transforms)
     dataset_test = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_test"], dataset_original.classes, dataset_transforms)
     dataset_train = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_train"], dataset_original.classes, dataset_transforms)

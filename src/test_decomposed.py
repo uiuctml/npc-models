@@ -19,7 +19,7 @@ def main():
 
     wandb.init(config = header.config_decomposed, mode = "disabled")
 
-    dataset_transforms = utility.createTransformDecomposed()
+    dataset_transforms = utility.createTransform(header.config_decomposed)
     dataset_original = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_test"], dataset_transforms)
     dataset_test = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_test"], dataset_original.classes, dataset_transforms)
     config_dataset = dataset_test.config

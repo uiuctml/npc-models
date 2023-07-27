@@ -19,30 +19,15 @@ def computeL2Norm(parameters):
 
     return torch.square(torch.cat(parameters_list)).sum().item()
 
-def createTransformBaseline():
+def createTransform(config):
     dataset_transforms = torchvision.transforms.Compose([
-        torchvision.transforms.Resize((header.config_baseline["model_input_height"], header.config_baseline["model_input_width"])),
+        torchvision.transforms.Resize((config["model_input_height"], config["model_input_width"])),
         torchvision.transforms.ToTensor()
     ])
 
-    if header.config_baseline["input_grayscale"]:
+    if config["input_grayscale"]:
         dataset_transforms = torchvision.transforms.Compose([
-        torchvision.transforms.Resize((header.config_baseline["model_input_height"], header.config_baseline["model_input_width"])),
-        torchvision.transforms.Grayscale(3),
-        torchvision.transforms.ToTensor()
-    ])
-
-    return dataset_transforms
-
-def createTransformDecomposed():
-    dataset_transforms = torchvision.transforms.Compose([
-        torchvision.transforms.Resize((header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])),
-        torchvision.transforms.ToTensor()
-    ])
-
-    if header.config_decomposed["input_grayscale"]:
-        dataset_transforms = torchvision.transforms.Compose([
-        torchvision.transforms.Resize((header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])),
+        torchvision.transforms.Resize((config["model_input_height"], config["model_input_width"])),
         torchvision.transforms.Grayscale(3),
         torchvision.transforms.ToTensor()
     ])
