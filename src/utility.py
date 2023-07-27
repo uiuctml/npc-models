@@ -84,6 +84,7 @@ def initializeRunNameBaseline(run_name):
 
     header.config_baseline["file_name_checkpoint"] = header.run_name_baseline + ".tar"
     header.config_baseline["file_name_checkpoint_best"] = header.run_name_baseline + ".best.tar"
+    header.config_baseline["run_name"] = header.run_name_baseline
 
     return resume
 
@@ -102,6 +103,7 @@ def initializeRunNameDecomposed(run_name):
 
     header.config_decomposed["file_name_checkpoint"] = header.run_name_decomposed + ".tar"
     header.config_decomposed["file_name_checkpoint_best"] = header.run_name_decomposed + ".best.tar"
+    header.config_decomposed["run_name"] = header.run_name_decomposed
 
     return resume
 
@@ -158,6 +160,60 @@ def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
     else:
         logger.log_fatal("Checkpoint file \"" + file_name_checkpoint + "\" missing.")
         exit(1)
+
+    return
+
+def logTestOutput(config, output):
+    if config["log_test_output"] == False:
+        return
+
+    dir_test_output = config["dir_test_output"]
+    file_empty = False
+    file_line = ""
+    file_path_test_output = ""
+
+    if not os.path.isdir(dir_test_output):
+        os.makedirs(dir_test_output, exist_ok = True)
+
+    if config["test_adversarial"] == False:
+        file_path_test_output = os.path.join(dir_test_output, config["file_name_test_output_clean"])
+    else:
+        file_path_test_output = os.path.join(dir_test_output, config["file_name_test_output_adversarial"])
+
+    if not os.path.isfile(file_path_test_output):
+        file_empty = True
+    elif os.stat(file_path_test_output).st_size == 0:
+        file_empty = True
+
+    with open(file_path_test_output, "a") as file_test_output:
+        if file_empty:
+            if config["type"] == "baseline":
+                file_test_output.write("# seed\trun_name_model\trun_name_attack\taccuracy\tprecision\trecall\n")
+            elif config["type"] == "decomposed":
+                file_test_output.write("# seed\trun_name_model\trun_name_attack\taccuracy_color\taccuracy_shape\taccuracy_symbol\taccuracy_text\tprecision_color\tprecision_shape\tprecision_symbol\tprecision_text\trecall_color\trecall_shape\trecall_symbol\trecall_text\n")
+            else:
+                logger.log_fatal("Unknown configuration type")
+                exit(1)
+
+        file_line += str(config["seed"])
+        file_line += "\t"
+        file_line += config["run_name"]
+        file_line += "\t"
+
+        if config["test_adversarial"] == False:
+            file_line += "N/A"
+        else:
+            file_line += config["file_path_input_adversarial"].split(".best.tar.pt")[0]
+
+        for value in output:
+            file_line += "\t"
+            file_line += str(value)
+
+        file_line += "\n"
+
+        file_test_output.write(file_line)
+
+    logger.log_info("Logged test output to \"" + file_path_test_output + "\".")
 
     return
 

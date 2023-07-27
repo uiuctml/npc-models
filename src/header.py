@@ -19,13 +19,13 @@ config_baseline = {
     "dir_dataset_test": "../../mapillary-dataset/images/split/original/test",
     "dir_dataset_train": "../../mapillary-dataset/images/split/original/train",
     "dir_dataset_validation": "../../mapillary-dataset/images/split/original/validate",
-    "dir_test_output": "../output",
+    "dir_test_output": "../output/test",
     "dropout_probability": 0.5,
     "epochs": 100,
     "file_name_checkpoint": run_name_baseline + ".tar",
     "file_name_checkpoint_best": run_name_baseline + ".best.tar",
-    "file_name_test_output_clean": "test_output_clean.txt",
-    "file_name_test_output_adversarial": "test_output_adversarial.txt",
+    "file_name_test_output_clean": "test_output_baseline_clean.txt",
+    "file_name_test_output_adversarial": "test_output_baseline_adversarial.txt",
     "file_path_input_adversarial": "1e-2-50.pt",
     "fine_tuning": True,
     "input_grayscale": False,
@@ -48,8 +48,10 @@ config_baseline = {
     "optimizer_learning_rate": 1e-3,
     "optimizer_momentum": 0.9,
     "optimizer_weight_decay": 1e-6,
+    "run_name": run_name_baseline,
     "seed": seed,
     "test_adversarial": False,
+    "type": "baseline",
     "use_l2_loss": False
 }
 
@@ -64,13 +66,13 @@ config_decomposed = {
     "dir_dataset_test": "../../mapillary-dataset/images/split/generated/test",
     "dir_dataset_train": "../../mapillary-dataset/images/split/generated/train",
     "dir_dataset_validation": "../../mapillary-dataset/images/split/generated/validate",
-    "dir_test_output": "../output",
+    "dir_test_output": "../output/test",
     "dropout_probability": 0.5,
     "epochs": 100,
     "file_name_checkpoint": run_name_decomposed + ".tar",
     "file_name_checkpoint_best": run_name_decomposed + ".best.tar",
-    "file_name_test_output_clean": "test_output_clean.txt",
-    "file_name_test_output_adversarial": "test_output_adversarial.txt",
+    "file_name_test_output_clean": "test_output_decomposed_clean.txt",
+    "file_name_test_output_adversarial": "test_output_decomposed_adversarial.txt",
     "file_name_config_dataset": "dataset.json",
     "file_name_config_dataset_generation": "generate.json",
     "file_path_input_adversarial": "1e-2-50.pt",
@@ -95,12 +97,14 @@ config_decomposed = {
     "optimizer_learning_rate": 1e-3,
     "optimizer_momentum": 0.9,
     "optimizer_weight_decay": 1e-6,
+    "run_name": run_name_decomposed,
     "seed": seed,
     "test_adversarial": False,
+    "type": "decomposed",
     "use_l2_loss": False
 }
 
-visualize_dir_output = "../output"
+visualize_dir_output = "../output/visualize"
 visualize_dir_output_correct = visualize_dir_output + "/correct"
 visualize_dir_output_incorrect = visualize_dir_output + "/incorrect"
 visualize_save = False
