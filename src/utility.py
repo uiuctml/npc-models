@@ -185,31 +185,31 @@ def logTestOutput(config, output):
     elif os.stat(file_path_test_output).st_size == 0:
         file_empty = True
 
+    file_line += str(config["seed"])
+    file_line += "\t"
+    file_line += config["run_name"]
+    file_line += "\t"
+
+    if config["test_adversarial"] == False:
+        file_line += "N/A"
+    else:
+        file_line += config["file_path_input_adversarial"].split("/")[-1].split(".best.tar.pt")[0]
+
+    for value in output:
+        file_line += "\t"
+        file_line += str(value)
+
+    file_line += "\n"
+
     with open(file_path_test_output, "a") as file_test_output:
         if file_empty:
             if config["type"] == "baseline":
-                file_test_output.write("# seed\trun_name_model\trun_name_attack\taccuracy\tprecision\trecall\n")
+                file_test_output.write("# seed\tmodel\tattack\taccuracy\tprecision\trecall\n")
             elif config["type"] == "decomposed":
-                file_test_output.write("# seed\trun_name_model\trun_name_attack\taccuracy_color\taccuracy_shape\taccuracy_symbol\taccuracy_text\tprecision_color\tprecision_shape\tprecision_symbol\tprecision_text\trecall_color\trecall_shape\trecall_symbol\trecall_text\n")
+                file_test_output.write("# seed\tmodel\tattack\taccuracy_color\taccuracy_shape\taccuracy_symbol\taccuracy_text\tprecision_color\tprecision_shape\tprecision_symbol\tprecision_text\trecall_color\trecall_shape\trecall_symbol\trecall_text\n")
             else:
                 logger.log_fatal("Unknown configuration type")
                 exit(1)
-
-        file_line += str(config["seed"])
-        file_line += "\t"
-        file_line += config["run_name"]
-        file_line += "\t"
-
-        if config["test_adversarial"] == False:
-            file_line += "N/A"
-        else:
-            file_line += config["file_path_input_adversarial"].split(".best.tar.pt")[0]
-
-        for value in output:
-            file_line += "\t"
-            file_line += str(value)
-
-        file_line += "\n"
 
         file_test_output.write(file_line)
 

@@ -11,6 +11,7 @@ def testBaseline(model, data_loader, device, batch_step):
 
     accuracy_epoch = 0
     ground_truths_epoch = []
+    output_list = []
     predictions_epoch = []
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
 
@@ -47,6 +48,7 @@ def testBaseline(model, data_loader, device, batch_step):
     accuracy_epoch /= len(data_loader.dataset)
     precision_epoch = sklearn.metrics.precision_score(ground_truths_epoch, predictions_epoch, average = "macro", zero_division = 0)
     recall_epoch = sklearn.metrics.recall_score(ground_truths_epoch, predictions_epoch, average = "macro", zero_division = 0)
+    output_list += [accuracy_epoch, precision_epoch, recall_epoch]
 
     wandb.log({"testing/epoch/accuracy": accuracy_epoch})
     wandb.log({"testing/epoch/precision": precision_epoch})
@@ -59,6 +61,8 @@ def testBaseline(model, data_loader, device, batch_step):
     logger.log_trace("Testing precision: " + str(precision_epoch) + ".")
     logger.log_trace("Testing recall: " + str(recall_epoch) + ".")
 
+    utility.logTestOutput(header.config_baseline, output_list)
+
     return batch_step
 
 def testDecomposed(model, config_dataset, data_loader, device, batch_step):
@@ -66,6 +70,10 @@ def testDecomposed(model, config_dataset, data_loader, device, batch_step):
 
     accuracy_epoch_list = []
     ground_truths_epoch_list = []
+    output_list = []
+    output_list_accuracy = []
+    output_list_precision = []
+    output_list_recall = []
     predictions_epoch_list = []
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
 
@@ -111,6 +119,10 @@ def testDecomposed(model, config_dataset, data_loader, device, batch_step):
         precision_epoch = sklearn.metrics.precision_score(ground_truths_epoch_list[i], predictions_epoch_list[i], average = "macro", zero_division = 0)
         recall_epoch = sklearn.metrics.recall_score(ground_truths_epoch_list[i], predictions_epoch_list[i], average = "macro", zero_division = 0)
 
+        output_list_accuracy.append(accuracy_epoch_list[i])
+        output_list_precision.append(precision_epoch)
+        output_list_recall.append(recall_epoch)
+
         wandb.log({"testing/epoch/" + dataset_entry["name"] + "/accuracy": accuracy_epoch_list[i]})
         wandb.log({"testing/epoch/" + dataset_entry["name"] + "/precision": precision_epoch})
         wandb.log({"testing/epoch/" + dataset_entry["name"] + "/recall": recall_epoch})
@@ -121,5 +133,11 @@ def testDecomposed(model, config_dataset, data_loader, device, batch_step):
         logger.log_info("Testing accuracy for \"" + dataset_entry["name"] + "\": " + str(accuracy_epoch_list[i]) + ".")
         logger.log_trace("Testing precision for \"" + dataset_entry["name"] + "\": " + str(precision_epoch) + ".")
         logger.log_trace("Testing recall for \"" + dataset_entry["name"] + "\": " + str(recall_epoch) + ".")
+
+    output_list += output_list_accuracy
+    output_list += output_list_precision
+    output_list += output_list_recall
+
+    utility.logTestOutput(header.config_decomposed, output_list)
 
     return batch_step
