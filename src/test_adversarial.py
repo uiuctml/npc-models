@@ -94,7 +94,7 @@ def testAdversarialDecomposed(model, config_dataset, data_loader, device, batch_
         predictions_epoch_list.append([])
 
     for i in range(0, len(input_adversarial)):
-        input_adversarial[i] = input_adversarial[i].float()
+        input_adversarial[i] = input_adversarial[i].float() / 255
 
     model.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")
