@@ -342,6 +342,9 @@ def createModelDecomposed(config_dataset, device):
         header.config_decomposed["model_pretrained_weights"] = "IMAGENET1K_V1"
         logger.log_trace("Model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
         return ViTB32MTL(config_dataset, device)
+    elif header.config_decomposed["model"] == type.NetworkModelDecomposed.vit_b_32_clip_mtl.name:
+        logger.log_trace("Model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
+        return ViTB32CLIPMTL(config_dataset, device)
     else:
         logger.log_fatal("Unknown decomposed network model \"" + header.config_decomposed["model"] + "\".")
         exit(1)
