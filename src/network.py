@@ -281,6 +281,9 @@ def createModelBaseline(class_count, device):
         header.config_baseline["model_pretrained_weights"] = "IMAGENET1K_V1"
         logger.log_trace("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
         return ViTB32(class_count, device)
+    elif header.config_baseline["model"] == type.NetworkModelBaseline.vit_b_32_clip.name:
+        logger.log_trace("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
+        return ViTB32CLIP(class_count, device)
     else:
         logger.log_fatal("Unknown baseline network model \"" + header.config_baseline["model"] + "\".")
         exit(1)
