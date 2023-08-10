@@ -23,7 +23,7 @@ def main():
     class_count = len(dataset_test.classes)
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_baseline["data_loader_batch_size"], shuffle = False, num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
-    model = network.createModelBaseline(class_count)
+    model = network.createModelBaseline(class_count, device)
     model = torch.nn.DataParallel(model)
     model = model.to(device)
 

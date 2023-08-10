@@ -2,12 +2,14 @@ import enum
 
 class NetworkModelBaseline(enum.Enum):
     resnet152 = 0
-    resnet152_dropout = 1
-    vit_b_32 = 2
+    resnet152_clip = 1
+    resnet152_dropout = 2
+    vit_b_32 = 3
 
 class NetworkModelDecomposed(enum.Enum):
     resnet152_mtl = 0
-    vit_b_32_mtl = 1
+    resnet152_clip_mtl = 1
+    vit_b_32_mtl = 2
 
 class LogLevel(enum.Enum):
     all = 6

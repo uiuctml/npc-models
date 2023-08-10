@@ -5,7 +5,31 @@ import torchvision
 import type
 import clip
 
-class CLIPResNet152(torch.nn.Module):
+class ResNet152(torch.nn.Module):
+    def __init__(self, class_count, device):
+        super().__init__()
+
+        self.net = torchvision.models.resnet152(weights = header.config_baseline["model_pretrained_weights"])
+
+        if not header.config_baseline["fine_tuning"]:
+            for parameter in self.net.parameters():
+                parameter.requires_grad = False
+
+        net_fc_in_features = self.net.fc.in_features
+        self.net.fc = torch.nn.Linear(net_fc_in_features, class_count)
+
+        return
+
+    def forward(self, input):
+        return self.net(input)
+
+    def getOptimizerParameters(self):
+        if header.config_baseline["fine_tuning"]:
+            return self.net.parameters()
+        else:
+            return self.net.fc.parameters()
+
+class ResNet152CLIP(torch.nn.Module):
     def __init__(self, class_count, device):
         super().__init__()
 
@@ -30,32 +54,8 @@ class CLIPResNet152(torch.nn.Module):
         else:
             return self.net.fc.parameters()
 
-class ResNet152(torch.nn.Module):
-    def __init__(self, class_count):
-        super().__init__()
-
-        self.net = torchvision.models.resnet152(weights = header.config_baseline["model_pretrained_weights"])
-
-        if not header.config_baseline["fine_tuning"]:
-            for parameter in self.net.parameters():
-                parameter.requires_grad = False
-
-        net_fc_in_features = self.net.fc.in_features
-        self.net.fc = torch.nn.Linear(net_fc_in_features, class_count)
-
-        return
-
-    def forward(self, input):
-        return self.net(input)
-
-    def getOptimizerParameters(self):
-        if header.config_baseline["fine_tuning"]:
-            return self.net.parameters()
-        else:
-            return self.net.fc.parameters()
-
 class ResNet152Dropout(torch.nn.Module):
-    def __init__(self, class_count):
+    def __init__(self, class_count, device):
         super().__init__()
 
         self.net = torchvision.models.resnet152(weights = header.config_baseline["model_pretrained_weights"])
@@ -79,7 +79,7 @@ class ResNet152Dropout(torch.nn.Module):
             return self.net.fc.parameters()
 
 class ViTB32(torch.nn.Module):
-    def __init__(self, class_count):
+    def __init__(self, class_count, device):
         super().__init__()
 
         self.net = torchvision.models.vit_b_32(weights = header.config_baseline["model_pretrained_weights"])
@@ -106,7 +106,7 @@ class ViTB32(torch.nn.Module):
             return self.net.heads.parameters()
 
 class ResNet152MTL(torch.nn.Module):
-    def __init__(self, config_dataset):
+    def __init__(self, config_dataset, device):
         super().__init__()
 
         self.net = torchvision.models.resnet152(weights = header.config_decomposed["model_pretrained_weights"])
@@ -150,7 +150,7 @@ class ResNet152MTL(torch.nn.Module):
             return self.net.heads_mtl.parameters()
 
 class ViTB32MTL(torch.nn.Module):
-    def __init__(self, config_dataset):
+    def __init__(self, config_dataset, device):
         super().__init__()
 
         self.net = torchvision.models.vit_b_32(weights = header.config_decomposed["model_pretrained_weights"])
@@ -196,32 +196,35 @@ class ViTB32MTL(torch.nn.Module):
         else:
             return self.net.heads_mtl.parameters()
 
-def createModelBaseline(*args, **kwargs):
+def createModelBaseline(class_count, device):
     if header.config_baseline["model"] == type.NetworkModelBaseline.resnet152.name:
         header.config_baseline["model_pretrained_weights"] = "IMAGENET1K_V2"
         logger.log_trace("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
-        return ResNet152(*args, **kwargs)
+        return ResNet152(class_count, device)
+    elif header.config_baseline["model"] == type.NetworkModelBaseline.resnet152_clip.name:
+        logger.log_trace("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
+        return ResNet152CLIP(class_count, device)
     elif header.config_baseline["model"] == type.NetworkModelBaseline.resnet152_dropout.name:
         header.config_baseline["model_pretrained_weights"] = "IMAGENET1K_V2"
         logger.log_trace("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
-        return ResNet152Dropout(*args, **kwargs)
+        return ResNet152Dropout(class_count, device)
     elif header.config_baseline["model"] == type.NetworkModelBaseline.vit_b_32.name:
         header.config_baseline["model_pretrained_weights"] = "IMAGENET1K_V1"
         logger.log_trace("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
-        return ViTB32(*args, **kwargs)
+        return ViTB32(class_count, device)
     else:
         logger.log_fatal("Unknown baseline network model \"" + header.config_baseline["model"] + "\".")
         exit(1)
 
-def createModelDecomposed(*args, **kwargs):
+def createModelDecomposed(config_dataset, device):
     if header.config_decomposed["model"] == type.NetworkModelDecomposed.resnet152_mtl.name:
         header.config_decomposed["model_pretrained_weights"] = "IMAGENET1K_V2"
         logger.log_trace("Model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
-        return ResNet152MTL(*args, **kwargs)
+        return ResNet152MTL(config_dataset, device)
     elif header.config_decomposed["model"] == type.NetworkModelDecomposed.vit_b_32_mtl.name:
         header.config_decomposed["model_pretrained_weights"] = "IMAGENET1K_V1"
         logger.log_trace("Model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
-        return ViTB32MTL(*args, **kwargs)
+        return ViTB32MTL(config_dataset, device)
     else:
         logger.log_fatal("Unknown decomposed network model \"" + header.config_decomposed["model"] + "\".")
         exit(1)

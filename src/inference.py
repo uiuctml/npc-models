@@ -46,10 +46,10 @@ def main():
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     composition = comp.Composition(dataset_test, device)
-    model_baseline = network.createModelBaseline(class_count_original)
+    model_baseline = network.createModelBaseline(class_count_original, device)
     model_baseline = torch.nn.DataParallel(model_baseline)
     model_baseline = model_baseline.to(device)
-    model_decomposed = network.createModelDecomposed(config_dataset)
+    model_decomposed = network.createModelDecomposed(config_dataset, device)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
 
