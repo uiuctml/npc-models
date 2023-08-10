@@ -29,15 +29,8 @@ class ResNet152(torch.nn.Module):
         else:
             return self.net.fc.parameters()
 
-<<<<<<< HEAD
 class ResNet152CLIP(torch.nn.Module):
     def __init__(self, class_count, device):
-=======
-
-
-class ResNet152(torch.nn.Module):
-    def __init__(self, class_count):
->>>>>>> 652508b88c71fe5b6184edd4552bab91a44dbe65
         super().__init__()
 
         self.net = clip.load(name = "RN101", device = device)[0]
