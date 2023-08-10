@@ -21,7 +21,8 @@ class ResNet101CLIP(torch.nn.Module):
         return
 
     def forward(self, input):
-        output_neck = self.net.encode_image(input)
+        output_neck = self.net.encode_image(input).type(self.net.fc.weight.dtype)
+
         return self.net.fc(output_neck)
 
     def getOptimizerParameters(self):
@@ -121,7 +122,7 @@ class ViTB32CLIP(torch.nn.Module):
         return
 
     def forward(self, input):
-        output_neck = self.net.encode_image(input)
+        output_neck = self.net.encode_image(input).type(self.net.fc.weight.dtype)
         return self.net.fc(output_neck)
 
     def getOptimizerParameters(self):
@@ -150,6 +151,7 @@ class ResNet101CLIPMTL(torch.nn.Module):
 
             layer = torch.nn.Linear(net_fc_in_features, len(dataset_labels))
             layer_dict = torch.nn.ModuleDict({dataset_name: layer})
+            self.dtype = layer.weight.dtype
 
             layer_list.append(layer_dict)
 
@@ -159,7 +161,7 @@ class ResNet101CLIPMTL(torch.nn.Module):
 
     def forward(self, input):
         outputs_head = []
-        output_neck = self.net.encode_image(input)
+        output_neck = self.net.encode_image(input).type(self.dtype)
 
         for head in self.net.heads_mtl:
             head_layer = list(head.values())[0]
@@ -284,6 +286,7 @@ class ViTB32CLIPMTL(torch.nn.Module):
 
             layer = torch.nn.Linear(net_fc_in_features, len(dataset_labels))
             layer_dict = torch.nn.ModuleDict({dataset_name: layer})
+            self.dtype = layer.weight.dtype
 
             layer_list.append(layer_dict)
 
@@ -293,7 +296,7 @@ class ViTB32CLIPMTL(torch.nn.Module):
 
     def forward(self, input):
         outputs_head = []
-        output_neck = self.net.encode_image(input)
+        output_neck = self.net.encode_image(input).type(self.dtype)
 
         for head in self.net.heads_mtl:
             head_layer = list(head.values())[0]
