@@ -30,6 +30,8 @@ class CLIPResNet152(torch.nn.Module):
         else:
             return self.net.fc.parameters()
 
+
+
 class ResNet152(torch.nn.Module):
     def __init__(self, class_count):
         super().__init__()
@@ -136,6 +138,50 @@ class ResNet152MTL(torch.nn.Module):
     def forward(self, input):
         outputs_head = []
         output_neck = self.net(input)
+
+        for head in self.net.heads_mtl:
+            head_layer = list(head.values())[0]
+            outputs_head.append(head_layer(output_neck))
+
+        return outputs_head
+
+    def getOptimizerParameters(self):
+        if header.config_decomposed["fine_tuning"]:
+            return self.net.parameters()
+        else:
+            return self.net.heads_mtl.parameters()
+
+class ResNet152CLIPMTL(torch.nn.Module):
+    def __init__(self, config_dataset, device):
+        super().__init__()
+
+        self.net = clip.load(name = "RN101", device = device)[0]
+
+        if not header.config_decomposed["fine_tuning"]:
+            for parameter in self.net.parameters():
+                parameter.requires_grad = False
+
+        net_fc_in_features = self.net.visual.output_dim
+        self.net.fc = torch.nn.Identity()
+
+        layer_list = []
+
+        for dataset_entry in config_dataset["datasets"]:
+            dataset_name = dataset_entry["name"]
+            dataset_labels = dataset_entry["labels"]
+
+            layer = torch.nn.Linear(net_fc_in_features, len(dataset_labels))
+            layer_dict = torch.nn.ModuleDict({dataset_name: layer})
+
+            layer_list.append(layer_dict)
+
+        self.net.heads_mtl = torch.nn.ModuleList(layer_list)
+
+        return
+
+    def forward(self, input):
+        outputs_head = []
+        output_neck = self.net.encode_image(input)
 
         for head in self.net.heads_mtl:
             head_layer = list(head.values())[0]
