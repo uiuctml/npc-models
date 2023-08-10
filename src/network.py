@@ -3,6 +3,32 @@ import logger
 import torch.nn
 import torchvision
 import type
+import clip
+
+class CLIPResNet152(torch.nn.Module):
+    def __init__(self, class_count, device):
+        super().__init__()
+
+        self.net = clip.load(name = "RN101", device = device)[0]
+
+        if not header.config_baseline["fine_tuning"]:
+            for parameter in self.net.parameters():
+                parameter.requires_grad = False
+
+        net_fc_in_features = self.net.visual.output_dim
+        self.net.fc = torch.nn.Linear(net_fc_in_features, class_count)
+
+        return
+
+    def forward(self, input):
+        output_neck = self.net.encode_image(input)
+        return self.net.fc(output_neck)
+
+    def getOptimizerParameters(self):
+        if header.config_baseline["fine_tuning"]:
+            return self.net.parameters()
+        else:
+            return self.net.fc.parameters()
 
 class ResNet152(torch.nn.Module):
     def __init__(self, class_count):
