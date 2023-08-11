@@ -34,11 +34,20 @@ def createTransform(config):
 
     return dataset_transforms
 
-def wAndBGenerateRunName(model_name, model_type):
+def wAndBGenerateRunName(model_name, model_type, seed, fine_tuning):
     date_time_list = list(datetime.datetime.now().timetuple())[:-4]
     run_name = model_name
     run_name += "."
     run_name += model_type
+    run_name += "."
+
+    if fine_tuning:
+        run_name += "ft"
+    else:
+        run_name += "ftl"
+
+    run_name += "."
+    run_name += str(seed)
 
     for entry in date_time_list:
         run_name += "."
@@ -80,7 +89,7 @@ def initializeRunNameBaseline(run_name):
         header.run_name_baseline = run_name
         resume = True
     else:
-        header.run_name_baseline = wAndBGenerateRunName(header.run_name_baseline_keyword, header.config_baseline["model"])
+        header.run_name_baseline = wAndBGenerateRunName(header.run_name_baseline_keyword, header.config_baseline["model"], header.config_baseline["seed"], header.config_baseline["fine_tuning"])
 
     header.config_baseline["file_name_checkpoint"] = header.run_name_baseline + ".tar"
     header.config_baseline["file_name_checkpoint_best"] = header.run_name_baseline + ".best.tar"
@@ -99,7 +108,7 @@ def initializeRunNameDecomposed(run_name):
         header.run_name_decomposed = run_name
         resume = True
     else:
-        header.run_name_decomposed = wAndBGenerateRunName(header.run_name_decomposed_keyword, header.config_decomposed["model"])
+        header.run_name_decomposed = wAndBGenerateRunName(header.run_name_decomposed_keyword, header.config_decomposed["model"], header.config_decomposed["seed"], header.config_decomposed["fine_tuning"])
 
     header.config_decomposed["file_name_checkpoint"] = header.run_name_decomposed + ".tar"
     header.config_decomposed["file_name_checkpoint_best"] = header.run_name_decomposed + ".best.tar"
@@ -220,18 +229,18 @@ def logTestOutput(config, output):
 def processArgumentsTrainBaseline():
     arguments = initializeArgumentsTrain()
 
-    resume = initializeRunNameBaseline(arguments.run_name)
-
-    if header.run_name_baseline == "":
-        logger.log_fatal("Run name missing. Quit.")
-        exit(1)
-
     if arguments.fine_tune == 0:
         header.config_baseline["fine_tuning"] = False
     else:
         header.config_baseline["fine_tuning"] = True
 
     header.config_baseline["seed"] = arguments.seed
+
+    resume = initializeRunNameBaseline(arguments.run_name)
+
+    if header.run_name_baseline == "":
+        logger.log_fatal("Run name missing. Quit.")
+        exit(1)
 
     logger.log_trace("WandB run name: \"" + header.run_name_baseline + "\".")
     logger.log_trace("Whether to perform backbone fine-tuning: " + str(header.config_baseline["fine_tuning"]) + ".")
@@ -242,18 +251,18 @@ def processArgumentsTrainBaseline():
 def processArgumentsTrainDecomposed():
     arguments = initializeArgumentsTrain()
 
-    resume = initializeRunNameDecomposed(arguments.run_name)
-
-    if header.run_name_decomposed == "":
-        logger.log_fatal("Run name missing. Quit.")
-        exit(1)
-
     if arguments.fine_tune == 0:
         header.config_decomposed["fine_tuning"] = False
     else:
         header.config_decomposed["fine_tuning"] = True
 
     header.config_decomposed["seed"] = arguments.seed
+
+    resume = initializeRunNameDecomposed(arguments.run_name)
+
+    if header.run_name_decomposed == "":
+        logger.log_fatal("Run name missing. Quit.")
+        exit(1)
 
     logger.log_trace("WandB run name: \"" + header.run_name_decomposed + "\".")
     logger.log_trace("Whether to perform backbone fine-tuning: " + str(header.config_decomposed["fine_tuning"]) + ".")
@@ -263,12 +272,6 @@ def processArgumentsTrainDecomposed():
 
 def processArgumentsTestBaseline():
     arguments = initializeArgumentsTest()
-
-    if not initializeRunNameBaseline(arguments.run_name) or header.run_name_baseline == "":
-        logger.log_fatal("Run name missing. Quit.")
-        exit(1)
-
-    header.config_baseline["model"] = header.run_name_baseline.split(".")[1]
 
     if arguments.adversarial_input_file != "":
         header.config_baseline["file_path_input_adversarial"] = arguments.adversarial_input_file
@@ -283,6 +286,12 @@ def processArgumentsTestBaseline():
     if arguments.test_dataset_dir != "":
         header.config_baseline["dir_dataset_test"] = arguments.test_dataset_dir
 
+    if not initializeRunNameBaseline(arguments.run_name) or header.run_name_baseline == "":
+        logger.log_fatal("Run name missing. Quit.")
+        exit(1)
+
+    header.config_baseline["model"] = header.run_name_baseline.split(".")[1]
+
     logger.log_trace("WandB run name: \"" + header.run_name_baseline + "\".")
     logger.log_trace("Path to adversarial input file: \"" + header.config_baseline["file_path_input_adversarial"] + "\".")
     logger.log_trace("Model type: \"" + header.config_baseline["model"] + "\".")
@@ -294,12 +303,6 @@ def processArgumentsTestBaseline():
 
 def processArgumentsTestDecomposed():
     arguments = initializeArgumentsTest()
-
-    if not initializeRunNameDecomposed(arguments.run_name) or header.run_name_decomposed == "":
-        logger.log_fatal("Run name missing. Quit.")
-        exit(1)
-
-    header.config_decomposed["model"] = header.run_name_decomposed.split(".")[1]
 
     if arguments.adversarial_input_file != "":
         header.config_decomposed["file_path_input_adversarial"] = arguments.adversarial_input_file
@@ -313,6 +316,12 @@ def processArgumentsTestDecomposed():
 
     if arguments.test_dataset_dir != "":
         header.config_decomposed["dir_dataset_test"] = arguments.test_dataset_dir
+
+    if not initializeRunNameDecomposed(arguments.run_name) or header.run_name_decomposed == "":
+        logger.log_fatal("Run name missing. Quit.")
+        exit(1)
+
+    header.config_decomposed["model"] = header.run_name_decomposed.split(".")[1]
 
     logger.log_trace("WandB run name: \"" + header.run_name_decomposed + "\".")
     logger.log_trace("Path to adversarial input file: \"" + header.config_decomposed["file_path_input_adversarial"] + "\".")
