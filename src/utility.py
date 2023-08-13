@@ -176,15 +176,19 @@ def logTestOutput(config, output):
     if config["log_test_output"] == False:
         return
 
+    dir_dataset_test = config["dir_dataset_test"]
     dir_test_output = config["dir_test_output"]
     file_empty = False
     file_line = ""
     file_path_test_output = ""
 
+    if dir_dataset_test[-1] == '/':
+        dir_dataset_test = dir_dataset_test[:-1]
+
     if not os.path.isdir(dir_test_output):
         os.makedirs(dir_test_output, exist_ok = True)
 
-    if config["test_adversarial"] == False:
+    if config["test_adversarial"] == False and dir_dataset_test.split('/')[-1] == "test":
         file_path_test_output = os.path.join(dir_test_output, config["file_name_test_output_clean"])
     else:
         file_path_test_output = os.path.join(dir_test_output, config["file_name_test_output_attacked"])
@@ -200,7 +204,7 @@ def logTestOutput(config, output):
     file_line += "\t"
 
     if config["test_adversarial"] == False:
-        file_line += "N/A"
+        file_line += dir_dataset_test.split('/')[-1]
     else:
         file_line += config["file_path_input_adversarial"].split("/")[-1].split(".best.tar.pt")[0]
 
