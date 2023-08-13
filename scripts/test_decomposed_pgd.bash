@@ -2,10 +2,10 @@
 
 cd ../src
 
-# 42    RMFT    N/A 
+# 42    RMFT    test
 ./test_decomposed.py -r decomposed.resnet152_mtl.2023.6.4.23.42.euler -s 42
 
-# 42    VMFT    N/A
+# 42    VMFT    test
 ./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.4.23.41.Fractal-Define-XL-R2 -s 42
 
 # 42    RMFT    RMFT Color
@@ -56,10 +56,10 @@ cd ../src
 # 42    VMFT    VMFT Text
 ./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.4.23.41.Fractal-Define-XL-R2 -i ../../mapillary-dataset/images/split/pgd/generated/decomposed.vit_b_32_mtl.2023.6.4.23.41.Fractal-Define-XL-R2.best.tar_task_3.pt -s 42 -a 1
 
-# 42    RMFTL    N/A 
+# 42    RMFTL    test
 ./test_decomposed.py -r decomposed.resnet152_mtl.2023.6.5.13.15.euler -s 42
 
-# 42    VMFTL    N/A
+# 42    VMFTL    test
 ./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.5.13.14.Fractal-Define-XL-R2 -s 42
 
 # 42    RMFTL    RMFTL Color
@@ -110,10 +110,10 @@ cd ../src
 # 42    VMFTL    VMFTL Text
 ./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.5.13.14.Fractal-Define-XL-R2 -i ../../mapillary-dataset/images/split/pgd/generated/decomposed.vit_b_32_mtl.2023.6.5.13.14.Fractal-Define-XL-R2.best.tar_task_3.pt -s 42 -a 1
 
-# 84    RMFT    N/A 
+# 84    RMFT    test
 ./test_decomposed.py -r decomposed.resnet152_mtl.2023.6.9.1.7.euler -s 84
 
-# 84    VMFT    N/A
+# 84    VMFT    test
 ./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.8.17.39.Fractal-Define-XL-R2 -s 84
 
 # 84    RMFT    RMFT Color
@@ -164,10 +164,10 @@ cd ../src
 # 84    VMFT    VMFT Text
 ./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.8.17.39.Fractal-Define-XL-R2 -i ../../mapillary-dataset/images/split/pgd/generated/decomposed.vit_b_32_mtl.2023.6.8.17.39.Fractal-Define-XL-R2.best.tar_task_3.pt -s 84 -a 1
 
-# 84    RMFTL    N/A 
+# 84    RMFTL    test
 ./test_decomposed.py -r decomposed.resnet152_mtl.2023.6.11.14.40.euler -s 84
 
-# 84    VMFTL    N/A
+# 84    VMFTL    test
 ./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.10.22.42.Fractal-Define-XL-R2 -s 84
 
 # 84    RMFTL    RMFTL Color
@@ -218,10 +218,10 @@ cd ../src
 # 84    VMFTL    VMFTL Text
 ./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.10.22.42.Fractal-Define-XL-R2 -i ../../mapillary-dataset/images/split/pgd/generated/decomposed.vit_b_32_mtl.2023.6.10.22.42.Fractal-Define-XL-R2.best.tar_task_3.pt -s 84 -a 1
 
-# 126    RMFT    N/A 
+# 126    RMFT    test
 ./test_decomposed.py -r decomposed.resnet152_mtl.2023.6.9.13.23.euler -s 126
 
-# 126    VMFT    N/A
+# 126    VMFT    test
 ./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.9.6.46.Fractal-Define-XL-R2 -s 126
 
 # 126    RMFT    RMFT Color
@@ -272,10 +272,10 @@ cd ../src
 # 126    VMFT    VMFT Text
 ./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.9.6.46.Fractal-Define-XL-R2 -i ../../mapillary-dataset/images/split/pgd/generated/decomposed.vit_b_32_mtl.2023.6.9.6.46.Fractal-Define-XL-R2.best.tar_task_3.pt -s 126 -a 1
 
-# 126    RMFTL    N/A 
+# 126    RMFTL    test
 ./test_decomposed.py -r decomposed.resnet152_mtl.2023.6.11.20.36.euler -s 126
 
-# 126    VMFTL    N/A
+# 126    VMFTL    test
 ./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.6.34.Fractal-Define-XL-R2 -s 126
 
 # 126    RMFTL    RMFTL Color
@@ -326,10 +326,10 @@ cd ../src
 # 126    VMFTL    VMFTL Text
 ./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.6.34.Fractal-Define-XL-R2 -i ../../mapillary-dataset/images/split/pgd/generated/decomposed.vit_b_32_mtl.2023.6.11.6.34.Fractal-Define-XL-R2.best.tar_task_3.pt -s 126 -a 1
 
-# 168    RMFT    N/A 
+# 168    RMFT    test
 ./test_decomposed.py -r decomposed.resnet152_mtl.2023.6.10.1.45.euler -s 168
 
-# 168    VMFT    N/A
+# 168    VMFT    test
 ./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.9.20.2.Fractal-Define-XL-R2 -s 168
 
 # 168    RMFT    RMFT Color
@@ -380,10 +380,10 @@ cd ../src
 # 168    VMFT    VMFT Text
 ./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.9.20.2.Fractal-Define-XL-R2 -i ../../mapillary-dataset/images/split/pgd/generated/decomposed.vit_b_32_mtl.2023.6.9.20.2.Fractal-Define-XL-R2.best.tar_task_3.pt -s 168 -a 1
 
-# 168    RMFTL    N/A 
+# 168    RMFTL    test
 ./test_decomposed.py -r decomposed.resnet152_mtl.2023.6.12.2.29.euler -s 168
 
-# 168    VMFTL    N/A
+# 168    VMFTL    test
 ./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.14.17.Fractal-Define-XL-R2 -s 168
 
 # 168    RMFTL    RMFTL Color
@@ -434,10 +434,10 @@ cd ../src
 # 168    VMFTL    VMFTL Text
 ./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.14.17.Fractal-Define-XL-R2 -i ../../mapillary-dataset/images/split/pgd/generated/decomposed.vit_b_32_mtl.2023.6.11.14.17.Fractal-Define-XL-R2.best.tar_task_3.pt -s 168 -a 1
 
-# 210    RMFT    N/A 
+# 210    RMFT    test
 ./test_decomposed.py -r decomposed.resnet152_mtl.2023.6.10.14.3.euler -s 210
 
-# 210    VMFT    N/A
+# 210    VMFT    test
 ./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.10.9.16.Fractal-Define-XL-R2 -s 210
 
 # 210    RMFT    RMFT Color
@@ -488,10 +488,10 @@ cd ../src
 # 210    VMFT    VMFT Text
 ./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.10.9.16.Fractal-Define-XL-R2 -i ../../mapillary-dataset/images/split/pgd/generated/decomposed.vit_b_32_mtl.2023.6.10.9.16.Fractal-Define-XL-R2.best.tar_task_3.pt -s 210 -a 1
 
-# 210    RMFTL    N/A 
+# 210    RMFTL    test
 ./test_decomposed.py -r decomposed.resnet152_mtl.2023.6.12.8.23.euler -s 210
 
-# 210    VMFTL    N/A
+# 210    VMFTL    test
 ./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -s 210
 
 # 210    RMFTL    RMFTL Color
