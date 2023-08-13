@@ -187,7 +187,7 @@ def logTestOutput(config, output):
     if config["test_adversarial"] == False:
         file_path_test_output = os.path.join(dir_test_output, config["file_name_test_output_clean"])
     else:
-        file_path_test_output = os.path.join(dir_test_output, config["file_name_test_output_adversarial"])
+        file_path_test_output = os.path.join(dir_test_output, config["file_name_test_output_attacked"])
 
     if not os.path.isfile(file_path_test_output):
         file_empty = True
