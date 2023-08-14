@@ -2,12 +2,6 @@
 
 cd ../src
 
-# 42    RBFT    test
-./test_baseline.py -r baseline.resnet152.2023.6.4.16.56.euler -s 42
-
-# 42    VBFT    test
-./test_baseline.py -r baseline.vit_b_32.2023.6.4.16.27.Fractal-Define-XL-R2 -s 42
-
 # 42    RBFT    Gaussian Noise 1
 ./test_baseline.py -r baseline.resnet152.2023.6.4.16.56.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_1/ -s 42
 
@@ -578,11 +572,575 @@ cd ../src
 # 42    VBFT    Saturate 5
 ./test_baseline.py -r baseline.vit_b_32.2023.6.4.16.27.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_5/ -s 42
 
-# 84    RBFT    test
-./test_baseline.py -r baseline.resnet152.2023.6.7.15.29.euler -s 84
+# 42    CRBFT    Gaussian Noise 1
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_1/ -s 42
 
-# 84    VBFT    test
-./test_baseline.py -r baseline.vit_b_32.2023.6.7.15.25.Fractal-Define-XL-R2 -s 84
+# 42    CRBFT    Gaussian Noise 2
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_2/ -s 42
+
+# 42    CRBFT    Gaussian Noise 3
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_3/ -s 42
+
+# 42    CRBFT    Gaussian Noise 4
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_4/ -s 42
+
+# 42    CRBFT    Gaussian Noise 5
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_5/ -s 42
+
+# 42    CRBFT    Shot Noise 1
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_1/ -s 42
+
+# 42    CRBFT    Shot Noise 2
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_2/ -s 42
+
+# 42    CRBFT    Shot Noise 3
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_3/ -s 42
+
+# 42    CRBFT    Shot Noise 4
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_4/ -s 42
+
+# 42    CRBFT    Shot Noise 5
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_5/ -s 42
+
+# 42    CRBFT    Impulse Noise 1
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_1/ -s 42
+
+# 42    CRBFT    Impulse Noise 2
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_2/ -s 42
+
+# 42    CRBFT    Impulse Noise 3
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_3/ -s 42
+
+# 42    CRBFT    Impulse Noise 4
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_4/ -s 42
+
+# 42    CRBFT    Impulse Noise 5
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_5/ -s 42
+
+# 42    CRBFT    Speckle Noise 1
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_1/ -s 42
+
+# 42    CRBFT    Speckle Noise 2
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_2/ -s 42
+
+# 42    CRBFT    Speckle Noise 3
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_3/ -s 42
+
+# 42    CRBFT    Speckle Noise 4
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_4/ -s 42
+
+# 42    CRBFT    Speckle Noise 5
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_5/ -s 42
+
+# 42    CRBFT    Defocus Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_1/ -s 42
+
+# 42    CRBFT    Defocus Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_2/ -s 42
+
+# 42    CRBFT    Defocus Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_3/ -s 42
+
+# 42    CRBFT    Defocus Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_4/ -s 42
+
+# 42    CRBFT    Defocus Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_5/ -s 42
+
+# 42    CRBFT    Glass Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_1/ -s 42
+
+# 42    CRBFT    Glass Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_2/ -s 42
+
+# 42    CRBFT    Glass Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_3/ -s 42
+
+# 42    CRBFT    Glass Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_4/ -s 42
+
+# 42    CRBFT    Glass Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_5/ -s 42
+
+# 42    CRBFT    Motion Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_1/ -s 42
+
+# 42    CRBFT    Motion Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_2/ -s 42
+
+# 42    CRBFT    Motion Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_3/ -s 42
+
+# 42    CRBFT    Motion Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_4/ -s 42
+
+# 42    CRBFT    Motion Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_5/ -s 42
+
+# 42    CRBFT    Zoom Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_1/ -s 42
+
+# 42    CRBFT    Zoom Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_2/ -s 42
+
+# 42    CRBFT    Zoom Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_3/ -s 42
+
+# 42    CRBFT    Zoom Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_4/ -s 42
+
+# 42    CRBFT    Zoom Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_5/ -s 42
+
+# 42    CRBFT    Gaussian Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_1/ -s 42
+
+# 42    CRBFT    Gaussian Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_2/ -s 42
+
+# 42    CRBFT    Gaussian Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_3/ -s 42
+
+# 42    CRBFT    Gaussian Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_4/ -s 42
+
+# 42    CRBFT    Gaussian Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_5/ -s 42
+
+# 42    CRBFT    Snow 1
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_1/ -s 42
+
+# 42    CRBFT    Snow 2
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_2/ -s 42
+
+# 42    CRBFT    Snow 3
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_3/ -s 42
+
+# 42    CRBFT    Snow 4
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_4/ -s 42
+
+# 42    CRBFT    Snow 5
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_5/ -s 42
+
+# 42    CRBFT    Frost 1
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_1/ -s 42
+
+# 42    CRBFT    Frost 2
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_2/ -s 42
+
+# 42    CRBFT    Frost 3
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_3/ -s 42
+
+# 42    CRBFT    Frost 4
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_4/ -s 42
+
+# 42    CRBFT    Frost 5
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_5/ -s 42
+
+# 42    CRBFT    Fog 1
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_1/ -s 42
+
+# 42    CRBFT    Fog 2
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_2/ -s 42
+
+# 42    CRBFT    Fog 3
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_3/ -s 42
+
+# 42    CRBFT    Fog 4
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_4/ -s 42
+
+# 42    CRBFT    Fog 5
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_5/ -s 42
+
+# 42    CRBFT    Spatter 1
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_1/ -s 42
+
+# 42    CRBFT    Spatter 2
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_2/ -s 42
+
+# 42    CRBFT    Spatter 3
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_3/ -s 42
+
+# 42    CRBFT    Spatter 4
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_4/ -s 42
+
+# 42    CRBFT    Spatter 5
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_5/ -s 42
+
+# 42    CRBFT    Brightness 1
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_1/ -s 42
+
+# 42    CRBFT    Brightness 2
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_2/ -s 42
+
+# 42    CRBFT    Brightness 3
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_3/ -s 42
+
+# 42    CRBFT    Brightness 4
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_4/ -s 42
+
+# 42    CRBFT    Brightness 5
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_5/ -s 42
+
+# 42    CRBFT    Contrast 1
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_1/ -s 42
+
+# 42    CRBFT    Contrast 2
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_2/ -s 42
+
+# 42    CRBFT    Contrast 3
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_3/ -s 42
+
+# 42    CRBFT    Contrast 4
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_4/ -s 42
+
+# 42    CRBFT    Contrast 5
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_5/ -s 42
+
+# 42    CRBFT    Elastic Transform 1
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_1/ -s 42
+
+# 42    CRBFT    Elastic Transform 2
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_2/ -s 42
+
+# 42    CRBFT    Elastic Transform 3
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_3/ -s 42
+
+# 42    CRBFT    Elastic Transform 4
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_4/ -s 42
+
+# 42    CRBFT    Elastic Transform 5
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_5/ -s 42
+
+# 42    CRBFT    Pixelate 1
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_1/ -s 42
+
+# 42    CRBFT    Pixelate 2
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_2/ -s 42
+
+# 42    CRBFT    Pixelate 3
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_3/ -s 42
+
+# 42    CRBFT    Pixelate 4
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_4/ -s 42
+
+# 42    CRBFT    Pixelate 5
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_5/ -s 42
+
+# 42    CRBFT    JPEG 1
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_1/ -s 42
+
+# 42    CRBFT    JPEG 2
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_2/ -s 42
+
+# 42    CRBFT    JPEG 3
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_3/ -s 42
+
+# 42    CRBFT    JPEG 4
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_4/ -s 42
+
+# 42    CRBFT    JPEG 5
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_5/ -s 42
+
+# 42    CRBFT    Saturate 1
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_1/ -s 42
+
+# 42    CRBFT    Saturate 2
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_2/ -s 42
+
+# 42    CRBFT    Saturate 3
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_3/ -s 42
+
+# 42    CRBFT    Saturate 4
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_4/ -s 42
+
+# 42    CRBFT    Saturate 5
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_5/ -s 42
+
+# 42    CVBFT    Gaussian Noise 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_1/ -s 42
+
+# 42    CVBFT    Gaussian Noise 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_2/ -s 42
+
+# 42    CVBFT    Gaussian Noise 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_3/ -s 42
+
+# 42    CVBFT    Gaussian Noise 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_4/ -s 42
+
+# 42    CVBFT    Gaussian Noise 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_5/ -s 42
+
+# 42    CVBFT    Shot Noise 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_1/ -s 42
+
+# 42    CVBFT    Shot Noise 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_2/ -s 42
+
+# 42    CVBFT    Shot Noise 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_3/ -s 42
+
+# 42    CVBFT    Shot Noise 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_4/ -s 42
+
+# 42    CVBFT    Shot Noise 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_5/ -s 42
+
+# 42    CVBFT    Impulse Noise 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_1/ -s 42
+
+# 42    CVBFT    Impulse Noise 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_2/ -s 42
+
+# 42    CVBFT    Impulse Noise 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_3/ -s 42
+
+# 42    CVBFT    Impulse Noise 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_4/ -s 42
+
+# 42    CVBFT    Impulse Noise 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_5/ -s 42
+
+# 42    CVBFT    Speckle Noise 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_1/ -s 42
+
+# 42    CVBFT    Speckle Noise 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_2/ -s 42
+
+# 42    CVBFT    Speckle Noise 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_3/ -s 42
+
+# 42    CVBFT    Speckle Noise 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_4/ -s 42
+
+# 42    CVBFT    Speckle Noise 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_5/ -s 42
+
+# 42    CVBFT    Defocus Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_1/ -s 42
+
+# 42    CVBFT    Defocus Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_2/ -s 42
+
+# 42    CVBFT    Defocus Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_3/ -s 42
+
+# 42    CVBFT    Defocus Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_4/ -s 42
+
+# 42    CVBFT    Defocus Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_5/ -s 42
+
+# 42    CVBFT    Glass Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_1/ -s 42
+
+# 42    CVBFT    Glass Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_2/ -s 42
+
+# 42    CVBFT    Glass Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_3/ -s 42
+
+# 42    CVBFT    Glass Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_4/ -s 42
+
+# 42    CVBFT    Glass Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_5/ -s 42
+
+# 42    CVBFT    Motion Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_1/ -s 42
+
+# 42    CVBFT    Motion Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_2/ -s 42
+
+# 42    CVBFT    Motion Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_3/ -s 42
+
+# 42    CVBFT    Motion Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_4/ -s 42
+
+# 42    CVBFT    Motion Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_5/ -s 42
+
+# 42    CVBFT    Zoom Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_1/ -s 42
+
+# 42    CVBFT    Zoom Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_2/ -s 42
+
+# 42    CVBFT    Zoom Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_3/ -s 42
+
+# 42    CVBFT    Zoom Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_4/ -s 42
+
+# 42    CVBFT    Zoom Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_5/ -s 42
+
+# 42    CVBFT    Gaussian Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_1/ -s 42
+
+# 42    CVBFT    Gaussian Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_2/ -s 42
+
+# 42    CVBFT    Gaussian Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_3/ -s 42
+
+# 42    CVBFT    Gaussian Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_4/ -s 42
+
+# 42    CVBFT    Gaussian Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_5/ -s 42
+
+# 42    CVBFT    Snow 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_1/ -s 42
+
+# 42    CVBFT    Snow 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_2/ -s 42
+
+# 42    CVBFT    Snow 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_3/ -s 42
+
+# 42    CVBFT    Snow 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_4/ -s 42
+
+# 42    CVBFT    Snow 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_5/ -s 42
+
+# 42    CVBFT    Frost 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_1/ -s 42
+
+# 42    CVBFT    Frost 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_2/ -s 42
+
+# 42    CVBFT    Frost 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_3/ -s 42
+
+# 42    CVBFT    Frost 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_4/ -s 42
+
+# 42    CVBFT    Frost 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_5/ -s 42
+
+# 42    CVBFT    Fog 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_1/ -s 42
+
+# 42    CVBFT    Fog 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_2/ -s 42
+
+# 42    CVBFT    Fog 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_3/ -s 42
+
+# 42    CVBFT    Fog 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_4/ -s 42
+
+# 42    CVBFT    Fog 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_5/ -s 42
+
+# 42    CVBFT    Spatter 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_1/ -s 42
+
+# 42    CVBFT    Spatter 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_2/ -s 42
+
+# 42    CVBFT    Spatter 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_3/ -s 42
+
+# 42    CVBFT    Spatter 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_4/ -s 42
+
+# 42    CVBFT    Spatter 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_5/ -s 42
+
+# 42    CVBFT    Brightness 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_1/ -s 42
+
+# 42    CVBFT    Brightness 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_2/ -s 42
+
+# 42    CVBFT    Brightness 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_3/ -s 42
+
+# 42    CVBFT    Brightness 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_4/ -s 42
+
+# 42    CVBFT    Brightness 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_5/ -s 42
+
+# 42    CVBFT    Contrast 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_1/ -s 42
+
+# 42    CVBFT    Contrast 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_2/ -s 42
+
+# 42    CVBFT    Contrast 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_3/ -s 42
+
+# 42    CVBFT    Contrast 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_4/ -s 42
+
+# 42    CVBFT    Contrast 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_5/ -s 42
+
+# 42    CVBFT    Elastic Transform 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_1/ -s 42
+
+# 42    CVBFT    Elastic Transform 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_2/ -s 42
+
+# 42    CVBFT    Elastic Transform 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_3/ -s 42
+
+# 42    CVBFT    Elastic Transform 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_4/ -s 42
+
+# 42    CVBFT    Elastic Transform 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_5/ -s 42
+
+# 42    CVBFT    Pixelate 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_1/ -s 42
+
+# 42    CVBFT    Pixelate 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_2/ -s 42
+
+# 42    CVBFT    Pixelate 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_3/ -s 42
+
+# 42    CVBFT    Pixelate 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_4/ -s 42
+
+# 42    CVBFT    Pixelate 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_5/ -s 42
+
+# 42    CVBFT    JPEG 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_1/ -s 42
+
+# 42    CVBFT    JPEG 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_2/ -s 42
+
+# 42    CVBFT    JPEG 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_3/ -s 42
+
+# 42    CVBFT    JPEG 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_4/ -s 42
+
+# 42    CVBFT    JPEG 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_5/ -s 42
+
+# 42    CVBFT    Saturate 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_1/ -s 42
+
+# 42    CVBFT    Saturate 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_2/ -s 42
+
+# 42    CVBFT    Saturate 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_3/ -s 42
+
+# 42    CVBFT    Saturate 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_4/ -s 42
+
+# 42    CVBFT    Saturate 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_5/ -s 42
 
 # 84    RBFT    Gaussian Noise 1
 ./test_baseline.py -r baseline.resnet152.2023.6.7.15.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_1/ -s 84
@@ -1154,11 +1712,575 @@ cd ../src
 # 84    VBFT    Saturate 5
 ./test_baseline.py -r baseline.vit_b_32.2023.6.7.15.25.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_5/ -s 84
 
-# 126    RBFT    test
-./test_baseline.py -r baseline.resnet152.2023.6.7.22.53.euler -s 126
+# 84    CRBFT    Gaussian Noise 1
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_1/ -s 84
 
-# 126    VBFT    test
-./test_baseline.py -r baseline.vit_b_32.2023.6.7.21.58.Fractal-Define-XL-R2 -s 126
+# 84    CRBFT    Gaussian Noise 2
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_2/ -s 84
+
+# 84    CRBFT    Gaussian Noise 3
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_3/ -s 84
+
+# 84    CRBFT    Gaussian Noise 4
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_4/ -s 84
+
+# 84    CRBFT    Gaussian Noise 5
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_5/ -s 84
+
+# 84    CRBFT    Shot Noise 1
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_1/ -s 84
+
+# 84    CRBFT    Shot Noise 2
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_2/ -s 84
+
+# 84    CRBFT    Shot Noise 3
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_3/ -s 84
+
+# 84    CRBFT    Shot Noise 4
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_4/ -s 84
+
+# 84    CRBFT    Shot Noise 5
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_5/ -s 84
+
+# 84    CRBFT    Impulse Noise 1
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_1/ -s 84
+
+# 84    CRBFT    Impulse Noise 2
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_2/ -s 84
+
+# 84    CRBFT    Impulse Noise 3
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_3/ -s 84
+
+# 84    CRBFT    Impulse Noise 4
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_4/ -s 84
+
+# 84    CRBFT    Impulse Noise 5
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_5/ -s 84
+
+# 84    CRBFT    Speckle Noise 1
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_1/ -s 84
+
+# 84    CRBFT    Speckle Noise 2
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_2/ -s 84
+
+# 84    CRBFT    Speckle Noise 3
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_3/ -s 84
+
+# 84    CRBFT    Speckle Noise 4
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_4/ -s 84
+
+# 84    CRBFT    Speckle Noise 5
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_5/ -s 84
+
+# 84    CRBFT    Defocus Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_1/ -s 84
+
+# 84    CRBFT    Defocus Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_2/ -s 84
+
+# 84    CRBFT    Defocus Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_3/ -s 84
+
+# 84    CRBFT    Defocus Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_4/ -s 84
+
+# 84    CRBFT    Defocus Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_5/ -s 84
+
+# 84    CRBFT    Glass Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_1/ -s 84
+
+# 84    CRBFT    Glass Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_2/ -s 84
+
+# 84    CRBFT    Glass Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_3/ -s 84
+
+# 84    CRBFT    Glass Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_4/ -s 84
+
+# 84    CRBFT    Glass Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_5/ -s 84
+
+# 84    CRBFT    Motion Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_1/ -s 84
+
+# 84    CRBFT    Motion Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_2/ -s 84
+
+# 84    CRBFT    Motion Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_3/ -s 84
+
+# 84    CRBFT    Motion Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_4/ -s 84
+
+# 84    CRBFT    Motion Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_5/ -s 84
+
+# 84    CRBFT    Zoom Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_1/ -s 84
+
+# 84    CRBFT    Zoom Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_2/ -s 84
+
+# 84    CRBFT    Zoom Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_3/ -s 84
+
+# 84    CRBFT    Zoom Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_4/ -s 84
+
+# 84    CRBFT    Zoom Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_5/ -s 84
+
+# 84    CRBFT    Gaussian Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_1/ -s 84
+
+# 84    CRBFT    Gaussian Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_2/ -s 84
+
+# 84    CRBFT    Gaussian Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_3/ -s 84
+
+# 84    CRBFT    Gaussian Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_4/ -s 84
+
+# 84    CRBFT    Gaussian Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_5/ -s 84
+
+# 84    CRBFT    Snow 1
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_1/ -s 84
+
+# 84    CRBFT    Snow 2
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_2/ -s 84
+
+# 84    CRBFT    Snow 3
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_3/ -s 84
+
+# 84    CRBFT    Snow 4
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_4/ -s 84
+
+# 84    CRBFT    Snow 5
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_5/ -s 84
+
+# 84    CRBFT    Frost 1
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_1/ -s 84
+
+# 84    CRBFT    Frost 2
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_2/ -s 84
+
+# 84    CRBFT    Frost 3
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_3/ -s 84
+
+# 84    CRBFT    Frost 4
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_4/ -s 84
+
+# 84    CRBFT    Frost 5
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_5/ -s 84
+
+# 84    CRBFT    Fog 1
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_1/ -s 84
+
+# 84    CRBFT    Fog 2
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_2/ -s 84
+
+# 84    CRBFT    Fog 3
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_3/ -s 84
+
+# 84    CRBFT    Fog 4
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_4/ -s 84
+
+# 84    CRBFT    Fog 5
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_5/ -s 84
+
+# 84    CRBFT    Spatter 1
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_1/ -s 84
+
+# 84    CRBFT    Spatter 2
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_2/ -s 84
+
+# 84    CRBFT    Spatter 3
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_3/ -s 84
+
+# 84    CRBFT    Spatter 4
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_4/ -s 84
+
+# 84    CRBFT    Spatter 5
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_5/ -s 84
+
+# 84    CRBFT    Brightness 1
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_1/ -s 84
+
+# 84    CRBFT    Brightness 2
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_2/ -s 84
+
+# 84    CRBFT    Brightness 3
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_3/ -s 84
+
+# 84    CRBFT    Brightness 4
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_4/ -s 84
+
+# 84    CRBFT    Brightness 5
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_5/ -s 84
+
+# 84    CRBFT    Contrast 1
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_1/ -s 84
+
+# 84    CRBFT    Contrast 2
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_2/ -s 84
+
+# 84    CRBFT    Contrast 3
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_3/ -s 84
+
+# 84    CRBFT    Contrast 4
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_4/ -s 84
+
+# 84    CRBFT    Contrast 5
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_5/ -s 84
+
+# 84    CRBFT    Elastic Transform 1
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_1/ -s 84
+
+# 84    CRBFT    Elastic Transform 2
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_2/ -s 84
+
+# 84    CRBFT    Elastic Transform 3
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_3/ -s 84
+
+# 84    CRBFT    Elastic Transform 4
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_4/ -s 84
+
+# 84    CRBFT    Elastic Transform 5
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_5/ -s 84
+
+# 84    CRBFT    Pixelate 1
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_1/ -s 84
+
+# 84    CRBFT    Pixelate 2
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_2/ -s 84
+
+# 84    CRBFT    Pixelate 3
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_3/ -s 84
+
+# 84    CRBFT    Pixelate 4
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_4/ -s 84
+
+# 84    CRBFT    Pixelate 5
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_5/ -s 84
+
+# 84    CRBFT    JPEG 1
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_1/ -s 84
+
+# 84    CRBFT    JPEG 2
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_2/ -s 84
+
+# 84    CRBFT    JPEG 3
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_3/ -s 84
+
+# 84    CRBFT    JPEG 4
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_4/ -s 84
+
+# 84    CRBFT    JPEG 5
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_5/ -s 84
+
+# 84    CRBFT    Saturate 1
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_1/ -s 84
+
+# 84    CRBFT    Saturate 2
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_2/ -s 84
+
+# 84    CRBFT    Saturate 3
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_3/ -s 84
+
+# 84    CRBFT    Saturate 4
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_4/ -s 84
+
+# 84    CRBFT    Saturate 5
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_5/ -s 84
+
+# 84    CVBFT    Gaussian Noise 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_1/ -s 84
+
+# 84    CVBFT    Gaussian Noise 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_2/ -s 84
+
+# 84    CVBFT    Gaussian Noise 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_3/ -s 84
+
+# 84    CVBFT    Gaussian Noise 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_4/ -s 84
+
+# 84    CVBFT    Gaussian Noise 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_5/ -s 84
+
+# 84    CVBFT    Shot Noise 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_1/ -s 84
+
+# 84    CVBFT    Shot Noise 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_2/ -s 84
+
+# 84    CVBFT    Shot Noise 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_3/ -s 84
+
+# 84    CVBFT    Shot Noise 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_4/ -s 84
+
+# 84    CVBFT    Shot Noise 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_5/ -s 84
+
+# 84    CVBFT    Impulse Noise 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_1/ -s 84
+
+# 84    CVBFT    Impulse Noise 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_2/ -s 84
+
+# 84    CVBFT    Impulse Noise 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_3/ -s 84
+
+# 84    CVBFT    Impulse Noise 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_4/ -s 84
+
+# 84    CVBFT    Impulse Noise 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_5/ -s 84
+
+# 84    CVBFT    Speckle Noise 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_1/ -s 84
+
+# 84    CVBFT    Speckle Noise 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_2/ -s 84
+
+# 84    CVBFT    Speckle Noise 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_3/ -s 84
+
+# 84    CVBFT    Speckle Noise 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_4/ -s 84
+
+# 84    CVBFT    Speckle Noise 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_5/ -s 84
+
+# 84    CVBFT    Defocus Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_1/ -s 84
+
+# 84    CVBFT    Defocus Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_2/ -s 84
+
+# 84    CVBFT    Defocus Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_3/ -s 84
+
+# 84    CVBFT    Defocus Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_4/ -s 84
+
+# 84    CVBFT    Defocus Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_5/ -s 84
+
+# 84    CVBFT    Glass Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_1/ -s 84
+
+# 84    CVBFT    Glass Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_2/ -s 84
+
+# 84    CVBFT    Glass Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_3/ -s 84
+
+# 84    CVBFT    Glass Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_4/ -s 84
+
+# 84    CVBFT    Glass Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_5/ -s 84
+
+# 84    CVBFT    Motion Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_1/ -s 84
+
+# 84    CVBFT    Motion Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_2/ -s 84
+
+# 84    CVBFT    Motion Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_3/ -s 84
+
+# 84    CVBFT    Motion Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_4/ -s 84
+
+# 84    CVBFT    Motion Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_5/ -s 84
+
+# 84    CVBFT    Zoom Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_1/ -s 84
+
+# 84    CVBFT    Zoom Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_2/ -s 84
+
+# 84    CVBFT    Zoom Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_3/ -s 84
+
+# 84    CVBFT    Zoom Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_4/ -s 84
+
+# 84    CVBFT    Zoom Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_5/ -s 84
+
+# 84    CVBFT    Gaussian Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_1/ -s 84
+
+# 84    CVBFT    Gaussian Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_2/ -s 84
+
+# 84    CVBFT    Gaussian Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_3/ -s 84
+
+# 84    CVBFT    Gaussian Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_4/ -s 84
+
+# 84    CVBFT    Gaussian Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_5/ -s 84
+
+# 84    CVBFT    Snow 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_1/ -s 84
+
+# 84    CVBFT    Snow 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_2/ -s 84
+
+# 84    CVBFT    Snow 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_3/ -s 84
+
+# 84    CVBFT    Snow 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_4/ -s 84
+
+# 84    CVBFT    Snow 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_5/ -s 84
+
+# 84    CVBFT    Frost 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_1/ -s 84
+
+# 84    CVBFT    Frost 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_2/ -s 84
+
+# 84    CVBFT    Frost 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_3/ -s 84
+
+# 84    CVBFT    Frost 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_4/ -s 84
+
+# 84    CVBFT    Frost 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_5/ -s 84
+
+# 84    CVBFT    Fog 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_1/ -s 84
+
+# 84    CVBFT    Fog 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_2/ -s 84
+
+# 84    CVBFT    Fog 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_3/ -s 84
+
+# 84    CVBFT    Fog 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_4/ -s 84
+
+# 84    CVBFT    Fog 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_5/ -s 84
+
+# 84    CVBFT    Spatter 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_1/ -s 84
+
+# 84    CVBFT    Spatter 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_2/ -s 84
+
+# 84    CVBFT    Spatter 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_3/ -s 84
+
+# 84    CVBFT    Spatter 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_4/ -s 84
+
+# 84    CVBFT    Spatter 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_5/ -s 84
+
+# 84    CVBFT    Brightness 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_1/ -s 84
+
+# 84    CVBFT    Brightness 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_2/ -s 84
+
+# 84    CVBFT    Brightness 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_3/ -s 84
+
+# 84    CVBFT    Brightness 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_4/ -s 84
+
+# 84    CVBFT    Brightness 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_5/ -s 84
+
+# 84    CVBFT    Contrast 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_1/ -s 84
+
+# 84    CVBFT    Contrast 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_2/ -s 84
+
+# 84    CVBFT    Contrast 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_3/ -s 84
+
+# 84    CVBFT    Contrast 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_4/ -s 84
+
+# 84    CVBFT    Contrast 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_5/ -s 84
+
+# 84    CVBFT    Elastic Transform 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_1/ -s 84
+
+# 84    CVBFT    Elastic Transform 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_2/ -s 84
+
+# 84    CVBFT    Elastic Transform 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_3/ -s 84
+
+# 84    CVBFT    Elastic Transform 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_4/ -s 84
+
+# 84    CVBFT    Elastic Transform 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_5/ -s 84
+
+# 84    CVBFT    Pixelate 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_1/ -s 84
+
+# 84    CVBFT    Pixelate 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_2/ -s 84
+
+# 84    CVBFT    Pixelate 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_3/ -s 84
+
+# 84    CVBFT    Pixelate 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_4/ -s 84
+
+# 84    CVBFT    Pixelate 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_5/ -s 84
+
+# 84    CVBFT    JPEG 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_1/ -s 84
+
+# 84    CVBFT    JPEG 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_2/ -s 84
+
+# 84    CVBFT    JPEG 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_3/ -s 84
+
+# 84    CVBFT    JPEG 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_4/ -s 84
+
+# 84    CVBFT    JPEG 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_5/ -s 84
+
+# 84    CVBFT    Saturate 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_1/ -s 84
+
+# 84    CVBFT    Saturate 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_2/ -s 84
+
+# 84    CVBFT    Saturate 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_3/ -s 84
+
+# 84    CVBFT    Saturate 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_4/ -s 84
+
+# 84    CVBFT    Saturate 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_5/ -s 84
 
 # 126    RBFT    Gaussian Noise 1
 ./test_baseline.py -r baseline.resnet152.2023.6.7.22.53.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_1/ -s 126
@@ -1730,11 +2852,575 @@ cd ../src
 # 126    VBFT    Saturate 5
 ./test_baseline.py -r baseline.vit_b_32.2023.6.7.21.58.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_5/ -s 126
 
-# 168    RBFT    test
-./test_baseline.py -r baseline.resnet152.2023.6.8.8.49.euler -s 168
+# 126    CRBFT    Gaussian Noise 1
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_1/ -s 126
 
-# 168    VBFT    test
-./test_baseline.py -r baseline.vit_b_32.2023.6.8.4.32.Fractal-Define-XL-R2 -s 168
+# 126    CRBFT    Gaussian Noise 2
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_2/ -s 126
+
+# 126    CRBFT    Gaussian Noise 3
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_3/ -s 126
+
+# 126    CRBFT    Gaussian Noise 4
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_4/ -s 126
+
+# 126    CRBFT    Gaussian Noise 5
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_5/ -s 126
+
+# 126    CRBFT    Shot Noise 1
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_1/ -s 126
+
+# 126    CRBFT    Shot Noise 2
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_2/ -s 126
+
+# 126    CRBFT    Shot Noise 3
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_3/ -s 126
+
+# 126    CRBFT    Shot Noise 4
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_4/ -s 126
+
+# 126    CRBFT    Shot Noise 5
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_5/ -s 126
+
+# 126    CRBFT    Impulse Noise 1
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_1/ -s 126
+
+# 126    CRBFT    Impulse Noise 2
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_2/ -s 126
+
+# 126    CRBFT    Impulse Noise 3
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_3/ -s 126
+
+# 126    CRBFT    Impulse Noise 4
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_4/ -s 126
+
+# 126    CRBFT    Impulse Noise 5
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_5/ -s 126
+
+# 126    CRBFT    Speckle Noise 1
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_1/ -s 126
+
+# 126    CRBFT    Speckle Noise 2
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_2/ -s 126
+
+# 126    CRBFT    Speckle Noise 3
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_3/ -s 126
+
+# 126    CRBFT    Speckle Noise 4
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_4/ -s 126
+
+# 126    CRBFT    Speckle Noise 5
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_5/ -s 126
+
+# 126    CRBFT    Defocus Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_1/ -s 126
+
+# 126    CRBFT    Defocus Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_2/ -s 126
+
+# 126    CRBFT    Defocus Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_3/ -s 126
+
+# 126    CRBFT    Defocus Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_4/ -s 126
+
+# 126    CRBFT    Defocus Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_5/ -s 126
+
+# 126    CRBFT    Glass Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_1/ -s 126
+
+# 126    CRBFT    Glass Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_2/ -s 126
+
+# 126    CRBFT    Glass Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_3/ -s 126
+
+# 126    CRBFT    Glass Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_4/ -s 126
+
+# 126    CRBFT    Glass Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_5/ -s 126
+
+# 126    CRBFT    Motion Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_1/ -s 126
+
+# 126    CRBFT    Motion Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_2/ -s 126
+
+# 126    CRBFT    Motion Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_3/ -s 126
+
+# 126    CRBFT    Motion Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_4/ -s 126
+
+# 126    CRBFT    Motion Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_5/ -s 126
+
+# 126    CRBFT    Zoom Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_1/ -s 126
+
+# 126    CRBFT    Zoom Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_2/ -s 126
+
+# 126    CRBFT    Zoom Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_3/ -s 126
+
+# 126    CRBFT    Zoom Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_4/ -s 126
+
+# 126    CRBFT    Zoom Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_5/ -s 126
+
+# 126    CRBFT    Gaussian Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_1/ -s 126
+
+# 126    CRBFT    Gaussian Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_2/ -s 126
+
+# 126    CRBFT    Gaussian Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_3/ -s 126
+
+# 126    CRBFT    Gaussian Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_4/ -s 126
+
+# 126    CRBFT    Gaussian Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_5/ -s 126
+
+# 126    CRBFT    Snow 1
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_1/ -s 126
+
+# 126    CRBFT    Snow 2
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_2/ -s 126
+
+# 126    CRBFT    Snow 3
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_3/ -s 126
+
+# 126    CRBFT    Snow 4
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_4/ -s 126
+
+# 126    CRBFT    Snow 5
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_5/ -s 126
+
+# 126    CRBFT    Frost 1
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_1/ -s 126
+
+# 126    CRBFT    Frost 2
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_2/ -s 126
+
+# 126    CRBFT    Frost 3
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_3/ -s 126
+
+# 126    CRBFT    Frost 4
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_4/ -s 126
+
+# 126    CRBFT    Frost 5
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_5/ -s 126
+
+# 126    CRBFT    Fog 1
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_1/ -s 126
+
+# 126    CRBFT    Fog 2
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_2/ -s 126
+
+# 126    CRBFT    Fog 3
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_3/ -s 126
+
+# 126    CRBFT    Fog 4
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_4/ -s 126
+
+# 126    CRBFT    Fog 5
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_5/ -s 126
+
+# 126    CRBFT    Spatter 1
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_1/ -s 126
+
+# 126    CRBFT    Spatter 2
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_2/ -s 126
+
+# 126    CRBFT    Spatter 3
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_3/ -s 126
+
+# 126    CRBFT    Spatter 4
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_4/ -s 126
+
+# 126    CRBFT    Spatter 5
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_5/ -s 126
+
+# 126    CRBFT    Brightness 1
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_1/ -s 126
+
+# 126    CRBFT    Brightness 2
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_2/ -s 126
+
+# 126    CRBFT    Brightness 3
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_3/ -s 126
+
+# 126    CRBFT    Brightness 4
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_4/ -s 126
+
+# 126    CRBFT    Brightness 5
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_5/ -s 126
+
+# 126    CRBFT    Contrast 1
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_1/ -s 126
+
+# 126    CRBFT    Contrast 2
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_2/ -s 126
+
+# 126    CRBFT    Contrast 3
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_3/ -s 126
+
+# 126    CRBFT    Contrast 4
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_4/ -s 126
+
+# 126    CRBFT    Contrast 5
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_5/ -s 126
+
+# 126    CRBFT    Elastic Transform 1
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_1/ -s 126
+
+# 126    CRBFT    Elastic Transform 2
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_2/ -s 126
+
+# 126    CRBFT    Elastic Transform 3
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_3/ -s 126
+
+# 126    CRBFT    Elastic Transform 4
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_4/ -s 126
+
+# 126    CRBFT    Elastic Transform 5
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_5/ -s 126
+
+# 126    CRBFT    Pixelate 1
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_1/ -s 126
+
+# 126    CRBFT    Pixelate 2
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_2/ -s 126
+
+# 126    CRBFT    Pixelate 3
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_3/ -s 126
+
+# 126    CRBFT    Pixelate 4
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_4/ -s 126
+
+# 126    CRBFT    Pixelate 5
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_5/ -s 126
+
+# 126    CRBFT    JPEG 1
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_1/ -s 126
+
+# 126    CRBFT    JPEG 2
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_2/ -s 126
+
+# 126    CRBFT    JPEG 3
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_3/ -s 126
+
+# 126    CRBFT    JPEG 4
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_4/ -s 126
+
+# 126    CRBFT    JPEG 5
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_5/ -s 126
+
+# 126    CRBFT    Saturate 1
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_1/ -s 126
+
+# 126    CRBFT    Saturate 2
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_2/ -s 126
+
+# 126    CRBFT    Saturate 3
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_3/ -s 126
+
+# 126    CRBFT    Saturate 4
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_4/ -s 126
+
+# 126    CRBFT    Saturate 5
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_5/ -s 126
+
+# 126    CVBFT    Gaussian Noise 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_1/ -s 126
+
+# 126    CVBFT    Gaussian Noise 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_2/ -s 126
+
+# 126    CVBFT    Gaussian Noise 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_3/ -s 126
+
+# 126    CVBFT    Gaussian Noise 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_4/ -s 126
+
+# 126    CVBFT    Gaussian Noise 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_5/ -s 126
+
+# 126    CVBFT    Shot Noise 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_1/ -s 126
+
+# 126    CVBFT    Shot Noise 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_2/ -s 126
+
+# 126    CVBFT    Shot Noise 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_3/ -s 126
+
+# 126    CVBFT    Shot Noise 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_4/ -s 126
+
+# 126    CVBFT    Shot Noise 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_5/ -s 126
+
+# 126    CVBFT    Impulse Noise 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_1/ -s 126
+
+# 126    CVBFT    Impulse Noise 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_2/ -s 126
+
+# 126    CVBFT    Impulse Noise 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_3/ -s 126
+
+# 126    CVBFT    Impulse Noise 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_4/ -s 126
+
+# 126    CVBFT    Impulse Noise 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_5/ -s 126
+
+# 126    CVBFT    Speckle Noise 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_1/ -s 126
+
+# 126    CVBFT    Speckle Noise 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_2/ -s 126
+
+# 126    CVBFT    Speckle Noise 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_3/ -s 126
+
+# 126    CVBFT    Speckle Noise 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_4/ -s 126
+
+# 126    CVBFT    Speckle Noise 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_5/ -s 126
+
+# 126    CVBFT    Defocus Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_1/ -s 126
+
+# 126    CVBFT    Defocus Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_2/ -s 126
+
+# 126    CVBFT    Defocus Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_3/ -s 126
+
+# 126    CVBFT    Defocus Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_4/ -s 126
+
+# 126    CVBFT    Defocus Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_5/ -s 126
+
+# 126    CVBFT    Glass Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_1/ -s 126
+
+# 126    CVBFT    Glass Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_2/ -s 126
+
+# 126    CVBFT    Glass Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_3/ -s 126
+
+# 126    CVBFT    Glass Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_4/ -s 126
+
+# 126    CVBFT    Glass Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_5/ -s 126
+
+# 126    CVBFT    Motion Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_1/ -s 126
+
+# 126    CVBFT    Motion Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_2/ -s 126
+
+# 126    CVBFT    Motion Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_3/ -s 126
+
+# 126    CVBFT    Motion Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_4/ -s 126
+
+# 126    CVBFT    Motion Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_5/ -s 126
+
+# 126    CVBFT    Zoom Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_1/ -s 126
+
+# 126    CVBFT    Zoom Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_2/ -s 126
+
+# 126    CVBFT    Zoom Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_3/ -s 126
+
+# 126    CVBFT    Zoom Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_4/ -s 126
+
+# 126    CVBFT    Zoom Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_5/ -s 126
+
+# 126    CVBFT    Gaussian Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_1/ -s 126
+
+# 126    CVBFT    Gaussian Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_2/ -s 126
+
+# 126    CVBFT    Gaussian Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_3/ -s 126
+
+# 126    CVBFT    Gaussian Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_4/ -s 126
+
+# 126    CVBFT    Gaussian Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_5/ -s 126
+
+# 126    CVBFT    Snow 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_1/ -s 126
+
+# 126    CVBFT    Snow 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_2/ -s 126
+
+# 126    CVBFT    Snow 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_3/ -s 126
+
+# 126    CVBFT    Snow 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_4/ -s 126
+
+# 126    CVBFT    Snow 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_5/ -s 126
+
+# 126    CVBFT    Frost 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_1/ -s 126
+
+# 126    CVBFT    Frost 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_2/ -s 126
+
+# 126    CVBFT    Frost 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_3/ -s 126
+
+# 126    CVBFT    Frost 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_4/ -s 126
+
+# 126    CVBFT    Frost 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_5/ -s 126
+
+# 126    CVBFT    Fog 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_1/ -s 126
+
+# 126    CVBFT    Fog 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_2/ -s 126
+
+# 126    CVBFT    Fog 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_3/ -s 126
+
+# 126    CVBFT    Fog 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_4/ -s 126
+
+# 126    CVBFT    Fog 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_5/ -s 126
+
+# 126    CVBFT    Spatter 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_1/ -s 126
+
+# 126    CVBFT    Spatter 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_2/ -s 126
+
+# 126    CVBFT    Spatter 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_3/ -s 126
+
+# 126    CVBFT    Spatter 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_4/ -s 126
+
+# 126    CVBFT    Spatter 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_5/ -s 126
+
+# 126    CVBFT    Brightness 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_1/ -s 126
+
+# 126    CVBFT    Brightness 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_2/ -s 126
+
+# 126    CVBFT    Brightness 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_3/ -s 126
+
+# 126    CVBFT    Brightness 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_4/ -s 126
+
+# 126    CVBFT    Brightness 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_5/ -s 126
+
+# 126    CVBFT    Contrast 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_1/ -s 126
+
+# 126    CVBFT    Contrast 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_2/ -s 126
+
+# 126    CVBFT    Contrast 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_3/ -s 126
+
+# 126    CVBFT    Contrast 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_4/ -s 126
+
+# 126    CVBFT    Contrast 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_5/ -s 126
+
+# 126    CVBFT    Elastic Transform 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_1/ -s 126
+
+# 126    CVBFT    Elastic Transform 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_2/ -s 126
+
+# 126    CVBFT    Elastic Transform 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_3/ -s 126
+
+# 126    CVBFT    Elastic Transform 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_4/ -s 126
+
+# 126    CVBFT    Elastic Transform 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_5/ -s 126
+
+# 126    CVBFT    Pixelate 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_1/ -s 126
+
+# 126    CVBFT    Pixelate 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_2/ -s 126
+
+# 126    CVBFT    Pixelate 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_3/ -s 126
+
+# 126    CVBFT    Pixelate 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_4/ -s 126
+
+# 126    CVBFT    Pixelate 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_5/ -s 126
+
+# 126    CVBFT    JPEG 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_1/ -s 126
+
+# 126    CVBFT    JPEG 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_2/ -s 126
+
+# 126    CVBFT    JPEG 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_3/ -s 126
+
+# 126    CVBFT    JPEG 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_4/ -s 126
+
+# 126    CVBFT    JPEG 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_5/ -s 126
+
+# 126    CVBFT    Saturate 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_1/ -s 126
+
+# 126    CVBFT    Saturate 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_2/ -s 126
+
+# 126    CVBFT    Saturate 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_3/ -s 126
+
+# 126    CVBFT    Saturate 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_4/ -s 126
+
+# 126    CVBFT    Saturate 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_5/ -s 126
 
 # 168    RBFT    Gaussian Noise 1
 ./test_baseline.py -r baseline.resnet152.2023.6.8.8.49.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_1/ -s 168
@@ -2306,11 +3992,575 @@ cd ../src
 # 168    VBFT    Saturate 5
 ./test_baseline.py -r baseline.vit_b_32.2023.6.8.4.32.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_5/ -s 168
 
-# 210    RBFT    test
-./test_baseline.py -r baseline.resnet152.2023.6.8.18.33.euler -s 210
+# 168    CRBFT    Gaussian Noise 1
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_1/ -s 168
 
-# 210    VBFT    test
-./test_baseline.py -r baseline.vit_b_32.2023.6.8.11.6.Fractal-Define-XL-R2 -s 210
+# 168    CRBFT    Gaussian Noise 2
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_2/ -s 168
+
+# 168    CRBFT    Gaussian Noise 3
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_3/ -s 168
+
+# 168    CRBFT    Gaussian Noise 4
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_4/ -s 168
+
+# 168    CRBFT    Gaussian Noise 5
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_5/ -s 168
+
+# 168    CRBFT    Shot Noise 1
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_1/ -s 168
+
+# 168    CRBFT    Shot Noise 2
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_2/ -s 168
+
+# 168    CRBFT    Shot Noise 3
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_3/ -s 168
+
+# 168    CRBFT    Shot Noise 4
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_4/ -s 168
+
+# 168    CRBFT    Shot Noise 5
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_5/ -s 168
+
+# 168    CRBFT    Impulse Noise 1
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_1/ -s 168
+
+# 168    CRBFT    Impulse Noise 2
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_2/ -s 168
+
+# 168    CRBFT    Impulse Noise 3
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_3/ -s 168
+
+# 168    CRBFT    Impulse Noise 4
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_4/ -s 168
+
+# 168    CRBFT    Impulse Noise 5
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_5/ -s 168
+
+# 168    CRBFT    Speckle Noise 1
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_1/ -s 168
+
+# 168    CRBFT    Speckle Noise 2
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_2/ -s 168
+
+# 168    CRBFT    Speckle Noise 3
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_3/ -s 168
+
+# 168    CRBFT    Speckle Noise 4
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_4/ -s 168
+
+# 168    CRBFT    Speckle Noise 5
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_5/ -s 168
+
+# 168    CRBFT    Defocus Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_1/ -s 168
+
+# 168    CRBFT    Defocus Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_2/ -s 168
+
+# 168    CRBFT    Defocus Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_3/ -s 168
+
+# 168    CRBFT    Defocus Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_4/ -s 168
+
+# 168    CRBFT    Defocus Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_5/ -s 168
+
+# 168    CRBFT    Glass Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_1/ -s 168
+
+# 168    CRBFT    Glass Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_2/ -s 168
+
+# 168    CRBFT    Glass Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_3/ -s 168
+
+# 168    CRBFT    Glass Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_4/ -s 168
+
+# 168    CRBFT    Glass Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_5/ -s 168
+
+# 168    CRBFT    Motion Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_1/ -s 168
+
+# 168    CRBFT    Motion Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_2/ -s 168
+
+# 168    CRBFT    Motion Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_3/ -s 168
+
+# 168    CRBFT    Motion Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_4/ -s 168
+
+# 168    CRBFT    Motion Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_5/ -s 168
+
+# 168    CRBFT    Zoom Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_1/ -s 168
+
+# 168    CRBFT    Zoom Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_2/ -s 168
+
+# 168    CRBFT    Zoom Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_3/ -s 168
+
+# 168    CRBFT    Zoom Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_4/ -s 168
+
+# 168    CRBFT    Zoom Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_5/ -s 168
+
+# 168    CRBFT    Gaussian Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_1/ -s 168
+
+# 168    CRBFT    Gaussian Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_2/ -s 168
+
+# 168    CRBFT    Gaussian Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_3/ -s 168
+
+# 168    CRBFT    Gaussian Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_4/ -s 168
+
+# 168    CRBFT    Gaussian Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_5/ -s 168
+
+# 168    CRBFT    Snow 1
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_1/ -s 168
+
+# 168    CRBFT    Snow 2
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_2/ -s 168
+
+# 168    CRBFT    Snow 3
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_3/ -s 168
+
+# 168    CRBFT    Snow 4
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_4/ -s 168
+
+# 168    CRBFT    Snow 5
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_5/ -s 168
+
+# 168    CRBFT    Frost 1
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_1/ -s 168
+
+# 168    CRBFT    Frost 2
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_2/ -s 168
+
+# 168    CRBFT    Frost 3
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_3/ -s 168
+
+# 168    CRBFT    Frost 4
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_4/ -s 168
+
+# 168    CRBFT    Frost 5
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_5/ -s 168
+
+# 168    CRBFT    Fog 1
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_1/ -s 168
+
+# 168    CRBFT    Fog 2
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_2/ -s 168
+
+# 168    CRBFT    Fog 3
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_3/ -s 168
+
+# 168    CRBFT    Fog 4
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_4/ -s 168
+
+# 168    CRBFT    Fog 5
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_5/ -s 168
+
+# 168    CRBFT    Spatter 1
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_1/ -s 168
+
+# 168    CRBFT    Spatter 2
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_2/ -s 168
+
+# 168    CRBFT    Spatter 3
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_3/ -s 168
+
+# 168    CRBFT    Spatter 4
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_4/ -s 168
+
+# 168    CRBFT    Spatter 5
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_5/ -s 168
+
+# 168    CRBFT    Brightness 1
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_1/ -s 168
+
+# 168    CRBFT    Brightness 2
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_2/ -s 168
+
+# 168    CRBFT    Brightness 3
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_3/ -s 168
+
+# 168    CRBFT    Brightness 4
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_4/ -s 168
+
+# 168    CRBFT    Brightness 5
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_5/ -s 168
+
+# 168    CRBFT    Contrast 1
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_1/ -s 168
+
+# 168    CRBFT    Contrast 2
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_2/ -s 168
+
+# 168    CRBFT    Contrast 3
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_3/ -s 168
+
+# 168    CRBFT    Contrast 4
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_4/ -s 168
+
+# 168    CRBFT    Contrast 5
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_5/ -s 168
+
+# 168    CRBFT    Elastic Transform 1
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_1/ -s 168
+
+# 168    CRBFT    Elastic Transform 2
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_2/ -s 168
+
+# 168    CRBFT    Elastic Transform 3
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_3/ -s 168
+
+# 168    CRBFT    Elastic Transform 4
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_4/ -s 168
+
+# 168    CRBFT    Elastic Transform 5
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_5/ -s 168
+
+# 168    CRBFT    Pixelate 1
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_1/ -s 168
+
+# 168    CRBFT    Pixelate 2
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_2/ -s 168
+
+# 168    CRBFT    Pixelate 3
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_3/ -s 168
+
+# 168    CRBFT    Pixelate 4
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_4/ -s 168
+
+# 168    CRBFT    Pixelate 5
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_5/ -s 168
+
+# 168    CRBFT    JPEG 1
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_1/ -s 168
+
+# 168    CRBFT    JPEG 2
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_2/ -s 168
+
+# 168    CRBFT    JPEG 3
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_3/ -s 168
+
+# 168    CRBFT    JPEG 4
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_4/ -s 168
+
+# 168    CRBFT    JPEG 5
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_5/ -s 168
+
+# 168    CRBFT    Saturate 1
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_1/ -s 168
+
+# 168    CRBFT    Saturate 2
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_2/ -s 168
+
+# 168    CRBFT    Saturate 3
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_3/ -s 168
+
+# 168    CRBFT    Saturate 4
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_4/ -s 168
+
+# 168    CRBFT    Saturate 5
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_5/ -s 168
+
+# 168    CVBFT    Gaussian Noise 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_1/ -s 168
+
+# 168    CVBFT    Gaussian Noise 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_2/ -s 168
+
+# 168    CVBFT    Gaussian Noise 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_3/ -s 168
+
+# 168    CVBFT    Gaussian Noise 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_4/ -s 168
+
+# 168    CVBFT    Gaussian Noise 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_5/ -s 168
+
+# 168    CVBFT    Shot Noise 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_1/ -s 168
+
+# 168    CVBFT    Shot Noise 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_2/ -s 168
+
+# 168    CVBFT    Shot Noise 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_3/ -s 168
+
+# 168    CVBFT    Shot Noise 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_4/ -s 168
+
+# 168    CVBFT    Shot Noise 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_5/ -s 168
+
+# 168    CVBFT    Impulse Noise 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_1/ -s 168
+
+# 168    CVBFT    Impulse Noise 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_2/ -s 168
+
+# 168    CVBFT    Impulse Noise 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_3/ -s 168
+
+# 168    CVBFT    Impulse Noise 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_4/ -s 168
+
+# 168    CVBFT    Impulse Noise 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_5/ -s 168
+
+# 168    CVBFT    Speckle Noise 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_1/ -s 168
+
+# 168    CVBFT    Speckle Noise 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_2/ -s 168
+
+# 168    CVBFT    Speckle Noise 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_3/ -s 168
+
+# 168    CVBFT    Speckle Noise 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_4/ -s 168
+
+# 168    CVBFT    Speckle Noise 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_5/ -s 168
+
+# 168    CVBFT    Defocus Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_1/ -s 168
+
+# 168    CVBFT    Defocus Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_2/ -s 168
+
+# 168    CVBFT    Defocus Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_3/ -s 168
+
+# 168    CVBFT    Defocus Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_4/ -s 168
+
+# 168    CVBFT    Defocus Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_5/ -s 168
+
+# 168    CVBFT    Glass Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_1/ -s 168
+
+# 168    CVBFT    Glass Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_2/ -s 168
+
+# 168    CVBFT    Glass Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_3/ -s 168
+
+# 168    CVBFT    Glass Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_4/ -s 168
+
+# 168    CVBFT    Glass Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_5/ -s 168
+
+# 168    CVBFT    Motion Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_1/ -s 168
+
+# 168    CVBFT    Motion Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_2/ -s 168
+
+# 168    CVBFT    Motion Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_3/ -s 168
+
+# 168    CVBFT    Motion Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_4/ -s 168
+
+# 168    CVBFT    Motion Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_5/ -s 168
+
+# 168    CVBFT    Zoom Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_1/ -s 168
+
+# 168    CVBFT    Zoom Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_2/ -s 168
+
+# 168    CVBFT    Zoom Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_3/ -s 168
+
+# 168    CVBFT    Zoom Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_4/ -s 168
+
+# 168    CVBFT    Zoom Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_5/ -s 168
+
+# 168    CVBFT    Gaussian Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_1/ -s 168
+
+# 168    CVBFT    Gaussian Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_2/ -s 168
+
+# 168    CVBFT    Gaussian Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_3/ -s 168
+
+# 168    CVBFT    Gaussian Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_4/ -s 168
+
+# 168    CVBFT    Gaussian Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_5/ -s 168
+
+# 168    CVBFT    Snow 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_1/ -s 168
+
+# 168    CVBFT    Snow 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_2/ -s 168
+
+# 168    CVBFT    Snow 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_3/ -s 168
+
+# 168    CVBFT    Snow 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_4/ -s 168
+
+# 168    CVBFT    Snow 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_5/ -s 168
+
+# 168    CVBFT    Frost 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_1/ -s 168
+
+# 168    CVBFT    Frost 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_2/ -s 168
+
+# 168    CVBFT    Frost 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_3/ -s 168
+
+# 168    CVBFT    Frost 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_4/ -s 168
+
+# 168    CVBFT    Frost 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_5/ -s 168
+
+# 168    CVBFT    Fog 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_1/ -s 168
+
+# 168    CVBFT    Fog 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_2/ -s 168
+
+# 168    CVBFT    Fog 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_3/ -s 168
+
+# 168    CVBFT    Fog 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_4/ -s 168
+
+# 168    CVBFT    Fog 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_5/ -s 168
+
+# 168    CVBFT    Spatter 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_1/ -s 168
+
+# 168    CVBFT    Spatter 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_2/ -s 168
+
+# 168    CVBFT    Spatter 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_3/ -s 168
+
+# 168    CVBFT    Spatter 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_4/ -s 168
+
+# 168    CVBFT    Spatter 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_5/ -s 168
+
+# 168    CVBFT    Brightness 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_1/ -s 168
+
+# 168    CVBFT    Brightness 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_2/ -s 168
+
+# 168    CVBFT    Brightness 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_3/ -s 168
+
+# 168    CVBFT    Brightness 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_4/ -s 168
+
+# 168    CVBFT    Brightness 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_5/ -s 168
+
+# 168    CVBFT    Contrast 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_1/ -s 168
+
+# 168    CVBFT    Contrast 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_2/ -s 168
+
+# 168    CVBFT    Contrast 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_3/ -s 168
+
+# 168    CVBFT    Contrast 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_4/ -s 168
+
+# 168    CVBFT    Contrast 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_5/ -s 168
+
+# 168    CVBFT    Elastic Transform 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_1/ -s 168
+
+# 168    CVBFT    Elastic Transform 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_2/ -s 168
+
+# 168    CVBFT    Elastic Transform 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_3/ -s 168
+
+# 168    CVBFT    Elastic Transform 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_4/ -s 168
+
+# 168    CVBFT    Elastic Transform 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_5/ -s 168
+
+# 168    CVBFT    Pixelate 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_1/ -s 168
+
+# 168    CVBFT    Pixelate 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_2/ -s 168
+
+# 168    CVBFT    Pixelate 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_3/ -s 168
+
+# 168    CVBFT    Pixelate 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_4/ -s 168
+
+# 168    CVBFT    Pixelate 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_5/ -s 168
+
+# 168    CVBFT    JPEG 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_1/ -s 168
+
+# 168    CVBFT    JPEG 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_2/ -s 168
+
+# 168    CVBFT    JPEG 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_3/ -s 168
+
+# 168    CVBFT    JPEG 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_4/ -s 168
+
+# 168    CVBFT    JPEG 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_5/ -s 168
+
+# 168    CVBFT    Saturate 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_1/ -s 168
+
+# 168    CVBFT    Saturate 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_2/ -s 168
+
+# 168    CVBFT    Saturate 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_3/ -s 168
+
+# 168    CVBFT    Saturate 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_4/ -s 168
+
+# 168    CVBFT    Saturate 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_5/ -s 168
 
 # 210    RBFT    Gaussian Noise 1
 ./test_baseline.py -r baseline.resnet152.2023.6.8.18.33.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_1/ -s 210
@@ -2882,5 +5132,572 @@ cd ../src
 # 210    VBFT    Saturate 5
 ./test_baseline.py -r baseline.vit_b_32.2023.6.8.11.6.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_5/ -s 210
 
+# 210    CRBFT    Gaussian Noise 1
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_1/ -s 210
 
+# 210    CRBFT    Gaussian Noise 2
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_2/ -s 210
 
+# 210    CRBFT    Gaussian Noise 3
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_3/ -s 210
+
+# 210    CRBFT    Gaussian Noise 4
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_4/ -s 210
+
+# 210    CRBFT    Gaussian Noise 5
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_5/ -s 210
+
+# 210    CRBFT    Shot Noise 1
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_1/ -s 210
+
+# 210    CRBFT    Shot Noise 2
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_2/ -s 210
+
+# 210    CRBFT    Shot Noise 3
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_3/ -s 210
+
+# 210    CRBFT    Shot Noise 4
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_4/ -s 210
+
+# 210    CRBFT    Shot Noise 5
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_5/ -s 210
+
+# 210    CRBFT    Impulse Noise 1
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_1/ -s 210
+
+# 210    CRBFT    Impulse Noise 2
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_2/ -s 210
+
+# 210    CRBFT    Impulse Noise 3
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_3/ -s 210
+
+# 210    CRBFT    Impulse Noise 4
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_4/ -s 210
+
+# 210    CRBFT    Impulse Noise 5
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_5/ -s 210
+
+# 210    CRBFT    Speckle Noise 1
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_1/ -s 210
+
+# 210    CRBFT    Speckle Noise 2
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_2/ -s 210
+
+# 210    CRBFT    Speckle Noise 3
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_3/ -s 210
+
+# 210    CRBFT    Speckle Noise 4
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_4/ -s 210
+
+# 210    CRBFT    Speckle Noise 5
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_5/ -s 210
+
+# 210    CRBFT    Defocus Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_1/ -s 210
+
+# 210    CRBFT    Defocus Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_2/ -s 210
+
+# 210    CRBFT    Defocus Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_3/ -s 210
+
+# 210    CRBFT    Defocus Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_4/ -s 210
+
+# 210    CRBFT    Defocus Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_5/ -s 210
+
+# 210    CRBFT    Glass Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_1/ -s 210
+
+# 210    CRBFT    Glass Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_2/ -s 210
+
+# 210    CRBFT    Glass Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_3/ -s 210
+
+# 210    CRBFT    Glass Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_4/ -s 210
+
+# 210    CRBFT    Glass Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_5/ -s 210
+
+# 210    CRBFT    Motion Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_1/ -s 210
+
+# 210    CRBFT    Motion Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_2/ -s 210
+
+# 210    CRBFT    Motion Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_3/ -s 210
+
+# 210    CRBFT    Motion Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_4/ -s 210
+
+# 210    CRBFT    Motion Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_5/ -s 210
+
+# 210    CRBFT    Zoom Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_1/ -s 210
+
+# 210    CRBFT    Zoom Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_2/ -s 210
+
+# 210    CRBFT    Zoom Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_3/ -s 210
+
+# 210    CRBFT    Zoom Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_4/ -s 210
+
+# 210    CRBFT    Zoom Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_5/ -s 210
+
+# 210    CRBFT    Gaussian Blur 1
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_1/ -s 210
+
+# 210    CRBFT    Gaussian Blur 2
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_2/ -s 210
+
+# 210    CRBFT    Gaussian Blur 3
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_3/ -s 210
+
+# 210    CRBFT    Gaussian Blur 4
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_4/ -s 210
+
+# 210    CRBFT    Gaussian Blur 5
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_5/ -s 210
+
+# 210    CRBFT    Snow 1
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_1/ -s 210
+
+# 210    CRBFT    Snow 2
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_2/ -s 210
+
+# 210    CRBFT    Snow 3
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_3/ -s 210
+
+# 210    CRBFT    Snow 4
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_4/ -s 210
+
+# 210    CRBFT    Snow 5
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_5/ -s 210
+
+# 210    CRBFT    Frost 1
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_1/ -s 210
+
+# 210    CRBFT    Frost 2
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_2/ -s 210
+
+# 210    CRBFT    Frost 3
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_3/ -s 210
+
+# 210    CRBFT    Frost 4
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_4/ -s 210
+
+# 210    CRBFT    Frost 5
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_5/ -s 210
+
+# 210    CRBFT    Fog 1
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_1/ -s 210
+
+# 210    CRBFT    Fog 2
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_2/ -s 210
+
+# 210    CRBFT    Fog 3
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_3/ -s 210
+
+# 210    CRBFT    Fog 4
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_4/ -s 210
+
+# 210    CRBFT    Fog 5
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_5/ -s 210
+
+# 210    CRBFT    Spatter 1
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_1/ -s 210
+
+# 210    CRBFT    Spatter 2
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_2/ -s 210
+
+# 210    CRBFT    Spatter 3
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_3/ -s 210
+
+# 210    CRBFT    Spatter 4
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_4/ -s 210
+
+# 210    CRBFT    Spatter 5
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_5/ -s 210
+
+# 210    CRBFT    Brightness 1
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_1/ -s 210
+
+# 210    CRBFT    Brightness 2
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_2/ -s 210
+
+# 210    CRBFT    Brightness 3
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_3/ -s 210
+
+# 210    CRBFT    Brightness 4
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_4/ -s 210
+
+# 210    CRBFT    Brightness 5
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_5/ -s 210
+
+# 210    CRBFT    Contrast 1
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_1/ -s 210
+
+# 210    CRBFT    Contrast 2
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_2/ -s 210
+
+# 210    CRBFT    Contrast 3
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_3/ -s 210
+
+# 210    CRBFT    Contrast 4
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_4/ -s 210
+
+# 210    CRBFT    Contrast 5
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_5/ -s 210
+
+# 210    CRBFT    Elastic Transform 1
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_1/ -s 210
+
+# 210    CRBFT    Elastic Transform 2
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_2/ -s 210
+
+# 210    CRBFT    Elastic Transform 3
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_3/ -s 210
+
+# 210    CRBFT    Elastic Transform 4
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_4/ -s 210
+
+# 210    CRBFT    Elastic Transform 5
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_5/ -s 210
+
+# 210    CRBFT    Pixelate 1
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_1/ -s 210
+
+# 210    CRBFT    Pixelate 2
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_2/ -s 210
+
+# 210    CRBFT    Pixelate 3
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_3/ -s 210
+
+# 210    CRBFT    Pixelate 4
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_4/ -s 210
+
+# 210    CRBFT    Pixelate 5
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_5/ -s 210
+
+# 210    CRBFT    JPEG 1
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_1/ -s 210
+
+# 210    CRBFT    JPEG 2
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_2/ -s 210
+
+# 210    CRBFT    JPEG 3
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_3/ -s 210
+
+# 210    CRBFT    JPEG 4
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_4/ -s 210
+
+# 210    CRBFT    JPEG 5
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_5/ -s 210
+
+# 210    CRBFT    Saturate 1
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_1/ -s 210
+
+# 210    CRBFT    Saturate 2
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_2/ -s 210
+
+# 210    CRBFT    Saturate 3
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_3/ -s 210
+
+# 210    CRBFT    Saturate 4
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_4/ -s 210
+
+# 210    CRBFT    Saturate 5
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_5/ -s 210
+
+# 210    CVBFT    Gaussian Noise 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_1/ -s 210
+
+# 210    CVBFT    Gaussian Noise 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_2/ -s 210
+
+# 210    CVBFT    Gaussian Noise 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_3/ -s 210
+
+# 210    CVBFT    Gaussian Noise 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_4/ -s 210
+
+# 210    CVBFT    Gaussian Noise 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_noise_5/ -s 210
+
+# 210    CVBFT    Shot Noise 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_1/ -s 210
+
+# 210    CVBFT    Shot Noise 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_2/ -s 210
+
+# 210    CVBFT    Shot Noise 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_3/ -s 210
+
+# 210    CVBFT    Shot Noise 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_4/ -s 210
+
+# 210    CVBFT    Shot Noise 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/shot_noise_5/ -s 210
+
+# 210    CVBFT    Impulse Noise 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_1/ -s 210
+
+# 210    CVBFT    Impulse Noise 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_2/ -s 210
+
+# 210    CVBFT    Impulse Noise 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_3/ -s 210
+
+# 210    CVBFT    Impulse Noise 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_4/ -s 210
+
+# 210    CVBFT    Impulse Noise 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/impulse_noise_5/ -s 210
+
+# 210    CVBFT    Speckle Noise 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_1/ -s 210
+
+# 210    CVBFT    Speckle Noise 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_2/ -s 210
+
+# 210    CVBFT    Speckle Noise 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_3/ -s 210
+
+# 210    CVBFT    Speckle Noise 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_4/ -s 210
+
+# 210    CVBFT    Speckle Noise 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/speckle_noise_5/ -s 210
+
+# 210    CVBFT    Defocus Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_1/ -s 210
+
+# 210    CVBFT    Defocus Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_2/ -s 210
+
+# 210    CVBFT    Defocus Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_3/ -s 210
+
+# 210    CVBFT    Defocus Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_4/ -s 210
+
+# 210    CVBFT    Defocus Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/defocus_blur_5/ -s 210
+
+# 210    CVBFT    Glass Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_1/ -s 210
+
+# 210    CVBFT    Glass Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_2/ -s 210
+
+# 210    CVBFT    Glass Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_3/ -s 210
+
+# 210    CVBFT    Glass Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_4/ -s 210
+
+# 210    CVBFT    Glass Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/glass_blur_5/ -s 210
+
+# 210    CVBFT    Motion Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_1/ -s 210
+
+# 210    CVBFT    Motion Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_2/ -s 210
+
+# 210    CVBFT    Motion Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_3/ -s 210
+
+# 210    CVBFT    Motion Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_4/ -s 210
+
+# 210    CVBFT    Motion Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/motion_blur_5/ -s 210
+
+# 210    CVBFT    Zoom Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_1/ -s 210
+
+# 210    CVBFT    Zoom Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_2/ -s 210
+
+# 210    CVBFT    Zoom Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_3/ -s 210
+
+# 210    CVBFT    Zoom Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_4/ -s 210
+
+# 210    CVBFT    Zoom Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/zoom_blur_5/ -s 210
+
+# 210    CVBFT    Gaussian Blur 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_1/ -s 210
+
+# 210    CVBFT    Gaussian Blur 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_2/ -s 210
+
+# 210    CVBFT    Gaussian Blur 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_3/ -s 210
+
+# 210    CVBFT    Gaussian Blur 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_4/ -s 210
+
+# 210    CVBFT    Gaussian Blur 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/gaussian_blur_5/ -s 210
+
+# 210    CVBFT    Snow 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_1/ -s 210
+
+# 210    CVBFT    Snow 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_2/ -s 210
+
+# 210    CVBFT    Snow 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_3/ -s 210
+
+# 210    CVBFT    Snow 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_4/ -s 210
+
+# 210    CVBFT    Snow 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/snow_5/ -s 210
+
+# 210    CVBFT    Frost 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_1/ -s 210
+
+# 210    CVBFT    Frost 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_2/ -s 210
+
+# 210    CVBFT    Frost 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_3/ -s 210
+
+# 210    CVBFT    Frost 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_4/ -s 210
+
+# 210    CVBFT    Frost 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/frost_5/ -s 210
+
+# 210    CVBFT    Fog 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_1/ -s 210
+
+# 210    CVBFT    Fog 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_2/ -s 210
+
+# 210    CVBFT    Fog 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_3/ -s 210
+
+# 210    CVBFT    Fog 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_4/ -s 210
+
+# 210    CVBFT    Fog 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/fog_5/ -s 210
+
+# 210    CVBFT    Spatter 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_1/ -s 210
+
+# 210    CVBFT    Spatter 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_2/ -s 210
+
+# 210    CVBFT    Spatter 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_3/ -s 210
+
+# 210    CVBFT    Spatter 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_4/ -s 210
+
+# 210    CVBFT    Spatter 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/spatter_5/ -s 210
+
+# 210    CVBFT    Brightness 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_1/ -s 210
+
+# 210    CVBFT    Brightness 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_2/ -s 210
+
+# 210    CVBFT    Brightness 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_3/ -s 210
+
+# 210    CVBFT    Brightness 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_4/ -s 210
+
+# 210    CVBFT    Brightness 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/brightness_5/ -s 210
+
+# 210    CVBFT    Contrast 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_1/ -s 210
+
+# 210    CVBFT    Contrast 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_2/ -s 210
+
+# 210    CVBFT    Contrast 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_3/ -s 210
+
+# 210    CVBFT    Contrast 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_4/ -s 210
+
+# 210    CVBFT    Contrast 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/contrast_5/ -s 210
+
+# 210    CVBFT    Elastic Transform 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_1/ -s 210
+
+# 210    CVBFT    Elastic Transform 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_2/ -s 210
+
+# 210    CVBFT    Elastic Transform 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_3/ -s 210
+
+# 210    CVBFT    Elastic Transform 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_4/ -s 210
+
+# 210    CVBFT    Elastic Transform 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/elastic_transform_5/ -s 210
+
+# 210    CVBFT    Pixelate 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_1/ -s 210
+
+# 210    CVBFT    Pixelate 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_2/ -s 210
+
+# 210    CVBFT    Pixelate 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_3/ -s 210
+
+# 210    CVBFT    Pixelate 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_4/ -s 210
+
+# 210    CVBFT    Pixelate 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/pixelate_5/ -s 210
+
+# 210    CVBFT    JPEG 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_1/ -s 210
+
+# 210    CVBFT    JPEG 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_2/ -s 210
+
+# 210    CVBFT    JPEG 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_3/ -s 210
+
+# 210    CVBFT    JPEG 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_4/ -s 210
+
+# 210    CVBFT    JPEG 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/jpeg_5/ -s 210
+
+# 210    CVBFT    Saturate 1
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_1/ -s 210
+
+# 210    CVBFT    Saturate 2
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_2/ -s 210
+
+# 210    CVBFT    Saturate 3
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_3/ -s 210
+
+# 210    CVBFT    Saturate 4
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_4/ -s 210
+
+# 210    CVBFT    Saturate 5
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test/saturate_5/ -s 210
