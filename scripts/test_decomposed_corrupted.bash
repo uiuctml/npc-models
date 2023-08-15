@@ -2284,6 +2284,8 @@ ln -sfv test_42 ../../mapillary-dataset/images/split/corrupted/original/test
 # 42    CVMFTL    Saturate 5
 ./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.42.2023.8.12.20.17.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/saturate_5/ -s 42
 
+ln -sfv test_84 ../../mapillary-dataset/images/split/corrupted/original/test
+
 # 84    RMFT    Gaussian Noise 1
 ./test_decomposed.py -r decomposed.resnet152_mtl.2023.6.9.1.7.euler -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_1/ -s 84
 
@@ -4563,6 +4565,8 @@ ln -sfv test_42 ../../mapillary-dataset/images/split/corrupted/original/test
 
 # 84    CVMFTL    Saturate 5
 ./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.84.2023.8.13.2.14.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/saturate_5/ -s 84
+
+ln -sfv test_126 ../../mapillary-dataset/images/split/corrupted/original/test
 
 # 126    RMFT    Gaussian Noise 1
 ./test_decomposed.py -r decomposed.resnet152_mtl.2023.6.9.13.23.euler -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_1/ -s 126
@@ -6844,6 +6848,8 @@ ln -sfv test_42 ../../mapillary-dataset/images/split/corrupted/original/test
 # 126    CVMFTL    Saturate 5
 ./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.126.2023.8.13.8.15.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/saturate_5/ -s 126
 
+ln -sfv test_168 ../../mapillary-dataset/images/split/corrupted/original/test
+
 # 168    RMFT    Gaussian Noise 1
 ./test_decomposed.py -r decomposed.resnet152_mtl.2023.6.10.1.45.euler -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_1/ -s 168
 
@@ -9123,6 +9129,8 @@ ln -sfv test_42 ../../mapillary-dataset/images/split/corrupted/original/test
 
 # 168    CVMFTL    Saturate 5
 ./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.168.2023.8.13.14.13.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/saturate_5/ -s 168
+
+ln -sfv test_210 ../../mapillary-dataset/images/split/corrupted/original/test
 
 # 210    RMFT    Gaussian Noise 1
 ./test_decomposed.py -r decomposed.resnet152_mtl.2023.6.10.14.3.euler -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_1/ -s 210
