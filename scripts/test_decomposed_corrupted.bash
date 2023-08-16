@@ -2,6 +2,8 @@
 
 cd ../src
 
+ln -sfv test_42 ../../mapillary-dataset/images/split/corrupted/original/test
+
 # 42    RMFT    Gaussian Noise 1
 ./test_decomposed.py -r decomposed.resnet152_mtl.2023.6.4.23.42.euler -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_1/ -s 42
 
@@ -2281,6 +2283,8 @@ cd ../src
 
 # 42    CVMFTL    Saturate 5
 ./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.42.2023.8.12.20.17.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/saturate_5/ -s 42
+
+ln -sfv test_84 ../../mapillary-dataset/images/split/corrupted/original/test
 
 # 84    RMFT    Gaussian Noise 1
 ./test_decomposed.py -r decomposed.resnet152_mtl.2023.6.9.1.7.euler -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_1/ -s 84
@@ -4562,6 +4566,8 @@ cd ../src
 # 84    CVMFTL    Saturate 5
 ./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.84.2023.8.13.2.14.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/saturate_5/ -s 84
 
+ln -sfv test_126 ../../mapillary-dataset/images/split/corrupted/original/test
+
 # 126    RMFT    Gaussian Noise 1
 ./test_decomposed.py -r decomposed.resnet152_mtl.2023.6.9.13.23.euler -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_1/ -s 126
 
@@ -6841,6 +6847,8 @@ cd ../src
 
 # 126    CVMFTL    Saturate 5
 ./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.126.2023.8.13.8.15.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/saturate_5/ -s 126
+
+ln -sfv test_168 ../../mapillary-dataset/images/split/corrupted/original/test
 
 # 168    RMFT    Gaussian Noise 1
 ./test_decomposed.py -r decomposed.resnet152_mtl.2023.6.10.1.45.euler -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_1/ -s 168
@@ -9122,6 +9130,8 @@ cd ../src
 # 168    CVMFTL    Saturate 5
 ./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.168.2023.8.13.14.13.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/saturate_5/ -s 168
 
+ln -sfv test_210 ../../mapillary-dataset/images/split/corrupted/original/test
+
 # 210    RMFT    Gaussian Noise 1
 ./test_decomposed.py -r decomposed.resnet152_mtl.2023.6.10.14.3.euler -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_1/ -s 210
 
@@ -11118,286 +11128,286 @@ cd ../src
 ./test_decomposed.py -r decomposed.resnet101_clip_mtl.ftl.210.2023.8.14.14.50.newton -d ../../mapillary-dataset/images/split/corrupted/generated/test/saturate_5/ -s 210
 
 # 210    CVMFTL    Gaussian Noise 1
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_1/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_1/ -s 210
 
 # 210    CVMFTL    Gaussian Noise 2
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_2/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_2/ -s 210
 
 # 210    CVMFTL    Gaussian Noise 3
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_3/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_3/ -s 210
 
 # 210    CVMFTL    Gaussian Noise 4
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_4/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_4/ -s 210
 
 # 210    CVMFTL    Gaussian Noise 5
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_5/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_5/ -s 210
 
 # 210    CVMFTL    Shot Noise 1
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/shot_noise_1/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/shot_noise_1/ -s 210
 
 # 210    CVMFTL    Shot Noise 2
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/shot_noise_2/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/shot_noise_2/ -s 210
 
 # 210    CVMFTL    Shot Noise 3
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/shot_noise_3/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/shot_noise_3/ -s 210
 
 # 210    CVMFTL    Shot Noise 4
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/shot_noise_4/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/shot_noise_4/ -s 210
 
 # 210    CVMFTL    Shot Noise 5
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/shot_noise_5/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/shot_noise_5/ -s 210
 
 # 210    CVMFTL    Impulse Noise 1
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/impulse_noise_1/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/impulse_noise_1/ -s 210
 
 # 210    CVMFTL    Impulse Noise 2
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/impulse_noise_2/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/impulse_noise_2/ -s 210
 
 # 210    CVMFTL    Impulse Noise 3
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/impulse_noise_3/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/impulse_noise_3/ -s 210
 
 # 210    CVMFTL    Impulse Noise 4
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/impulse_noise_4/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/impulse_noise_4/ -s 210
 
 # 210    CVMFTL    Impulse Noise 5
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/impulse_noise_5/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/impulse_noise_5/ -s 210
 
 # 210    CVMFTL    Speckle Noise 1
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/speckle_noise_1/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/speckle_noise_1/ -s 210
 
 # 210    CVMFTL    Speckle Noise 2
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/speckle_noise_2/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/speckle_noise_2/ -s 210
 
 # 210    CVMFTL    Speckle Noise 3
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/speckle_noise_3/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/speckle_noise_3/ -s 210
 
 # 210    CVMFTL    Speckle Noise 4
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/speckle_noise_4/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/speckle_noise_4/ -s 210
 
 # 210    CVMFTL    Speckle Noise 5
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/speckle_noise_5/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/speckle_noise_5/ -s 210
 
 # 210    CVMFTL    Defocus Blur 1
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/defocus_blur_1/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/defocus_blur_1/ -s 210
 
 # 210    CVMFTL    Defocus Blur 2
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/defocus_blur_2/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/defocus_blur_2/ -s 210
 
 # 210    CVMFTL    Defocus Blur 3
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/defocus_blur_3/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/defocus_blur_3/ -s 210
 
 # 210    CVMFTL    Defocus Blur 4
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/defocus_blur_4/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/defocus_blur_4/ -s 210
 
 # 210    CVMFTL    Defocus Blur 5
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/defocus_blur_5/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/defocus_blur_5/ -s 210
 
 # 210    CVMFTL    Glass Blur 1
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/glass_blur_1/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/glass_blur_1/ -s 210
 
 # 210    CVMFTL    Glass Blur 2
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/glass_blur_2/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/glass_blur_2/ -s 210
 
 # 210    CVMFTL    Glass Blur 3
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/glass_blur_3/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/glass_blur_3/ -s 210
 
 # 210    CVMFTL    Glass Blur 4
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/glass_blur_4/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/glass_blur_4/ -s 210
 
 # 210    CVMFTL    Glass Blur 5
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/glass_blur_5/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/glass_blur_5/ -s 210
 
 # 210    CVMFTL    Motion Blur 1
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/motion_blur_1/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/motion_blur_1/ -s 210
 
 # 210    CVMFTL    Motion Blur 2
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/motion_blur_2/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/motion_blur_2/ -s 210
 
 # 210    CVMFTL    Motion Blur 3
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/motion_blur_3/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/motion_blur_3/ -s 210
 
 # 210    CVMFTL    Motion Blur 4
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/motion_blur_4/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/motion_blur_4/ -s 210
 
 # 210    CVMFTL    Motion Blur 5
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/motion_blur_5/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/motion_blur_5/ -s 210
 
 # 210    CVMFTL    Zoom Blur 1
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/zoom_blur_1/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/zoom_blur_1/ -s 210
 
 # 210    CVMFTL    Zoom Blur 2
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/zoom_blur_2/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/zoom_blur_2/ -s 210
 
 # 210    CVMFTL    Zoom Blur 3
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/zoom_blur_3/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/zoom_blur_3/ -s 210
 
 # 210    CVMFTL    Zoom Blur 4
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/zoom_blur_4/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/zoom_blur_4/ -s 210
 
 # 210    CVMFTL    Zoom Blur 5
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/zoom_blur_5/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/zoom_blur_5/ -s 210
 
 # 210    CVMFTL    Gaussian Blur 1
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_blur_1/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_blur_1/ -s 210
 
 # 210    CVMFTL    Gaussian Blur 2
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_blur_2/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_blur_2/ -s 210
 
 # 210    CVMFTL    Gaussian Blur 3
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_blur_3/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_blur_3/ -s 210
 
 # 210    CVMFTL    Gaussian Blur 4
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_blur_4/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_blur_4/ -s 210
 
 # 210    CVMFTL    Gaussian Blur 5
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_blur_5/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_blur_5/ -s 210
 
 # 210    CVMFTL    Snow 1
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/snow_1/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/snow_1/ -s 210
 
 # 210    CVMFTL    Snow 2
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/snow_2/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/snow_2/ -s 210
 
 # 210    CVMFTL    Snow 3
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/snow_3/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/snow_3/ -s 210
 
 # 210    CVMFTL    Snow 4
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/snow_4/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/snow_4/ -s 210
 
 # 210    CVMFTL    Snow 5
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/snow_5/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/snow_5/ -s 210
 
 # 210    CVMFTL    Frost 1
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/frost_1/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/frost_1/ -s 210
 
 # 210    CVMFTL    Frost 2
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/frost_2/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/frost_2/ -s 210
 
 # 210    CVMFTL    Frost 3
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/frost_3/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/frost_3/ -s 210
 
 # 210    CVMFTL    Frost 4
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/frost_4/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/frost_4/ -s 210
 
 # 210    CVMFTL    Frost 5
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/frost_5/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/frost_5/ -s 210
 
 # 210    CVMFTL    Fog 1
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/fog_1/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/fog_1/ -s 210
 
 # 210    CVMFTL    Fog 2
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/fog_2/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/fog_2/ -s 210
 
 # 210    CVMFTL    Fog 3
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/fog_3/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/fog_3/ -s 210
 
 # 210    CVMFTL    Fog 4
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/fog_4/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/fog_4/ -s 210
 
 # 210    CVMFTL    Fog 5
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/fog_5/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/fog_5/ -s 210
 
 # 210    CVMFTL    Spatter 1
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/spatter_1/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/spatter_1/ -s 210
 
 # 210    CVMFTL    Spatter 2
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/spatter_2/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/spatter_2/ -s 210
 
 # 210    CVMFTL    Spatter 3
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/spatter_3/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/spatter_3/ -s 210
 
 # 210    CVMFTL    Spatter 4
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/spatter_4/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/spatter_4/ -s 210
 
 # 210    CVMFTL    Spatter 5
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/spatter_5/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/spatter_5/ -s 210
 
 # 210    CVMFTL    Brightness 1
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/brightness_1/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/brightness_1/ -s 210
 
 # 210    CVMFTL    Brightness 2
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/brightness_2/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/brightness_2/ -s 210
 
 # 210    CVMFTL    Brightness 3
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/brightness_3/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/brightness_3/ -s 210
 
 # 210    CVMFTL    Brightness 4
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/brightness_4/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/brightness_4/ -s 210
 
 # 210    CVMFTL    Brightness 5
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/brightness_5/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/brightness_5/ -s 210
 
 # 210    CVMFTL    Contrast 1
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/contrast_1/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/contrast_1/ -s 210
 
 # 210    CVMFTL    Contrast 2
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/contrast_2/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/contrast_2/ -s 210
 
 # 210    CVMFTL    Contrast 3
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/contrast_3/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/contrast_3/ -s 210
 
 # 210    CVMFTL    Contrast 4
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/contrast_4/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/contrast_4/ -s 210
 
 # 210    CVMFTL    Contrast 5
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/contrast_5/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/contrast_5/ -s 210
 
 # 210    CVMFTL    Elastic Transform 1
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/elastic_transform_1/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/elastic_transform_1/ -s 210
 
 # 210    CVMFTL    Elastic Transform 2
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/elastic_transform_2/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/elastic_transform_2/ -s 210
 
 # 210    CVMFTL    Elastic Transform 3
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/elastic_transform_3/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/elastic_transform_3/ -s 210
 
 # 210    CVMFTL    Elastic Transform 4
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/elastic_transform_4/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/elastic_transform_4/ -s 210
 
 # 210    CVMFTL    Elastic Transform 5
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/elastic_transform_5/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/elastic_transform_5/ -s 210
 
 # 210    CVMFTL    Pixelate 1
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/pixelate_1/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/pixelate_1/ -s 210
 
 # 210    CVMFTL    Pixelate 2
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/pixelate_2/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/pixelate_2/ -s 210
 
 # 210    CVMFTL    Pixelate 3
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/pixelate_3/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/pixelate_3/ -s 210
 
 # 210    CVMFTL    Pixelate 4
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/pixelate_4/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/pixelate_4/ -s 210
 
 # 210    CVMFTL    Pixelate 5
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/pixelate_5/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/pixelate_5/ -s 210
 
 # 210    CVMFTL    JPEG 1
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/jpeg_1/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/jpeg_1/ -s 210
 
 # 210    CVMFTL    JPEG 2
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/jpeg_2/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/jpeg_2/ -s 210
 
 # 210    CVMFTL    JPEG 3
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/jpeg_3/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/jpeg_3/ -s 210
 
 # 210    CVMFTL    JPEG 4
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/jpeg_4/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/jpeg_4/ -s 210
 
 # 210    CVMFTL    JPEG 5
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/jpeg_5/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/jpeg_5/ -s 210
 
 # 210    CVMFTL    Saturate 1
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/saturate_1/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/saturate_1/ -s 210
 
 # 210    CVMFTL    Saturate 2
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/saturate_2/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/saturate_2/ -s 210
 
 # 210    CVMFTL    Saturate 3
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/saturate_3/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/saturate_3/ -s 210
 
 # 210    CVMFTL    Saturate 4
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/saturate_4/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/saturate_4/ -s 210
 
 # 210    CVMFTL    Saturate 5
-./test_decomposed.py -r decomposed.vit_b_32_mtl.2023.6.11.22.0.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/saturate_5/ -s 210
+./test_decomposed.py -r decomposed.vit_b_32_clip_mtl.ftl.210.2023.8.13.20.9.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/generated/test/saturate_5/ -s 210
