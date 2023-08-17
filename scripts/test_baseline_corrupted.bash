@@ -258,19 +258,19 @@ cd ../src
 ./test_baseline.py -r baseline.resnet152.2023.6.4.16.56.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/pixelate_5/ -s 42
 
 # 42    RBFT    JPEG 1
-./test_baseline.py -r baseline.resnet152.2023.6.4.16.56.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_1/ -s 42
+./test_baseline.py -r baseline.resnet152.2023.6.4.16.56.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_compression_1/ -s 42
 
 # 42    RBFT    JPEG 2
-./test_baseline.py -r baseline.resnet152.2023.6.4.16.56.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_2/ -s 42
+./test_baseline.py -r baseline.resnet152.2023.6.4.16.56.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_compression_2/ -s 42
 
 # 42    RBFT    JPEG 3
-./test_baseline.py -r baseline.resnet152.2023.6.4.16.56.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_3/ -s 42
+./test_baseline.py -r baseline.resnet152.2023.6.4.16.56.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_compression_3/ -s 42
 
 # 42    RBFT    JPEG 4
-./test_baseline.py -r baseline.resnet152.2023.6.4.16.56.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_4/ -s 42
+./test_baseline.py -r baseline.resnet152.2023.6.4.16.56.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_compression_4/ -s 42
 
 # 42    RBFT    JPEG 5
-./test_baseline.py -r baseline.resnet152.2023.6.4.16.56.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_5/ -s 42
+./test_baseline.py -r baseline.resnet152.2023.6.4.16.56.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_compression_5/ -s 42
 
 # 42    RBFT    Saturate 1
 ./test_baseline.py -r baseline.resnet152.2023.6.4.16.56.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/saturate_1/ -s 42
@@ -543,19 +543,19 @@ cd ../src
 ./test_baseline.py -r baseline.vit_b_32.2023.6.4.16.27.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_42/pixelate_5/ -s 42
 
 # 42    VBFT    JPEG 1
-./test_baseline.py -r baseline.vit_b_32.2023.6.4.16.27.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_1/ -s 42
+./test_baseline.py -r baseline.vit_b_32.2023.6.4.16.27.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_compression_1/ -s 42
 
 # 42    VBFT    JPEG 2
-./test_baseline.py -r baseline.vit_b_32.2023.6.4.16.27.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_2/ -s 42
+./test_baseline.py -r baseline.vit_b_32.2023.6.4.16.27.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_compression_2/ -s 42
 
 # 42    VBFT    JPEG 3
-./test_baseline.py -r baseline.vit_b_32.2023.6.4.16.27.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_3/ -s 42
+./test_baseline.py -r baseline.vit_b_32.2023.6.4.16.27.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_compression_3/ -s 42
 
 # 42    VBFT    JPEG 4
-./test_baseline.py -r baseline.vit_b_32.2023.6.4.16.27.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_4/ -s 42
+./test_baseline.py -r baseline.vit_b_32.2023.6.4.16.27.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_compression_4/ -s 42
 
 # 42    VBFT    JPEG 5
-./test_baseline.py -r baseline.vit_b_32.2023.6.4.16.27.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_5/ -s 42
+./test_baseline.py -r baseline.vit_b_32.2023.6.4.16.27.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_compression_5/ -s 42
 
 # 42    VBFT    Saturate 1
 ./test_baseline.py -r baseline.vit_b_32.2023.6.4.16.27.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_42/saturate_1/ -s 42
@@ -828,19 +828,19 @@ cd ../src
 ./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/pixelate_5/ -s 42
 
 # 42    CRBFT    JPEG 1
-./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_1/ -s 42
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_compression_1/ -s 42
 
 # 42    CRBFT    JPEG 2
-./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_2/ -s 42
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_compression_2/ -s 42
 
 # 42    CRBFT    JPEG 3
-./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_3/ -s 42
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_compression_3/ -s 42
 
 # 42    CRBFT    JPEG 4
-./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_4/ -s 42
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_compression_4/ -s 42
 
 # 42    CRBFT    JPEG 5
-./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_5/ -s 42
+./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_compression_5/ -s 42
 
 # 42    CRBFT    Saturate 1
 ./test_baseline.py -r baseline.resnet101_clip.ft.42.2023.8.12.14.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_42/saturate_1/ -s 42
@@ -1113,19 +1113,19 @@ cd ../src
 ./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_42/pixelate_5/ -s 42
 
 # 42    CVBFT    JPEG 1
-./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_1/ -s 42
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_compression_1/ -s 42
 
 # 42    CVBFT    JPEG 2
-./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_2/ -s 42
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_compression_2/ -s 42
 
 # 42    CVBFT    JPEG 3
-./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_3/ -s 42
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_compression_3/ -s 42
 
 # 42    CVBFT    JPEG 4
-./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_4/ -s 42
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_compression_4/ -s 42
 
 # 42    CVBFT    JPEG 5
-./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_5/ -s 42
+./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_42/jpeg_compression_5/ -s 42
 
 # 42    CVBFT    Saturate 1
 ./test_baseline.py -r baseline.vit_b_32_clip.ft.42.2023.8.12.19.55.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_42/saturate_1/ -s 42
@@ -1398,19 +1398,19 @@ cd ../src
 ./test_baseline.py -r baseline.resnet152.2023.6.7.15.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/pixelate_5/ -s 84
 
 # 84    RBFT    JPEG 1
-./test_baseline.py -r baseline.resnet152.2023.6.7.15.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_1/ -s 84
+./test_baseline.py -r baseline.resnet152.2023.6.7.15.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_compression_1/ -s 84
 
 # 84    RBFT    JPEG 2
-./test_baseline.py -r baseline.resnet152.2023.6.7.15.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_2/ -s 84
+./test_baseline.py -r baseline.resnet152.2023.6.7.15.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_compression_2/ -s 84
 
 # 84    RBFT    JPEG 3
-./test_baseline.py -r baseline.resnet152.2023.6.7.15.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_3/ -s 84
+./test_baseline.py -r baseline.resnet152.2023.6.7.15.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_compression_3/ -s 84
 
 # 84    RBFT    JPEG 4
-./test_baseline.py -r baseline.resnet152.2023.6.7.15.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_4/ -s 84
+./test_baseline.py -r baseline.resnet152.2023.6.7.15.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_compression_4/ -s 84
 
 # 84    RBFT    JPEG 5
-./test_baseline.py -r baseline.resnet152.2023.6.7.15.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_5/ -s 84
+./test_baseline.py -r baseline.resnet152.2023.6.7.15.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_compression_5/ -s 84
 
 # 84    RBFT    Saturate 1
 ./test_baseline.py -r baseline.resnet152.2023.6.7.15.29.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/saturate_1/ -s 84
@@ -1683,19 +1683,19 @@ cd ../src
 ./test_baseline.py -r baseline.vit_b_32.2023.6.7.15.25.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_84/pixelate_5/ -s 84
 
 # 84    VBFT    JPEG 1
-./test_baseline.py -r baseline.vit_b_32.2023.6.7.15.25.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_1/ -s 84
+./test_baseline.py -r baseline.vit_b_32.2023.6.7.15.25.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_compression_1/ -s 84
 
 # 84    VBFT    JPEG 2
-./test_baseline.py -r baseline.vit_b_32.2023.6.7.15.25.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_2/ -s 84
+./test_baseline.py -r baseline.vit_b_32.2023.6.7.15.25.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_compression_2/ -s 84
 
 # 84    VBFT    JPEG 3
-./test_baseline.py -r baseline.vit_b_32.2023.6.7.15.25.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_3/ -s 84
+./test_baseline.py -r baseline.vit_b_32.2023.6.7.15.25.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_compression_3/ -s 84
 
 # 84    VBFT    JPEG 4
-./test_baseline.py -r baseline.vit_b_32.2023.6.7.15.25.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_4/ -s 84
+./test_baseline.py -r baseline.vit_b_32.2023.6.7.15.25.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_compression_4/ -s 84
 
 # 84    VBFT    JPEG 5
-./test_baseline.py -r baseline.vit_b_32.2023.6.7.15.25.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_5/ -s 84
+./test_baseline.py -r baseline.vit_b_32.2023.6.7.15.25.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_compression_5/ -s 84
 
 # 84    VBFT    Saturate 1
 ./test_baseline.py -r baseline.vit_b_32.2023.6.7.15.25.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_84/saturate_1/ -s 84
@@ -1968,19 +1968,19 @@ cd ../src
 ./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/pixelate_5/ -s 84
 
 # 84    CRBFT    JPEG 1
-./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_1/ -s 84
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_compression_1/ -s 84
 
 # 84    CRBFT    JPEG 2
-./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_2/ -s 84
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_compression_2/ -s 84
 
 # 84    CRBFT    JPEG 3
-./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_3/ -s 84
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_compression_3/ -s 84
 
 # 84    CRBFT    JPEG 4
-./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_4/ -s 84
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_compression_4/ -s 84
 
 # 84    CRBFT    JPEG 5
-./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_5/ -s 84
+./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_compression_5/ -s 84
 
 # 84    CRBFT    Saturate 1
 ./test_baseline.py -r baseline.resnet101_clip.ft.84.2023.8.13.7.32.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_84/saturate_1/ -s 84
@@ -2253,19 +2253,19 @@ cd ../src
 ./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_84/pixelate_5/ -s 84
 
 # 84    CVBFT    JPEG 1
-./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_1/ -s 84
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_compression_1/ -s 84
 
 # 84    CVBFT    JPEG 2
-./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_2/ -s 84
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_compression_2/ -s 84
 
 # 84    CVBFT    JPEG 3
-./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_3/ -s 84
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_compression_3/ -s 84
 
 # 84    CVBFT    JPEG 4
-./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_4/ -s 84
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_compression_4/ -s 84
 
 # 84    CVBFT    JPEG 5
-./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_5/ -s 84
+./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_84/jpeg_compression_5/ -s 84
 
 # 84    CVBFT    Saturate 1
 ./test_baseline.py -r baseline.vit_b_32_clip.ft.84.2023.8.13.1.32.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_84/saturate_1/ -s 84
@@ -2538,19 +2538,19 @@ cd ../src
 ./test_baseline.py -r baseline.resnet152.2023.6.7.22.53.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/pixelate_5/ -s 126
 
 # 126    RBFT    JPEG 1
-./test_baseline.py -r baseline.resnet152.2023.6.7.22.53.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_1/ -s 126
+./test_baseline.py -r baseline.resnet152.2023.6.7.22.53.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_compression_1/ -s 126
 
 # 126    RBFT    JPEG 2
-./test_baseline.py -r baseline.resnet152.2023.6.7.22.53.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_2/ -s 126
+./test_baseline.py -r baseline.resnet152.2023.6.7.22.53.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_compression_2/ -s 126
 
 # 126    RBFT    JPEG 3
-./test_baseline.py -r baseline.resnet152.2023.6.7.22.53.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_3/ -s 126
+./test_baseline.py -r baseline.resnet152.2023.6.7.22.53.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_compression_3/ -s 126
 
 # 126    RBFT    JPEG 4
-./test_baseline.py -r baseline.resnet152.2023.6.7.22.53.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_4/ -s 126
+./test_baseline.py -r baseline.resnet152.2023.6.7.22.53.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_compression_4/ -s 126
 
 # 126    RBFT    JPEG 5
-./test_baseline.py -r baseline.resnet152.2023.6.7.22.53.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_5/ -s 126
+./test_baseline.py -r baseline.resnet152.2023.6.7.22.53.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_compression_5/ -s 126
 
 # 126    RBFT    Saturate 1
 ./test_baseline.py -r baseline.resnet152.2023.6.7.22.53.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/saturate_1/ -s 126
@@ -2823,19 +2823,19 @@ cd ../src
 ./test_baseline.py -r baseline.vit_b_32.2023.6.7.21.58.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_126/pixelate_5/ -s 126
 
 # 126    VBFT    JPEG 1
-./test_baseline.py -r baseline.vit_b_32.2023.6.7.21.58.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_1/ -s 126
+./test_baseline.py -r baseline.vit_b_32.2023.6.7.21.58.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_compression_1/ -s 126
 
 # 126    VBFT    JPEG 2
-./test_baseline.py -r baseline.vit_b_32.2023.6.7.21.58.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_2/ -s 126
+./test_baseline.py -r baseline.vit_b_32.2023.6.7.21.58.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_compression_2/ -s 126
 
 # 126    VBFT    JPEG 3
-./test_baseline.py -r baseline.vit_b_32.2023.6.7.21.58.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_3/ -s 126
+./test_baseline.py -r baseline.vit_b_32.2023.6.7.21.58.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_compression_3/ -s 126
 
 # 126    VBFT    JPEG 4
-./test_baseline.py -r baseline.vit_b_32.2023.6.7.21.58.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_4/ -s 126
+./test_baseline.py -r baseline.vit_b_32.2023.6.7.21.58.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_compression_4/ -s 126
 
 # 126    VBFT    JPEG 5
-./test_baseline.py -r baseline.vit_b_32.2023.6.7.21.58.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_5/ -s 126
+./test_baseline.py -r baseline.vit_b_32.2023.6.7.21.58.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_compression_5/ -s 126
 
 # 126    VBFT    Saturate 1
 ./test_baseline.py -r baseline.vit_b_32.2023.6.7.21.58.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_126/saturate_1/ -s 126
@@ -3108,19 +3108,19 @@ cd ../src
 ./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/pixelate_5/ -s 126
 
 # 126    CRBFT    JPEG 1
-./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_1/ -s 126
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_compression_1/ -s 126
 
 # 126    CRBFT    JPEG 2
-./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_2/ -s 126
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_compression_2/ -s 126
 
 # 126    CRBFT    JPEG 3
-./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_3/ -s 126
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_compression_3/ -s 126
 
 # 126    CRBFT    JPEG 4
-./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_4/ -s 126
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_compression_4/ -s 126
 
 # 126    CRBFT    JPEG 5
-./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_5/ -s 126
+./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_compression_5/ -s 126
 
 # 126    CRBFT    Saturate 1
 ./test_baseline.py -r baseline.resnet101_clip.ft.126.2023.8.13.11.46.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_126/saturate_1/ -s 126
@@ -3393,19 +3393,19 @@ cd ../src
 ./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_126/pixelate_5/ -s 126
 
 # 126    CVBFT    JPEG 1
-./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_1/ -s 126
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_compression_1/ -s 126
 
 # 126    CVBFT    JPEG 2
-./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_2/ -s 126
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_compression_2/ -s 126
 
 # 126    CVBFT    JPEG 3
-./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_3/ -s 126
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_compression_3/ -s 126
 
 # 126    CVBFT    JPEG 4
-./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_4/ -s 126
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_compression_4/ -s 126
 
 # 126    CVBFT    JPEG 5
-./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_5/ -s 126
+./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_126/jpeg_compression_5/ -s 126
 
 # 126    CVBFT    Saturate 1
 ./test_baseline.py -r baseline.vit_b_32_clip.ft.126.2023.8.13.3.22.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_126/saturate_1/ -s 126
@@ -3678,19 +3678,19 @@ cd ../src
 ./test_baseline.py -r baseline.resnet152.2023.6.8.8.49.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/pixelate_5/ -s 168
 
 # 168    RBFT    JPEG 1
-./test_baseline.py -r baseline.resnet152.2023.6.8.8.49.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_1/ -s 168
+./test_baseline.py -r baseline.resnet152.2023.6.8.8.49.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_compression_1/ -s 168
 
 # 168    RBFT    JPEG 2
-./test_baseline.py -r baseline.resnet152.2023.6.8.8.49.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_2/ -s 168
+./test_baseline.py -r baseline.resnet152.2023.6.8.8.49.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_compression_2/ -s 168
 
 # 168    RBFT    JPEG 3
-./test_baseline.py -r baseline.resnet152.2023.6.8.8.49.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_3/ -s 168
+./test_baseline.py -r baseline.resnet152.2023.6.8.8.49.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_compression_3/ -s 168
 
 # 168    RBFT    JPEG 4
-./test_baseline.py -r baseline.resnet152.2023.6.8.8.49.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_4/ -s 168
+./test_baseline.py -r baseline.resnet152.2023.6.8.8.49.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_compression_4/ -s 168
 
 # 168    RBFT    JPEG 5
-./test_baseline.py -r baseline.resnet152.2023.6.8.8.49.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_5/ -s 168
+./test_baseline.py -r baseline.resnet152.2023.6.8.8.49.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_compression_5/ -s 168
 
 # 168    RBFT    Saturate 1
 ./test_baseline.py -r baseline.resnet152.2023.6.8.8.49.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/saturate_1/ -s 168
@@ -3963,19 +3963,19 @@ cd ../src
 ./test_baseline.py -r baseline.vit_b_32.2023.6.8.4.32.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_168/pixelate_5/ -s 168
 
 # 168    VBFT    JPEG 1
-./test_baseline.py -r baseline.vit_b_32.2023.6.8.4.32.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_1/ -s 168
+./test_baseline.py -r baseline.vit_b_32.2023.6.8.4.32.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_compression_1/ -s 168
 
 # 168    VBFT    JPEG 2
-./test_baseline.py -r baseline.vit_b_32.2023.6.8.4.32.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_2/ -s 168
+./test_baseline.py -r baseline.vit_b_32.2023.6.8.4.32.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_compression_2/ -s 168
 
 # 168    VBFT    JPEG 3
-./test_baseline.py -r baseline.vit_b_32.2023.6.8.4.32.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_3/ -s 168
+./test_baseline.py -r baseline.vit_b_32.2023.6.8.4.32.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_compression_3/ -s 168
 
 # 168    VBFT    JPEG 4
-./test_baseline.py -r baseline.vit_b_32.2023.6.8.4.32.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_4/ -s 168
+./test_baseline.py -r baseline.vit_b_32.2023.6.8.4.32.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_compression_4/ -s 168
 
 # 168    VBFT    JPEG 5
-./test_baseline.py -r baseline.vit_b_32.2023.6.8.4.32.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_5/ -s 168
+./test_baseline.py -r baseline.vit_b_32.2023.6.8.4.32.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_compression_5/ -s 168
 
 # 168    VBFT    Saturate 1
 ./test_baseline.py -r baseline.vit_b_32.2023.6.8.4.32.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_168/saturate_1/ -s 168
@@ -4248,19 +4248,19 @@ cd ../src
 ./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/pixelate_5/ -s 168
 
 # 168    CRBFT    JPEG 1
-./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_1/ -s 168
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_compression_1/ -s 168
 
 # 168    CRBFT    JPEG 2
-./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_2/ -s 168
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_compression_2/ -s 168
 
 # 168    CRBFT    JPEG 3
-./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_3/ -s 168
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_compression_3/ -s 168
 
 # 168    CRBFT    JPEG 4
-./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_4/ -s 168
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_compression_4/ -s 168
 
 # 168    CRBFT    JPEG 5
-./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_5/ -s 168
+./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_compression_5/ -s 168
 
 # 168    CRBFT    Saturate 1
 ./test_baseline.py -r baseline.resnet101_clip.ft.168.2023.8.13.15.58.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_168/saturate_1/ -s 168
@@ -4533,19 +4533,19 @@ cd ../src
 ./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_168/pixelate_5/ -s 168
 
 # 168    CVBFT    JPEG 1
-./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_1/ -s 168
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_compression_1/ -s 168
 
 # 168    CVBFT    JPEG 2
-./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_2/ -s 168
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_compression_2/ -s 168
 
 # 168    CVBFT    JPEG 3
-./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_3/ -s 168
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_compression_3/ -s 168
 
 # 168    CVBFT    JPEG 4
-./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_4/ -s 168
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_compression_4/ -s 168
 
 # 168    CVBFT    JPEG 5
-./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_5/ -s 168
+./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_168/jpeg_compression_5/ -s 168
 
 # 168    CVBFT    Saturate 1
 ./test_baseline.py -r baseline.vit_b_32_clip.ft.168.2023.8.13.5.12.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_168/saturate_1/ -s 168
@@ -4818,19 +4818,19 @@ cd ../src
 ./test_baseline.py -r baseline.resnet152.2023.6.8.18.33.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/pixelate_5/ -s 210
 
 # 210    RBFT    JPEG 1
-./test_baseline.py -r baseline.resnet152.2023.6.8.18.33.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_1/ -s 210
+./test_baseline.py -r baseline.resnet152.2023.6.8.18.33.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_compression_1/ -s 210
 
 # 210    RBFT    JPEG 2
-./test_baseline.py -r baseline.resnet152.2023.6.8.18.33.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_2/ -s 210
+./test_baseline.py -r baseline.resnet152.2023.6.8.18.33.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_compression_2/ -s 210
 
 # 210    RBFT    JPEG 3
-./test_baseline.py -r baseline.resnet152.2023.6.8.18.33.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_3/ -s 210
+./test_baseline.py -r baseline.resnet152.2023.6.8.18.33.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_compression_3/ -s 210
 
 # 210    RBFT    JPEG 4
-./test_baseline.py -r baseline.resnet152.2023.6.8.18.33.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_4/ -s 210
+./test_baseline.py -r baseline.resnet152.2023.6.8.18.33.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_compression_4/ -s 210
 
 # 210    RBFT    JPEG 5
-./test_baseline.py -r baseline.resnet152.2023.6.8.18.33.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_5/ -s 210
+./test_baseline.py -r baseline.resnet152.2023.6.8.18.33.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_compression_5/ -s 210
 
 # 210    RBFT    Saturate 1
 ./test_baseline.py -r baseline.resnet152.2023.6.8.18.33.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/saturate_1/ -s 210
@@ -5103,19 +5103,19 @@ cd ../src
 ./test_baseline.py -r baseline.vit_b_32.2023.6.8.11.6.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_210/pixelate_5/ -s 210
 
 # 210    VBFT    JPEG 1
-./test_baseline.py -r baseline.vit_b_32.2023.6.8.11.6.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_1/ -s 210
+./test_baseline.py -r baseline.vit_b_32.2023.6.8.11.6.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_compression_1/ -s 210
 
 # 210    VBFT    JPEG 2
-./test_baseline.py -r baseline.vit_b_32.2023.6.8.11.6.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_2/ -s 210
+./test_baseline.py -r baseline.vit_b_32.2023.6.8.11.6.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_compression_2/ -s 210
 
 # 210    VBFT    JPEG 3
-./test_baseline.py -r baseline.vit_b_32.2023.6.8.11.6.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_3/ -s 210
+./test_baseline.py -r baseline.vit_b_32.2023.6.8.11.6.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_compression_3/ -s 210
 
 # 210    VBFT    JPEG 4
-./test_baseline.py -r baseline.vit_b_32.2023.6.8.11.6.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_4/ -s 210
+./test_baseline.py -r baseline.vit_b_32.2023.6.8.11.6.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_compression_4/ -s 210
 
 # 210    VBFT    JPEG 5
-./test_baseline.py -r baseline.vit_b_32.2023.6.8.11.6.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_5/ -s 210
+./test_baseline.py -r baseline.vit_b_32.2023.6.8.11.6.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_compression_5/ -s 210
 
 # 210    VBFT    Saturate 1
 ./test_baseline.py -r baseline.vit_b_32.2023.6.8.11.6.Fractal-Define-XL-R2 -d ../../mapillary-dataset/images/split/corrupted/original/test_210/saturate_1/ -s 210
@@ -5388,19 +5388,19 @@ cd ../src
 ./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/pixelate_5/ -s 210
 
 # 210    CRBFT    JPEG 1
-./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_1/ -s 210
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_compression_1/ -s 210
 
 # 210    CRBFT    JPEG 2
-./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_2/ -s 210
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_compression_2/ -s 210
 
 # 210    CRBFT    JPEG 3
-./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_3/ -s 210
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_compression_3/ -s 210
 
 # 210    CRBFT    JPEG 4
-./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_4/ -s 210
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_compression_4/ -s 210
 
 # 210    CRBFT    JPEG 5
-./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_5/ -s 210
+./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_compression_5/ -s 210
 
 # 210    CRBFT    Saturate 1
 ./test_baseline.py -r baseline.resnet101_clip.ft.210.2023.8.13.20.14.euler -d ../../mapillary-dataset/images/split/corrupted/original/test_210/saturate_1/ -s 210
@@ -5673,19 +5673,19 @@ cd ../src
 ./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_210/pixelate_5/ -s 210
 
 # 210    CVBFT    JPEG 1
-./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_1/ -s 210
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_compression_1/ -s 210
 
 # 210    CVBFT    JPEG 2
-./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_2/ -s 210
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_compression_2/ -s 210
 
 # 210    CVBFT    JPEG 3
-./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_3/ -s 210
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_compression_3/ -s 210
 
 # 210    CVBFT    JPEG 4
-./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_4/ -s 210
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_compression_4/ -s 210
 
 # 210    CVBFT    JPEG 5
-./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_5/ -s 210
+./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_210/jpeg_compression_5/ -s 210
 
 # 210    CVBFT    Saturate 1
 ./test_baseline.py -r baseline.vit_b_32_clip.ft.210.2023.8.13.7.2.newton -d ../../mapillary-dataset/images/split/corrupted/original/test_210/saturate_1/ -s 210
