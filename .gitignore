@@ -1,10 +1,8 @@
 checkpoints
 *.png
 *.pth
-*.txt
 .idea/
 .vscode/
 checkpoints/
-output/
 wandb/
 __pycache__/
