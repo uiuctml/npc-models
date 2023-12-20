@@ -30,12 +30,6 @@ class Composition():
 
         return outputs_decomposed
 
-    def compose(self, outputs_decomposed):
-        outputs_decomposed_gathered = self.gatherDecomposedPredictionConfidences(outputs_decomposed)
-        output_composed = torch.prod(outputs_decomposed_gathered, 2)
-
-        return output_composed
-
     def gatherDecomposedClassIndices(self):
         for class_name_original in self.dataset.classes_original:
             class_indices_decomposed = []
@@ -74,3 +68,32 @@ class Composition():
             outputs_decomposed_gathered = torch.cat([outputs_decomposed_gathered, outputs_task], 2)
 
         return outputs_decomposed_gathered
+
+    def naive_bayes(self, outputs_decomposed):
+        outputs_decomposed_gathered = self.gatherDecomposedPredictionConfidences(outputs_decomposed)
+        output_composed = torch.prod(outputs_decomposed_gathered, 2)
+        return output_composed
+
+    def spn(self, outputs_decomposed, spn_matrix_a):
+        spn_matrix_b = torch.zeros((spn_matrix_a.shape[1], header.config_decomposed["data_loader_batch_size"]))
+
+        logger.log_info(len(outputs_decomposed))
+        logger.log_info(outputs_decomposed[0])
+        logger.log_info(outputs_decomposed[0].shape)
+
+        exit()
+
+        # for b in range(outputs[0].shape[0]):
+        #     mtl_mtx = outputs[0][b:b+1].T @ outputs[1][b:b+1]
+        #     mtl_mtx = np.array([mtl_mtx])
+
+        #     mtl_mtx = mtl_mtx.reshape(mtl_mtx.shape[1], mtl_mtx.shape[2], mtl_mtx.shape[0]) @ outputs[2][b:b+1]
+        #     mtl_mtx = np.array([mtl_mtx])
+
+        #     mtl_mtx = mtl_mtx.reshape(mtl_mtx.shape[1], mtl_mtx.shape[2], mtl_mtx.shape[3], mtl_mtx.shape[0]) @ outputs[3][b:b+1]
+
+        #     B.append(mtl_mtx.flatten())
+
+        # B = torch.from_numpy(np.array(B).T)
+
+        return torch.matmul(spn_matrix_a, spn_matrix_b)

@@ -5,7 +5,6 @@ import dataset as dset
 import header
 import logger
 import network
-import sys
 import torch
 import torch.nn
 import torchvision
@@ -14,26 +13,10 @@ import utility
 import visualize
 
 def main():
+    utility.processArgumentsInference()
+
     utility.setSeed(header.seed)
     torch.backends.cuda.matmul.allow_tf32 = True
-
-    run_name_baseline = ""
-    run_name_decomposed = ""
-
-    if len(sys.argv) > 2:
-        run_name_baseline = sys.argv[1]
-        run_name_decomposed = sys.argv[2]
-    else:
-        logger.log_fatal("Run names missing. Quit.")
-        exit(1)
-
-    if not utility.initializeRunNameBaseline(run_name_baseline) or header.run_name_baseline == "":
-        logger.log_fatal("Baseline run name missing. Quit.")
-        exit(1)
-
-    if not utility.initializeRunNameDecomposed(run_name_decomposed) or header.run_name_decomposed == "":
-        logger.log_fatal("Decomposed run name missing. Quit.")
-        exit(1)
 
     accuracy_epoch_baseline = 0
     accuracy_epoch_composed = 0
@@ -52,6 +35,8 @@ def main():
     model_decomposed = network.createModelDecomposed(config_dataset, device)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
+    spn_matrix_a = torch.load(header.file_path_spn_matrix_a)
+    spn_matrix_a = spn_matrix_a.to(device)
 
     for _ in config_dataset["datasets"]:
         accuracy_epoch_decomposed_list.append(0)
@@ -78,7 +63,7 @@ def main():
                 output_baseline = composition.applySoftmax(output_baseline)
                 outputs_decomposed = composition.applySoftmaxDecomposed(outputs_decomposed)
 
-                output_composed = composition.compose(outputs_decomposed)
+                output_composed = composition.spn(outputs_decomposed, spn_matrix_a)
 
                 (_, predictions_baseline) = torch.max(output_baseline, 1)
                 (_, predictions_composed) = torch.max(output_composed, 1)

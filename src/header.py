@@ -1,6 +1,7 @@
 import multiprocessing
 import type
 
+file_path_spn_matrix_a = ""
 log_level = type.LogLevel.info
 project_name = "mapillary-dataset-network"
 run_mode = "disabled"
