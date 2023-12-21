@@ -52,6 +52,8 @@ def main():
 
     for _ in config_dataset["datasets"]:
         accuracy_epoch_list_decomposed.append(0)
+        ground_truths_epoch_list_decomposed.append([])
+        predictions_epoch_list_decomposed.append([])
 
     utility.loadCheckpointBest(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint_best"], model_baseline)
     utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
@@ -108,8 +110,8 @@ def main():
 
     for (i, dataset_entry) in enumerate(config_dataset["datasets"]):
         accuracy_epoch_list_decomposed[i] /= len(data_loader_test.dataset)
-        precision_epoch_decomposed = sklearn.metrics.precision_score(ground_truths_epoch_list[i], predictions_epoch_list[i], average = "macro", zero_division = 0)
-        recall_epoch_decomposed = sklearn.metrics.recall_score(ground_truths_epoch_list[i], predictions_epoch_list[i], average = "macro", zero_division = 0)
+        precision_epoch_decomposed = sklearn.metrics.precision_score(ground_truths_epoch_list_decomposed[i], predictions_epoch_list_decomposed[i], average = "macro", zero_division = 0)
+        recall_epoch_decomposed = sklearn.metrics.recall_score(ground_truths_epoch_list_decomposed[i], predictions_epoch_list_decomposed[i], average = "macro", zero_division = 0)
 
         output_list_decomposed_accuracy.append(accuracy_epoch_list_decomposed[i])
         output_list_decomposed_precision.append(precision_epoch_decomposed)
@@ -135,7 +137,7 @@ def main():
 
     utility.logTestOutput(header.config_baseline, output_list_baseline)
     utility.logTestOutput(header.config_baseline, output_list_composed, True)
-    utility.logTestOutput(header.config_decomposed, output_list_composed)
+    utility.logTestOutput(header.config_decomposed, output_list_decomposed)
 
     return
 
