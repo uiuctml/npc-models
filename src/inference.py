@@ -5,6 +5,7 @@ import dataset as dset
 import header
 import logger
 import network
+import sklearn.metrics
 import torch
 import torch.nn
 import torchvision
@@ -20,7 +21,18 @@ def main():
 
     accuracy_epoch_baseline = 0
     accuracy_epoch_composed = 0
-    accuracy_epoch_decomposed_list = []
+    accuracy_epoch_list_decomposed = []
+    ground_truths_epoch_baseline = []
+    ground_truths_epoch_list_decomposed = []
+    output_list_baseline = []
+    output_list_composed = []
+    output_list_decomposed = []
+    output_list_decomposed_accuracy = []
+    output_list_decomposed_precision = []
+    output_list_decomposed_recall = []
+    predictions_epoch_baseline = []
+    predictions_epoch_composed = []
+    predictions_epoch_list_decomposed = []
     dataset_transforms = utility.createTransform(header.config_decomposed)
     dataset_original = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_test"], dataset_transforms)
     dataset_test = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_test"], dataset_original.classes, dataset_transforms)
@@ -39,7 +51,7 @@ def main():
     spn_matrix_a = spn_matrix_a.to(device)
 
     for _ in config_dataset["datasets"]:
-        accuracy_epoch_decomposed_list.append(0)
+        accuracy_epoch_list_decomposed.append(0)
 
     utility.loadCheckpointBest(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint_best"], model_baseline)
     utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
@@ -75,7 +87,9 @@ def main():
                     (_, predictions_decomposed) = torch.max(outputs_decomposed[i], 1)
 
                     corrects_decomposed = torch.sum(predictions_decomposed == labels_decomposed[:, i].data).item()
-                    accuracy_epoch_decomposed_list[i] += corrects_decomposed
+                    accuracy_epoch_list_decomposed[i] += corrects_decomposed
+                    ground_truths_epoch_list_decomposed[i] += labels_decomposed[:, i].data.tolist()
+                    predictions_epoch_list_decomposed[i] += predictions_decomposed.tolist()
 
             accuracy_epoch_baseline += corrects_baseline
             accuracy_epoch_composed += corrects_composed
@@ -83,20 +97,45 @@ def main():
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
 
+            ground_truths_epoch_baseline += labels_original.data.tolist()
+            predictions_epoch_baseline += predictions_baseline.tolist()
+            predictions_epoch_composed += predictions_composed.tolist()
+
             if header.visualize_show or header.visualize_save:
                 visualize.visualize(input, composition, dataset_test, labels_decomposed, labels_original, output_baseline, outputs_decomposed, output_composed)
 
     progress_bar.close()
 
     for (i, dataset_entry) in enumerate(config_dataset["datasets"]):
-        accuracy_epoch_decomposed_list[i] /= len(data_loader_test.dataset)
-        logger.log_info("Decomposed testing accuracy for \"" + dataset_entry["name"] + "\": " + str(accuracy_epoch_decomposed_list[i]) + ".")
+        accuracy_epoch_list_decomposed[i] /= len(data_loader_test.dataset)
+        precision_epoch_decomposed = sklearn.metrics.precision_score(ground_truths_epoch_list[i], predictions_epoch_list[i], average = "macro", zero_division = 0)
+        recall_epoch_decomposed = sklearn.metrics.recall_score(ground_truths_epoch_list[i], predictions_epoch_list[i], average = "macro", zero_division = 0)
+
+        output_list_decomposed_accuracy.append(accuracy_epoch_list_decomposed[i])
+        output_list_decomposed_precision.append(precision_epoch_decomposed)
+        output_list_decomposed_recall.append(recall_epoch_decomposed)
+
+        logger.log_info("Decomposed testing accuracy for \"" + dataset_entry["name"] + "\": " + str(accuracy_epoch_list_decomposed[i]) + ".")
 
     accuracy_epoch_baseline /= len(data_loader_test.dataset)
     accuracy_epoch_composed /= len(data_loader_test.dataset)
 
+    precision_epoch_baseline = sklearn.metrics.precision_score(ground_truths_epoch_baseline, predictions_epoch_baseline, average = "macro", zero_division = 0)
+    precision_epoch_composed = sklearn.metrics.precision_score(ground_truths_epoch_baseline, predictions_epoch_composed, average = "macro", zero_division = 0)
+    recall_epoch_baseline = sklearn.metrics.recall_score(ground_truths_epoch_baseline, predictions_epoch_baseline, average = "macro", zero_division = 0)
+    recall_epoch_composed = sklearn.metrics.recall_score(ground_truths_epoch_baseline, predictions_epoch_composed, average = "macro", zero_division = 0)
+    output_list_baseline += [accuracy_epoch_baseline, precision_epoch_baseline, recall_epoch_baseline]
+    output_list_composed += [accuracy_epoch_composed, precision_epoch_composed, recall_epoch_composed]
+    output_list_decomposed += output_list_decomposed_accuracy
+    output_list_decomposed += output_list_decomposed_precision
+    output_list_decomposed += output_list_decomposed_recall
+
     logger.log_info("Composed inference accuracy: " + str(accuracy_epoch_composed) + ".")
     logger.log_info("Baseline inference accuracy: " + str(accuracy_epoch_baseline) + ".")
+
+    utility.logTestOutput(header.config_baseline, output_list_baseline)
+    utility.logTestOutput(header.config_baseline, output_list_composed, True)
+    utility.logTestOutput(header.config_decomposed, output_list_composed)
 
     return
 

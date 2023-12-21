@@ -183,7 +183,7 @@ def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
 
     return
 
-def logTestOutput(config, output):
+def logTestOutput(config, output, composed = False):
     if config["log_test_output"] == False:
         return
 
@@ -219,6 +219,9 @@ def logTestOutput(config, output):
     else:
         file_line += config["file_path_input_adversarial"].split("/")[-1].split(".best.tar.pt")[0]
 
+    file_line += "\t"
+    file_line += str(composed)
+
     for value in output:
         file_line += "\t"
         file_line += str(value)
@@ -228,9 +231,9 @@ def logTestOutput(config, output):
     with open(file_path_test_output, "a") as file_test_output:
         if file_empty:
             if config["type"] == "baseline":
-                file_test_output.write("# seed\tmodel\tattack\taccuracy\tprecision\trecall\n")
+                file_test_output.write("# seed\tmodel\tattack\tcomposed\taccuracy\tprecision\trecall\n")
             elif config["type"] == "decomposed":
-                file_test_output.write("# seed\tmodel\tattack\taccuracy_color\taccuracy_shape\taccuracy_symbol\taccuracy_text\tprecision_color\tprecision_shape\tprecision_symbol\tprecision_text\trecall_color\trecall_shape\trecall_symbol\trecall_text\n")
+                file_test_output.write("# seed\tmodel\tattack\tcomposed\taccuracy_color\taccuracy_shape\taccuracy_symbol\taccuracy_text\tprecision_color\tprecision_shape\tprecision_symbol\tprecision_text\trecall_color\trecall_shape\trecall_symbol\trecall_text\n")
             else:
                 logger.log_fatal("Unknown configuration type")
                 exit(1)
