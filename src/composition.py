@@ -75,25 +75,20 @@ class Composition():
         return output_composed
 
     def spn(self, outputs_decomposed, spn_matrix_a):
-        spn_matrix_b = torch.zeros((spn_matrix_a.shape[1], header.config_decomposed["data_loader_batch_size"]))
+        batch_size = outputs_decomposed[0].shape[0]
+        spn_matrix_b_list = []
 
-        logger.log_info(len(outputs_decomposed))
-        logger.log_info(outputs_decomposed[0])
-        logger.log_info(outputs_decomposed[0].shape)
+        for batch in range(batch_size):
+            spn_matrix_b_batch = outputs_decomposed[0][batch]
 
-        exit()
+            for task_index in range(1, len(outputs_decomposed)):
+                spn_matrix_b_batch = torch.outer(spn_matrix_b_batch, outputs_decomposed[task_index][batch]).flatten()
 
-        # for b in range(outputs[0].shape[0]):
-        #     mtl_mtx = outputs[0][b:b+1].T @ outputs[1][b:b+1]
-        #     mtl_mtx = np.array([mtl_mtx])
+            spn_matrix_b_list.append(spn_matrix_b_batch)
 
-        #     mtl_mtx = mtl_mtx.reshape(mtl_mtx.shape[1], mtl_mtx.shape[2], mtl_mtx.shape[0]) @ outputs[2][b:b+1]
-        #     mtl_mtx = np.array([mtl_mtx])
+        spn_matrix_b = torch.stack(spn_matrix_b_list, dim = 0).t()
+        spn_matrix_b = spn_matrix_b.to(self.device)
 
-        #     mtl_mtx = mtl_mtx.reshape(mtl_mtx.shape[1], mtl_mtx.shape[2], mtl_mtx.shape[3], mtl_mtx.shape[0]) @ outputs[3][b:b+1]
+        spn_matrix_c = torch.matmul(spn_matrix_a, spn_matrix_b).t()
 
-        #     B.append(mtl_mtx.flatten())
-
-        # B = torch.from_numpy(np.array(B).T)
-
-        return torch.matmul(spn_matrix_a, spn_matrix_b)
+        return spn_matrix_c

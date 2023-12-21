@@ -35,7 +35,7 @@ def main():
     model_decomposed = network.createModelDecomposed(config_dataset, device)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
-    spn_matrix_a = torch.load(header.file_path_spn_matrix_a)
+    spn_matrix_a = torch.load(header.file_path_spn_matrix_a).float()
     spn_matrix_a = spn_matrix_a.to(device)
 
     for _ in config_dataset["datasets"]:
