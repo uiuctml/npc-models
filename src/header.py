@@ -18,6 +18,7 @@ config_baseline = {
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dir_checkpoints": "../checkpoints",
     "dir_dataset_test": "../../mapillary-dataset/images/split/original/test",
+    "dir_dataset_test_class": "../../mapillary-dataset/images/split/original/test",
     "dir_dataset_train": "../../mapillary-dataset/images/split/original/train",
     "dir_dataset_validation": "../../mapillary-dataset/images/split/original/validate",
     "dir_test_output": "../output/test",

@@ -34,7 +34,7 @@ def main():
     predictions_epoch_composed = []
     predictions_epoch_list_decomposed = []
     dataset_transforms = utility.createTransform(header.config_decomposed)
-    dataset_original = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_test"], dataset_transforms)
+    dataset_original = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_test_class"], dataset_transforms)
     dataset_test = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_test"], dataset_original.classes, dataset_transforms)
     config_dataset = dataset_test.config
     class_count_original = len(dataset_original.classes)
