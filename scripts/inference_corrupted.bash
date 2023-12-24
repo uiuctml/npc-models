@@ -61,9 +61,6 @@ ln -sfv test_42 ../../mapillary-dataset/images/split/corrupted/original/test
 # 42    RBFT    RMFT    Saturate 5
 ./inference.py -rb baseline.resnet152.2023.6.4.16.56.euler -rd decomposed.resnet152_mtl.2023.6.4.23.42.euler -m ../../visat-spn/output/spn_matrices/matrix_a.pt -d ../../mapillary-dataset/images/split/corrupted/generated/test/saturate_5/ -s 42
 
-# 42    VBFT    VMFT    Color
-./inference.py -rb baseline.vit_b_32.2023.6.4.16.27.Fractal-Define-XL-R2 -rd decomposed.vit_b_32_mtl.2023.6.4.23.41.Fractal-Define-XL-R2 -m ../../visat-spn/output/spn_matrices/matrix_a.pt -d ../../mapillary-dataset/images/split/corrupted/generated/test/color/ -s 42
-
 # 42    VBFT    VMFT    Gaussian Noise 5
 ./inference.py -rb baseline.vit_b_32.2023.6.4.16.27.Fractal-Define-XL-R2 -rd decomposed.vit_b_32_mtl.2023.6.4.23.41.Fractal-Define-XL-R2 -m ../../visat-spn/output/spn_matrices/matrix_a.pt -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_5/ -s 42
 
