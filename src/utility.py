@@ -27,7 +27,7 @@ def computeCovarianceRegularization(outputs):
         # Compute pair-wise covariance matrix
         convariance = torch.matmul(output_pair[0].t(), output_pair[1])
 
-        # Add frobenius norm to total loss
+        # Add Frobenius norm to total loss
         loss += torch.sum(torch.square(convariance))
 
     # Multiply total loss with tunable regularization factor
