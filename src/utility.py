@@ -2,6 +2,7 @@ import argparse
 import cv2
 import datetime
 import header
+import itertools
 import logger
 import numpy
 import os
@@ -10,6 +11,29 @@ import socket
 import torch
 import torchvision
 import wandb
+
+def computeCovarianceRegularization(outputs):
+    loss = 0
+
+    # Mean-center all attribute feature tensors across rows
+    for output in outputs:
+        output_means_col = torch.mean(output, axis = 0)
+        output -= output_means_col
+
+    # Obtain unique pairs of attribute feature tensors
+    output_pairs = list(itertools.combinations(outputs, 2))
+
+    for output_pair in output_pairs:
+        # Compute pair-wise covariance matrix
+        convariance = torch.matmul(output_pair[0].t(), output_pair[1])
+
+        # Add frobenius norm to total loss
+        loss += torch.sum(torch.square(convariance))
+
+    # Multiply total loss with tunable regularization factor
+    loss *= header.config_decomposed["factor_loss_covariance"]
+
+    return loss
 
 def computeL2Norm(parameters):
     parameters_list = []
