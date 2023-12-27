@@ -107,7 +107,6 @@ def trainDecomposed(model, config_dataset, data_loader, criterions, optimizer, d
                 wandb.log({"training/batch/" + dataset_entry["name"] + "/loss": loss_batch})
 
             loss_overall /= len(outputs)
-
             loss_overall += loss_covariance
 
             loss_overall.backward()

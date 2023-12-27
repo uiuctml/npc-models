@@ -14,14 +14,15 @@ import wandb
 
 def computeCovarianceRegularization(outputs):
     loss = 0
+    outputs_centered = []
 
     # Mean-center all attribute feature tensors across rows
     for output in outputs:
         output_means_col = torch.mean(output, axis = 0)
-        output -= output_means_col
+        outputs_centered.append(output.detach().clone() - output_means_col)
 
     # Obtain unique pairs of attribute feature tensors
-    output_pairs = list(itertools.combinations(outputs, 2))
+    output_pairs = list(itertools.combinations(outputs_centered, 2))
 
     for output_pair in output_pairs:
         # Compute pair-wise covariance matrix
