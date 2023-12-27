@@ -71,7 +71,7 @@ config_decomposed = {
     "dir_test_output": "../output/test",
     "dropout_probability": 0.5,
     "epochs": 100,
-    "factor_loss_covariance": 1e-4,
+    "factor_loss_covariance": 1e-6,
     "file_name_checkpoint": run_name_decomposed + ".tar",
     "file_name_checkpoint_best": run_name_decomposed + ".best.tar",
     "file_name_test_output_clean": "test_output_decomposed_clean.txt",
@@ -80,6 +80,12 @@ config_decomposed = {
     "file_name_config_dataset_generation": "generate.json",
     "file_path_input_adversarial": "1e-2-50.pt",
     "fine_tuning": True,
+    "head_hidden_sizes": {
+        "color": 128,
+        "shape": 128,
+        "symbol": 128,
+        "text": 128
+    },
     "input_grayscale": False,
     "learning_rate_scheduler_mode": "min",
     "learning_rate_scheduler_factor": 0.1,
@@ -104,7 +110,8 @@ config_decomposed = {
     "seed": seed,
     "test_adversarial": False,
     "type": "decomposed",
-    "use_l2_loss": False
+    "use_l2_loss": False,
+    "use_covariance_loss": False
 }
 
 visualize_dir_output = "../output/visualize"

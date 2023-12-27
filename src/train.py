@@ -81,9 +81,7 @@ def trainDecomposed(model, config_dataset, data_loader, criterions, optimizer, d
         optimizer.zero_grad()
 
         with torch.set_grad_enabled(True):
-            outputs = model(input)
-
-            loss_covariance = utility.computeCovarianceRegularization(outputs)
+            (outputs, outputs_head_hidden) = model(input)
 
             for (i, dataset_entry) in enumerate(config_dataset["datasets"]):
                 (_, predictions) = torch.max(outputs[i], 1)
@@ -107,7 +105,9 @@ def trainDecomposed(model, config_dataset, data_loader, criterions, optimizer, d
                 wandb.log({"training/batch/" + dataset_entry["name"] + "/loss": loss_batch})
 
             loss_overall /= len(outputs)
-            loss_overall += loss_covariance
+
+            if header.config_decomposed["use_covariance_loss"]:
+                loss_overall += utility.computeCovarianceRegularization(outputs_head_hidden)
 
             loss_overall.backward()
             optimizer.step()

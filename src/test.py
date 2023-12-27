@@ -91,7 +91,7 @@ def testDecomposed(model, config_dataset, data_loader, device, batch_step):
             labels = labels.to(device, non_blocking = True)
 
             with torch.set_grad_enabled(False):
-                outputs = model(input)
+                (outputs, _) = model(input)
 
                 for (i, dataset_entry) in enumerate(config_dataset["datasets"]):
                     (_, predictions) = torch.max(outputs[i], 1)
