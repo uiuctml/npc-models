@@ -71,7 +71,7 @@ config_decomposed = {
     "dir_test_output": "../output/test",
     "dropout_probability": 0.5,
     "epochs": 100,
-    "factor_loss_covariance": 1e-5,
+    "factor_loss_covariance": 1e-4,
     "file_name_checkpoint": run_name_decomposed + ".tar",
     "file_name_checkpoint_best": run_name_decomposed + ".best.tar",
     "file_name_test_output_clean": "test_output_decomposed_clean.txt",
