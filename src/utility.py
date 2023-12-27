@@ -12,21 +12,21 @@ import torch
 import torchvision
 import wandb
 
-def computeCovarianceRegularization(outputs):
+def computeCovarianceRegularization(features):
     loss = 0
-    outputs_centered = []
+    features_centered = []
 
     # Mean-center all attribute feature tensors across rows
-    for output in outputs:
-        output_means_col = torch.mean(output, axis = 0)
-        outputs_centered.append(output.detach().clone() - output_means_col)
+    for feature in features:
+        means_col = torch.mean(feature, axis = 0)
+        features_centered.append(feature.detach().clone() - means_col)
 
     # Obtain unique pairs of attribute feature tensors
-    output_pairs = list(itertools.combinations(outputs_centered, 2))
+    feature_pairs = list(itertools.combinations(features_centered, 2))
 
-    for output_pair in output_pairs:
+    for feature_pair in feature_pairs:
         # Compute pair-wise covariance matrix
-        convariance = torch.matmul(output_pair[0].t(), output_pair[1])
+        convariance = torch.matmul(feature_pair[0].t(), feature_pair[1])
 
         # Add Frobenius norm to total loss
         loss += torch.sum(torch.square(convariance))
