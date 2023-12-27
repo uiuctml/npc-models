@@ -119,6 +119,7 @@ def trainDecomposed(model, config_dataset, data_loader, criterions, optimizer, d
         progress_bar.refresh()
 
         wandb.log({"training/batch/step": batch_step})
+        wandb.log({"training/batch/loss": loss_overall_batch})
 
         batch_step += 1
 
