@@ -193,11 +193,15 @@ class ResNet152MTL(torch.nn.Module):
         for dataset_entry in config_dataset["datasets"]:
             dataset_name = dataset_entry["name"]
             dataset_labels = dataset_entry["labels"]
+            head_hidden_size = header.config_decomposed["head_hidden_sizes"][dataset_name]
 
-            layer = torch.nn.Linear(net_fc_in_features, len(dataset_labels))
-            layer_dict = torch.nn.ModuleDict({dataset_name: layer})
+            layers_hidden = torch.nn.Sequential(torch.nn.Linear(net_fc_in_features, head_hidden_size), torch.nn.ReLU())
+            layer_final = torch.nn.Linear(head_hidden_size, len(dataset_labels))
 
-            layer_list.append(layer_dict)
+            layer_dict = torch.nn.ModuleDict({"hidden": layers_hidden, "final": layer_final})
+            layer_dict_task = torch.nn.ModuleDict({dataset_name: layer_dict})
+
+            layer_list.append(layer_dict_task)
 
         self.net.heads_mtl = torch.nn.ModuleList(layer_list)
 
@@ -205,13 +209,19 @@ class ResNet152MTL(torch.nn.Module):
 
     def forward(self, input):
         outputs_head = []
+        outputs_head_hidden = []
         output_neck = self.net(input)
 
         for head in self.net.heads_mtl:
-            head_layer = list(head.values())[0]
-            outputs_head.append(head_layer(output_neck))
+            head_layer_dict = list(head.values())[0]
 
-        return outputs_head
+            output_head_hidden = head_layer_dict["hidden"](output_neck)
+            output_head = head_layer_dict["final"](output_head_hidden)
+
+            outputs_head.append(output_head)
+            outputs_head_hidden.append(output_head_hidden)
+
+        return (outputs_head, outputs_head_hidden)
 
     def getOptimizerParameters(self):
         if header.config_decomposed["fine_tuning"]:
