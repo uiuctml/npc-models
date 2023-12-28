@@ -2,7 +2,7 @@ import multiprocessing
 import type
 
 file_path_spn_matrix_a = ""
-log_level = type.LogLevel.info
+log_level = type.LogLevel.debug
 project_name = "mapillary-dataset-network"
 run_mode = "disabled"
 run_name_baseline_keyword = "baseline"
@@ -66,6 +66,7 @@ config_decomposed = {
     "dataset_label_undefined_keyword": "undefined",
     "dir_checkpoints": "../checkpoints",
     "dir_dataset_test": "../../mapillary-dataset/images/split/generated/test",
+    "dir_dataset_test_config": "../../mapillary-dataset/images/split/generated/test",
     "dir_dataset_train": "../../mapillary-dataset/images/split/generated/train",
     "dir_dataset_validation": "../../mapillary-dataset/images/split/generated/validate",
     "dir_test_output": "../output/test",
