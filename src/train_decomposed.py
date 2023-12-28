@@ -12,7 +12,6 @@ import torchvision
 import test
 import tqdm
 import train
-import type
 import utility
 import validate
 import wandb

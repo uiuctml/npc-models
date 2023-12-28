@@ -111,7 +111,9 @@ def initializeArgumentsTrain():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-r", "--run-name", type = str, default = "", help = "WandB run name.")
+    parser.add_argument("-m", "--model", type = str, default = "", help = "Model to train.")
     parser.add_argument("-f", "--fine-tune", type = int, default = 1, help = "Whether to perform backbone fine-tuning.")
+    parser.add_argument("-c", "--use-covariance-loss", type = int, default = 0, help = "Whether to use covariance loss.")
     parser.add_argument("-s", "--seed", type = int, default = 42, help = "Randomization seed.")
 
     return parser.parse_args()
@@ -319,6 +321,9 @@ def processArgumentsInference():
 def processArgumentsTrainBaseline():
     arguments = initializeArgumentsTrain()
 
+    if arguments.model != "":
+        header.config_baseline["model"] = arguments.model
+
     if arguments.fine_tune == 0:
         header.config_baseline["fine_tuning"] = False
     else:
@@ -332,7 +337,10 @@ def processArgumentsTrainBaseline():
         logger.log_fatal("Run name missing. Quit.")
         exit(1)
 
+    header.config_baseline["model"] = header.run_name_baseline.split(".")[1]
+
     logger.log_trace("WandB run name: \"" + header.run_name_baseline + "\".")
+    logger.log_trace("Model type: \"" + header.config_baseline["model"] + "\".")
     logger.log_trace("Whether to perform backbone fine-tuning: " + str(header.config_baseline["fine_tuning"]) + ".")
     logger.log_trace("Randomization seed: " + str(header.config_baseline["seed"]) + ".")
 
@@ -341,10 +349,18 @@ def processArgumentsTrainBaseline():
 def processArgumentsTrainDecomposed():
     arguments = initializeArgumentsTrain()
 
+    if arguments.model != "":
+        header.config_decomposed["model"] = arguments.model
+
     if arguments.fine_tune == 0:
         header.config_decomposed["fine_tuning"] = False
     else:
         header.config_decomposed["fine_tuning"] = True
+
+    if arguments.use_covariance_loss == 0:
+        header.config_decomposed["use_covariance_loss"] = False
+    else:
+        header.config_decomposed["use_covariance_loss"] = True
 
     header.config_decomposed["seed"] = arguments.seed
 
@@ -354,8 +370,12 @@ def processArgumentsTrainDecomposed():
         logger.log_fatal("Run name missing. Quit.")
         exit(1)
 
+    header.config_decomposed["model"] = header.run_name_decomposed.split(".")[1]
+
     logger.log_trace("WandB run name: \"" + header.run_name_decomposed + "\".")
+    logger.log_trace("Model type: \"" + header.config_decomposed["model"] + "\".")
     logger.log_trace("Whether to perform backbone fine-tuning: " + str(header.config_decomposed["fine_tuning"]) + ".")
+    logger.log_trace("Whether to use covariance loss: " + str(header.config_decomposed["use_covariance_loss"]) + ".")
     logger.log_trace("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
 
     return resume
