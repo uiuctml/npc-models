@@ -73,7 +73,7 @@ def trainDecomposed(model, config_dataset, data_loader, criterions, optimizer, d
     progress_bar.set_description_str("[INFO]: Training progress")
 
     for (batch_index, (input, labels, _)) in enumerate(data_loader):
-        loss_covariance = 0
+        loss_covariance = torch.tensor(0)
         loss_criterions = 0
 
         input = input.to(device, non_blocking = True)
