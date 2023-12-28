@@ -73,7 +73,8 @@ def trainDecomposed(model, config_dataset, data_loader, criterions, optimizer, d
     progress_bar.set_description_str("[INFO]: Training progress")
 
     for (batch_index, (input, labels, _)) in enumerate(data_loader):
-        loss_overall = 0
+        loss_covariance = 0
+        loss_criterions = 0
 
         input = input.to(device, non_blocking = True)
         labels = labels.to(device, non_blocking = True)
@@ -99,19 +100,23 @@ def trainDecomposed(model, config_dataset, data_loader, criterions, optimizer, d
 
                 accuracy_epoch_list[i] += corrects
                 loss_epoch_list[i] += loss_batch
-                loss_overall += loss / math.log(outputs[i].size(1))
+                loss_criterions += loss / math.log(outputs[i].size(1))
 
                 wandb.log({"training/batch/" + dataset_entry["name"] + "/accuracy": accuracy_batch})
                 wandb.log({"training/batch/" + dataset_entry["name"] + "/loss": loss_batch})
 
-            loss_overall /= len(outputs)
+            loss_criterions /= len(outputs)
 
             if header.config_decomposed["use_covariance_loss"]:
-                loss_overall += utility.computeCovarianceRegularization(outputs_head_hidden)
+                loss_covariance = utility.computeCovarianceRegularization(outputs_head_hidden)
+
+            loss_overall = loss_criterions + loss_covariance
 
             loss_overall.backward()
             optimizer.step()
 
+        loss_covariance_batch = loss_covariance.item()
+        loss_criterions_batch = loss_criterions.item()
         loss_overall_batch = loss_overall.item()
         loss_overall_epoch += loss_overall_batch
 
@@ -120,6 +125,8 @@ def trainDecomposed(model, config_dataset, data_loader, criterions, optimizer, d
 
         wandb.log({"training/batch/step": batch_step})
         wandb.log({"training/batch/loss": loss_overall_batch})
+        wandb.log({"training/batch/loss_covariance": loss_covariance_batch})
+        wandb.log({"training/batch/loss_criterions": loss_criterions_batch})
 
         batch_step += 1
 
