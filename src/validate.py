@@ -74,7 +74,7 @@ def validateDecomposed(model, config_dataset, data_loader, criterions, device, b
         labels = labels.to(device, non_blocking = True)
 
         with torch.set_grad_enabled(False):
-            outputs = model(input)
+            (outputs, outputs_head_hidden) = model(input)
 
             for (i, dataset_entry) in enumerate(config_dataset["datasets"]):
                 (_, predictions) = torch.max(outputs[i], 1)
@@ -99,6 +99,9 @@ def validateDecomposed(model, config_dataset, data_loader, criterions, device, b
 
             loss_overall /= len(outputs)
 
+            if header.config_decomposed["use_covariance_loss"]:
+                loss_overall += utility.computeCovarianceRegularization(outputs_head_hidden)
+
         loss_overall_batch = loss_overall.item()
         loss_overall_epoch += loss_overall_batch
 
@@ -106,6 +109,7 @@ def validateDecomposed(model, config_dataset, data_loader, criterions, device, b
         progress_bar.refresh()
 
         wandb.log({"validation/batch/step": batch_step})
+        wandb.log({"validation/batch/loss": loss_overall_batch})
 
         batch_step += 1
 
@@ -119,6 +123,6 @@ def validateDecomposed(model, config_dataset, data_loader, criterions, device, b
 
     loss_overall_epoch /= len(data_loader)
 
-    wandb.log({"validation/epoch/loss_overall": loss_overall_epoch})
+    wandb.log({"validation/epoch/loss": loss_overall_epoch})
 
     return (accuracy_epoch_list, loss_overall_epoch, batch_step)

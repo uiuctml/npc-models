@@ -133,6 +133,6 @@ def trainDecomposed(model, config_dataset, data_loader, criterions, optimizer, d
 
     loss_overall_epoch /= len(data_loader)
 
-    wandb.log({"training/epoch/loss_overall": loss_overall_epoch})
+    wandb.log({"training/epoch/loss": loss_overall_epoch})
 
     return batch_step
