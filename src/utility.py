@@ -112,6 +112,8 @@ def initializeArgumentsTrain():
 
     parser.add_argument("-r", "--run-name", type = str, default = "", help = "WandB run name.")
     parser.add_argument("-m", "--model", type = str, default = "", help = "Model to train.")
+    parser.add_argument("-b", "--batch-size", type = int, default = 512, help = "Batch size.")
+    parser.add_argument("-e", "--epochs", type = int, default = 100, help = "Number of training epochs.")
     parser.add_argument("-f", "--fine-tune", type = int, default = 1, help = "Whether to perform backbone fine-tuning.")
     parser.add_argument("-c", "--use-covariance-loss", type = int, default = 0, help = "Whether to use covariance loss.")
     parser.add_argument("-s", "--seed", type = int, default = 42, help = "Randomization seed.")
@@ -324,6 +326,9 @@ def processArgumentsTrainBaseline():
     if arguments.model != "":
         header.config_baseline["model"] = arguments.model
 
+    header.config_baseline["data_loader_batch_size"] = arguments.batch_size
+    header.config_baseline["epochs"] = arguments.epochs
+
     if arguments.fine_tune == 0:
         header.config_baseline["fine_tuning"] = False
     else:
@@ -341,6 +346,8 @@ def processArgumentsTrainBaseline():
 
     logger.log_trace("WandB run name: \"" + header.run_name_baseline + "\".")
     logger.log_trace("Model type: \"" + header.config_baseline["model"] + "\".")
+    logger.log_trace("Batch size: " + str(header.config_baseline["data_loader_batch_size"]) + ".")
+    logger.log_trace("Epochs: " + str(header.config_baseline["epochs"]) + ".")
     logger.log_trace("Whether to perform backbone fine-tuning: " + str(header.config_baseline["fine_tuning"]) + ".")
     logger.log_trace("Randomization seed: " + str(header.config_baseline["seed"]) + ".")
 
@@ -351,6 +358,9 @@ def processArgumentsTrainDecomposed():
 
     if arguments.model != "":
         header.config_decomposed["model"] = arguments.model
+
+    header.config_decomposed["data_loader_batch_size"] = arguments.batch_size
+    header.config_decomposed["epochs"] = arguments.epochs
 
     if arguments.fine_tune == 0:
         header.config_decomposed["fine_tuning"] = False
@@ -374,6 +384,8 @@ def processArgumentsTrainDecomposed():
 
     logger.log_trace("WandB run name: \"" + header.run_name_decomposed + "\".")
     logger.log_trace("Model type: \"" + header.config_decomposed["model"] + "\".")
+    logger.log_trace("Batch size: " + str(header.config_decomposed["data_loader_batch_size"]) + ".")
+    logger.log_trace("Epochs: " + str(header.config_decomposed["epochs"]) + ".")
     logger.log_trace("Whether to perform backbone fine-tuning: " + str(header.config_decomposed["fine_tuning"]) + ".")
     logger.log_trace("Whether to use covariance loss: " + str(header.config_decomposed["use_covariance_loss"]) + ".")
     logger.log_trace("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
