@@ -73,7 +73,7 @@ def trainDecomposed(model, config_dataset, data_loader, criterions, optimizer, d
     progress_bar.set_description_str("[INFO]: Training progress")
 
     for (batch_index, (input, labels, _)) in enumerate(data_loader):
-        loss_covariance = torch.tensor(0)
+        loss_covariance = 0
         loss_criterions = 0
 
         input = input.to(device, non_blocking = True)
@@ -106,11 +106,12 @@ def trainDecomposed(model, config_dataset, data_loader, criterions, optimizer, d
                 wandb.log({"training/batch/" + dataset_entry["name"] + "/loss": loss_batch})
 
             loss_criterions /= len(outputs)
+            loss_covariance = utility.computeCovarianceRegularization(outputs_head_hidden)
 
             if header.config_decomposed["use_covariance_loss"]:
-                loss_covariance = utility.computeCovarianceRegularization(outputs_head_hidden)
-
-            loss_overall = loss_criterions + loss_covariance
+                loss_overall = loss_criterions + loss_covariance
+            else:
+                loss_overall = loss_criterions
 
             loss_overall.backward()
             optimizer.step()
