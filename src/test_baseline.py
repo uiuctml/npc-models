@@ -14,7 +14,7 @@ def main():
     utility.processArgumentsTestBaseline()
 
     utility.setSeed(header.config_baseline["seed"])
-    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
 
     wandb.init(config = header.config_baseline, mode = "disabled")
 

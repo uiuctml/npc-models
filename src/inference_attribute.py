@@ -17,7 +17,7 @@ def main():
     utility.processArgumentsInference()
 
     utility.setSeed(header.seed)
-    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
 
     accuracy_epoch_baseline = 0
     accuracy_epoch_composed = 0

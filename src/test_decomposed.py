@@ -15,7 +15,7 @@ def main():
     utility.processArgumentsTestDecomposed()
 
     utility.setSeed(header.config_decomposed["seed"])
-    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
 
     wandb.init(config = header.config_decomposed, mode = "disabled")
 

@@ -20,7 +20,7 @@ def main():
     resume = utility.processArgumentsTrainDecomposed()
 
     utility.setSeed(header.config_decomposed["seed"])
-    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
 
     if header.run_mode == "online":
         wandb.login()
