@@ -9,8 +9,18 @@ import os
 import random
 import socket
 import torch
+import torch.nn
 import torchvision
 import wandb
+
+def applySoftmax(output):
+    return torch.nn.functional.softmax(output, dim = 1)
+
+def applySoftmaxDecomposed(outputs_decomposed):
+    for task_index in range(0, len(outputs_decomposed)):
+        outputs_decomposed[task_index] = torch.nn.functional.softmax(outputs_decomposed[task_index], dim = 1)
+
+    return outputs_decomposed
 
 def computeCovarianceRegularization(features):
     loss = 0

@@ -60,7 +60,7 @@ def validateDecomposed(model, config_dataset, data_loader, criterions, device, b
     loss_overall_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
 
-    for _ in config_dataset["datasets"]:
+    for _ in config_dataset["attributes"]:
         accuracy_epoch_list.append(0)
         loss_epoch_list.append(0)
 
@@ -76,7 +76,7 @@ def validateDecomposed(model, config_dataset, data_loader, criterions, device, b
         with torch.set_grad_enabled(False):
             (outputs, outputs_head_hidden) = model(input)
 
-            for (i, dataset_entry) in enumerate(config_dataset["datasets"]):
+            for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
                 (_, predictions) = torch.max(outputs[i], 1)
                 loss = criterions[i](outputs[i], labels[:, i])
 
@@ -115,7 +115,7 @@ def validateDecomposed(model, config_dataset, data_loader, criterions, device, b
 
     progress_bar.close()
 
-    for (i, dataset_entry) in enumerate(config_dataset["datasets"]):
+    for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
         accuracy_epoch_list[i] /= len(data_loader.dataset)
         loss_epoch_list[i] /= len(data_loader)
         wandb.log({"validation/epoch/" + dataset_entry["name"] + "/accuracy": accuracy_epoch_list[i]})

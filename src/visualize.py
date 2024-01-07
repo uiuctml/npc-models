@@ -5,18 +5,16 @@ import os
 import torch
 import utility
 
-def annotateInput(input, batch_index, config_generate, dataset_decomposed, ground_truths_label_original, ground_truths_label_decomposed, predictions_index_composed, predictions_label_baseline, predictions_label_composed, predictions_label_decomposed, predictions_confidence_baseline, predictions_confidence_composed, predictions_confidence_decomposed):
+def annotateInput(input, batch_index, dataset_decomposed, ground_truths_label_original, ground_truths_label_decomposed, predictions_index_composed, predictions_label_baseline, predictions_label_composed, predictions_label_decomposed, predictions_confidence_baseline, predictions_confidence_composed, predictions_confidence_decomposed):
     text_position_y = header.visualize_text_position_y_start
 
-    for (task_index, dataset_entry) in enumerate(dataset_decomposed.config["datasets"]):
+    for (task_index, dataset_entry) in enumerate(dataset_decomposed.config["attributes"]):
         prediction_index_composed = predictions_index_composed[batch_index]
         prediction_confidence_decomposed = predictions_confidence_decomposed[batch_index][prediction_index_composed][task_index].item()
 
         input = cv2.putText(input, "Decomposed Prediction for \"" + dataset_entry["name"] + "\": " + predictions_label_decomposed[task_index][batch_index] + " " + str(round(prediction_confidence_decomposed * 100, 2)) + "% ", (20, text_position_y), cv2.FONT_HERSHEY_SIMPLEX, header.visualize_text_scale, (0, 0, 255), header.visualize_text_thickness, cv2.LINE_AA)
         text_position_y += header.visualize_text_position_y_increment
         input = cv2.putText(input, "Ground Truth for \"" + dataset_entry["name"] + "\": " + ground_truths_label_decomposed[task_index][batch_index], (20, text_position_y), cv2.FONT_HERSHEY_SIMPLEX, header.visualize_text_scale, (0, 255, 0), header.visualize_text_thickness, cv2.LINE_AA)
-        text_position_y += header.visualize_text_position_y_increment
-        input = cv2.putText(input, "Weight for \"" + dataset_entry["name"] + "\": " + str(round(config_generate[ground_truths_label_original[batch_index]]["weights"][dataset_entry["name"]], 2)), (20, text_position_y), cv2.FONT_HERSHEY_SIMPLEX, header.visualize_text_scale, (255, 100, 100), header.visualize_text_thickness, cv2.LINE_AA)
         text_position_y += header.visualize_text_position_y_increment
         text_position_y += header.visualize_text_position_y_increment
 
@@ -40,7 +38,7 @@ def indicesToLabels(composition, dataset_decomposed, ground_truths_index_decompo
     predictions_label_composed = []
     predictions_label_decomposed = []
 
-    for _ in dataset_decomposed.config["datasets"]:
+    for _ in dataset_decomposed.config["attributes"]:
         ground_truths_label_decomposed.append([])
         predictions_label_decomposed.append([])
 
@@ -104,7 +102,7 @@ def visualize(input, composition, dataset_decomposed, ground_truths_index_decomp
 
     for (batch_index, input_batch) in enumerate(input):
         input_batch = transformInput(input_batch)
-        input_batch = annotateInput(input_batch, batch_index, composition.config_generate, dataset_decomposed, ground_truths_label_original, ground_truths_label_decomposed, predictions_index_composed, predictions_label_baseline, predictions_label_composed, predictions_label_decomposed, predictions_confidence_baseline, predictions_confidence_composed, predictions_confidence_decomposed)
+        input_batch = annotateInput(input_batch, batch_index, dataset_decomposed, ground_truths_label_original, ground_truths_label_decomposed, predictions_index_composed, predictions_label_baseline, predictions_label_composed, predictions_label_decomposed, predictions_confidence_baseline, predictions_confidence_composed, predictions_confidence_decomposed)
 
         if header.visualize_show:
             cv2.imshow(dataset_decomposed.root, input_batch)

@@ -2,6 +2,7 @@ import multiprocessing
 import type
 
 cuda_allow_tf32 = True
+dataset_config_file_path = "../../mapillary-dataset-tools/config/visat.json"
 file_path_spn_matrix_a = ""
 log_level = type.LogLevel.debug
 project_name = "mapillary-dataset-network"
@@ -19,7 +20,6 @@ config_baseline = {
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dir_checkpoints": "../checkpoints",
     "dir_dataset_test": "../../mapillary-dataset/images/split/original/test",
-    "dir_dataset_test_class": "../../mapillary-dataset/images/split/original/test",
     "dir_dataset_train": "../../mapillary-dataset/images/split/original/train",
     "dir_dataset_validation": "../../mapillary-dataset/images/split/original/validate",
     "dir_test_output": "../output/test",
@@ -66,10 +66,9 @@ config_decomposed = {
     "dataset_delimiter_label": "--",
     "dataset_label_undefined_keyword": "undefined",
     "dir_checkpoints": "../checkpoints",
-    "dir_dataset_test": "../../mapillary-dataset/images/split/generated/test",
-    "dir_dataset_test_config": "../../mapillary-dataset/images/split/generated/test",
-    "dir_dataset_train": "../../mapillary-dataset/images/split/generated/train",
-    "dir_dataset_validation": "../../mapillary-dataset/images/split/generated/validate",
+    "dir_dataset_test": "../../mapillary-dataset/images/split/original/test",
+    "dir_dataset_train": "../../mapillary-dataset/images/split/original/train",
+    "dir_dataset_validation": "../../mapillary-dataset/images/split/original/validate",
     "dir_test_output": "../output/test",
     "dropout_probability": 0.5,
     "epochs": 100,
@@ -78,8 +77,6 @@ config_decomposed = {
     "file_name_checkpoint_best": run_name_decomposed + ".best.tar",
     "file_name_test_output_clean": "test_output_decomposed_clean.txt",
     "file_name_test_output_attacked": "test_output_decomposed_attacked.txt",
-    "file_name_config_dataset": "dataset.json",
-    "file_name_config_dataset_generation": "generate.json",
     "file_path_input_adversarial": "1e-2-50.pt",
     "fine_tuning": True,
     "head_hidden_sizes": {

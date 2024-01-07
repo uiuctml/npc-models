@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 
-import composition as comp
-import dataset as dset
+import composition
+import dataset
 import header
 import logger
 import network
 import sklearn.metrics
 import torch
 import torch.nn
-import torchvision
 import tqdm
 import utility
 import visualize
@@ -34,23 +33,21 @@ def main():
     predictions_epoch_composed = []
     predictions_epoch_list_decomposed = []
     dataset_transforms = utility.createTransform(header.config_decomposed)
-    dataset_original = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_test_class"], dataset_transforms)
-    dataset_test = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_test"], dataset_original.classes, dataset_transforms)
+    dataset_test = dataset.DatasetDecomposed(header.config_decomposed["dir_dataset_test"], dataset_transforms)
     config_dataset = dataset_test.config
-    class_count_original = len(dataset_original.classes)
+    class_count_original = len(dataset_test.classes_original)
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
-    composition = comp.Composition(dataset_test, device)
     model_baseline = network.createModelBaseline(class_count_original, device)
     model_baseline = torch.nn.DataParallel(model_baseline)
     model_baseline = model_baseline.to(device)
-    model_decomposed = network.createModelDecomposed(config_dataset, device)
+    model_decomposed = network.createModelDecomposed(device)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
     spn_matrix_a = torch.load(header.file_path_spn_matrix_a).float()
     spn_matrix_a = spn_matrix_a.to(device)
 
-    for _ in config_dataset["datasets"]:
+    for _ in config_dataset["attributes"]:
         accuracy_epoch_list_decomposed.append(0)
         ground_truths_epoch_list_decomposed.append([])
         predictions_epoch_list_decomposed.append([])
@@ -74,10 +71,10 @@ def main():
                 output_baseline = model_baseline(input)
                 (outputs_decomposed, _) = model_decomposed(input)
 
-                output_baseline = composition.applySoftmax(output_baseline)
-                outputs_decomposed = composition.applySoftmaxDecomposed(outputs_decomposed)
+                output_baseline = utility.applySoftmax(output_baseline)
+                outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
 
-                output_composed = composition.spn(outputs_decomposed, spn_matrix_a)
+                output_composed = composition.spn(outputs_decomposed, spn_matrix_a, device)
 
                 (_, predictions_baseline) = torch.max(output_baseline, 1)
                 (_, predictions_composed) = torch.max(output_composed, 1)
@@ -85,7 +82,7 @@ def main():
                 corrects_baseline = torch.sum(predictions_baseline == labels_original.data).item()
                 corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
 
-                for i in range(0, len(config_dataset["datasets"])):
+                for i in range(0, len(config_dataset["attributes"])):
                     (_, predictions_decomposed) = torch.max(outputs_decomposed[i], 1)
 
                     corrects_decomposed = torch.sum(predictions_decomposed == labels_decomposed[:, i].data).item()
@@ -108,7 +105,7 @@ def main():
 
     progress_bar.close()
 
-    for (i, dataset_entry) in enumerate(config_dataset["datasets"]):
+    for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
         accuracy_epoch_list_decomposed[i] /= len(data_loader_test.dataset)
         precision_epoch_decomposed = sklearn.metrics.precision_score(ground_truths_epoch_list_decomposed[i], predictions_epoch_list_decomposed[i], average = "macro", zero_division = 0)
         recall_epoch_decomposed = sklearn.metrics.recall_score(ground_truths_epoch_list_decomposed[i], predictions_epoch_list_decomposed[i], average = "macro", zero_division = 0)

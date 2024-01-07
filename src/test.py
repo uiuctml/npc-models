@@ -77,7 +77,7 @@ def testDecomposed(model, config_dataset, data_loader, device, batch_step):
     predictions_epoch_list = []
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
 
-    for _ in config_dataset["datasets"]:
+    for _ in config_dataset["attributes"]:
         accuracy_epoch_list.append(0)
         ground_truths_epoch_list.append([])
         predictions_epoch_list.append([])
@@ -93,7 +93,7 @@ def testDecomposed(model, config_dataset, data_loader, device, batch_step):
             with torch.set_grad_enabled(False):
                 (outputs, _) = model(input)
 
-                for (i, dataset_entry) in enumerate(config_dataset["datasets"]):
+                for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
                     (_, predictions) = torch.max(outputs[i], 1)
 
                     corrects = torch.sum(predictions == labels[:, i].data).item()
@@ -114,7 +114,7 @@ def testDecomposed(model, config_dataset, data_loader, device, batch_step):
 
     progress_bar.close()
 
-    for (i, dataset_entry) in enumerate(config_dataset["datasets"]):
+    for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
         accuracy_epoch_list[i] /= len(data_loader.dataset)
         precision_epoch = sklearn.metrics.precision_score(ground_truths_epoch_list[i], predictions_epoch_list[i], average = "macro", zero_division = 0)
         recall_epoch = sklearn.metrics.recall_score(ground_truths_epoch_list[i], predictions_epoch_list[i], average = "macro", zero_division = 0)

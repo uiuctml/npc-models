@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-import composition as comp
-import dataset as dset
+import composition
 import header
 import logger
 import network
@@ -28,16 +27,13 @@ def main():
     predictions_epoch_composed = []
     dataset_transforms = utility.createTransform(header.config_decomposed)
     dataset_test = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_test"], dataset_transforms)
-    dataset_decomposed = dset.DatasetDecomposed(header.config_decomposed["dir_dataset_test_config"], dataset_test.classes, dataset_transforms)
-    config_dataset = dataset_decomposed.config
     class_count_original = len(dataset_test.classes)
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
-    composition = comp.Composition(dataset_decomposed, device)
     model_baseline = network.createModelBaseline(class_count_original, device)
     model_baseline = torch.nn.DataParallel(model_baseline)
     model_baseline = model_baseline.to(device)
-    model_decomposed = network.createModelDecomposed(config_dataset, device)
+    model_decomposed = network.createModelDecomposed(device)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
     spn_matrix_a = torch.load(header.file_path_spn_matrix_a).float()
@@ -61,10 +57,10 @@ def main():
                 output_baseline = model_baseline(input)
                 (outputs_decomposed, _) = model_decomposed(input)
 
-                output_baseline = composition.applySoftmax(output_baseline)
-                outputs_decomposed = composition.applySoftmaxDecomposed(outputs_decomposed)
+                output_baseline = utility.applySoftmax(output_baseline)
+                outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
 
-                output_composed = composition.spn(outputs_decomposed, spn_matrix_a)
+                output_composed = composition.spn(outputs_decomposed, spn_matrix_a, device)
 
                 (_, predictions_baseline) = torch.max(output_baseline, 1)
                 (_, predictions_composed) = torch.max(output_composed, 1)

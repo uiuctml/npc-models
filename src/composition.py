@@ -1,42 +1,25 @@
 import header
-import json
 import logger
-import os
 import torch
 import torch.nn
 
 class Composition():
     def __init__(self, dataset, device):
-        self.config_generate = {}
         self.class_indices_decomposed = []
         self.dataset = dataset
         self.device = device
-        self.softmax = torch.nn.Softmax(dim = 1)
-
-        file_config_generate = open(os.path.join(header.config_decomposed["dir_dataset_test_config"], header.config_decomposed["file_name_config_dataset_generation"]), "r")
-        self.config_generate = json.load(file_config_generate)
-        file_config_generate.close()
 
         self.gatherDecomposedClassIndices()
 
         return
 
-    def applySoftmax(self, output):
-        return self.softmax(output)
-
-    def applySoftmaxDecomposed(self, outputs_decomposed):
-        for task_index in range(0, len(outputs_decomposed)):
-            outputs_decomposed[task_index] = self.softmax(outputs_decomposed[task_index])
-
-        return outputs_decomposed
-
     def gatherDecomposedClassIndices(self):
         for class_name_original in self.dataset.classes_original:
             class_indices_decomposed = []
 
-            for (dataset_index, dataset) in enumerate(self.dataset.config["datasets"]):
+            for (dataset_index, dataset) in enumerate(self.dataset.config["attributes"]):
                 dataset_name = dataset["name"]
-                class_name_decomposed = self.config_generate[class_name_original]["labels"][dataset_name]
+                class_name_decomposed = self.dataset.config["mappings"][class_name_original]["labels"][dataset_name]
 
                 if class_name_decomposed == "":
                     logger.log_warn("\"" + class_name_original + "\" contains an empty label for dataset \"" + dataset_name + "\".")
@@ -74,7 +57,8 @@ class Composition():
         output_composed = torch.prod(outputs_decomposed_gathered, 2)
         return output_composed
 
-    def spn(self, outputs_decomposed, spn_matrix_a):
+    @staticmethod
+    def spn(outputs_decomposed, spn_matrix_a, device):
         batch_size = outputs_decomposed[0].shape[0]
         spn_matrix_b_list = []
 
@@ -87,7 +71,7 @@ class Composition():
             spn_matrix_b_list.append(spn_matrix_b_batch)
 
         spn_matrix_b = torch.stack(spn_matrix_b_list, dim = 0).t()
-        spn_matrix_b = spn_matrix_b.to(self.device)
+        spn_matrix_b = spn_matrix_b.to(device)
 
         spn_matrix_c = torch.matmul(spn_matrix_a, spn_matrix_b).t()
 

@@ -7,11 +7,11 @@ import PIL.Image
 import torch
 
 class DatasetDecomposed(torch.utils.data.Dataset):
-    def __init__(self, root, classes_original, transform = None):
+    def __init__(self, root, transform = None):
         self.class_to_idx = []
         self.class_to_idx_original = {}
         self.classes = []
-        self.classes_original = classes_original
+        self.classes_original = []
         self.config = {}
         self.file_paths = []
         self.labels = []
@@ -23,11 +23,13 @@ class DatasetDecomposed(torch.utils.data.Dataset):
             logger.log_error("Invalid dataset directory.")
             return
 
-        file_config_dataset = open(os.path.join(root, header.config_decomposed["file_name_config_dataset"]), "r")
+        self.classes_original = os.listdir(root)
+
+        file_config_dataset = open(header.dataset_config_file_path, "r")
         self.config = json.load(file_config_dataset)
         file_config_dataset.close()
 
-        for dataset in self.config["datasets"]:
+        for dataset in self.config["attributes"]:
             dataset_labels = dataset["labels"]
             dataset_labels.remove("")
             self.classes.append(dataset_labels)
@@ -44,26 +46,18 @@ class DatasetDecomposed(torch.utils.data.Dataset):
         for (class_index, class_name) in enumerate(self.classes_original):
             self.class_to_idx_original[class_name] = class_index
 
-        for file_name in os.listdir(root):
-            if file_name == header.config_decomposed["file_name_config_dataset"] or file_name == header.config_decomposed["file_name_config_dataset_generation"]:
-                continue
+        for class_name_original in self.classes_original:
+            for file_name in os.listdir(os.path.join(root, class_name_original)):
+                label_original = self.class_to_idx_original[class_name_original]
 
-            file_name_split = file_name.split(header.config_decomposed["dataset_delimiter_file_name"])
+                self.file_paths.append(os.path.abspath(os.path.join(root, class_name_original, file_name)))
+                self.labels_original.append(label_original)
 
-            # A valid data should contain decomposed labels, an original label, and a file key
-            if len(file_name_split) < len(self.labels) + 2:
-                logger.log_warn("Invalid data \"" + file_name + "\".")
-                continue
-
-            class_original = file_name_split[-2]
-            label_original = self.class_to_idx_original[class_original]
-
-            self.file_paths.append(os.path.abspath(os.path.join(root, file_name)))
-            self.labels_original.append(label_original)
-
-            for i in range(0, len(self.labels)):
-                label = self.class_to_idx[i][file_name_split[i]]
-                self.labels[i].append(label)
+                for (attribute_index, attribute) in enumerate(self.config["attributes"]):
+                    attribute_name = attribute["name"]
+                    class_name_decomposed = self.config["mappings"][class_name_original]["labels"][attribute_name]
+                    label = self.class_to_idx[attribute_index][class_name_decomposed]
+                    self.labels[attribute_index].append(label)
 
         return
 

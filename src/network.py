@@ -1,4 +1,5 @@
 import header
+import json
 import logger
 import torch.nn
 import torchvision
@@ -145,7 +146,7 @@ class ResNet101CLIPMTL(torch.nn.Module):
 
         layer_list = []
 
-        for dataset_entry in config_dataset["datasets"]:
+        for dataset_entry in config_dataset["attributes"]:
             dataset_name = dataset_entry["name"]
             dataset_labels = dataset_entry["labels"]
             head_hidden_size = header.config_decomposed["head_hidden_sizes"][dataset_name]
@@ -200,7 +201,7 @@ class ResNet152MTL(torch.nn.Module):
 
         layer_list = []
 
-        for dataset_entry in config_dataset["datasets"]:
+        for dataset_entry in config_dataset["attributes"]:
             dataset_name = dataset_entry["name"]
             dataset_labels = dataset_entry["labels"]
             head_hidden_size = header.config_decomposed["head_hidden_sizes"][dataset_name]
@@ -257,7 +258,7 @@ class ViTB32MTL(torch.nn.Module):
 
         layer_list = []
 
-        for dataset_entry in config_dataset["datasets"]:
+        for dataset_entry in config_dataset["attributes"]:
             dataset_name = dataset_entry["name"]
             dataset_labels = dataset_entry["labels"]
             head_hidden_size = header.config_decomposed["head_hidden_sizes"][dataset_name]
@@ -310,7 +311,7 @@ class ViTB32CLIPMTL(torch.nn.Module):
 
         layer_list = []
 
-        for dataset_entry in config_dataset["datasets"]:
+        for dataset_entry in config_dataset["attributes"]:
             dataset_name = dataset_entry["name"]
             dataset_labels = dataset_entry["labels"]
             head_hidden_size = header.config_decomposed["head_hidden_sizes"][dataset_name]
@@ -373,7 +374,11 @@ def createModelBaseline(class_count, device):
         logger.log_fatal("Unknown baseline network model \"" + header.config_baseline["model"] + "\".")
         exit(1)
 
-def createModelDecomposed(config_dataset, device):
+def createModelDecomposed(device):
+    file_config_dataset = open(header.dataset_config_file_path, "r")
+    config_dataset = json.load(file_config_dataset)
+    file_config_dataset.close()
+
     if header.config_decomposed["model"] == type.NetworkModelDecomposed.resnet101_clip_mtl.name:
         logger.log_trace("Model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
         return ResNet101CLIPMTL(config_dataset, device)

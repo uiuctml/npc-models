@@ -88,7 +88,7 @@ def testAdversarialDecomposed(model, config_dataset, data_loader, device, batch_
     predictions_epoch_list = []
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
 
-    for _ in config_dataset["datasets"]:
+    for _ in config_dataset["attributes"]:
         accuracy_epoch_list.append(0)
         ground_truths_epoch_list.append([])
         predictions_epoch_list.append([])
@@ -113,7 +113,7 @@ def testAdversarialDecomposed(model, config_dataset, data_loader, device, batch_
             with torch.set_grad_enabled(False):
                 outputs = model(input_adversarial_batch)
 
-                for (i, dataset_entry) in enumerate(config_dataset["datasets"]):
+                for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
                     (_, predictions) = torch.max(outputs[i], 1)
 
                     corrects = torch.sum(predictions == labels[:, i].data).item()
@@ -134,7 +134,7 @@ def testAdversarialDecomposed(model, config_dataset, data_loader, device, batch_
 
     progress_bar.close()
 
-    for (i, dataset_entry) in enumerate(config_dataset["datasets"]):
+    for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
         accuracy_epoch_list[i] /= len(data_loader.dataset)
         precision_epoch = sklearn.metrics.precision_score(ground_truths_epoch_list[i], predictions_epoch_list[i], average = "macro", zero_division = 0)
         recall_epoch = sklearn.metrics.recall_score(ground_truths_epoch_list[i], predictions_epoch_list[i], average = "macro", zero_division = 0)
