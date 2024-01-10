@@ -2,7 +2,7 @@ import multiprocessing
 import type
 
 cuda_allow_tf32 = True
-dataset_config_file_path = "../../mapillary-dataset-tools/config/visat.json"
+dataset_config_file_path = "../../visat-dataset-tools/config/mtsd.json"
 file_path_spn_matrix_a = ""
 log_level = type.LogLevel.debug
 project_name = "visat-models"
