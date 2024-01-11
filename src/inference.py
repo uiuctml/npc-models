@@ -60,7 +60,7 @@ def main():
                 output_baseline = utility.applySoftmax(output_baseline)
                 outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
 
-                output_composed = composition.spn(outputs_decomposed, spn_matrix_a, device)
+                output_composed = composition.Composition.spn(outputs_decomposed, spn_matrix_a, device)
 
                 (_, predictions_baseline) = torch.max(output_baseline, 1)
                 (_, predictions_composed) = torch.max(output_composed, 1)
