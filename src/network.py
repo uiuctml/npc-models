@@ -151,6 +151,8 @@ class ResNet101CLIPMTL(torch.nn.Module):
             dataset_labels = dataset_entry["labels"]
             head_hidden_size = header.config_decomposed["head_hidden_sizes"][dataset_name]
 
+            dataset_labels.remove("")
+
             layers_hidden = torch.nn.Sequential(torch.nn.Linear(net_fc_in_features, head_hidden_size), torch.nn.ReLU())
             layer_final = torch.nn.Linear(head_hidden_size, len(dataset_labels))
             self.dtype = layer_final.weight.dtype
@@ -205,6 +207,8 @@ class ResNet152MTL(torch.nn.Module):
             dataset_name = dataset_entry["name"]
             dataset_labels = dataset_entry["labels"]
             head_hidden_size = header.config_decomposed["head_hidden_sizes"][dataset_name]
+
+            dataset_labels.remove("")
 
             layers_hidden = torch.nn.Sequential(torch.nn.Linear(net_fc_in_features, head_hidden_size), torch.nn.ReLU())
             layer_final = torch.nn.Linear(head_hidden_size, len(dataset_labels))
@@ -263,6 +267,8 @@ class ViTB32MTL(torch.nn.Module):
             dataset_labels = dataset_entry["labels"]
             head_hidden_size = header.config_decomposed["head_hidden_sizes"][dataset_name]
 
+            dataset_labels.remove("")
+
             layers_hidden = torch.nn.Sequential(torch.nn.Linear(net_heads_head_in_features, head_hidden_size), torch.nn.ReLU())
             layer_final = torch.nn.Linear(head_hidden_size, len(dataset_labels))
 
@@ -315,6 +321,8 @@ class ViTB32CLIPMTL(torch.nn.Module):
             dataset_name = dataset_entry["name"]
             dataset_labels = dataset_entry["labels"]
             head_hidden_size = header.config_decomposed["head_hidden_sizes"][dataset_name]
+
+            dataset_labels.remove("")
 
             layers_hidden = torch.nn.Sequential(torch.nn.Linear(net_fc_in_features, head_hidden_size), torch.nn.ReLU())
             layer_final = torch.nn.Linear(head_hidden_size, len(dataset_labels))
