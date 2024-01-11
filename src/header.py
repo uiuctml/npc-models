@@ -2,7 +2,7 @@ import multiprocessing
 import type
 
 cuda_allow_tf32 = True
-dataset_config_file_path = "../../visat-dataset-tools/config/mtsd.json"
+dataset_config_file_path = "../../visat-dataset-tools/config/gtsrb.json"
 file_path_spn_matrix_a = ""
 log_level = type.LogLevel.debug
 project_name = "visat-models"
@@ -15,13 +15,13 @@ seed = 42
 show_model_summary = False
 
 config_baseline = {
-    "data_loader_batch_size": 512,
+    "data_loader_batch_size": 384,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dir_checkpoints": "../checkpoints",
-    "dir_dataset_test": "../../mapillary-dataset/images/split/original/test",
-    "dir_dataset_train": "../../mapillary-dataset/images/split/original/train",
-    "dir_dataset_validation": "../../mapillary-dataset/images/split/original/validate",
+    "dir_dataset_test": "../../gtsrb-dataset/images/split/original/test",
+    "dir_dataset_train": "../../gtsrb-dataset/images/split/original/train",
+    "dir_dataset_validation": "../../gtsrb-dataset/images/split/original/validate",
     "dir_test_output": "../output/test",
     "dropout_probability": 0.5,
     "epochs": 100,
@@ -59,16 +59,16 @@ config_baseline = {
 }
 
 config_decomposed = {
-    "data_loader_batch_size": 512,
+    "data_loader_batch_size": 384,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dataset_delimiter_file_name": "---",
     "dataset_delimiter_label": "--",
     "dataset_label_undefined_keyword": "undefined",
     "dir_checkpoints": "../checkpoints",
-    "dir_dataset_test": "../../mapillary-dataset/images/split/original/test",
-    "dir_dataset_train": "../../mapillary-dataset/images/split/original/train",
-    "dir_dataset_validation": "../../mapillary-dataset/images/split/original/validate",
+    "dir_dataset_test": "../../gtsrb-dataset/images/split/original/test",
+    "dir_dataset_train": "../../gtsrb-dataset/images/split/original/train",
+    "dir_dataset_validation": "../../gtsrb-dataset/images/split/original/validate",
     "dir_test_output": "../output/test",
     "dropout_probability": 0.5,
     "epochs": 100,
@@ -81,9 +81,12 @@ config_decomposed = {
     "fine_tuning": True,
     "head_hidden_sizes": {
         "color": 128,
+        "overlay": 128,
         "shape": 128,
-        "symbol": 128,
-        "text": 128
+        "symbol-arrow": 128,
+        "symbol-assorted": 128,
+        "symbol-general": 128,
+        "symbol-number": 128
     },
     "input_grayscale": False,
     "learning_rate_scheduler_mode": "min",
