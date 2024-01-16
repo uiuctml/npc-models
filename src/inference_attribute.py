@@ -33,7 +33,7 @@ def main():
     predictions_epoch_composed = []
     predictions_epoch_list_decomposed = []
     dataset_transforms = utility.createTransform(header.config_decomposed)
-    dataset_test = dataset.DatasetDecomposed(header.config_decomposed["dir_dataset_test"], dataset_transforms)
+    dataset_test = dataset.VISATDataset(header.config_decomposed["dir_dataset_test"], dataset_transforms)
     config_dataset = dataset_test.config
     class_count_original = len(dataset_test.classes_original)
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
