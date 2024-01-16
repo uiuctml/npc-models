@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import header
 import dataset
+import header
 import logger
 import network
 import torch

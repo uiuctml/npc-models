@@ -7,7 +7,7 @@ import type
 import clip
 
 class ResNet101CLIP(torch.nn.Module):
-    def __init__(self, class_count, device):
+    def __init__(self, config_dataset, device):
         super().__init__()
 
         self.net = clip.load(name = "RN101", device = device)[0]
@@ -16,6 +16,7 @@ class ResNet101CLIP(torch.nn.Module):
             for parameter in self.net.parameters():
                 parameter.requires_grad = False
 
+        class_count = len(config_dataset["mappings"].keys())
         net_fc_in_features = self.net.visual.output_dim
         self.net.fc = torch.nn.Linear(net_fc_in_features, class_count)
 
@@ -33,7 +34,7 @@ class ResNet101CLIP(torch.nn.Module):
             return self.net.fc.parameters()
 
 class ResNet152(torch.nn.Module):
-    def __init__(self, class_count, device):
+    def __init__(self, config_dataset, device):
         super().__init__()
 
         self.net = torchvision.models.resnet152(weights = header.config_baseline["model_pretrained_weights"])
@@ -42,6 +43,7 @@ class ResNet152(torch.nn.Module):
             for parameter in self.net.parameters():
                 parameter.requires_grad = False
 
+        class_count = len(config_dataset["mappings"].keys())
         net_fc_in_features = self.net.fc.in_features
         self.net.fc = torch.nn.Linear(net_fc_in_features, class_count)
 
@@ -57,7 +59,7 @@ class ResNet152(torch.nn.Module):
             return self.net.fc.parameters()
 
 class ResNet152Dropout(torch.nn.Module):
-    def __init__(self, class_count, device):
+    def __init__(self, config_dataset, device):
         super().__init__()
 
         self.net = torchvision.models.resnet152(weights = header.config_baseline["model_pretrained_weights"])
@@ -66,6 +68,7 @@ class ResNet152Dropout(torch.nn.Module):
             for parameter in self.net.parameters():
                 parameter.requires_grad = False
 
+        class_count = len(config_dataset["mappings"].keys())
         net_fc_in_features = self.net.fc.in_features
         self.net.fc = torch.nn.Sequential(torch.nn.Dropout(p = header.config_baseline["train_dropout_probability"]), torch.nn.Linear(net_fc_in_features, class_count))
 
@@ -81,7 +84,7 @@ class ResNet152Dropout(torch.nn.Module):
             return self.net.fc.parameters()
 
 class ViTB32(torch.nn.Module):
-    def __init__(self, class_count, device):
+    def __init__(self, config_dataset, device):
         super().__init__()
 
         self.net = torchvision.models.vit_b_32(weights = header.config_baseline["model_pretrained_weights"])
@@ -93,6 +96,7 @@ class ViTB32(torch.nn.Module):
         for parameter in self.net.heads.parameters():
             parameter.requires_grad = True
 
+        class_count = len(config_dataset["mappings"].keys())
         net_heads_head_in_features = self.net.heads.head.in_features
         self.net.heads.head = torch.nn.Linear(net_heads_head_in_features, class_count)
 
@@ -108,7 +112,7 @@ class ViTB32(torch.nn.Module):
             return self.net.heads.parameters()
 
 class ViTB32CLIP(torch.nn.Module):
-    def __init__(self, class_count, device):
+    def __init__(self, config_dataset, device):
         super().__init__()
 
         self.net = clip.load(name = "ViT-B/32", device = device)[0]
@@ -117,6 +121,7 @@ class ViTB32CLIP(torch.nn.Module):
             for parameter in self.net.parameters():
                 parameter.requires_grad = False
 
+        class_count = len(config_dataset["mappings"].keys())
         net_fc_in_features = self.net.visual.output_dim
         self.net.fc = torch.nn.Linear(net_fc_in_features, class_count)
 
@@ -359,25 +364,29 @@ class ViTB32CLIPMTL(torch.nn.Module):
         else:
             return self.net.heads_mtl.parameters()
 
-def createModelBaseline(class_count, device):
+def createModelBaseline(device):
+    file_config_dataset = open(header.dataset_config_file_path, "r")
+    config_dataset = json.load(file_config_dataset)
+    file_config_dataset.close()
+
     if header.config_baseline["model"] == type.NetworkModelBaseline.resnet101_clip.name:
         logger.log_trace("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
-        return ResNet101CLIP(class_count, device)
+        return ResNet101CLIP(config_dataset, device)
     elif header.config_baseline["model"] == type.NetworkModelBaseline.resnet152.name:
         header.config_baseline["model_pretrained_weights"] = "IMAGENET1K_V2"
         logger.log_trace("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
-        return ResNet152(class_count, device)
+        return ResNet152(config_dataset, device)
     elif header.config_baseline["model"] == type.NetworkModelBaseline.resnet152_dropout.name:
         header.config_baseline["model_pretrained_weights"] = "IMAGENET1K_V2"
         logger.log_trace("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
-        return ResNet152Dropout(class_count, device)
+        return ResNet152Dropout(config_dataset, device)
     elif header.config_baseline["model"] == type.NetworkModelBaseline.vit_b_32.name:
         header.config_baseline["model_pretrained_weights"] = "IMAGENET1K_V1"
         logger.log_trace("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
-        return ViTB32(class_count, device)
+        return ViTB32(config_dataset, device)
     elif header.config_baseline["model"] == type.NetworkModelBaseline.vit_b_32_clip.name:
         logger.log_trace("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
-        return ViTB32CLIP(class_count, device)
+        return ViTB32CLIP(config_dataset, device)
     else:
         logger.log_fatal("Unknown baseline network model \"" + header.config_baseline["model"] + "\".")
         exit(1)
