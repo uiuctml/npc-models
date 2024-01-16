@@ -25,7 +25,7 @@ def testAdversarialBaseline(model, data_loader, device, batch_step):
     with torch.no_grad():
         input_adversarial_index = 0
 
-        for (batch_index, (input, labels)) in enumerate(data_loader):
+        for (batch_index, (input, _, labels)) in enumerate(data_loader):
             input_adversarial_batch = input_adversarial[input_adversarial_index:input_adversarial_index + input.size(0)]
             input_adversarial_batch = torch.stack(input_adversarial_batch)
             input_adversarial_index += input.size(0)

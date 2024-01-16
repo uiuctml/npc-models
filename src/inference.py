@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import dataset
 import composition
 import header
 import logger
@@ -7,7 +8,6 @@ import network
 import sklearn.metrics
 import torch
 import torch.nn
-import torchvision
 import tqdm
 import utility
 import visualize
@@ -26,7 +26,7 @@ def main():
     predictions_epoch_baseline = []
     predictions_epoch_composed = []
     dataset_transforms = utility.createTransform(header.config_decomposed)
-    dataset_test = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_test"], dataset_transforms)
+    dataset_test = dataset.VISATDataset(header.config_baseline["dir_dataset_test"], dataset_transforms)
     class_count_original = len(dataset_test.classes)
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
@@ -49,7 +49,7 @@ def main():
     progress_bar.set_description_str("[INFO]: Inference progress")
 
     with torch.no_grad():
-        for (batch_index, (input, labels)) in enumerate(data_loader_test):
+        for (batch_index, (input, _, labels)) in enumerate(data_loader_test):
             input = input.to(device, non_blocking = True)
             labels = labels.to(device, non_blocking = True)
 

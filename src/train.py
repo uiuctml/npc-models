@@ -13,7 +13,7 @@ def trainBaseline(model, data_loader, criterion, optimizer, device, batch_step):
     model.train()
     progress_bar.set_description_str("[INFO]: Training progress")
 
-    for (batch_index, (input, labels)) in enumerate(data_loader):
+    for (batch_index, (input, _, labels)) in enumerate(data_loader):
         input = input.to(device, non_blocking = True)
         labels = labels.to(device, non_blocking = True)
 

@@ -13,7 +13,7 @@ def validateBaseline(model, data_loader, criterion, device, batch_step):
     model.eval()
     progress_bar.set_description_str("[INFO]: Validation progress")
 
-    for (batch_index, (input, labels)) in enumerate(data_loader):
+    for (batch_index, (input, _, labels)) in enumerate(data_loader):
         input = input.to(device, non_blocking = True)
         labels = labels.to(device, non_blocking = True)
 

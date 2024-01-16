@@ -5,9 +5,8 @@ import os
 import PIL
 import PIL.Image
 import torch
-import torchvision
 
-class DatasetDecomposed(torch.utils.data.Dataset):
+class VISATDataset(torch.utils.data.Dataset):
     def __init__(self, root, transform = None):
         self.class_to_idx = []
         self.class_to_idx_original = {}
@@ -24,12 +23,11 @@ class DatasetDecomposed(torch.utils.data.Dataset):
             logger.log_error("Invalid dataset directory.")
             return
 
-        dataset_test = torchvision.datasets.ImageFolder(header.config_baseline["dir_dataset_test"])
-        self.classes_original = dataset_test.classes
-
         file_config_dataset = open(header.dataset_config_file_path, "r")
         self.config = json.load(file_config_dataset)
         file_config_dataset.close()
+
+        self.classes_original = list(self.config["mappings"].keys())
 
         for dataset in self.config["attributes"]:
             dataset_labels = dataset["labels"]
