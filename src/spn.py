@@ -15,7 +15,11 @@ class Node:
         return
 
     @abc.abstractmethod
-    def evaluate(self):
+    def backward(self):
+        pass
+
+    @abc.abstractmethod
+    def forward(self):
         pass
 
 class CategoricalLeafNode(Node):
@@ -27,7 +31,10 @@ class CategoricalLeafNode(Node):
 
         return
 
-    def evaluate(self):
+    def backward(self):
+        return
+
+    def forward(self):
         return
 
     def set(self, data):
@@ -51,7 +58,10 @@ class ProductNode(Node):
 
         return
 
-    def evaluate(self):
+    def backward(self):
+        return
+
+    def forward(self):
         if len(self.children) == 0:
             logger.log_fatal("Product node " + str(self.id) + " has no children. Quit.")
             exit(-1)
@@ -75,7 +85,10 @@ class SumNode(Node):
 
         return
 
-    def evaluate(self):
+    def backward(self):
+        return
+
+    def forward(self):
         if len(self.children) == 0:
             logger.log_fatal("Sum node " + str(self.id) + " has no children. Quit.")
             exit(-1)
@@ -106,7 +119,7 @@ class SPN:
         return
 
     def backward(self):
-        pass
+        return
 
     def forward(self):
         if self.reevalute:
@@ -120,7 +133,7 @@ class SPN:
 
             for i in range(self.depth - 1, -1, -1):
                 for node in self.layers[i]:
-                    node.evaluate()
+                    node.forward()
 
             self.reevalute = False
 
