@@ -164,8 +164,8 @@ def main():
     output_list_decomposed += output_list_decomposed_precision
     output_list_decomposed += output_list_decomposed_recall
 
-    logger.log_info("Baseline inference accuracy: " + str(accuracy_epoch_baseline) + ".")
-    logger.log_info("Composed inference accuracy: " + str(accuracy_epoch_composed) + ".")
+    logger.log_info("Baseline testing accuracy: " + str(accuracy_epoch_baseline) + ".")
+    logger.log_info("Composed testing accuracy: " + str(accuracy_epoch_composed) + ".")
 
     utility.logTestOutput(header.config_baseline, output_list_baseline)
     utility.logTestOutput(header.config_baseline, output_list_composed, True)
