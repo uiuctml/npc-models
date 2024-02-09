@@ -2,8 +2,6 @@
 
 cd ../src
 
-ln -sfv test_42 ../../mapillary-dataset/images/split/corrupted/original/test
-
 # 42    RBFT    RMFT    Gaussian Noise 5
 ./inference_attribute.py -rb baseline.resnet152.ft.42.2024.1.3.15.16.newton -rd decomposed.resnet152_mtl.ft.42.2024.1.3.15.13.newton -m ../../visat-spn/output/spn_matrices/matrix_a.pt -d ../../mapillary-dataset/images/split/corrupted/generated/test/gaussian_noise_5/ -s 42
 
