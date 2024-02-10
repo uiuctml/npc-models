@@ -12,12 +12,66 @@ class Node:
         self.parents = []
         self.value_backward = None
         self.value_forward = None
+        self.weights_children = []
+        self.weights_parents = []
 
         return
 
-    @abc.abstractmethod
     def backward(self):
-        pass
+        if len(self.parents) == 0:
+            logger.log_fatal("Node " + str(self.id) + " has no parents. Quit.")
+            exit(-1)
+
+        value_backward_parents_product = []
+        value_backward_parents_sum = []
+        value_backward_product = None
+        value_backward_sum = None
+        value_forward_parents_product = []
+        weights_parents_sum = []
+
+        for (parent, weight_parents) in zip(self.parents, self.weights_parents):
+            if isinstance(parent, ProductNode):
+                value_backward_parents_product.append(parent.value_backward)
+                value_forward_parents_product.append(parent.value_forward)
+            elif isinstance(parent, SumNode):
+                value_backward_parents_sum.append(parent.value_backward)
+                weights_parents_sum.append(weight_parents)
+
+        if len(value_backward_parents_product) > 0:
+            value_backward_parents_product = torch.stack(value_backward_parents_product)
+
+        if len(value_backward_parents_sum) > 0:
+            value_backward_parents_sum = torch.stack(value_backward_parents_sum)
+
+        if len(value_forward_parents_product) > 0:
+            value_forward_parents_product = torch.stack(value_forward_parents_product)
+
+        if len(weights_parents_sum) > 0:
+            weights_parents_sum = torch.Tensor(weights_parents_sum).reshape(-1, 1)
+            weights_parents_sum = weights_parents_sum.to(self.device)
+
+        if len(value_backward_parents_product) > 0:
+            value_backward_product = value_backward_parents_product + value_forward_parents_product - self.value_forward
+
+        if len(value_backward_parents_sum) > 0:
+            value_backward_sum = value_backward_parents_sum + torch.log(weights_parents_sum)
+
+        if value_backward_product is not None and value_backward_sum is None:
+            self.value_backward = value_backward_product
+        elif value_backward_product is None and value_backward_sum is not None:
+            self.value_backward = value_backward_sum
+        else:
+            self.value_backward = torch.stack([value_backward_product, value_backward_sum])
+
+        # Compute backward values in log space
+        # Log-Sum-Exp trick: https://gregorygundersen.com/blog/2020/02/09/log-sum-exp/
+        value_backward_max = torch.max(self.value_backward, 0)[0]
+        self.value_backward -= value_backward_max
+        self.value_backward = torch.exp(self.value_backward)
+        self.value_backward = torch.sum(self.value_backward, 0)
+        self.value_backward = torch.log(self.value_backward) + value_backward_max
+
+        return
 
     @abc.abstractmethod
     def forward(self):
@@ -30,9 +84,6 @@ class CategoricalLeafNode(Node):
         self.attribute_index = -1
         self.category_index = -1
 
-        return
-
-    def backward(self):
         return
 
     def forward(self):
@@ -62,30 +113,6 @@ class ProductNode(Node):
 
         return
 
-    def backward(self):
-        if len(self.parents) == 0:
-            logger.log_fatal("Product node " + str(self.id) + " has no parents. Quit.")
-            exit(-1)
-
-        value_backward_parents = []
-        value_forward_parents = []
-
-        for parent in self.parents:
-            value_backward_parents.append(parent.value_backward)
-            value_forward_parents.append(parent.value_forward)
-
-        # Compute backward values in log space
-        # Log-Sum-Exp trick: https://gregorygundersen.com/blog/2020/02/09/log-sum-exp/
-        value_backward_parents = torch.stack(value_backward_parents)
-        value_backward_parents += value_forward_parents - self.value_forward
-        value_backward_parents_max = torch.max(value_backward_parents, 0)[0]
-        value_backward_parents -= value_backward_parents_max
-        value_backward_parents = torch.exp(value_backward_parents)
-        self.value_backward = torch.sum(value_backward_parents, 0)
-        self.value_backward = torch.log(self.value_backward) + value_backward_parents_max
-
-        return
-
     def forward(self):
         if len(self.children) == 0:
             logger.log_fatal("Product node " + str(self.id) + " has no children. Quit.")
@@ -107,29 +134,6 @@ class SumNode(Node):
         super().__init__()
 
         self.leaf = False
-        self.weights = []
-
-        return
-
-    def backward(self):
-        if len(self.parents) == 0:
-            logger.log_fatal("Sum node " + str(self.id) + " has no parents. Quit.")
-            exit(-1)
-
-        value_backward_parents = []
-
-        for parent in self.parents:
-            value_backward_parents.append(parent.value_backward)
-
-        # Compute backward values in log space
-        # Log-Sum-Exp trick: https://gregorygundersen.com/blog/2020/02/09/log-sum-exp/
-        value_backward_parents = torch.stack(value_backward_parents)
-        value_backward_parents += torch.log(self.weights)
-        value_backward_parents_max = torch.max(value_backward_parents, 0)[0]
-        value_backward_parents -= value_backward_parents_max
-        value_backward_parents = torch.exp(value_backward_parents)
-        self.value_backward = torch.sum(value_backward_parents, 0)
-        self.value_backward = torch.log(self.value_backward) + value_backward_parents_max
 
         return
 
@@ -149,28 +153,30 @@ class SumNode(Node):
         value_forward_children_max = torch.max(value_forward_children, 0)[0]
         value_forward_children -= value_forward_children_max
         value_forward_children = torch.exp(value_forward_children)
-        value_forward_children *= self.weights
+        value_forward_children *= self.weights_children
         self.value_forward = torch.sum(value_forward_children, 0)
         self.value_forward = torch.log(self.value_forward) + value_forward_children_max
 
         return
 
 class SPN:
-    def __init__(self):
+    def __init__(self, device = torch.device("cuda")):
         self.depth = -1
-        self.device = torch.device("cuda")
+        self.device = device
         self.layers = {}
         self.leaf_nodes = {}
         self.nodes = []
         self.product_nodes = []
-        self.reevalute = True
-        self.root_node = []
+        self.reuse_backward = False
+        self.reuse_forward = False
+        self.root_node = None
+        self.settings = None
         self.sum_nodes = []
 
         return
 
     def backward(self):
-        if self.reevalute:
+        if not self.reuse_backward:
             if len(self.layers) == 0:
                 logger.log_fatal("Empty tree. Quit.")
                 exit(-1)
@@ -178,18 +184,30 @@ class SPN:
             if len(self.layers[0]) > 1:
                 logger.log_fatal("Multiple root nodes. Quit.")
                 exit(-1)
+
+            if self.root_node is None:
+                logger.log_fatal("Missing root node. Quit.")
+                exit(-1)
+
+            if self.root_node.value_forward is None:
+                logger.log_fatal("Missing root node forward value. Quit.")
+                exit(-1)
+
+            # Initialize root node backward value in log space
+            self.root_node.value_backward = torch.log(torch.ones(self.settings.shape[0]))
+            self.root_node.value_backward = self.root_node.value_backward.to(self.device)
 
             # Skip root node
             for i in range(1, self.depth):
                 for node in self.layers[i]:
                     node.backward()
 
-            self.reevalute = False
+            self.reuse_backward = True
 
         return
 
     def forward(self):
-        if self.reevalute:
+        if not self.reuse_forward:
             if len(self.layers) == 0:
                 logger.log_fatal("Empty tree. Quit.")
                 exit(-1)
@@ -198,11 +216,16 @@ class SPN:
                 logger.log_fatal("Multiple root nodes. Quit.")
                 exit(-1)
 
+            if self.root_node is None:
+                logger.log_fatal("Missing root node. Quit.")
+                exit(-1)
+
             for i in range(self.depth - 1, -1, -1):
                 for node in self.layers[i]:
                     node.forward()
 
-            self.reevalute = False
+            self.reuse_backward = False
+            self.reuse_forward = True
 
         return self.root_node.value_forward
 
@@ -263,6 +286,7 @@ class SPN:
                                 categorical_leaf_node.device = self.device
                                 categorical_leaf_node.id = -1
                                 categorical_leaf_node_list.append(categorical_leaf_node)
+                                self.nodes.append(categorical_leaf_node)
 
                             self.leaf_nodes[node_attribute_index] = categorical_leaf_node_list
 
@@ -271,12 +295,13 @@ class SPN:
                         sum_node.device = self.device
                         sum_node.id = node_id
                         sum_node.leaf = True
-                        sum_node.weights = node_probabilities
+                        sum_node.weights_children = node_probabilities
                         self.nodes.append(sum_node)
                         self.sum_nodes.append(sum_node)
 
-                        for categorical_leaf_node in categorical_leaf_node_list:
+                        for (categorical_leaf_node, node_probability) in zip(categorical_leaf_node_list, node_probabilities):
                             categorical_leaf_node.parents.append(sum_node)
+                            categorical_leaf_node.weights_parents.append(node_probability)
                 else:
                     nodes = []
                     node_id_first = int(line_list[0])
@@ -295,23 +320,30 @@ class SPN:
 
                         if isinstance(nodes[0], SumNode) and not nodes[0].leaf:
                             nodes[0].children.append(nodes[1])
-                            nodes[0].weights.append(node_weight)
+                            nodes[0].weights_children.append(node_weight)
                             nodes[1].parents.append(nodes[0])
+                            nodes[1].weights_parents.append(node_weight)
                         else:
                             nodes[1].children.append(nodes[0])
-                            nodes[1].weights.append(node_weight)
+                            nodes[1].weights_children.append(node_weight)
                             nodes[0].parents.append(nodes[1])
+                            nodes[0].weights_parents.append(node_weight)
                     else:
                         if isinstance(nodes[0], ProductNode):
                             nodes[0].children.append(nodes[1])
                             nodes[1].parents.append(nodes[0])
+                            nodes[1].weights_parents.append(1)
                         else:
                             nodes[1].children.append(nodes[0])
                             nodes[0].parents.append(nodes[1])
+                            nodes[0].weights_parents.append(1)
 
-        for sum_node in self.sum_nodes:
-            sum_node.weights = torch.Tensor(sum_node.weights).reshape(-1, 1)
-            sum_node.weights = sum_node.weights.to(self.device)
+        for node in self.nodes:
+            node.weights_children = torch.Tensor(node.weights_children).reshape(-1, 1)
+            node.weights_parents = torch.Tensor(node.weights_parents).reshape(-1, 1)
+
+            node.weights_children = node.weights_children.to(self.device)
+            node.weights_parents = node.weights_parents.to(self.device)
 
         root_nodes = []
 
@@ -347,13 +379,16 @@ class SPN:
 
         return
 
-    def set(self, data):
+    def set(self, settings):
+        self.settings = settings
+
         for attribute_index in self.leaf_nodes.keys():
             leaf_nodes = self.leaf_nodes[attribute_index]
 
             for leaf_node in leaf_nodes:
-                leaf_node.set(data)
+                leaf_node.set(self.settings)
 
-        self.reevalute = True
+        self.reuse_backward = False
+        self.reuse_forward = False
 
         return
