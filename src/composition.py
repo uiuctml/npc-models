@@ -59,11 +59,10 @@ class Composition():
 
     @staticmethod
     def spn(outputs_decomposed, spn_joint, spn_marginal, spn_matrix_a_rows, spn_matrix_a_cols, device):
-        likelihoods_joint = spn_joint.forward()
-        likelihoods_marginal = spn_marginal.forward()
+        log_likelihoods_joint = spn_joint.forward()
+        log_likelihoods_marginal = spn_marginal.forward()
 
-        spn_matrix_a = likelihoods_joint / likelihoods_marginal
-        spn_matrix_a[torch.isnan(spn_matrix_a)] = 0
+        spn_matrix_a = torch.exp(log_likelihoods_joint - log_likelihoods_marginal)
         spn_matrix_a = spn_matrix_a.reshape(spn_matrix_a_rows, spn_matrix_a_cols)
 
         batch_size = outputs_decomposed[0].shape[0]

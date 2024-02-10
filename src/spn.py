@@ -51,6 +51,9 @@ class CategoricalLeafNode(Node):
         self.value_forward = torch.logical_or(settings, settings_marginal).float()
         self.value_forward = self.value_forward.to(self.device)
 
+        # Compute forward values in log space
+        self.value_forward = torch.log(self.value_forward)
+
         return
 
 class ProductNode(Node):
@@ -72,8 +75,9 @@ class ProductNode(Node):
         for child in self.children:
             value_forward_children.append(child.value_forward)
 
+        # Compute forward values in log space
         value_forward_children = torch.stack(value_forward_children)
-        self.value_forward = torch.prod(value_forward_children, 0)
+        self.value_forward = torch.sum(value_forward_children, 0)
 
         return
 
@@ -100,8 +104,15 @@ class SumNode(Node):
             value_forward_children.append(child.value_forward)
 
         value_forward_children = torch.stack(value_forward_children)
+        value_forward_children_max = torch.max(value_forward_children, 0)[0]
+
+        # Compute forward values in log space
+        # Log-Sum-Exp trick: https://gregorygundersen.com/blog/2020/02/09/log-sum-exp/
+        value_forward_children -= value_forward_children_max
+        value_forward_children = torch.exp(value_forward_children)
         value_forward_children *= self.weights
         self.value_forward = torch.sum(value_forward_children, 0)
+        self.value_forward = torch.log(self.value_forward) + value_forward_children_max
 
         return
 
