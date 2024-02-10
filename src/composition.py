@@ -58,27 +58,27 @@ class Composition():
         return output_composed
 
     @staticmethod
-    def spn(outputs_decomposed, spn_joint, spn_marginal, spn_matrix_a_rows, spn_matrix_a_cols, device):
+    def spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device):
         log_likelihoods_joint = spn_joint.forward()
         log_likelihoods_marginal = spn_marginal.forward()
 
-        spn_matrix_a = torch.exp(log_likelihoods_joint - log_likelihoods_marginal)
-        spn_matrix_a = spn_matrix_a.reshape(spn_matrix_a_rows, spn_matrix_a_cols)
+        matrix_a = torch.exp(log_likelihoods_joint - log_likelihoods_marginal)
+        matrix_a = matrix_a.reshape(spn_output_rows, spn_output_cols)
 
         batch_size = outputs_decomposed[0].shape[0]
-        spn_matrix_b_list = []
+        matrix_b_list = []
 
         for batch in range(batch_size):
-            spn_matrix_b_batch = outputs_decomposed[0][batch]
+            matrix_b_batch = outputs_decomposed[0][batch]
 
             for task_index in range(1, len(outputs_decomposed)):
-                spn_matrix_b_batch = torch.outer(spn_matrix_b_batch, outputs_decomposed[task_index][batch]).flatten()
+                matrix_b_batch = torch.outer(matrix_b_batch, outputs_decomposed[task_index][batch]).flatten()
 
-            spn_matrix_b_list.append(spn_matrix_b_batch)
+            matrix_b_list.append(matrix_b_batch)
 
-        spn_matrix_b = torch.stack(spn_matrix_b_list, dim = 0).t()
-        spn_matrix_b = spn_matrix_b.to(device)
+        matrix_b = torch.stack(matrix_b_list, dim = 0).t()
+        matrix_b = matrix_b.to(device)
 
-        spn_matrix_c = torch.matmul(spn_matrix_a, spn_matrix_b).t()
+        matrix_c = torch.matmul(matrix_a, matrix_b).t()
 
-        return spn_matrix_c
+        return matrix_c

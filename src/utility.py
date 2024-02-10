@@ -93,23 +93,11 @@ def wAndBGenerateRunName(model_name, model_type, seed, fine_tuning):
 
     return run_name
 
-def initializeArgumentsInference():
+def initializeArgumentsTest():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-rb", "--run-name-baseline", type = str, default = "", help = "Baseline WandB run name.", required = True)
     parser.add_argument("-rd", "--run-name-decomposed", type = str, default = "", help = "Decomposed WandB run name.", required = True)
-    parser.add_argument("-i", "--adversarial-input-file", type = str, default = "", help = "Path to adversarial input file.")
-    parser.add_argument("-s", "--seed", type = int, default = 42, help = "Randomization seed.")
-    parser.add_argument("-m", "--spn-matrix-a-file", type = str, default = "", help = "Path to SPN matrix A file.")
-    parser.add_argument("-a", "--test-adversarial", type = int, default = 0, help = "Whether to perform adversarial tests.")
-    parser.add_argument("-d", "--test-dataset-dir", type = str, default = "", help = "Directory of dataset testing split.")
-
-    return parser.parse_args()
-
-def initializeArgumentsTest():
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("-r", "--run-name", type = str, default = "", help = "WandB run name.", required = True)
     parser.add_argument("-i", "--adversarial-input-file", type = str, default = "", help = "Path to adversarial input file.")
     parser.add_argument("-s", "--seed", type = int, default = 42, help = "Randomization seed.")
     parser.add_argument("-a", "--test-adversarial", type = int, default = 0, help = "Whether to perform adversarial tests.")
@@ -283,8 +271,8 @@ def logTestOutput(config, output, composed = False):
 
     return
 
-def processArgumentsInference():
-    arguments = initializeArgumentsInference()
+def processArgumentsTest():
+    arguments = initializeArgumentsTest()
 
     if arguments.adversarial_input_file != "":
         header.config_baseline["file_path_input_adversarial"] = arguments.adversarial_input_file
@@ -292,9 +280,6 @@ def processArgumentsInference():
 
     header.config_baseline["seed"] = arguments.seed
     header.config_decomposed["seed"] = arguments.seed
-
-    if arguments.spn_matrix_a_file != "":
-        header.file_path_spn_matrix_a = arguments.spn_matrix_a_file
 
     if arguments.test_adversarial == 0:
         header.config_baseline["test_adversarial"] = False
@@ -323,7 +308,6 @@ def processArgumentsInference():
     logger.log_trace("Decomposed WandB run name: \"" + header.run_name_decomposed + "\".")
     logger.log_trace("Decomposed model type: \"" + header.config_decomposed["model"] + "\".")
     logger.log_trace("Path to adversarial input file: \"" + header.config_baseline["file_path_input_adversarial"] + "\".")
-    logger.log_trace("Path to SPN matrix A file: " + header.file_path_spn_matrix_a + ".")
     logger.log_trace("Randomization seed: " + str(header.config_baseline["seed"]) + ".")
     logger.log_trace("Whether to perform adversarial tests: " + str(header.config_baseline["test_adversarial"]) + ".")
     logger.log_trace("Directory of dataset testing split: \"" + header.config_baseline["dir_dataset_test"] + "\".")
@@ -401,68 +385,6 @@ def processArgumentsTrainDecomposed():
     logger.log_trace("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
 
     return resume
-
-def processArgumentsTestBaseline():
-    arguments = initializeArgumentsTest()
-
-    if arguments.adversarial_input_file != "":
-        header.config_baseline["file_path_input_adversarial"] = arguments.adversarial_input_file
-
-    header.config_baseline["seed"] = arguments.seed
-
-    if arguments.test_adversarial == 0:
-        header.config_baseline["test_adversarial"] = False
-    else:
-        header.config_baseline["test_adversarial"] = True
-
-    if arguments.test_dataset_dir != "":
-        header.config_baseline["dir_dataset_test"] = arguments.test_dataset_dir
-
-    if not initializeRunNameBaseline(arguments.run_name) or header.run_name_baseline == "":
-        logger.log_fatal("Run name missing. Quit.")
-        exit(1)
-
-    header.config_baseline["model"] = header.run_name_baseline.split(".")[1]
-
-    logger.log_trace("WandB run name: \"" + header.run_name_baseline + "\".")
-    logger.log_trace("Path to adversarial input file: \"" + header.config_baseline["file_path_input_adversarial"] + "\".")
-    logger.log_trace("Model type: \"" + header.config_baseline["model"] + "\".")
-    logger.log_trace("Randomization seed: " + str(header.config_baseline["seed"]) + ".")
-    logger.log_trace("Whether to perform adversarial tests: " + str(header.config_baseline["test_adversarial"]) + ".")
-    logger.log_trace("Directory of dataset testing split: \"" + header.config_baseline["dir_dataset_test"] + "\".")
-
-    return
-
-def processArgumentsTestDecomposed():
-    arguments = initializeArgumentsTest()
-
-    if arguments.adversarial_input_file != "":
-        header.config_decomposed["file_path_input_adversarial"] = arguments.adversarial_input_file
-
-    header.config_decomposed["seed"] = arguments.seed
-
-    if arguments.test_adversarial == 0:
-        header.config_decomposed["test_adversarial"] = False
-    else:
-        header.config_decomposed["test_adversarial"] = True
-
-    if arguments.test_dataset_dir != "":
-        header.config_decomposed["dir_dataset_test"] = arguments.test_dataset_dir
-
-    if not initializeRunNameDecomposed(arguments.run_name) or header.run_name_decomposed == "":
-        logger.log_fatal("Run name missing. Quit.")
-        exit(1)
-
-    header.config_decomposed["model"] = header.run_name_decomposed.split(".")[1]
-
-    logger.log_trace("WandB run name: \"" + header.run_name_decomposed + "\".")
-    logger.log_trace("Path to adversarial input file: \"" + header.config_decomposed["file_path_input_adversarial"] + "\".")
-    logger.log_trace("Model type: \"" + header.config_decomposed["model"] + "\".")
-    logger.log_trace("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
-    logger.log_trace("Whether to perform adversarial tests: " + str(header.config_decomposed["test_adversarial"]) + ".")
-    logger.log_trace("Directory of dataset testing split: \"" + header.config_decomposed["dir_dataset_test"] + "\".")
-
-    return
 
 def resize(image, width = None, height = None, inter = cv2.INTER_AREA):
     width_image = image.shape[1]

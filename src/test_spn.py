@@ -16,7 +16,7 @@ def main():
     spn_marginal.load(header.file_path_spn)
 
     # GTSRB ground truth attribute and original labels
-    settings_gtsrb_joint = torch.Tensor([
+    spn_settings_gtsrb_joint = torch.Tensor([
         [2, 0, 0, 9, 15, 2, 2, 0],
         [2, 0, 0, 9, 15, 2, 3, 1],
         [2, 0, 0, 9, 15, 2, 4, 2],
@@ -62,7 +62,7 @@ def main():
         [2, 1, 0, 9,  3, 1, 8, 42]
     ])
     # GTSRB ground truth attribute labels with original labels marginalized
-    settings_gtsrb_marginal = torch.Tensor([
+    spn_settings_gtsrb_marginal = torch.Tensor([
         [2, 0, 0, 9, 15, 2, 2, -1],
         [2, 0, 0, 9, 15, 2, 3, -1],
         [2, 0, 0, 9, 15, 2, 4, -1],
@@ -108,13 +108,13 @@ def main():
         [2, 1, 0, 9,  3, 1, 8, -1]
     ])
 
-    settings_gtsrb_joint = settings_gtsrb_joint.to(device)
-    settings_gtsrb_marginal = settings_gtsrb_marginal.to(device)
+    spn_settings_gtsrb_joint = spn_settings_gtsrb_joint.to(device)
+    spn_settings_gtsrb_marginal = spn_settings_gtsrb_marginal.to(device)
 
     logger.log_info("Setting SPN...")
 
-    spn_joint.set(settings_gtsrb_joint)
-    spn_marginal.set(settings_gtsrb_joint)
+    spn_joint.set(spn_settings_gtsrb_joint)
+    spn_marginal.set(spn_settings_gtsrb_joint)
 
     logger.log_info("Performing SPN forward pass...")
 

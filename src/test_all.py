@@ -16,7 +16,7 @@ import utility
 import visualize
 
 def main():
-    utility.processArgumentsInference()
+    utility.processArgumentsTest()
 
     utility.setSeed(header.seed)
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
@@ -54,33 +54,33 @@ def main():
     spn_joint.load(header.file_path_spn)
     spn_marginal.load(header.file_path_spn)
 
-    logger.log_info("Loading SPN matrix A data...")
+    logger.log_info("Loading SPN settings...")
 
-    data_joint = numpy.load(header.file_path_spn_matrix_a_data).astype(numpy.int32)
-    data_marginal = numpy.copy(data_joint)
-    data_marginal[:, -1] = -1
+    spn_settings_joint = numpy.load(header.file_path_spn_matrix_a_data).astype(numpy.int32)
+    spn_settings_marginal = numpy.copy(spn_settings_joint)
+    spn_settings_marginal[:, -1] = -1
 
-    data_joint = torch.Tensor(data_joint)
-    data_joint = data_joint.to(device)
-    data_marginal = torch.Tensor(data_marginal)
-    data_marginal = data_marginal.to(device)
+    spn_settings_joint = torch.Tensor(spn_settings_joint)
+    spn_settings_joint = spn_settings_joint.to(device)
+    spn_settings_marginal = torch.Tensor(spn_settings_marginal)
+    spn_settings_marginal = spn_settings_marginal.to(device)
 
     gc.collect()
 
-    logger.log_info("SPN Matrix A data dimension:", int(data_joint.shape[0]), int(data_joint.shape[1]))
+    logger.log_info("SPN setting dimension:", int(spn_settings_joint.shape[0]), int(spn_settings_joint.shape[1]))
 
-    spn_matrix_a_rows = len(dataset_test.classes_original)
-    spn_matrix_a_cols = 1
+    spn_output_rows = len(dataset_test.classes_original)
+    spn_output_cols = 1
 
     for attribute in dataset_test.classes:
-        spn_matrix_a_cols *= len(attribute)
+        spn_output_cols *= len(attribute)
 
-    logger.log_info("SPN Matrix A dimension:", int(spn_matrix_a_rows), int(spn_matrix_a_cols))
+    logger.log_info("SPN output dimension:", int(spn_output_rows), int(spn_output_cols))
 
     logger.log_info("Setting SPN...")
 
-    spn_joint.set(data_joint)
-    spn_marginal.set(data_marginal)
+    spn_joint.set(spn_settings_joint)
+    spn_marginal.set(spn_settings_marginal)
 
     for _ in config_dataset["attributes"]:
         accuracy_epoch_list_decomposed.append(0)
@@ -109,7 +109,7 @@ def main():
                 output_baseline = utility.applySoftmax(output_baseline)
                 outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
 
-                output_composed = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_matrix_a_rows, spn_matrix_a_cols, device)
+                output_composed = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
 
                 (_, predictions_baseline) = torch.max(output_baseline, 1)
                 (_, predictions_composed) = torch.max(output_composed, 1)
