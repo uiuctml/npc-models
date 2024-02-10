@@ -23,7 +23,7 @@ class VISATDataset(torch.utils.data.Dataset):
             logger.log_error("Invalid dataset directory.")
             return
 
-        file_config_dataset = open(header.dataset_config_file_path, "r")
+        file_config_dataset = open(header.file_path_dataset_config, "r")
         self.config = json.load(file_config_dataset)
         file_config_dataset.close()
 

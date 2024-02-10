@@ -56,7 +56,7 @@ def main():
 
     logger.log_info("Loading SPN settings...")
 
-    spn_settings_joint = numpy.load(header.file_path_spn_matrix_a_data).astype(numpy.int32)
+    spn_settings_joint = numpy.load(header.file_path_spn_settings).astype(numpy.int32)
     spn_settings_marginal = numpy.copy(spn_settings_joint)
     spn_settings_marginal[:, -1] = -1
 

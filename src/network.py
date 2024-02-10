@@ -174,7 +174,7 @@ class ViTB32MTL(torch.nn.Module):
             return self.net.heads_mtl.parameters()
 
 def createModelBaseline(device):
-    file_config_dataset = open(header.dataset_config_file_path, "r")
+    file_config_dataset = open(header.file_path_dataset_config, "r")
     config_dataset = json.load(file_config_dataset)
     file_config_dataset.close()
 
@@ -191,7 +191,7 @@ def createModelBaseline(device):
         exit(1)
 
 def createModelDecomposed(device):
-    file_config_dataset = open(header.dataset_config_file_path, "r")
+    file_config_dataset = open(header.file_path_dataset_config, "r")
     config_dataset = json.load(file_config_dataset)
     file_config_dataset.close()
 

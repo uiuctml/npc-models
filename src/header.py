@@ -2,9 +2,9 @@ import multiprocessing
 import type
 
 cuda_allow_tf32 = True
-dataset_config_file_path = "../../visat-dataset-tools/config/gtsrb.json"
+file_path_dataset_config = "../../visat-dataset-tools/config/gtsrb.json"
 file_path_spn = "../../visat-spn/output/spn_trees/gtsrb.spn.txt"
-file_path_spn_matrix_a_data = "../../visat-spn/output/spn_matrices/matrix_a_data.npy"
+file_path_spn_settings = "../../visat-spn/output/spn_matrices/matrix_a_data.npy"
 log_level = type.LogLevel.debug
 project_name = "visat-models"
 run_mode = "disabled"
