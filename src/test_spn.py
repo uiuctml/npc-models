@@ -7,11 +7,13 @@ import torch
 
 def main():
     device = torch.device("cuda")
-    spn_tree = spn.SPN()
+    spn_joint = spn.SPN()
+    spn_marginal = spn.SPN()
 
     logger.log_info("Loading SPN from \"" + header.file_path_spn + "\"...")
 
-    spn_tree.load(header.file_path_spn)
+    spn_joint.load(header.file_path_spn)
+    spn_marginal.load(header.file_path_spn)
 
     # GTSRB ground truth attribute and original labels
     settings_gtsrb_joint = torch.Tensor([
@@ -111,22 +113,16 @@ def main():
 
     logger.log_info("Setting SPN...")
 
-    spn_tree.set(settings_gtsrb_joint)
+    spn_joint.set(settings_gtsrb_joint)
+    spn_marginal.set(settings_gtsrb_joint)
 
     logger.log_info("Performing SPN forward pass...")
 
-    log_likelihoods_joint = spn_tree.forward()
+    log_likelihoods_joint = spn_joint.forward()
+    log_likelihoods_marginal = spn_marginal.forward()
 
-    logger.log_info("Setting SPN...")
-
-    spn_tree.set(settings_gtsrb_marginal)
-
-    logger.log_info("Performing SPN marginal forward pass...")
-
-    log_likelihoods_marginal = spn_tree.forward()
-
-    logger.log_debug("Forward joint log likelihoods:", log_likelihoods_joint)
-    logger.log_debug("Forward marginal log likelihoods:", log_likelihoods_marginal)
+    logger.log_trace("Forward joint log likelihoods:", log_likelihoods_joint)
+    logger.log_trace("Forward marginal log likelihoods:", log_likelihoods_marginal)
 
     probabilities = torch.exp(log_likelihoods_joint - log_likelihoods_marginal)
 
@@ -134,7 +130,7 @@ def main():
 
     logger.log_info("Performing SPN backward pass...")
 
-    spn_tree.backward()
+    spn_joint.backward()
 
     return
 
