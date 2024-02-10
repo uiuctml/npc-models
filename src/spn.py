@@ -10,7 +10,8 @@ class Node:
         self.device = None
         self.id = -1
         self.parents = []
-        self.value = None
+        self.value_backward = None
+        self.value_forward = None
 
         return
 
@@ -47,8 +48,8 @@ class CategoricalLeafNode(Node):
         settings = (variables == self.category_index)
         settings_marginal = (variables < 0)
 
-        self.value = torch.logical_or(settings, settings_marginal).float()
-        self.value = self.value.to(self.device)
+        self.value_forward = torch.logical_or(settings, settings_marginal).float()
+        self.value_forward = self.value_forward.to(self.device)
 
         return
 
@@ -66,13 +67,13 @@ class ProductNode(Node):
             logger.log_fatal("Product node " + str(self.id) + " has no children. Quit.")
             exit(-1)
 
-        values_children = []
+        value_forward_children = []
 
         for child in self.children:
-            values_children.append(child.value)
+            value_forward_children.append(child.value_forward)
 
-        values_children = torch.stack(values_children)
-        self.value = torch.prod(values_children, 0)
+        value_forward_children = torch.stack(value_forward_children)
+        self.value_forward = torch.prod(value_forward_children, 0)
 
         return
 
@@ -93,14 +94,14 @@ class SumNode(Node):
             logger.log_fatal("Sum node " + str(self.id) + " has no children. Quit.")
             exit(-1)
 
-        values_children = []
+        value_forward_children = []
 
         for child in self.children:
-            values_children.append(child.value)
+            value_forward_children.append(child.value_forward)
 
-        values_children = torch.stack(values_children)
-        values_children *= self.weights
-        self.value = torch.sum(values_children, 0)
+        value_forward_children = torch.stack(value_forward_children)
+        value_forward_children *= self.weights
+        self.value_forward = torch.sum(value_forward_children, 0)
 
         return
 
@@ -137,7 +138,7 @@ class SPN:
 
             self.reevalute = False
 
-        return self.root_node.value
+        return self.root_node.value_forward
 
     def load(self, file_path_spn):
         if not os.path.exists(file_path_spn):
