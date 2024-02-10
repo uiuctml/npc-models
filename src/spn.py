@@ -63,6 +63,27 @@ class ProductNode(Node):
         return
 
     def backward(self):
+        if len(self.parents) == 0:
+            logger.log_fatal("Product node " + str(self.id) + " has no parents. Quit.")
+            exit(-1)
+
+        value_backward_parents = []
+        value_forward_parents = []
+
+        for parent in self.parents:
+            value_backward_parents.append(parent.value_backward)
+            value_forward_parents.append(parent.value_forward)
+
+        # Compute backward values in log space
+        # Log-Sum-Exp trick: https://gregorygundersen.com/blog/2020/02/09/log-sum-exp/
+        value_backward_parents = torch.stack(value_backward_parents)
+        value_backward_parents += value_forward_parents - self.value_forward
+        value_backward_parents_max = torch.max(value_backward_parents, 0)[0]
+        value_backward_parents -= value_backward_parents_max
+        value_backward_parents = torch.exp(value_backward_parents)
+        self.value_backward = torch.sum(value_backward_parents, 0)
+        self.value_backward = torch.log(self.value_backward) + value_backward_parents_max
+
         return
 
     def forward(self):
@@ -91,6 +112,25 @@ class SumNode(Node):
         return
 
     def backward(self):
+        if len(self.parents) == 0:
+            logger.log_fatal("Sum node " + str(self.id) + " has no parents. Quit.")
+            exit(-1)
+
+        value_backward_parents = []
+
+        for parent in self.parents:
+            value_backward_parents.append(parent.value_backward)
+
+        # Compute backward values in log space
+        # Log-Sum-Exp trick: https://gregorygundersen.com/blog/2020/02/09/log-sum-exp/
+        value_backward_parents = torch.stack(value_backward_parents)
+        value_backward_parents += torch.log(self.weights)
+        value_backward_parents_max = torch.max(value_backward_parents, 0)[0]
+        value_backward_parents -= value_backward_parents_max
+        value_backward_parents = torch.exp(value_backward_parents)
+        self.value_backward = torch.sum(value_backward_parents, 0)
+        self.value_backward = torch.log(self.value_backward) + value_backward_parents_max
+
         return
 
     def forward(self):
@@ -103,11 +143,10 @@ class SumNode(Node):
         for child in self.children:
             value_forward_children.append(child.value_forward)
 
-        value_forward_children = torch.stack(value_forward_children)
-        value_forward_children_max = torch.max(value_forward_children, 0)[0]
-
         # Compute forward values in log space
         # Log-Sum-Exp trick: https://gregorygundersen.com/blog/2020/02/09/log-sum-exp/
+        value_forward_children = torch.stack(value_forward_children)
+        value_forward_children_max = torch.max(value_forward_children, 0)[0]
         value_forward_children -= value_forward_children_max
         value_forward_children = torch.exp(value_forward_children)
         value_forward_children *= self.weights
@@ -131,6 +170,22 @@ class SPN:
         return
 
     def backward(self):
+        if self.reevalute:
+            if len(self.layers) == 0:
+                logger.log_fatal("Empty tree. Quit.")
+                exit(-1)
+
+            if len(self.layers[0]) > 1:
+                logger.log_fatal("Multiple root nodes. Quit.")
+                exit(-1)
+
+            # Skip root node
+            for i in range(1, self.depth):
+                for node in self.layers[i]:
+                    node.backward()
+
+            self.reevalute = False
+
         return
 
     def forward(self):
