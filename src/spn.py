@@ -244,6 +244,14 @@ class SPN:
 
         return self.root_node.value_forward
 
+    def getWeights(self):
+        weights = []
+
+        for sum_node in self.sum_nodes:
+            weights.append(sum_node.weights)
+
+        return
+
     def load(self, file_path_spn):
         if not os.path.exists(file_path_spn):
             logger.log_fatal("Invalid SPN file path. Quit.")
@@ -393,6 +401,12 @@ class SPN:
 
         self.reuse_backward = False
         self.reuse_forward = False
+
+        return
+
+    def setWeights(self, weights):
+        for (sum_node, sum_node_weights) in zip(self.sum_nodes, weights):
+            sum_node.weights = sum_node_weights
 
         return
 
