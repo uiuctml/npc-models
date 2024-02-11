@@ -20,7 +20,23 @@ class CCCPOfflineSPNOptimizer:
         return
 
     def step(self):
+        machine_epsilon = torch.finfo(torch.float).eps
+        weight_normalization = 0
+        weights = []
 
+        for sum_node in self.spn.sum_node:
+            for (i, child) in enumerate(sum_node.children):
+                weight = sum_node.weights[i] * torch.exp(sum_node.value_backward + child.value_forward - self.spn.root_node.value_forward)
+                weights.append(weight)
+
+        # Weight normalization with Laplace smoothing
+        for weight in self.weights:
+            weight_normalization += weight + machine_epsilon
+
+        for weight in self.weights:
+            weight = (weight + machine_epsilon) / weight_normalization
+
+        self.spn.setWeights(weights)
 
         return
 
