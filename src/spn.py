@@ -323,7 +323,7 @@ class SPN:
                             nodes[0].weights_children.append(node_weight)
                             nodes[1].parents.append(nodes[0])
                             nodes[1].weights_parents.append(node_weight)
-                        else:
+                        elif isinstance(nodes[1], SumNode) and not nodes[0].leaf:
                             nodes[1].children.append(nodes[0])
                             nodes[1].weights_children.append(node_weight)
                             nodes[0].parents.append(nodes[1])
@@ -333,7 +333,7 @@ class SPN:
                             nodes[0].children.append(nodes[1])
                             nodes[1].parents.append(nodes[0])
                             nodes[1].weights_parents.append(1)
-                        else:
+                        elif isinstance(nodes[1], ProductNode):
                             nodes[1].children.append(nodes[0])
                             nodes[0].parents.append(nodes[1])
                             nodes[0].weights_parents.append(1)
