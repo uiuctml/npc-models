@@ -54,7 +54,7 @@ def main():
     spn_joint.load(header.file_path_spn)
     spn_marginal.load(header.file_path_spn)
 
-    logger.log_info("Loading SPN settings...")
+    logger.log_info("Loading SPN leaf node settings...")
 
     spn_settings_joint = numpy.load(header.file_path_spn_settings).astype(numpy.int32)
     spn_settings_marginal = numpy.copy(spn_settings_joint)
@@ -67,7 +67,7 @@ def main():
 
     gc.collect()
 
-    logger.log_info("SPN setting dimension:", int(spn_settings_joint.shape[0]), int(spn_settings_joint.shape[1]))
+    logger.log_info("SPN leaf node setting dimension:", int(spn_settings_joint.shape[0]), int(spn_settings_joint.shape[1]))
 
     spn_output_rows = len(dataset_test.classes_original)
     spn_output_cols = 1
@@ -77,10 +77,10 @@ def main():
 
     logger.log_info("SPN output dimension:", int(spn_output_rows), int(spn_output_cols))
 
-    logger.log_info("Setting SPN...")
+    logger.log_info("Setting SPN leaf nodes...")
 
-    spn_joint.set(spn_settings_joint)
-    spn_marginal.set(spn_settings_marginal)
+    spn_joint.setLeafNodes(spn_settings_joint)
+    spn_marginal.setLeafNodes(spn_settings_marginal)
 
     for _ in config_dataset["attributes"]:
         accuracy_epoch_list_decomposed.append(0)

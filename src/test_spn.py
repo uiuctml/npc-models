@@ -113,13 +113,13 @@ def main():
     logger.log_info("Number of leaf nodes:", len(spn_joint.leaf_nodes))
     logger.log_info("SPN depths:", spn_joint.depth)
 
-    logger.log_info("Setting SPN...")
+    logger.log_info("Setting SPN leaf nodes...")
 
     spn_settings_gtsrb_joint = spn_settings_gtsrb_joint.to(device)
     spn_settings_gtsrb_marginal = spn_settings_gtsrb_marginal.to(device)
 
-    spn_joint.set(spn_settings_gtsrb_joint)
-    spn_marginal.set(spn_settings_gtsrb_joint)
+    spn_joint.setLeafNodes(spn_settings_gtsrb_joint)
+    spn_marginal.setLeafNodes(spn_settings_gtsrb_joint)
 
     logger.log_info("Performing SPN forward pass...")
 

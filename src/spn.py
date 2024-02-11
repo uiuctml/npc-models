@@ -3,6 +3,27 @@ import logger
 import os
 import torch
 
+class SPNOptimizer:
+    def __init__(self, spn):
+        self.spn = spn
+
+        return
+
+    @abc.abstractmethod
+    def step(self):
+        pass
+
+class CCCPOfflineSPNOptimizer:
+    def __init__(self):
+        super().__init__()
+
+        return
+
+    def step(self):
+
+
+        return
+
 class Node:
     def __init__(self):
         self.children = []
@@ -366,7 +387,7 @@ class SPN:
 
         return
 
-    def set(self, settings):
+    def setLeafNodes(self, settings):
         self.settings = settings
 
         for leaf_node in self.leaf_nodes:
