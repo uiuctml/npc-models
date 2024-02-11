@@ -89,13 +89,12 @@ class CategoricalLeafNode(Node):
     def forward(self):
         return
 
-    def set(self, data):
+    def set(self, settings):
         if self.attribute_index < 0 or self.category_index < 0:
             logger.log_fatal("Invalid categorical leaf node. Quit.")
             exit(-1)
 
-        variables = data[:, self.attribute_index]
-
+        variables = settings[:, self.attribute_index]
         settings = (variables == self.category_index)
         settings_marginal = (variables < 0)
 
@@ -163,8 +162,6 @@ class SPN:
     def __init__(self, device = torch.device("cuda")):
         self.depth = -1
         self.device = device
-        self.layers_backward_order = {}
-        self.layers_forward_order = {}
         self.leaf_nodes = []
         self.leaf_nodes_dict = {}
         self.nodes = []
@@ -174,16 +171,18 @@ class SPN:
         self.root_node = None
         self.settings = None
         self.sum_nodes = []
+        self.traversal_order_backward = []
+        self.traversal_order_forward = []
 
         return
 
     def backward(self):
         if not self.reuse_backward:
-            if len(self.layers_backward_order) == 0:
+            if len(self.traversal_order_backward) == 0:
                 logger.log_fatal("Empty tree. Quit.")
                 exit(-1)
 
-            if self.root_node is None:
+            if self.root_node is None or self.traversal_order_backward[0].id != self.root_node.id:
                 logger.log_fatal("Missing root node. Quit.")
                 exit(-1)
 
@@ -195,12 +194,12 @@ class SPN:
             self.root_node.value_backward = torch.log(torch.ones(self.settings.shape[0]))
             self.root_node.value_backward = self.root_node.value_backward.to(self.device)
 
-            for i in range(self.depth - 1, -1, -1):
-                for node in self.layers_backward_order[i]:
-                    if node is self.root_node:
-                        continue
+            for node in self.traversal_order_backward:
+                # Skip root node
+                if node.id == self.root_node.id:
+                    continue
 
-                    node.backward()
+                node.backward()
 
             self.reuse_backward = True
 
@@ -208,21 +207,16 @@ class SPN:
 
     def forward(self):
         if not self.reuse_forward:
-            if len(self.layers_forward_order) == 0:
+            if len(self.traversal_order_forward) == 0:
                 logger.log_fatal("Empty tree. Quit.")
                 exit(-1)
 
-            if len(self.layers_forward_order[0]) > 1:
-                logger.log_fatal("Multiple root nodes. Quit.")
-                exit(-1)
-
-            if self.root_node is None:
+            if self.root_node is None or self.traversal_order_forward[-1].id != self.root_node.id:
                 logger.log_fatal("Missing root node. Quit.")
                 exit(-1)
 
-            for i in range(self.depth - 1, -1, -1):
-                for node in self.layers_forward_order[i]:
-                    node.forward()
+            for node in self.traversal_order_forward:
+                node.forward()
 
             self.reuse_backward = False
             self.reuse_forward = True
@@ -286,9 +280,9 @@ class SPN:
                                 categorical_leaf_node.device = self.device
                                 categorical_leaf_node.id = -1
                                 categorical_leaf_node_list.append(categorical_leaf_node)
+                                self.leaf_nodes.append(categorical_leaf_node)
                                 self.nodes.append(categorical_leaf_node)
 
-                            self.leaf_nodes += categorical_leaf_node_list
                             self.leaf_nodes_dict[node_attribute_index] = categorical_leaf_node_list
 
                         sum_node = SumNode()
@@ -356,18 +350,19 @@ class SPN:
             logger.log_fatal("Invalid SPN.")
             exit(-1)
 
+        self.depth = self.traverse({0: root_nodes}, 0)
         self.root_node = root_nodes[0]
-        self.layers_backward_order[0] = self.leaf_nodes
-        self.layers_forward_order[0] = root_nodes
+        self.traversal_order_backward = self.topologicalSort()
+        self.traversal_order_forward = self.traversal_order_backward.copy()
+        self.traversal_order_forward.reverse()
 
-        depth_backward_order = self.traverse(self.layers_backward_order, 0, False)
-        depth_forward_order = self.traverse(self.layers_forward_order, 0, True)
-
-        if depth_backward_order != depth_forward_order:
-            logger.log_fatal("Invalid SPN traversals.")
+        if len(self.traversal_order_backward) != len(self.nodes):
+            logger.log_fatal("Invalid SPN backward traversal")
             exit(-1)
 
-        self.depth = depth_forward_order
+        if len(self.traversal_order_forward) != len(self.nodes):
+            logger.log_fatal("Invalid SPN forward traversal")
+            exit(-1)
 
         return
 
@@ -382,24 +377,44 @@ class SPN:
 
         return
 
-    def traverse(self, layers, depth, children_as_next = True):
+    def topologicalSort(self):
+        parent_count = {}
+        queue = []
+        topological_order = []
+
+        for node in self.nodes:
+            parent_count[node] = len(node.parents)
+
+        queue.append(self.root_node)
+
+        while len(queue) > 0:
+            node = queue[0]
+            topological_order.append(node)
+
+            for child in node.children:
+                parent_count[child] -= 1
+
+                if parent_count[child] <= 0:
+                    queue.append(child)
+
+            queue.pop(0)
+
+        return topological_order
+
+    def traverse(self, layers, depth):
         if depth not in layers.keys():
             return depth
 
         for node in layers[depth]:
             node.depth = depth
-            nodes_next = node.children
 
-            if not children_as_next:
-                nodes_next = node.parents
-
-            for node_next in nodes_next:
+            for child in node.children:
                 if depth + 1 not in layers.keys():
                     layers[depth + 1] = []
 
-                layers[depth + 1].append(node_next)
+                layers[depth + 1].append(child)
 
-        depth_next = self.traverse(layers, depth + 1, children_as_next)
+        depth_next = self.traverse(layers, depth + 1)
 
         if depth_next > depth:
             depth = depth_next
