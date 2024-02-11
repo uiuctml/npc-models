@@ -91,7 +91,7 @@ def test(model, config_dataset, data_loader, device, batch_step):
 
     return batch_step
 
-def train(model, config_dataset, data_loader, criterions, optimizer, device, batch_step):
+def train(model, config_dataset, data_loader, criterions, optimizers, device, batch_step):
     accuracy_epoch_list = []
     loss_epoch_list = []
     loss_overall_epoch = 0
@@ -105,25 +105,28 @@ def train(model, config_dataset, data_loader, criterions, optimizer, device, bat
     progress_bar.set_description_str("[INFO]: Training progress")
 
     for (batch_index, (input, labels, _)) in enumerate(data_loader):
-        loss_criterions = 0
-
-        input = input.to(device, non_blocking = True)
-        labels = labels.to(device, non_blocking = True)
-
-        optimizer.zero_grad()
+        outputs = model(input)
 
         with torch.set_grad_enabled(True):
-            outputs = model(input)
+            parameters = model.getOptimizerParameters()
 
             for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
-                (_, predictions) = torch.max(outputs[i], 1)
+                optimizer = optimizers[i]
+                optimizer.zero_grad()
 
+                input = input.to(device, non_blocking = True)
+                labels = labels.to(device, non_blocking = True)
+
+                (_, predictions) = torch.max(outputs[i], 1)
                 loss = criterions[i](outputs[i], labels[:, i])
 
                 if header.config_decomposed["use_l2_loss"]:
-                    l2_norm = utility.computeL2Norm(model.parameters())
+                    l2_norm = utility.computeL2Norm(parameters[i])
                     loss_l2 = header.config_decomposed["l2_lambda"] * l2_norm
                     loss += loss_l2
+
+                loss.backward()
+                optimizer.step()
 
                 corrects = torch.sum(predictions == labels[:, i].data).item()
 
@@ -132,24 +135,14 @@ def train(model, config_dataset, data_loader, criterions, optimizer, device, bat
 
                 accuracy_epoch_list[i] += corrects
                 loss_epoch_list[i] += loss_batch
-                loss_criterions += loss / math.log(outputs[i].size(1))
 
                 wandb.log({"training/batch/" + dataset_entry["name"] + "/accuracy": accuracy_batch})
                 wandb.log({"training/batch/" + dataset_entry["name"] + "/loss": loss_batch})
-
-            loss_criterions /= len(outputs)
-
-            loss_criterions.backward()
-            optimizer.step()
-
-        loss_overall_batch = loss_criterions.item()
-        loss_overall_epoch += loss_overall_batch
 
         progress_bar.n = batch_index + 1
         progress_bar.refresh()
 
         wandb.log({"training/batch/step": batch_step})
-        wandb.log({"training/batch/loss": loss_overall_batch})
 
         batch_step += 1
 
@@ -257,6 +250,7 @@ def main():
     batch_step_train = 1
     batch_step_validate = 1
     criterions = []
+    optimizers = []
     dataset_transforms = utility.createTransform(header.config_decomposed)
     dataset_test = dataset.VISATDataset(header.config_decomposed["dir_dataset_test"], dataset_transforms)
     dataset_train = dataset.VISATDataset(header.config_decomposed["dir_dataset_train"], dataset_transforms)
@@ -267,17 +261,19 @@ def main():
     data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     epoch = 1
-    model = network.createModelMLP(device)
+    model = network.createModelDecomposed(device)
     model = torch.nn.DataParallel(model)
     model = model.to(device)
 
-    optimizer = torch.optim.SGD(model.parameters(), lr = header.config_decomposed["optimizer_learning_rate"], momentum = header.config_decomposed["optimizer_momentum"], weight_decay = header.config_decomposed["optimizer_weight_decay"])
-
-    learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.config_decomposed["learning_rate_scheduler_mode"], header.config_decomposed["learning_rate_scheduler_factor"], header.config_decomposed["learning_rate_scheduler_patience"], header.config_decomposed["learning_rate_scheduler_threshold"], header.config_decomposed["learning_rate_scheduler_threshold_mode"], header.config_decomposed["learning_rate_scheduler_cooldown"], header.config_decomposed["learning_rate_scheduler_min_learning_rate"], header.config_decomposed["learning_rate_scheduler_min_learning_rate_decay"], header.config_decomposed["learning_rate_scheduler_verbose"])
-
     progress_bar = None
 
-    for _ in config_dataset["attributes"]:
+    parameters = model.getOptimizerParameters()
+    for i in len(config_dataset["attributes"]):
+        optimizer = torch.optim.SGD(parameters[i], lr = header.config_decomposed["optimizer_learning_rate"], momentum = header.config_decomposed["optimizer_momentum"], weight_decay = header.config_decomposed["optimizer_weight_decay"])
+
+        learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.config_decomposed["learning_rate_scheduler_mode"], header.config_decomposed["learning_rate_scheduler_factor"], header.config_decomposed["learning_rate_scheduler_patience"], header.config_decomposed["learning_rate_scheduler_threshold"], header.config_decomposed["learning_rate_scheduler_threshold_mode"], header.config_decomposed["learning_rate_scheduler_cooldown"], header.config_decomposed["learning_rate_scheduler_min_learning_rate"], header.config_decomposed["learning_rate_scheduler_min_learning_rate_decay"], header.config_decomposed["learning_rate_scheduler_verbose"])
+
+        optimizers.append(optimizer)
         criterions.append(torch.nn.CrossEntropyLoss())
 
     (accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch) = utility.loadCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch, learning_rate_scheduler, model, optimizer)
@@ -298,7 +294,7 @@ def main():
         wandb.log({"training/epoch/step": epoch})
         wandb.log({"validation/epoch/step": epoch})
 
-        batch_step_train = train(model, config_dataset, data_loader_train, criterions, optimizer, device, batch_step_train)
+        batch_step_train = train(model, config_dataset, data_loader_train, criterions, optimizers, device, batch_step_train)
         (accuracy_validation_epoch_list, loss_overall_validation_epoch, batch_step_validate) = validate(model, config_dataset, data_loader_validation, criterions, device, batch_step_validate)
 
         learning_rate_scheduler.step(loss_overall_validation_epoch)

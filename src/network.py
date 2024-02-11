@@ -116,6 +116,13 @@ class MLPSet(torch.nn.Module):
 
         return outputs
 
+    def getOptimizerParameters(self):
+        params = []
+        for model in self.model_list:
+            params.append(model.parameters)
+
+        return params
+
 class ViTB32(torch.nn.Module):
     def __init__(self, config_dataset, device):
         super().__init__()
@@ -233,13 +240,8 @@ def createModelDecomposed(device):
         header.config_decomposed["model_pretrained_weights"] = "IMAGENET1K_V1"
         logger.log_trace("Model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
         return ViTB32MTL(config_dataset, device)
+    elif header.config_decomposed["model"] == type.NetworkModelDecomposed.mlp_set.name:
+        return MLPSet(config_dataset, device)
     else:
         logger.log_fatal("Unknown decomposed network model \"" + header.config_decomposed["model"] + "\".")
         exit(1)
-
-def createModelSet(device):
-    file_config_dataset = open(header.dataset_config_file_path, "r")
-    config_dataset = json.load(file_config_dataset)
-    file_config_dataset.close()
-
-    return MLPSet(config_dataset, device)
