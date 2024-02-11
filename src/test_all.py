@@ -79,8 +79,8 @@ def main():
 
     logger.log_info("Setting SPN leaf nodes...")
 
-    spn_joint.setLeafNodes(spn_settings_joint)
-    spn_marginal.setLeafNodes(spn_settings_marginal)
+    spn_joint.set_leaf_nodes(spn_settings_joint)
+    spn_marginal.set_leaf_nodes(spn_settings_marginal)
 
     for _ in config_dataset["attributes"]:
         accuracy_epoch_list_decomposed.append(0)

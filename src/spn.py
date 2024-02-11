@@ -36,7 +36,7 @@ class CCCPOfflineSPNOptimizer:
         for weight in self.weights:
             weight = (weight + machine_epsilon) / weight_normalization
 
-        self.spn.setWeights(weights)
+        self.spn.set_weights(weights)
 
         return
 
@@ -260,7 +260,7 @@ class SPN:
 
         return self.root_node.value_forward
 
-    def getWeights(self):
+    def get_weights(self):
         weights = []
 
         for sum_node in self.sum_nodes:
@@ -395,7 +395,7 @@ class SPN:
 
         self.depth = self.traverse({0: root_nodes}, 0)
         self.root_node = root_nodes[0]
-        self.traversal_order_backward = self.topologicalSort()
+        self.traversal_order_backward = self.topological_sort()
         self.traversal_order_forward = self.traversal_order_backward.copy()
         self.traversal_order_forward.reverse()
 
@@ -409,7 +409,7 @@ class SPN:
 
         return
 
-    def setLeafNodes(self, settings):
+    def set_leaf_nodes(self, settings):
         self.settings = settings
 
         for leaf_node in self.leaf_nodes:
@@ -420,13 +420,13 @@ class SPN:
 
         return
 
-    def setWeights(self, weights):
+    def set_weights(self, weights):
         for (sum_node, sum_node_weights) in zip(self.sum_nodes, weights):
             sum_node.weights = sum_node_weights
 
         return
 
-    def topologicalSort(self):
+    def topological_sort(self):
         parent_count = {}
         queue = []
         topological_order = []

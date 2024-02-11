@@ -118,8 +118,8 @@ def main():
     spn_settings_gtsrb_joint = spn_settings_gtsrb_joint.to(device)
     spn_settings_gtsrb_marginal = spn_settings_gtsrb_marginal.to(device)
 
-    spn_joint.setLeafNodes(spn_settings_gtsrb_joint)
-    spn_marginal.setLeafNodes(spn_settings_gtsrb_joint)
+    spn_joint.set_leaf_nodes(spn_settings_gtsrb_joint)
+    spn_marginal.set_leaf_nodes(spn_settings_gtsrb_joint)
 
     logger.log_info("Performing SPN forward pass...")
 
