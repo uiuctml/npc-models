@@ -165,7 +165,8 @@ class SPN:
         self.device = device
         self.layers_backward_order = {}
         self.layers_forward_order = {}
-        self.leaf_nodes = {}
+        self.leaf_nodes = []
+        self.leaf_nodes_dict = {}
         self.nodes = []
         self.product_nodes = []
         self.reuse_backward = False
@@ -275,8 +276,8 @@ class SPN:
                         for i in range(0, len(node_probabilities)):
                             node_probabilities[i] = float(node_probabilities[i])
 
-                        if node_attribute_index in self.leaf_nodes.keys():
-                            categorical_leaf_node_list = self.leaf_nodes[node_attribute_index]
+                        if node_attribute_index in self.leaf_nodes_dict.keys():
+                            categorical_leaf_node_list = self.leaf_nodes_dict[node_attribute_index]
                         else:
                             for category_index in range(0, len(node_probabilities)):
                                 categorical_leaf_node = CategoricalLeafNode()
@@ -287,7 +288,8 @@ class SPN:
                                 categorical_leaf_node_list.append(categorical_leaf_node)
                                 self.nodes.append(categorical_leaf_node)
 
-                            self.leaf_nodes[node_attribute_index] = categorical_leaf_node_list
+                            self.leaf_nodes += categorical_leaf_node_list
+                            self.leaf_nodes_dict[node_attribute_index] = categorical_leaf_node_list
 
                         sum_node = SumNode()
                         sum_node.children = categorical_leaf_node_list
@@ -355,13 +357,7 @@ class SPN:
             exit(-1)
 
         self.root_node = root_nodes[0]
-
-        leaf_nodes = []
-
-        for leaf_nodes_list in self.leaf_nodes.values():
-            leaf_nodes += leaf_nodes_list
-
-        self.layers_backward_order[0] = leaf_nodes
+        self.layers_backward_order[0] = self.leaf_nodes
         self.layers_forward_order[0] = root_nodes
 
         depth_backward_order = self.traverse(self.layers_backward_order, 0, False)
@@ -378,11 +374,8 @@ class SPN:
     def set(self, settings):
         self.settings = settings
 
-        for attribute_index in self.leaf_nodes.keys():
-            leaf_nodes = self.leaf_nodes[attribute_index]
-
-            for leaf_node in leaf_nodes:
-                leaf_node.set(self.settings)
+        for leaf_node in self.leaf_nodes:
+            leaf_node.set(self.settings)
 
         self.reuse_backward = False
         self.reuse_forward = False

@@ -107,7 +107,11 @@ def main():
     spn_joint.load(header.file_path_spn)
     spn_marginal.load(header.file_path_spn)
 
-    logger.log_info("SPN depths:", spn_joint.depth, spn_marginal.depth)
+    logger.log_info("Number of nodes:", len(spn_joint.nodes))
+    logger.log_info("Number of sum nodes:", len(spn_joint.sum_nodes))
+    logger.log_info("Number of product nodes:", len(spn_joint.product_nodes))
+    logger.log_info("Number of leaf nodes:", len(spn_joint.leaf_nodes))
+    logger.log_info("SPN depths:", spn_joint.depth)
 
     logger.log_info("Setting SPN...")
 
