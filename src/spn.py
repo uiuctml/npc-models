@@ -27,14 +27,12 @@ class CCCPOfflineSPNOptimizer:
 class Node:
     def __init__(self):
         self.children = []
-        self.depth = -1
+        self.depth = None
         self.device = None
-        self.id = -1
+        self.id = None
         self.parents = []
         self.value_backward = None
         self.value_forward = None
-        self.weights_children = []
-        self.weights_parents = []
 
         return
 
@@ -50,13 +48,13 @@ class Node:
         value_forward_parents_product = []
         weights_parents_sum = []
 
-        for (parent, weight_parents) in zip(self.parents, self.weights_parents):
+        for parent in self.parents:
             if isinstance(parent, ProductNode):
                 value_backward_parents_product.append(parent.value_backward)
                 value_forward_parents_product.append(parent.value_forward)
             elif isinstance(parent, SumNode):
                 value_backward_parents_sum.append(parent.value_backward)
-                weights_parents_sum.append(weight_parents)
+                weights_parents_sum.append(parent.weights[parent.weights_index_by_child_id[self.id]])
 
         if len(value_backward_parents_product) > 0:
             value_backward_parents_product = torch.stack(value_backward_parents_product)
@@ -102,8 +100,8 @@ class CategoricalLeafNode(Node):
     def __init__(self):
         super().__init__()
 
-        self.attribute_index = -1
-        self.category_index = -1
+        self.attribute_index = None
+        self.category_index = None
 
         return
 
@@ -154,6 +152,8 @@ class SumNode(Node):
         super().__init__()
 
         self.leaf = False
+        self.weights = []
+        self.weights_index_by_child_id = {}
 
         return
 
@@ -173,7 +173,7 @@ class SumNode(Node):
         value_forward_children_max = torch.max(value_forward_children, 0)[0]
         value_forward_children -= value_forward_children_max
         value_forward_children = torch.exp(value_forward_children)
-        value_forward_children *= self.weights_children
+        value_forward_children *= self.weights
         self.value_forward = torch.sum(value_forward_children, 0)
         self.value_forward = torch.log(self.value_forward) + value_forward_children_max
 
@@ -181,7 +181,7 @@ class SumNode(Node):
 
 class SPN:
     def __init__(self, device = torch.device("cuda")):
-        self.depth = -1
+        self.depth = None
         self.device = device
         self.leaf_nodes = []
         self.leaf_nodes_dict = {}
@@ -250,6 +250,7 @@ class SPN:
             exit(-1)
 
         with open(file_path_spn, "r") as file_spn:
+            categorical_leaf_node_id = -1
             reading_nodes = True
 
             for line in file_spn.readlines():
@@ -299,7 +300,9 @@ class SPN:
                                 categorical_leaf_node.attribute_index = node_attribute_index
                                 categorical_leaf_node.category_index = category_index
                                 categorical_leaf_node.device = self.device
-                                categorical_leaf_node.id = -1
+                                categorical_leaf_node.id = categorical_leaf_node_id
+                                categorical_leaf_node_id -= 1
+
                                 categorical_leaf_node_list.append(categorical_leaf_node)
                                 self.leaf_nodes.append(categorical_leaf_node)
                                 self.nodes.append(categorical_leaf_node)
@@ -311,13 +314,13 @@ class SPN:
                         sum_node.device = self.device
                         sum_node.id = node_id
                         sum_node.leaf = True
-                        sum_node.weights_children = node_probabilities
+                        sum_node.weights = node_probabilities
                         self.nodes.append(sum_node)
                         self.sum_nodes.append(sum_node)
 
-                        for (categorical_leaf_node, node_probability) in zip(categorical_leaf_node_list, node_probabilities):
+                        for (i, categorical_leaf_node) in enumerate(categorical_leaf_node_list):
+                            sum_node.weights_index_by_child_id[categorical_leaf_node.id] = i
                             categorical_leaf_node.parents.append(sum_node)
-                            categorical_leaf_node.weights_parents.append(node_probability)
                 else:
                     nodes = []
                     node_id_first = int(line_list[0])
@@ -336,30 +339,25 @@ class SPN:
 
                         if isinstance(nodes[0], SumNode) and not nodes[0].leaf:
                             nodes[0].children.append(nodes[1])
-                            nodes[0].weights_children.append(node_weight)
+                            nodes[0].weights.append(node_weight)
+                            nodes[0].weights_index_by_child_id[nodes[1].id] = len(nodes[0].weights) - 1
                             nodes[1].parents.append(nodes[0])
-                            nodes[1].weights_parents.append(node_weight)
                         elif isinstance(nodes[1], SumNode) and not nodes[0].leaf:
                             nodes[1].children.append(nodes[0])
-                            nodes[1].weights_children.append(node_weight)
+                            nodes[1].weights.append(node_weight)
+                            nodes[1].weights_index_by_child_id[nodes[0].id] = len(nodes[1].weights) - 1
                             nodes[0].parents.append(nodes[1])
-                            nodes[0].weights_parents.append(node_weight)
                     else:
                         if isinstance(nodes[0], ProductNode):
                             nodes[0].children.append(nodes[1])
                             nodes[1].parents.append(nodes[0])
-                            nodes[1].weights_parents.append(1)
                         elif isinstance(nodes[1], ProductNode):
                             nodes[1].children.append(nodes[0])
                             nodes[0].parents.append(nodes[1])
-                            nodes[0].weights_parents.append(1)
 
-        for node in self.nodes:
-            node.weights_children = torch.Tensor(node.weights_children).reshape(-1, 1)
-            node.weights_parents = torch.Tensor(node.weights_parents).reshape(-1, 1)
-
-            node.weights_children = node.weights_children.to(self.device)
-            node.weights_parents = node.weights_parents.to(self.device)
+        for sum_node in self.sum_nodes:
+            sum_node.weights = torch.Tensor(sum_node.weights).reshape(-1, 1)
+            sum_node.weights = sum_node.weights.to(self.device)
 
         root_nodes = []
 
@@ -404,7 +402,7 @@ class SPN:
         topological_order = []
 
         for node in self.nodes:
-            parent_count[node] = len(node.parents)
+            parent_count[node.id] = len(node.parents)
 
         queue.append(self.root_node)
 
@@ -413,9 +411,9 @@ class SPN:
             topological_order.append(node)
 
             for child in node.children:
-                parent_count[child] -= 1
+                parent_count[child.id] -= 1
 
-                if parent_count[child] <= 0:
+                if parent_count[child.id] <= 0:
                     queue.append(child)
 
             queue.pop(0)
