@@ -86,6 +86,36 @@ class ResNet152MTL(torch.nn.Module):
         else:
             return self.net.heads_mtl.parameters()
 
+class MLPSet(torch.nn.Module):
+    def __init__(self, config_dataset, device):
+        super().__init__()
+
+        self.model_list = []
+
+        for attribute in config_dataset["attributes"]:
+            attribute_name = attribute["name"]
+            attribute_labels = attribute["labels"]
+            hidden_size = header.config_decomposed["head_hidden_sizes"][attribute_name]
+            output_size = len(attribute_labels)
+            input_size = header.config_decomposed["model_input_height"] * header.config_decomposed["model_input_width"] * 3
+
+            attribute_labels.remove("")
+
+            model = torch.nn.Sequential(torch.nn.Flatten(),torch.nn.Linear(input_size, hidden_size), torch.nn.ReLU(), torch.nn.Linear(hidden_size, output_size))
+            self.model_list.append(model)
+
+        self.model_list = torch.nn.ModuleList(self.model_list)
+
+        return
+
+    def forward(self, input):
+        outputs = []
+
+        for model in self.model_list:
+            outputs.append(model(input))
+
+        return outputs
+
 class ViTB32(torch.nn.Module):
     def __init__(self, config_dataset, device):
         super().__init__()
@@ -206,3 +236,10 @@ def createModelDecomposed(device):
     else:
         logger.log_fatal("Unknown decomposed network model \"" + header.config_decomposed["model"] + "\".")
         exit(1)
+
+def createModelSet(device):
+    file_config_dataset = open(header.dataset_config_file_path, "r")
+    config_dataset = json.load(file_config_dataset)
+    file_config_dataset.close()
+
+    return MLPSet(config_dataset, device)

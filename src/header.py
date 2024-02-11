@@ -83,12 +83,9 @@ config_decomposed = {
     "fine_tuning": True,
     "head_hidden_sizes": {
         "color": 128,
-        "overlay": 128,
         "shape": 128,
-        "symbol-arrow": 128,
-        "symbol-assorted": 128,
-        "symbol-general": 128,
-        "symbol-number": 128
+        "symbol": 128,
+        "text": 128
     },
     "input_grayscale": False,
     "learning_rate_scheduler_mode": "min",
