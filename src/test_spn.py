@@ -9,12 +9,6 @@ def main():
     device = torch.device("cuda")
     spn_joint = spn.SPN()
     spn_marginal = spn.SPN()
-
-    logger.log_info("Loading SPN from \"" + header.file_path_spn + "\"...")
-
-    spn_joint.load(header.file_path_spn)
-    spn_marginal.load(header.file_path_spn)
-
     # GTSRB ground truth attribute and original labels
     spn_settings_gtsrb_joint = torch.Tensor([
         [2, 0, 0, 9, 15, 2, 2, 0],
@@ -108,10 +102,17 @@ def main():
         [2, 1, 0, 9,  3, 1, 8, -1]
     ])
 
-    spn_settings_gtsrb_joint = spn_settings_gtsrb_joint.to(device)
-    spn_settings_gtsrb_marginal = spn_settings_gtsrb_marginal.to(device)
+    logger.log_info("Loading SPN from \"" + header.file_path_spn + "\"...")
+
+    spn_joint.load(header.file_path_spn)
+    spn_marginal.load(header.file_path_spn)
+
+    logger.log_info("SPN depths:", spn_joint.depth, spn_marginal.depth)
 
     logger.log_info("Setting SPN...")
+
+    spn_settings_gtsrb_joint = spn_settings_gtsrb_joint.to(device)
+    spn_settings_gtsrb_marginal = spn_settings_gtsrb_marginal.to(device)
 
     spn_joint.set(spn_settings_gtsrb_joint)
     spn_marginal.set(spn_settings_gtsrb_joint)

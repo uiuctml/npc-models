@@ -163,7 +163,8 @@ class SPN:
     def __init__(self, device = torch.device("cuda")):
         self.depth = -1
         self.device = device
-        self.layers = {}
+        self.layers_backward_order = {}
+        self.layers_forward_order = {}
         self.leaf_nodes = {}
         self.nodes = []
         self.product_nodes = []
@@ -177,12 +178,8 @@ class SPN:
 
     def backward(self):
         if not self.reuse_backward:
-            if len(self.layers) == 0:
+            if len(self.layers_backward_order) == 0:
                 logger.log_fatal("Empty tree. Quit.")
-                exit(-1)
-
-            if len(self.layers[0]) > 1:
-                logger.log_fatal("Multiple root nodes. Quit.")
                 exit(-1)
 
             if self.root_node is None:
@@ -197,9 +194,11 @@ class SPN:
             self.root_node.value_backward = torch.log(torch.ones(self.settings.shape[0]))
             self.root_node.value_backward = self.root_node.value_backward.to(self.device)
 
-            # Skip root node
-            for i in range(1, self.depth):
-                for node in self.layers[i]:
+            for i in range(self.depth - 1, -1, -1):
+                for node in self.layers_backward_order[i]:
+                    if node is self.root_node:
+                        continue
+
                     node.backward()
 
             self.reuse_backward = True
@@ -208,11 +207,11 @@ class SPN:
 
     def forward(self):
         if not self.reuse_forward:
-            if len(self.layers) == 0:
+            if len(self.layers_forward_order) == 0:
                 logger.log_fatal("Empty tree. Quit.")
                 exit(-1)
 
-            if len(self.layers[0]) > 1:
+            if len(self.layers_forward_order[0]) > 1:
                 logger.log_fatal("Multiple root nodes. Quit.")
                 exit(-1)
 
@@ -221,7 +220,7 @@ class SPN:
                 exit(-1)
 
             for i in range(self.depth - 1, -1, -1):
-                for node in self.layers[i]:
+                for node in self.layers_forward_order[i]:
                     node.forward()
 
             self.reuse_backward = False
@@ -357,25 +356,22 @@ class SPN:
 
         self.root_node = root_nodes[0]
 
-        def traverse(self, node, layer):
-            depth = layer
-            node.depth = depth
+        leaf_nodes = []
 
-            for child in node.children:
-                if layer not in self.layers.keys():
-                    self.layers[layer] = []
+        for leaf_nodes_list in self.leaf_nodes.values():
+            leaf_nodes += leaf_nodes_list
 
-                self.layers[layer].append(child)
+        self.layers_backward_order[0] = leaf_nodes
+        self.layers_forward_order[0] = root_nodes
 
-                depth_child = traverse(self, child, layer + 1)
+        depth_backward_order = self.traverse(self.layers_backward_order, 0, False)
+        depth_forward_order = self.traverse(self.layers_forward_order, 0, True)
 
-                if depth_child > depth:
-                    depth = depth_child
+        if depth_backward_order != depth_forward_order:
+            logger.log_fatal("Invalid SPN traversals.")
+            exit(-1)
 
-            return depth
-
-        self.layers[0] = [self.root_node]
-        self.depth = traverse(self, self.root_node, 1)
+        self.depth = depth_forward_order
 
         return
 
@@ -392,3 +388,27 @@ class SPN:
         self.reuse_forward = False
 
         return
+
+    def traverse(self, layers, depth, children_as_next = True):
+        if depth not in layers.keys():
+            return depth
+
+        for node in layers[depth]:
+            node.depth = depth
+            nodes_next = node.children
+
+            if not children_as_next:
+                nodes_next = node.parents
+
+            for node_next in nodes_next:
+                if depth + 1 not in layers.keys():
+                    layers[depth + 1] = []
+
+                layers[depth + 1].append(node_next)
+
+        depth_next = self.traverse(layers, depth + 1, children_as_next)
+
+        if depth_next > depth:
+            depth = depth_next
+
+        return depth
