@@ -120,7 +120,6 @@ class MLPSet(torch.nn.Module):
         params = []
         for model in self.model_list:
             params.append(model.parameters)
-
         return params
 
 class ViTB32(torch.nn.Module):
