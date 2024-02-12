@@ -3,7 +3,10 @@ import type
 
 cuda_allow_tf32 = True
 file_path_dataset_config = "../../visat-dataset-tools/config/gtsrb.json"
-file_path_spn = "../../visat-spn/output/spn_trees/gtsrb.spn.txt"
+file_path_spn = "../../learnspn/output/learnspn/gtsrb.spn.txt"
+file_path_spn_dataset_test = "../../visat-spn/output/spn_datasets/gtsrb.test.data"
+file_path_spn_dataset_train = "../../visat-spn/output/spn_datasets/gtsrb.ts.data"
+file_path_spn_dataset_validation = "../../visat-spn/output/spn_datasets/gtsrb.valid.data"
 file_path_spn_settings = "../../visat-spn/output/spn_matrices/matrix_a_data.npy"
 log_level = type.LogLevel.debug
 project_name = "visat-models"

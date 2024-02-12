@@ -4,7 +4,8 @@ import os
 import torch
 
 class SPNOptimizer:
-    def __init__(self, spn):
+    def __init__(self, spn, device = torch.device("cuda")):
+        self.device = device
         self.spn = spn
 
         return
@@ -13,30 +14,27 @@ class SPNOptimizer:
     def step(self):
         pass
 
-class CCCPOfflineSPNOptimizer:
-    def __init__(self):
-        super().__init__()
+class CCCPOfflineSPNOptimizer(SPNOptimizer):
+    def __init__(self, spn):
+        super().__init__(spn)
+
+        self.machine_epsilon = torch.finfo(torch.float).eps
 
         return
 
     def step(self):
-        machine_epsilon = torch.finfo(torch.float).eps
-        weight_normalization = 0
-        weights = []
+        for sum_node in self.spn.sum_nodes:
+            weight_normalization_sum_node = 0
 
-        for sum_node in self.spn.sum_node:
             for (i, child) in enumerate(sum_node.children):
-                weight = sum_node.weights[i] * torch.exp(sum_node.value_backward + child.value_forward - self.spn.root_node.value_forward)
-                weights.append(weight)
+                weights = sum_node.weights[i] * torch.exp(sum_node.value_backward + child.value_forward - self.spn.root_node.value_forward)
+                sum_node.weights[i] = torch.sum(weights, 0)
 
-        # Weight normalization with Laplace smoothing
-        for weight in self.weights:
-            weight_normalization += weight + machine_epsilon
+            # Local weight normalization with Laplace smoothing
+            for weight_sum_node in sum_node.weights:
+                weight_normalization_sum_node += weight_sum_node + self.machine_epsilon
 
-        for weight in self.weights:
-            weight = (weight + machine_epsilon) / weight_normalization
-
-        self.spn.set_weights(weights)
+            sum_node.weights = (sum_node.weights + self.machine_epsilon) / weight_normalization_sum_node
 
         return
 
@@ -82,6 +80,7 @@ class Node:
             value_forward_parents_product = torch.stack(value_forward_parents_product)
 
         if len(weights_parents_sum) > 0:
+            weights_parents_sum = torch.stack(weights_parents_sum)
             weights_parents_sum = torch.Tensor(weights_parents_sum).reshape(-1, 1)
             weights_parents_sum = weights_parents_sum.to(self.device)
 
@@ -213,6 +212,11 @@ class SPN:
 
         return
 
+    def __call__(self, settings):
+        self.set_leaf_nodes(settings)
+
+        return self.forward()
+
     def backward(self):
         if not self.reuse_backward:
             if len(self.traversal_order_backward) == 0:
@@ -266,7 +270,7 @@ class SPN:
         for sum_node in self.sum_nodes:
             weights.append(sum_node.weights)
 
-        return
+        return weights
 
     def load(self, file_path_spn):
         if not os.path.exists(file_path_spn):
