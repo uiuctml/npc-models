@@ -268,7 +268,7 @@ class SPN:
         weights = []
 
         for sum_node in self.sum_nodes:
-            weights.append(sum_node.weights)
+            weights.append(torch.clone(sum_node.weights))
 
         return weights
 
@@ -425,8 +425,12 @@ class SPN:
         return
 
     def set_weights(self, weights):
+        if len(weights) != len(self.sum_nodes):
+            logger.log_fatal("Invalid weights. Quit.")
+            exit(-1)
+
         for (sum_node, sum_node_weights) in zip(self.sum_nodes, weights):
-            sum_node.weights = sum_node_weights
+            sum_node.weights = torch.clone(sum_node_weights)
 
         return
 
