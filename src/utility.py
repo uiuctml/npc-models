@@ -93,14 +93,21 @@ def wAndBGenerateRunName(model_name, model_type, seed, fine_tuning):
 
     return run_name
 
+def initializeArgumentsAttack():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-r", "--run-name", type = str, default = "", help = "WandB run name.", required = True)
+    parser.add_argument("-s", "--seed", type = int, default = 42, help = "Randomization seed.")
+    parser.add_argument("-d", "--test-dataset-dir", type = str, default = "", help = "Directory of dataset testing split.")
+
+    return parser.parse_args()
+
 def initializeArgumentsTest():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-rb", "--run-name-baseline", type = str, default = "", help = "Baseline WandB run name.", required = True)
     parser.add_argument("-rd", "--run-name-decomposed", type = str, default = "", help = "Decomposed WandB run name.", required = True)
-    parser.add_argument("-i", "--adversarial-input-file", type = str, default = "", help = "Path to adversarial input file.")
     parser.add_argument("-s", "--seed", type = int, default = 42, help = "Randomization seed.")
-    parser.add_argument("-a", "--test-adversarial", type = int, default = 0, help = "Whether to perform adversarial tests.")
     parser.add_argument("-d", "--test-dataset-dir", type = str, default = "", help = "Directory of dataset testing split.")
 
     return parser.parse_args()
@@ -230,7 +237,7 @@ def logTestOutput(config, output, composed = False):
     if not os.path.isdir(dir_test_output):
         os.makedirs(dir_test_output, exist_ok = True)
 
-    if config["test_adversarial"] == False and dir_dataset_test.split('/')[-1] == "test":
+    if dir_dataset_test.split('/')[-1] == "test":
         file_path_test_output = os.path.join(dir_test_output, config["file_name_test_output_clean"])
     else:
         file_path_test_output = os.path.join(dir_test_output, config["file_name_test_output_attacked"])
@@ -244,12 +251,7 @@ def logTestOutput(config, output, composed = False):
     file_line += "\t"
     file_line += config["run_name"]
     file_line += "\t"
-
-    if config["test_adversarial"] == False:
-        file_line += dir_dataset_test.split('/')[-1]
-    else:
-        file_line += config["file_path_input_adversarial"].split("/")[-1].split(".best.tar.pt")[0]
-
+    file_line += dir_dataset_test.split('/')[-1]
     file_line += "\t"
     file_line += str(composed)
 
@@ -275,22 +277,32 @@ def logTestOutput(config, output, composed = False):
 
     return
 
+def processArgumentsAttack():
+    arguments = initializeArgumentsAttack()
+
+    header.config_decomposed["seed"] = arguments.seed
+
+    if arguments.test_dataset_dir != "":
+        header.config_decomposed["dir_dataset_test"] = arguments.test_dataset_dir
+
+    if not initializeRunNameDecomposed(arguments.run_name) or header.run_name_decomposed == "":
+        logger.log_fatal("Run name missing. Quit.")
+        exit(1)
+
+    header.config_decomposed["model"] = header.run_name_decomposed.split(".")[1]
+
+    logger.log_trace("WandB run name: \"" + header.run_name_decomposed + "\".")
+    logger.log_trace("Model type: \"" + header.config_decomposed["model"] + "\".")
+    logger.log_trace("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
+    logger.log_trace("Directory of dataset testing split: \"" + header.config_decomposed["dir_dataset_test"] + "\".")
+
+    return
+
 def processArgumentsTest():
     arguments = initializeArgumentsTest()
 
-    if arguments.adversarial_input_file != "":
-        header.config_baseline["file_path_input_adversarial"] = arguments.adversarial_input_file
-        header.config_decomposed["file_path_input_adversarial"] = arguments.adversarial_input_file
-
     header.config_baseline["seed"] = arguments.seed
     header.config_decomposed["seed"] = arguments.seed
-
-    if arguments.test_adversarial == 0:
-        header.config_baseline["test_adversarial"] = False
-        header.config_decomposed["test_adversarial"] = False
-    else:
-        header.config_baseline["test_adversarial"] = True
-        header.config_decomposed["test_adversarial"] = True
 
     if arguments.test_dataset_dir != "":
         header.config_baseline["dir_dataset_test"] = arguments.test_dataset_dir
@@ -311,9 +323,7 @@ def processArgumentsTest():
     logger.log_trace("Baseline model type: \"" + header.config_baseline["model"] + "\".")
     logger.log_trace("Decomposed WandB run name: \"" + header.run_name_decomposed + "\".")
     logger.log_trace("Decomposed model type: \"" + header.config_decomposed["model"] + "\".")
-    logger.log_trace("Path to adversarial input file: \"" + header.config_baseline["file_path_input_adversarial"] + "\".")
     logger.log_trace("Randomization seed: " + str(header.config_baseline["seed"]) + ".")
-    logger.log_trace("Whether to perform adversarial tests: " + str(header.config_baseline["test_adversarial"]) + ".")
     logger.log_trace("Directory of dataset testing split: \"" + header.config_baseline["dir_dataset_test"] + "\".")
 
     return

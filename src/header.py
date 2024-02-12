@@ -2,6 +2,7 @@ import multiprocessing
 import type
 
 cuda_allow_tf32 = False
+dir_dataset_test_adversarial = "../../gtsrb-dataset/images/split/adversarial/test"
 file_path_dataset_config = "../../visat-dataset-tools/config/gtsrb.json"
 file_path_spn = "../../learnspn/output/learnspn/gtsrb.spn.txt"
 file_path_spn_dataset_test = "../../visat-spn/output/spn_datasets/gtsrb.test.data"
@@ -32,7 +33,6 @@ config_baseline = {
     "file_name_checkpoint_best": run_name_baseline + ".best.tar",
     "file_name_test_output_clean": "test_output_baseline_clean.txt",
     "file_name_test_output_attacked": "test_output_baseline_attacked.txt",
-    "file_path_input_adversarial": "1e-2-50.pt",
     "fine_tuning": True,
     "input_grayscale": False,
     "learning_rate_scheduler_mode": "min",
@@ -56,7 +56,6 @@ config_baseline = {
     "optimizer_weight_decay": 1e-6,
     "run_name": run_name_baseline,
     "seed": seed,
-    "test_adversarial": False,
     "type": "baseline",
     "use_l2_loss": False
 }
@@ -79,7 +78,6 @@ config_decomposed = {
     "file_name_checkpoint_best": run_name_decomposed + ".best.tar",
     "file_name_test_output_clean": "test_output_decomposed_clean.txt",
     "file_name_test_output_attacked": "test_output_decomposed_attacked.txt",
-    "file_path_input_adversarial": "1e-2-50.pt",
     "fine_tuning": True,
     "head_hidden_size": 128,
     "input_grayscale": False,
@@ -104,7 +102,6 @@ config_decomposed = {
     "optimizer_weight_decay": 1e-6,
     "run_name": run_name_decomposed,
     "seed": seed,
-    "test_adversarial": False,
     "type": "decomposed",
     "use_l2_loss": False,
     "use_covariance_loss": False
