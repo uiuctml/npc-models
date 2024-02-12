@@ -35,7 +35,7 @@ def test(model_decomposed, config_dataset, data_loader, device, batch_step):
     progress_bar.set_description_str("[INFO]: Testing progress")
 
     with torch.no_grad():
-        for (batch_index, (input, labels, _)) in enumerate(data_loader):
+        for (batch_index, (input, labels, _, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
             labels = labels.to(device, non_blocking = True)
 
@@ -104,7 +104,7 @@ def train(model_decomposed, config_dataset, data_loader, criterions, optimizer, 
     model_decomposed.train()
     progress_bar.set_description_str("[INFO]: Training progress")
 
-    for (batch_index, (input, labels, _)) in enumerate(data_loader):
+    for (batch_index, (input, labels, _, _)) in enumerate(data_loader):
         loss_covariance = 0
         loss_criterions = 0
 
@@ -190,7 +190,7 @@ def validate(model_decomposed, config_dataset, data_loader, criterions, device, 
     model_decomposed.eval()
     progress_bar.set_description_str("[INFO]: Validation progress")
 
-    for (batch_index, (input, labels, _)) in enumerate(data_loader):
+    for (batch_index, (input, labels, _, _)) in enumerate(data_loader):
         loss_overall = 0
 
         input = input.to(device, non_blocking = True)

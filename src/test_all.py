@@ -53,6 +53,12 @@ def main():
     spn_joint.load(header.file_path_spn)
     spn_marginal.load(header.file_path_spn)
 
+    logger.log_trace("Number of nodes:", len(spn_joint.nodes))
+    logger.log_trace("Number of sum nodes:", len(spn_joint.sum_nodes))
+    logger.log_trace("Number of product nodes:", len(spn_joint.product_nodes))
+    logger.log_trace("Number of leaf nodes:", len(spn_joint.leaf_nodes))
+    logger.log_trace("SPN depths:", spn_joint.depth)
+
     logger.log_info("Loading SPN leaf node settings...")
 
     spn_settings_joint = numpy.load(header.file_path_spn_settings).astype(numpy.int32)
@@ -96,7 +102,7 @@ def main():
     progress_bar.set_description_str("[INFO]: Inference progress")
 
     with torch.no_grad():
-        for (batch_index, (input, labels_decomposed, labels_original)) in enumerate(data_loader_test):
+        for (batch_index, (input, labels_decomposed, labels_original, _)) in enumerate(data_loader_test):
             input = input.to(device, non_blocking = True)
             labels_decomposed = labels_decomposed.to(device, non_blocking = True)
             labels_original = labels_original.to(device, non_blocking = True)

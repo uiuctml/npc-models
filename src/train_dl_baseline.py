@@ -26,7 +26,7 @@ def test(model_baseline, data_loader, device, batch_step):
     progress_bar.set_description_str("[INFO]: Testing progress")
 
     with torch.no_grad():
-        for (batch_index, (input, _, labels)) in enumerate(data_loader):
+        for (batch_index, (input, _, labels, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
             labels = labels.to(device, non_blocking = True)
 
@@ -80,7 +80,7 @@ def train(model_baseline, data_loader, criterion, optimizer, device, batch_step)
     model_baseline.train()
     progress_bar.set_description_str("[INFO]: Training progress")
 
-    for (batch_index, (input, _, labels)) in enumerate(data_loader):
+    for (batch_index, (input, _, labels, _)) in enumerate(data_loader):
         input = input.to(device, non_blocking = True)
         labels = labels.to(device, non_blocking = True)
 
@@ -134,7 +134,7 @@ def validate(model_baseline, data_loader, criterion, device, batch_step):
     model_baseline.eval()
     progress_bar.set_description_str("[INFO]: Validation progress")
 
-    for (batch_index, (input, _, labels)) in enumerate(data_loader):
+    for (batch_index, (input, _, labels, _)) in enumerate(data_loader):
         input = input.to(device, non_blocking = True)
         labels = labels.to(device, non_blocking = True)
 

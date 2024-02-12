@@ -74,4 +74,4 @@ class VISATDataset(torch.utils.data.Dataset):
         for label in self.labels:
             labels.append(int(label[index]))
 
-        return (image, torch.LongTensor(labels), self.labels_original[index])
+        return (image, torch.LongTensor(labels), self.labels_original[index], self.file_paths[index])
