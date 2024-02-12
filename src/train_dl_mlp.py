@@ -3,7 +3,6 @@
 import dataset
 import header
 import logger
-import math
 import model
 import sklearn.metrics
 import torch
@@ -171,13 +170,14 @@ def validate(model_decomposed, config_dataset, data_loader, criterions, device, 
             labels = labels.to(device, non_blocking = True)
 
             outputs = model_decomposed(input)
+            parameters = model_decomposed.module.get_parameters()
 
             for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
                 (_, predictions) = torch.max(outputs[i], 1)
                 loss = criterions[i](outputs[i], labels[:, i])
 
                 if header.config_decomposed["use_l2_loss"]:
-                    l2_norm = utility.computeL2Norm(model_decomposed.parameters())
+                    l2_norm = utility.computeL2Norm(parameters[i])
                     loss_l2 = header.config_decomposed["l2_lambda"] * l2_norm
                     loss += loss_l2
 
