@@ -126,12 +126,12 @@ def main():
     log_likelihoods_joint = spn_joint.forward()
     log_likelihoods_marginal = spn_marginal.forward()
 
-    logger.log_trace("Forward joint log likelihoods:", log_likelihoods_joint)
-    logger.log_trace("Forward marginal log likelihoods:", log_likelihoods_marginal)
+    logger.log_trace("Testing joint log likelihoods:", log_likelihoods_joint)
+    logger.log_trace("Testing marginal log likelihoods:", log_likelihoods_marginal)
 
     probabilities = torch.exp(log_likelihoods_joint - log_likelihoods_marginal)
 
-    logger.log_info("Forward probabilities:", probabilities)
+    logger.log_info("Testing probabilities:", probabilities)
 
     return
 
