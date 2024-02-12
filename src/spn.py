@@ -460,7 +460,7 @@ class SPN:
 
     def traverse(self, layers, depth):
         if depth not in layers.keys():
-            return depth
+            return depth - 1
 
         for node in layers[depth]:
             node.depth = depth
