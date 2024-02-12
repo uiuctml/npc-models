@@ -53,9 +53,9 @@ def main():
     log_likelihood_best = float("-inf")
     log_likelihood_train = 0
     log_likelihood_train_last = 0
-    spn_joint = spn.SPN()
+    spn_joint = spn.SPN(device)
     stopping_criterion = 1e-4
-    optimizer = spn.CCCPOfflineSPNOptimizer(spn_joint)
+    optimizer = spn.CCCPOfflineSPNOptimizer(spn_joint, device)
     weights_best = None
 
     logger.log_info("Loading SPN from \"" + header.file_path_spn + "\"...")

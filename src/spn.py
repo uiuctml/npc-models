@@ -15,8 +15,8 @@ class SPNOptimizer:
         pass
 
 class CCCPOfflineSPNOptimizer(SPNOptimizer):
-    def __init__(self, spn):
-        super().__init__(spn)
+    def __init__(self, spn, device = torch.device("cuda")):
+        super().__init__(spn, device)
 
         self.machine_epsilon = torch.finfo(torch.float).eps
 
