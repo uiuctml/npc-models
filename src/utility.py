@@ -154,7 +154,7 @@ def initializeRunNameDecomposed(run_name):
 
     return resume
 
-def loadCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer):
+def loadCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch, learning_rate_schedulers, model, optimizers):
     if wandb.run.resumed:
         if not os.path.isdir(dir_checkpoints):
             os.makedirs(dir_checkpoints, exist_ok = True)
@@ -173,18 +173,22 @@ def loadCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_be
             accuracy_validation_best = checkpoint["accuracy_validation_best"]
             batch_step_train = checkpoint["batch_step_train"]
             batch_step_validate = checkpoint["batch_step_validate"]
-            criterion = checkpoint["criterion"]
+            criterions = checkpoint["criterions"]
             epoch = checkpoint["epoch"]
-            learning_rate_scheduler.load_state_dict(checkpoint["learning_rate_scheduler_state_dict"])
             model.load_state_dict(checkpoint["model_state_dict"])
-            optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+
+            for (learning_rate_scheduler, learning_rate_scheduler_state_dict) in zip(learning_rate_schedulers, checkpoint["learning_rate_scheduler_state_dict_list"]):
+                learning_rate_scheduler.load_state_dict(learning_rate_scheduler_state_dict)
+
+            for (optimizer, optimizer_state_dict) in zip(optimizers, checkpoint["optimizer_state_dict_list"]):
+                optimizer.load_state_dict(optimizer_state_dict)
 
             logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
         else:
             logger.log_fatal("Checkpoint file \"" + file_name_checkpoint + "\" missing.")
             exit(1)
 
-    return (accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch)
+    return (accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch)
 
 def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
     if not os.path.isdir(dir_checkpoints):
@@ -406,19 +410,28 @@ def resize(image, width = None, height = None, inter = cv2.INTER_AREA):
 
     return cv2.resize(image, (width_resize, height_resize), interpolation=inter)
 
-def saveCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer):
+def saveCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch, learning_rate_schedulers, model, optimizers):
     if not os.path.isdir(dir_checkpoints):
         os.makedirs(dir_checkpoints, exist_ok = True)
+
+    learning_rate_scheduler_state_dict_list = []
+    optimizer_state_dict_list = []
+
+    for learning_rate_scheduler in learning_rate_schedulers:
+        learning_rate_scheduler_state_dict_list.append(learning_rate_scheduler.state_dict())
+
+    for optimizer in optimizers:
+        optimizer_state_dict_list.append(optimizer.state_dict())
 
     checkpoint = {
         "accuracy_validation_best": accuracy_validation_best,
         "batch_step_train": batch_step_train,
         "batch_step_validate": batch_step_validate,
-        "criterion": criterion,
+        "criterions": criterions,
         "epoch": epoch,
-        "learning_rate_scheduler_state_dict": learning_rate_scheduler.state_dict(),
+        "learning_rate_scheduler_state_dict_list": learning_rate_scheduler_state_dict_list,
         "model_state_dict": model.state_dict(),
-        "optimizer_state_dict": optimizer.state_dict()
+        "optimizer_state_dict_list": optimizer_state_dict_list
     }
     file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
 

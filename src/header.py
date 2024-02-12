@@ -81,12 +81,7 @@ config_decomposed = {
     "file_name_test_output_attacked": "test_output_decomposed_attacked.txt",
     "file_path_input_adversarial": "1e-2-50.pt",
     "fine_tuning": True,
-    "head_hidden_sizes": {
-        "color": 128,
-        "shape": 128,
-        "symbol": 128,
-        "text": 128
-    },
+    "head_hidden_size": 128,
     "input_grayscale": False,
     "learning_rate_scheduler_mode": "min",
     "learning_rate_scheduler_factor": 0.5,

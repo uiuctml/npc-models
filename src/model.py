@@ -24,14 +24,14 @@ class MLPSet(Model):
     def __init__(self, config_dataset, device):
         super().__init__()
 
-        for attribute in config_dataset["attributes"]:
-            attribute_name = attribute["name"]
-            attribute_labels = attribute["labels"]
+        self.model_list = []
 
+        for attribute in config_dataset["attributes"]:
+            attribute_labels = attribute["labels"]
             attribute_labels.remove("")
 
             input_size = header.config_decomposed["model_input_height"] * header.config_decomposed["model_input_width"] * header.config_decomposed["model_input_channels"]
-            hidden_size = header.config_decomposed["head_hidden_sizes"][attribute_name]
+            hidden_size = header.config_decomposed["head_hidden_size"]
             output_size = len(attribute_labels)
 
             model = torch.nn.Sequential(
@@ -59,7 +59,7 @@ class MLPSet(Model):
         parameters = []
 
         for model in self.model_list:
-            parameters.append(model.parameters)
+            parameters.append(model.parameters())
 
         return parameters
 
@@ -106,7 +106,7 @@ class ResNet152MTL(Model):
         for dataset_entry in config_dataset["attributes"]:
             dataset_name = dataset_entry["name"]
             dataset_labels = dataset_entry["labels"]
-            head_hidden_size = header.config_decomposed["head_hidden_sizes"][dataset_name]
+            head_hidden_size = header.config_decomposed["head_hidden_size"]
 
             dataset_labels.remove("")
 
@@ -193,7 +193,7 @@ class ViTB32MTL(Model):
         for dataset_entry in config_dataset["attributes"]:
             dataset_name = dataset_entry["name"]
             dataset_labels = dataset_entry["labels"]
-            head_hidden_size = header.config_decomposed["head_hidden_sizes"][dataset_name]
+            head_hidden_size = header.config_decomposed["head_hidden_size"]
 
             dataset_labels.remove("")
 
