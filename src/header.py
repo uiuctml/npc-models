@@ -114,14 +114,3 @@ config_decomposed = {
     "use_l2_loss": False,
     "use_covariance_loss": False
 }
-
-visualize_dir_output = "../output/visualize"
-visualize_dir_output_correct = visualize_dir_output + "/correct"
-visualize_dir_output_incorrect = visualize_dir_output + "/incorrect"
-visualize_save = False
-visualize_show = False
-visualize_size = 900
-visualize_text_position_y_start = 30
-visualize_text_position_y_increment = 20
-visualize_text_scale = 0.5
-visualize_text_thickness = 2

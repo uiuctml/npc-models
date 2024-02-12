@@ -13,7 +13,6 @@ import torch
 import torch.nn
 import tqdm
 import utility
-import visualize
 
 def main():
     utility.processArgumentsTest()
@@ -134,9 +133,6 @@ def main():
             ground_truths_epoch_baseline += labels_original.data.tolist()
             predictions_epoch_baseline += predictions_baseline.tolist()
             predictions_epoch_composed += predictions_composed.tolist()
-
-            if header.visualize_show or header.visualize_save:
-                visualize.visualize(input, composition, dataset_test, labels_decomposed, labels_original, output_baseline, outputs_decomposed, output_composed)
 
     progress_bar.close()
 
