@@ -133,10 +133,6 @@ def main():
 
     logger.log_info("Forward probabilities:", probabilities)
 
-    logger.log_info("Performing SPN backward pass...")
-
-    spn_joint.backward()
-
     return
 
 if __name__=="__main__":
