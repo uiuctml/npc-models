@@ -229,11 +229,11 @@ def createModelBaseline(device):
     config_dataset = json.load(file_config_dataset)
     file_config_dataset.close()
 
-    if header.config_baseline["model"] == type.NetworkModelBaseline.resnet152.name:
+    if header.config_baseline["model"] == type.ModelBaseline.resnet152.name:
         header.config_baseline["model_pretrained_weights"] = "IMAGENET1K_V2"
         logger.log_trace("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
         return ResNet152(config_dataset, device)
-    elif header.config_baseline["model"] == type.NetworkModelBaseline.vit_b_32.name:
+    elif header.config_baseline["model"] == type.ModelBaseline.vit_b_32.name:
         header.config_baseline["model_pretrained_weights"] = "IMAGENET1K_V1"
         logger.log_trace("Model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
         return ViTB32(config_dataset, device)
@@ -246,13 +246,13 @@ def createModelDecomposed(device):
     config_dataset = json.load(file_config_dataset)
     file_config_dataset.close()
 
-    if header.config_decomposed["model"] == type.NetworkModelDecomposed.mlp_set.name:
+    if header.config_decomposed["model"] == type.ModelDecomposed.mlp_set.name:
         return MLPSet(config_dataset, device)
-    elif header.config_decomposed["model"] == type.NetworkModelDecomposed.resnet152_mtl.name:
+    elif header.config_decomposed["model"] == type.ModelDecomposed.resnet152_mtl.name:
         header.config_decomposed["model_pretrained_weights"] = "IMAGENET1K_V2"
         logger.log_trace("Model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
         return ResNet152MTL(config_dataset, device)
-    elif header.config_decomposed["model"] == type.NetworkModelDecomposed.vit_b_32_mtl.name:
+    elif header.config_decomposed["model"] == type.ModelDecomposed.vit_b_32_mtl.name:
         header.config_decomposed["model_pretrained_weights"] = "IMAGENET1K_V1"
         logger.log_trace("Model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
         return ViTB32MTL(config_dataset, device)

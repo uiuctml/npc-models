@@ -3,7 +3,7 @@
 import dataset
 import header
 import logger
-import network
+import model
 import sklearn.metrics
 import torch
 import torch.nn
@@ -13,8 +13,8 @@ import tqdm
 import utility
 import wandb
 
-def test(model, data_loader, device, batch_step):
-    utility.loadCheckpointBest(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint_best"], model)
+def test(model_baseline, data_loader, device, batch_step):
+    utility.loadCheckpointBest(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint_best"], model_baseline)
 
     accuracy_epoch = 0
     ground_truths_epoch = []
@@ -22,7 +22,7 @@ def test(model, data_loader, device, batch_step):
     predictions_epoch = []
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
 
-    model.eval()
+    model_baseline.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")
 
     with torch.no_grad():
@@ -31,7 +31,7 @@ def test(model, data_loader, device, batch_step):
             labels = labels.to(device, non_blocking = True)
 
             with torch.set_grad_enabled(False):
-                output = model(input)
+                output = model_baseline(input)
                 (_, predictions) = torch.max(output, 1)
 
             corrects = torch.sum(predictions == labels.data).item()
@@ -72,12 +72,12 @@ def test(model, data_loader, device, batch_step):
 
     return batch_step
 
-def train(model, data_loader, criterion, optimizer, device, batch_step):
+def train(model_baseline, data_loader, criterion, optimizer, device, batch_step):
     accuracy_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
 
-    model.train()
+    model_baseline.train()
     progress_bar.set_description_str("[INFO]: Training progress")
 
     for (batch_index, (input, _, labels)) in enumerate(data_loader):
@@ -87,12 +87,12 @@ def train(model, data_loader, criterion, optimizer, device, batch_step):
         optimizer.zero_grad()
 
         with torch.set_grad_enabled(True):
-            output = model(input)
+            output = model_baseline(input)
             (_, predictions) = torch.max(output, 1)
             loss = criterion(output, labels)
 
             if header.config_baseline["use_l2_loss"]:
-                l2_norm = utility.computeL2Norm(model.parameters())
+                l2_norm = utility.computeL2Norm(model_baseline.parameters())
                 loss_l2 = header.config_baseline["l2_lambda"] * l2_norm
                 loss += loss_l2
 
@@ -126,12 +126,12 @@ def train(model, data_loader, criterion, optimizer, device, batch_step):
 
     return batch_step
 
-def validate(model, data_loader, criterion, device, batch_step):
+def validate(model_baseline, data_loader, criterion, device, batch_step):
     accuracy_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
 
-    model.eval()
+    model_baseline.eval()
     progress_bar.set_description_str("[INFO]: Validation progress")
 
     for (batch_index, (input, _, labels)) in enumerate(data_loader):
@@ -139,12 +139,12 @@ def validate(model, data_loader, criterion, device, batch_step):
         labels = labels.to(device, non_blocking = True)
 
         with torch.set_grad_enabled(False):
-            output = model(input)
+            output = model_baseline(input)
             (_, predictions) = torch.max(output, 1)
             loss = criterion(output, labels)
 
             if header.config_baseline["use_l2_loss"]:
-                l2_norm = utility.computeL2Norm(model.parameters())
+                l2_norm = utility.computeL2Norm(model_baseline.parameters())
                 loss_l2 = header.config_baseline["l2_lambda"] * l2_norm
                 loss += loss_l2
 
@@ -204,18 +204,18 @@ def main():
     data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_baseline["data_loader_batch_size"], shuffle = header.config_baseline["data_loader_shuffle"], num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     epoch = 1
-    model = network.createModelBaseline(device)
-    model = torch.nn.DataParallel(model)
-    model = model.to(device)
-    optimizer = torch.optim.SGD(model.module.get_parameters(), lr = header.config_baseline["optimizer_learning_rate"], momentum = header.config_baseline["optimizer_momentum"], weight_decay = header.config_baseline["optimizer_weight_decay"])
+    model_baseline = model.createModelBaseline(device)
+    model_baseline = torch.nn.DataParallel(model_baseline)
+    model_baseline = model_baseline.to(device)
+    optimizer = torch.optim.SGD(model_baseline.module.get_parameters(), lr = header.config_baseline["optimizer_learning_rate"], momentum = header.config_baseline["optimizer_momentum"], weight_decay = header.config_baseline["optimizer_weight_decay"])
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.config_baseline["learning_rate_scheduler_mode"], header.config_baseline["learning_rate_scheduler_factor"], header.config_baseline["learning_rate_scheduler_patience"], header.config_baseline["learning_rate_scheduler_threshold"], header.config_baseline["learning_rate_scheduler_threshold_mode"], header.config_baseline["learning_rate_scheduler_cooldown"], header.config_baseline["learning_rate_scheduler_min_learning_rate"], header.config_baseline["learning_rate_scheduler_min_learning_rate_decay"], header.config_baseline["learning_rate_scheduler_verbose"])
     progress_bar = None
 
-    (accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch) = utility.loadCheckpoint(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer)
+    (accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch) = utility.loadCheckpoint(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model_baseline, optimizer)
 
     if header.show_model_summary:
         model_input_size = (header.config_baseline["model_input_channels"], header.config_baseline["model_input_height"], header.config_baseline["model_input_width"])
-        torchsummary.summary(model, input_size = model_input_size)
+        torchsummary.summary(model_baseline, input_size = model_input_size)
 
     if epoch <= header.config_baseline["epochs"]:
         progress_bar = tqdm.tqdm(total = header.config_baseline["epochs"], position = 0)
@@ -229,17 +229,17 @@ def main():
         wandb.log({"training/epoch/step": epoch})
         wandb.log({"validation/epoch/step": epoch})
 
-        batch_step_train = train(model, data_loader_train, criterion, optimizer, device, batch_step_train)
-        (accuracy_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model, data_loader_validation, criterion, device, batch_step_validate)
+        batch_step_train = train(model_baseline, data_loader_train, criterion, optimizer, device, batch_step_train)
+        (accuracy_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_baseline, data_loader_validation, criterion, device, batch_step_validate)
 
         learning_rate_scheduler.step(loss_validation_epoch)
 
         if accuracy_validation_epoch > accuracy_validation_best:
             accuracy_validation_best = accuracy_validation_epoch
             wandb.log({"validation/epoch/accuracy_best": accuracy_validation_best})
-            utility.saveCheckpoint(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint_best"], accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer)
+            utility.saveCheckpoint(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint_best"], accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model_baseline, optimizer)
 
-        utility.saveCheckpoint(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model, optimizer)
+        utility.saveCheckpoint(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterion, epoch, learning_rate_scheduler, model_baseline, optimizer)
 
         epoch += 1
 
@@ -250,7 +250,7 @@ def main():
     wandb.summary["validation/epoch/accuracy_best"] = accuracy_validation_best
 
     wandb.log({"testing/epoch/step": 1})
-    batch_step_test = test(model, data_loader_test, device, batch_step_test)
+    batch_step_test = test(model_baseline, data_loader_test, device, batch_step_test)
 
     wandb.finish()
 

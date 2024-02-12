@@ -4,7 +4,7 @@ import dataset
 import header
 import logger
 import math
-import network
+import model
 import sklearn.metrics
 import torch
 import torch.nn
@@ -14,8 +14,8 @@ import tqdm
 import utility
 import wandb
 
-def test(model, config_dataset, data_loader, device, batch_step):
-    utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model)
+def test(model_decomposed, config_dataset, data_loader, device, batch_step):
+    utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
 
     accuracy_epoch_list = []
     ground_truths_epoch_list = []
@@ -31,7 +31,7 @@ def test(model, config_dataset, data_loader, device, batch_step):
         ground_truths_epoch_list.append([])
         predictions_epoch_list.append([])
 
-    model.eval()
+    model_decomposed.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")
 
     with torch.no_grad():
@@ -40,7 +40,7 @@ def test(model, config_dataset, data_loader, device, batch_step):
             labels = labels.to(device, non_blocking = True)
 
             with torch.set_grad_enabled(False):
-                outputs = model(input)
+                outputs = model_decomposed(input)
 
                 for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
                     (_, predictions) = torch.max(outputs[i], 1)
@@ -91,7 +91,7 @@ def test(model, config_dataset, data_loader, device, batch_step):
 
     return batch_step
 
-def train(model, config_dataset, data_loader, criterions, optimizers, device, batch_step):
+def train(model_decomposed, config_dataset, data_loader, criterions, optimizers, device, batch_step):
     accuracy_epoch_list = []
     loss_epoch_list = []
     loss_overall_epoch = 0
@@ -101,14 +101,14 @@ def train(model, config_dataset, data_loader, criterions, optimizers, device, ba
         accuracy_epoch_list.append(0)
         loss_epoch_list.append(0)
 
-    model.train()
+    model_decomposed.train()
     progress_bar.set_description_str("[INFO]: Training progress")
 
     for (batch_index, (input, labels, _)) in enumerate(data_loader):
-        outputs = model(input)
+        outputs = model_decomposed(input)
 
         with torch.set_grad_enabled(True):
-            parameters = model.get_parameters()
+            parameters = model_decomposed.get_parameters()
 
             for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
                 optimizer = optimizers[i]
@@ -160,7 +160,7 @@ def train(model, config_dataset, data_loader, criterions, optimizers, device, ba
 
     return batch_step
 
-def validate(model, config_dataset, data_loader, criterions, device, batch_step):
+def validate(model_decomposed, config_dataset, data_loader, criterions, device, batch_step):
     accuracy_epoch_list = []
     loss_epoch_list = []
     loss_overall_epoch = 0
@@ -170,7 +170,7 @@ def validate(model, config_dataset, data_loader, criterions, device, batch_step)
         accuracy_epoch_list.append(0)
         loss_epoch_list.append(0)
 
-    model.eval()
+    model_decomposed.eval()
     progress_bar.set_description_str("[INFO]: Validation progress")
 
     for (batch_index, (input, labels, _)) in enumerate(data_loader):
@@ -180,14 +180,14 @@ def validate(model, config_dataset, data_loader, criterions, device, batch_step)
         labels = labels.to(device, non_blocking = True)
 
         with torch.set_grad_enabled(False):
-            outputs = model(input)
+            outputs = model_decomposed(input)
 
             for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
                 (_, predictions) = torch.max(outputs[i], 1)
                 loss = criterions[i](outputs[i], labels[:, i])
 
                 if header.config_decomposed["use_l2_loss"]:
-                    l2_norm = utility.computeL2Norm(model.parameters())
+                    l2_norm = utility.computeL2Norm(model_decomposed.parameters())
                     loss_l2 = header.config_decomposed["l2_lambda"] * l2_norm
                     loss += loss_l2
 
@@ -261,13 +261,13 @@ def main():
     data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     epoch = 1
-    model = network.createModelDecomposed(device)
-    model = torch.nn.DataParallel(model)
-    model = model.to(device)
+    model_decomposed = model.createModelDecomposed(device)
+    model_decomposed = torch.nn.DataParallel(model_decomposed)
+    model_decomposed = model_decomposed.to(device)
 
     progress_bar = None
 
-    parameters = model.module.get_parameters()
+    parameters = model_decomposed.module.get_parameters()
     print(parameters)
 
     for i in range(len(config_dataset["attributes"])):
@@ -278,11 +278,11 @@ def main():
         optimizers.append(optimizer)
         criterions.append(torch.nn.CrossEntropyLoss())
 
-    (accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch) = utility.loadCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch, learning_rate_scheduler, model, optimizer)
+    (accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch) = utility.loadCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch, learning_rate_scheduler, model_decomposed, optimizer)
 
     if header.show_model_summary:
         model_input_size = (header.config_decomposed["model_input_channels"], header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])
-        torchsummary.summary(model, input_size = model_input_size)
+        torchsummary.summary(model_decomposed, input_size = model_input_size)
 
     if epoch <= header.config_decomposed["epochs"]:
         progress_bar = tqdm.tqdm(total = header.config_decomposed["epochs"], position = 0)
@@ -296,8 +296,8 @@ def main():
         wandb.log({"training/epoch/step": epoch})
         wandb.log({"validation/epoch/step": epoch})
 
-        batch_step_train = train(model, config_dataset, data_loader_train, criterions, optimizers, device, batch_step_train)
-        (accuracy_validation_epoch_list, loss_overall_validation_epoch, batch_step_validate) = validate(model, config_dataset, data_loader_validation, criterions, device, batch_step_validate)
+        batch_step_train = train(model_decomposed, config_dataset, data_loader_train, criterions, optimizers, device, batch_step_train)
+        (accuracy_validation_epoch_list, loss_overall_validation_epoch, batch_step_validate) = validate(model_decomposed, config_dataset, data_loader_validation, criterions, device, batch_step_validate)
 
         learning_rate_scheduler.step(loss_overall_validation_epoch)
 
@@ -306,9 +306,9 @@ def main():
         if accuracy_validation_epoch_mean > accuracy_validation_best:
             accuracy_validation_best = accuracy_validation_epoch_mean
             wandb.log({"validation/epoch/accuracy_best": accuracy_validation_best})
-            utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch, learning_rate_scheduler, model, optimizer)
+            utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch, learning_rate_scheduler, model_decomposed, optimizer)
 
-        utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch, learning_rate_scheduler, model, optimizer)
+        utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch, learning_rate_scheduler, model_decomposed, optimizer)
 
         epoch += 1
 
@@ -319,7 +319,7 @@ def main():
     wandb.summary["validation/epoch/accuracy_best"] = accuracy_validation_best
 
     wandb.log({"testing/epoch/step": 1})
-    batch_step_test = test(model, config_dataset, data_loader_test, device, batch_step_test)
+    batch_step_test = test(model_decomposed, config_dataset, data_loader_test, device, batch_step_test)
 
     wandb.finish()
 

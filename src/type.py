@@ -1,14 +1,5 @@
 import enum
 
-class NetworkModelBaseline(enum.Enum):
-    resnet152 = 0
-    vit_b_32 = 1
-
-class NetworkModelDecomposed(enum.Enum):
-    mlp_set = 0
-    resnet152_mtl = 1
-    vit_b_32_mtl = 2
-
 class LogLevel(enum.Enum):
     all = 6
     trace = 5
@@ -38,3 +29,12 @@ class LogLevel(enum.Enum):
         if self.__class__ is other.__class__:
             return self.value < other.value
         return NotImplemented
+
+class ModelBaseline(enum.Enum):
+    resnet152 = 0
+    vit_b_32 = 1
+
+class ModelDecomposed(enum.Enum):
+    mlp_set = 0
+    resnet152_mtl = 1
+    vit_b_32_mtl = 2
