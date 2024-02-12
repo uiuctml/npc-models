@@ -108,7 +108,7 @@ def train(model, config_dataset, data_loader, criterions, optimizers, device, ba
         outputs = model(input)
 
         with torch.set_grad_enabled(True):
-            parameters = model.getOptimizerParameters()
+            parameters = model.get_parameters()
 
             for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
                 optimizer = optimizers[i]
@@ -267,7 +267,7 @@ def main():
 
     progress_bar = None
 
-    parameters = model.module.getOptimizerParameters()
+    parameters = model.module.get_parameters()
     print(parameters)
 
     for i in range(len(config_dataset["attributes"])):

@@ -5,9 +5,9 @@ class NetworkModelBaseline(enum.Enum):
     vit_b_32 = 1
 
 class NetworkModelDecomposed(enum.Enum):
-    resnet152_mtl = 0
-    vit_b_32_mtl = 1
-    mlp_set = 2
+    mlp_set = 0
+    resnet152_mtl = 1
+    vit_b_32_mtl = 2
 
 class LogLevel(enum.Enum):
     all = 6
