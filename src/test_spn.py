@@ -51,11 +51,11 @@ def main():
     spn_joint.load(header.file_path_spn)
     spn_marginal.load(header.file_path_spn)
 
-    logger.log_info("Number of nodes:", len(spn_joint.nodes))
-    logger.log_info("Number of sum nodes:", len(spn_joint.sum_nodes))
-    logger.log_info("Number of product nodes:", len(spn_joint.product_nodes))
-    logger.log_info("Number of leaf nodes:", len(spn_joint.leaf_nodes))
-    logger.log_info("SPN depths:", spn_joint.depth)
+    logger.log_info("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
+    logger.log_info("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
+    logger.log_info("Number of product nodes: " + str(len(spn_joint.product_nodes)) + ".")
+    logger.log_info("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
+    logger.log_info("SPN depths: " + str(spn_joint.depth) + ".")
 
     logger.log_info("Setting SPN leaf nodes...")
 
@@ -67,12 +67,12 @@ def main():
     log_likelihoods_joint = spn_joint.forward()
     log_likelihoods_marginal = spn_marginal.forward()
 
-    logger.log_trace("Testing joint log likelihoods:", log_likelihoods_joint)
-    logger.log_trace("Testing marginal log likelihoods:", log_likelihoods_marginal)
+    logger.log_trace("Testing joint log likelihoods: " + str(log_likelihoods_joint) + ".")
+    logger.log_trace("Testing marginal log likelihoods: " + str(log_likelihoods_marginal) + ".")
 
     probabilities = torch.exp(log_likelihoods_joint - log_likelihoods_marginal)
 
-    logger.log_info("Testing probabilities:", probabilities)
+    logger.log_info("Testing probabilities: " + str(probabilities) + ".")
 
     return
 

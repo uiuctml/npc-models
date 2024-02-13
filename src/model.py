@@ -246,7 +246,7 @@ def createModelBaseline(device):
         return ViTB32(config_dataset, device)
     else:
         logger.log_fatal("Unknown baseline network model \"" + header.config_baseline["model"] + "\".")
-        exit(1)
+        exit(-1)
 
 def createModelDecomposed(device):
     file_config_dataset = open(header.file_path_dataset_config, "r")
@@ -265,4 +265,4 @@ def createModelDecomposed(device):
         return ViTB32MTL(config_dataset, device)
     else:
         logger.log_fatal("Unknown decomposed network model \"" + header.config_decomposed["model"] + "\".")
-        exit(1)
+        exit(-1)

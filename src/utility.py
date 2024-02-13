@@ -152,7 +152,7 @@ def initializeRunNameBaseline(run_name):
     if run_name != "":
         if run_name.split(".")[0] != header.run_name_baseline_keyword:
             logger.log_fatal("Invalid baseline run name. Quit.")
-            exit(1)
+            exit(-1)
 
         header.run_name_baseline = run_name
         resume = True
@@ -170,7 +170,7 @@ def initializeRunNameDecomposed(run_name):
     if run_name != "":
         if run_name.split(".")[0] != header.run_name_decomposed_keyword:
             logger.log_fatal("Invalid decomposed run name. Quit.")
-            exit(1)
+            exit(-1)
 
         header.run_name_decomposed = run_name
         resume = True
@@ -215,7 +215,7 @@ def loadCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_be
             logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
         else:
             logger.log_fatal("Checkpoint file \"" + file_name_checkpoint + "\" missing.")
-            exit(1)
+            exit(-1)
 
     return (accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch)
 
@@ -239,7 +239,7 @@ def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
         logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
     else:
         logger.log_fatal("Checkpoint file \"" + file_name_checkpoint + "\" missing.")
-        exit(1)
+        exit(-1)
 
     return
 
@@ -300,7 +300,7 @@ def logTestOutput(output, config, config_dataset, composed = False):
                 file_test_output.write(file_line_header)
             else:
                 logger.log_fatal("Unknown configuration type")
-                exit(1)
+                exit(-1)
 
         file_test_output.write(file_line)
 
@@ -318,7 +318,7 @@ def processArgumentsTestBaseline():
 
     if not initializeRunNameBaseline(arguments.run_name) or header.run_name_baseline == "":
         logger.log_fatal("Run name missing. Quit.")
-        exit(1)
+        exit(-1)
 
     header.config_baseline["model"] = header.run_name_baseline.split(".")[1]
 
@@ -339,7 +339,7 @@ def processArgumentsTestDecomposed():
 
     if not initializeRunNameDecomposed(arguments.run_name) or header.run_name_decomposed == "":
         logger.log_fatal("Run name missing. Quit.")
-        exit(1)
+        exit(-1)
 
     header.config_decomposed["model"] = header.run_name_decomposed.split(".")[1]
 
@@ -370,7 +370,7 @@ def processArgumentsTrainBaseline():
 
     if header.run_name_baseline == "":
         logger.log_fatal("Run name missing. Quit.")
-        exit(1)
+        exit(-1)
 
     header.config_baseline["model"] = header.run_name_baseline.split(".")[1]
 
@@ -408,7 +408,7 @@ def processArgumentsTrainDecomposed():
 
     if header.run_name_decomposed == "":
         logger.log_fatal("Run name missing. Quit.")
-        exit(1)
+        exit(-1)
 
     header.config_decomposed["model"] = header.run_name_decomposed.split(".")[1]
 

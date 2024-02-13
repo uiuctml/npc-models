@@ -47,11 +47,11 @@ def main():
     spn_joint.load(header.file_path_spn)
     spn_marginal.load(header.file_path_spn)
 
-    logger.log_trace("Number of nodes:", len(spn_joint.nodes))
-    logger.log_trace("Number of sum nodes:", len(spn_joint.sum_nodes))
-    logger.log_trace("Number of product nodes:", len(spn_joint.product_nodes))
-    logger.log_trace("Number of leaf nodes:", len(spn_joint.leaf_nodes))
-    logger.log_trace("SPN depths:", spn_joint.depth)
+    logger.log_trace("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
+    logger.log_trace("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
+    logger.log_trace("Number of product nodes: " + str(len(spn_joint.product_nodes)) + ".")
+    logger.log_trace("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
+    logger.log_trace("SPN depths: " + str(spn_joint.depth) + ".")
 
     logger.log_info("Loading SPN leaf node settings...")
 
@@ -66,7 +66,7 @@ def main():
 
     gc.collect()
 
-    logger.log_info("SPN leaf node setting dimension:", int(spn_settings_joint.shape[0]), int(spn_settings_joint.shape[1]))
+    logger.log_info("SPN leaf node setting dimension: (" + str(int(spn_settings_joint.shape[0])) + ", " + str(int(spn_settings_joint.shape[1])) + ").")
 
     spn_output_rows = len(dataset_test.classes_original)
     spn_output_cols = 1
@@ -74,7 +74,7 @@ def main():
     for attribute in dataset_test.classes:
         spn_output_cols *= len(attribute)
 
-    logger.log_info("SPN output dimension:", int(spn_output_rows), int(spn_output_cols))
+    logger.log_info("SPN output dimension: (" + str(int(spn_output_rows)) + ", " + str(int(spn_output_cols)) + ").")
 
     logger.log_info("Setting SPN leaf nodes...")
 

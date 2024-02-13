@@ -63,26 +63,26 @@ def main():
     spn_joint.load(header.file_path_spn)
     weights_best = spn_joint.get_weights()
 
-    logger.log_info("Number of nodes:", len(spn_joint.nodes))
-    logger.log_info("Number of sum nodes:", len(spn_joint.sum_nodes))
-    logger.log_info("Number of product nodes:", len(spn_joint.product_nodes))
-    logger.log_info("Number of leaf nodes:", len(spn_joint.leaf_nodes))
-    logger.log_info("SPN depths:", spn_joint.depth)
+    logger.log_info("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
+    logger.log_info("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
+    logger.log_info("Number of product nodes: " + str(len(spn_joint.product_nodes)) + ".")
+    logger.log_info("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
+    logger.log_info("SPN depths: " + str(spn_joint.depth) + ".")
 
     log_likelihood_test = test(spn_joint, dataset_test)
 
-    logger.log_info("Testing log likelihood:", round(log_likelihood_test, 4))
+    logger.log_info("Testing log likelihood: " + str(round(log_likelihood_test, 4)) + ".")
 
     while True:
-        logger.log_info("Epoch:", epoch_counter)
+        logger.log_info("Epoch: " + str(epoch_counter) + ".")
 
         log_likelihood_train_last = log_likelihood_train
 
         log_likelihood_train = train(spn_joint, dataset_train, optimizer)
         log_likelihood_validate = validate(spn_joint, dataset_validation)
 
-        logger.log_info("Training log likelihood:", round(log_likelihood_train, 4))
-        logger.log_info("Validation log likelihood:", round(log_likelihood_validate, 4))
+        logger.log_info("Training log likelihood: " + str(round(log_likelihood_train, 4)) + ".")
+        logger.log_info("Validation log likelihood: " + str(round(log_likelihood_validate, 4)) + ".")
 
         if log_likelihood_validate > log_likelihood_best:
             log_likelihood_best = log_likelihood_validate
@@ -99,7 +99,7 @@ def main():
 
     log_likelihood_test = test(spn_joint, dataset_test)
 
-    logger.log_info("Testing log likelihood:", round(log_likelihood_test, 4))
+    logger.log_info("Testing log likelihood: " + str(round(log_likelihood_test, 4)) + ".")
 
     return
 
