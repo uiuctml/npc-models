@@ -1,6 +1,7 @@
 import multiprocessing
 import type
 
+attack_targeted_attribute = 0
 cuda_allow_tf32 = False
 dir_dataset_test_adversarial = "../../gtsrb-dataset/images/split/adversarial/test"
 file_path_dataset_config = "../../visat-dataset-tools/config/gtsrb.json"
