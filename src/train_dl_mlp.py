@@ -4,7 +4,7 @@ import dataset
 import header
 import logger
 import model
-import sklearn.metrics
+import test_dl_mlp
 import torch
 import torch.nn
 import torch.optim
@@ -12,82 +12,6 @@ import torchsummary
 import tqdm
 import utility
 import wandb
-
-def test(model_decomposed, config_dataset, data_loader, device, batch_step):
-    utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
-
-    accuracy_epoch_list = []
-    ground_truths_epoch_list = []
-    output_list = []
-    output_list_accuracy = []
-    output_list_precision = []
-    output_list_recall = []
-    predictions_epoch_list = []
-    progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
-
-    for _ in config_dataset["attributes"]:
-        accuracy_epoch_list.append(0)
-        ground_truths_epoch_list.append([])
-        predictions_epoch_list.append([])
-
-    model_decomposed.eval()
-    progress_bar.set_description_str("[INFO]: Testing progress")
-
-    with torch.set_grad_enabled(False):
-        for (batch_index, (input, labels, _, _)) in enumerate(data_loader):
-            input = input.to(device, non_blocking = True)
-            labels = labels.to(device, non_blocking = True)
-
-            outputs = model_decomposed(input)
-
-            for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
-                (_, predictions) = torch.max(outputs[i], 1)
-
-                corrects = torch.sum(predictions == labels[:, i].data).item()
-                accuracy_batch = corrects / input.size(0)
-                accuracy_epoch_list[i] += corrects
-
-                wandb.log({"testing/batch/" + dataset_entry["name"] + "/accuracy": accuracy_batch})
-
-                ground_truths_epoch_list[i] += labels[:, i].data.tolist()
-                predictions_epoch_list[i] += predictions.tolist()
-
-            progress_bar.n = batch_index + 1
-            progress_bar.refresh()
-
-            wandb.log({"testing/batch/step": batch_step})
-
-            batch_step += 1
-
-    progress_bar.close()
-
-    for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
-        accuracy_epoch_list[i] /= len(data_loader.dataset)
-        precision_epoch = sklearn.metrics.precision_score(ground_truths_epoch_list[i], predictions_epoch_list[i], average = "macro", zero_division = 0)
-        recall_epoch = sklearn.metrics.recall_score(ground_truths_epoch_list[i], predictions_epoch_list[i], average = "macro", zero_division = 0)
-
-        output_list_accuracy.append(accuracy_epoch_list[i])
-        output_list_precision.append(precision_epoch)
-        output_list_recall.append(recall_epoch)
-
-        wandb.log({"testing/epoch/" + dataset_entry["name"] + "/accuracy": accuracy_epoch_list[i]})
-        wandb.log({"testing/epoch/" + dataset_entry["name"] + "/precision": precision_epoch})
-        wandb.log({"testing/epoch/" + dataset_entry["name"] + "/recall": recall_epoch})
-        wandb.summary["testing/epoch/" + dataset_entry["name"] + "/accuracy"] = accuracy_epoch_list[i]
-        wandb.summary["testing/epoch/" + dataset_entry["name"] + "/precision"] = precision_epoch
-        wandb.summary["testing/epoch/" + dataset_entry["name"] + "/recall"] = recall_epoch
-
-        logger.log_info("Testing accuracy for \"" + dataset_entry["name"] + "\": " + str(accuracy_epoch_list[i]) + ".")
-        logger.log_trace("Testing precision for \"" + dataset_entry["name"] + "\": " + str(precision_epoch) + ".")
-        logger.log_trace("Testing recall for \"" + dataset_entry["name"] + "\": " + str(recall_epoch) + ".")
-
-    output_list += output_list_accuracy
-    output_list += output_list_precision
-    output_list += output_list_recall
-
-    utility.logTestOutput(header.config_decomposed, output_list)
-
-    return batch_step
 
 def train(model_decomposed, config_dataset, data_loader, criterions, optimizers, device, batch_step):
     accuracy_epoch_list = []
@@ -298,7 +222,7 @@ def main():
     wandb.summary["validation/epoch/accuracy_best"] = accuracy_validation_best
 
     wandb.log({"testing/epoch/step": 1})
-    batch_step_test = test(model_decomposed, config_dataset, data_loader_test, device, batch_step_test)
+    batch_step_test = test_dl_mlp.test(model_decomposed, config_dataset, data_loader_test, device, batch_step_test)
 
     wandb.finish()
 
