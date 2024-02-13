@@ -126,7 +126,7 @@ def wAndBGenerateRunName(model_name, model_type, seed, fine_tuning):
 
     return run_name
 
-def initializeArgumentsAttack():
+def initializeArgumentsTest():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-r", "--run-name", type = str, default = "", help = "WandB run name.", required = True)
@@ -135,7 +135,7 @@ def initializeArgumentsAttack():
 
     return parser.parse_args()
 
-def initializeArgumentsTest():
+def initializeArgumentsTestAll():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-rb", "--run-name-baseline", type = str, default = "", help = "Baseline WandB run name.", required = True)
@@ -310,29 +310,8 @@ def logTestOutput(config, output, composed = False):
 
     return
 
-def processArgumentsAttack():
-    arguments = initializeArgumentsAttack()
-
-    header.config_decomposed["seed"] = arguments.seed
-
-    if arguments.test_dataset_dir != "":
-        header.config_decomposed["dir_dataset_test"] = arguments.test_dataset_dir
-
-    if not initializeRunNameDecomposed(arguments.run_name) or header.run_name_decomposed == "":
-        logger.log_fatal("Run name missing. Quit.")
-        exit(1)
-
-    header.config_decomposed["model"] = header.run_name_decomposed.split(".")[1]
-
-    logger.log_trace("WandB run name: \"" + header.run_name_decomposed + "\".")
-    logger.log_trace("Model type: \"" + header.config_decomposed["model"] + "\".")
-    logger.log_trace("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
-    logger.log_trace("Directory of dataset testing split: \"" + header.config_decomposed["dir_dataset_test"] + "\".")
-
-    return
-
-def processArgumentsTest():
-    arguments = initializeArgumentsTest()
+def processArgumentsTestAll():
+    arguments = initializeArgumentsTestAll()
 
     header.config_baseline["seed"] = arguments.seed
     header.config_decomposed["seed"] = arguments.seed
@@ -358,6 +337,27 @@ def processArgumentsTest():
     logger.log_trace("Decomposed model type: \"" + header.config_decomposed["model"] + "\".")
     logger.log_trace("Randomization seed: " + str(header.config_baseline["seed"]) + ".")
     logger.log_trace("Directory of dataset testing split: \"" + header.config_baseline["dir_dataset_test"] + "\".")
+
+    return
+
+def processArgumentsTestDecomposed():
+    arguments = initializeArgumentsTest()
+
+    header.config_decomposed["seed"] = arguments.seed
+
+    if arguments.test_dataset_dir != "":
+        header.config_decomposed["dir_dataset_test"] = arguments.test_dataset_dir
+
+    if not initializeRunNameDecomposed(arguments.run_name) or header.run_name_decomposed == "":
+        logger.log_fatal("Run name missing. Quit.")
+        exit(1)
+
+    header.config_decomposed["model"] = header.run_name_decomposed.split(".")[1]
+
+    logger.log_trace("WandB run name: \"" + header.run_name_decomposed + "\".")
+    logger.log_trace("Model type: \"" + header.config_decomposed["model"] + "\".")
+    logger.log_trace("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
+    logger.log_trace("Directory of dataset testing split: \"" + header.config_decomposed["dir_dataset_test"] + "\".")
 
     return
 

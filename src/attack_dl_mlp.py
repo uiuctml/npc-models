@@ -54,7 +54,7 @@ def attack_pgd(model_decomposed, x, y, attribute, num_steps = 20, step_size=1e-2
     return x_adv
 
 def main():
-    utility.processArgumentsAttack()
+    utility.processArgumentsTestDecomposed()
 
     utility.setSeed(header.seed)
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32

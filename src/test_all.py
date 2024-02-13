@@ -15,7 +15,7 @@ import tqdm
 import utility
 
 def main():
-    utility.processArgumentsTest()
+    utility.processArgumentsTestAll()
 
     utility.setSeed(header.seed)
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
