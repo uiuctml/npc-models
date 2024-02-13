@@ -4,7 +4,7 @@ import dataset
 import header
 import logger
 import model
-import test_dl_mlp
+import test_dl_decomposed
 import torch
 import torchsummary
 import tqdm
@@ -28,7 +28,7 @@ def train(model_decomposed, config_dataset, data_loader, criterions, optimizers,
             input = input.to(device, non_blocking = True)
             labels = labels.to(device, non_blocking = True)
 
-            outputs = model_decomposed(input)
+            (outputs, _) = model_decomposed(input)
             parameters = model_decomposed.module.get_parameters()
 
             for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
@@ -91,7 +91,7 @@ def validate(model_decomposed, config_dataset, data_loader, criterions, device, 
             input = input.to(device, non_blocking = True)
             labels = labels.to(device, non_blocking = True)
 
-            outputs = model_decomposed(input)
+            (outputs, _) = model_decomposed(input)
             parameters = model_decomposed.module.get_parameters()
 
             for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
@@ -220,7 +220,7 @@ def main():
     wandb.summary["validation/epoch/accuracy_best"] = accuracy_validation_best
 
     wandb.log({"testing/epoch/step": batch_step_test})
-    test_dl_mlp.test(model_decomposed, config_dataset, data_loader_test, device, batch_step_test)
+    test_dl_decomposed.test(model_decomposed, config_dataset, data_loader_test, device, batch_step_test)
 
     wandb.finish()
 

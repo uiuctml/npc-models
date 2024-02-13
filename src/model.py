@@ -53,7 +53,7 @@ class MLPSet(Model):
         for model in self.model_list:
             outputs.append(model(input))
 
-        return outputs
+        return (outputs, None)
 
     def get_parameters(self):
         parameters = []

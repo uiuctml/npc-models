@@ -35,7 +35,7 @@ def test(model_decomposed, config_dataset, data_loader, device, batch_step):
             input = input.to(device, non_blocking = True)
             labels = labels.to(device, non_blocking = True)
 
-            outputs = model_decomposed(input)
+            (outputs, _) = model_decomposed(input)
 
             for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
                 (_, predictions) = torch.max(outputs[i], 1)
