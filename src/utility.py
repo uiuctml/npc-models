@@ -72,7 +72,9 @@ def getLabelsAttribute(dataset_config):
     labels_attribute = {}
 
     for attribute in dataset_config["attributes"]:
-        attribute["labels"].remove("")
+        if "" in attribute["labels"]:
+            attribute["labels"].remove("")
+
         labels_attribute[attribute["name"]] = attribute["labels"]
 
     return labels_attribute

@@ -6,13 +6,38 @@ import gc
 import header
 import logger
 import model
-import numpy
 import sklearn.metrics
 import spn
 import torch
 import torch.nn
 import tqdm
 import utility
+
+def generateSPNSettings(config_dataset, device):
+    attribute_ranges = []
+    labels_attribute = utility.getLabelsAttribute(config_dataset)
+    labels_original = utility.getLabelsOriginal(config_dataset)
+
+    for attribute in labels_attribute.keys():
+        attribute_count = len(labels_attribute[attribute])
+        attribute_range = torch.Tensor(range(attribute_count))
+        attribute_range = attribute_range.to(device)
+        attribute_ranges.append(attribute_range)
+
+        logger.log_trace("Number of attribute labels for \"" + attribute + "\": " + str(attribute_count) + ".")
+
+    original_count = len(labels_original)
+    original_range = torch.Tensor(range(original_count))
+    original_range = original_range.to(device)
+
+    logger.log_trace("Number of original labels: " + str(original_count) + ".")
+
+    spn_settings = torch.cartesian_prod(*attribute_ranges)
+    original_range = original_range.repeat_interleave(spn_settings.shape[0]).reshape(-1, 1)
+    spn_settings = spn_settings.repeat(original_count, 1)
+    spn_settings = torch.cat((spn_settings, original_range), 1)
+
+    return spn_settings
 
 def main():
     utility.processArgumentsTestDecomposed()
@@ -61,14 +86,9 @@ def main():
 
     logger.log_info("Loading SPN leaf node settings...")
 
-    spn_settings_joint = numpy.load(header.file_path_spn_settings).astype(numpy.int32)
-    spn_settings_marginal = numpy.copy(spn_settings_joint)
+    spn_settings_joint = generateSPNSettings(config_dataset, device)
+    spn_settings_marginal = torch.clone(spn_settings_joint)
     spn_settings_marginal[:, -1] = -1
-
-    spn_settings_joint = torch.Tensor(spn_settings_joint)
-    spn_settings_joint = spn_settings_joint.to(device)
-    spn_settings_marginal = torch.Tensor(spn_settings_marginal)
-    spn_settings_marginal = spn_settings_marginal.to(device)
 
     gc.collect()
 
