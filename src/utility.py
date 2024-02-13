@@ -69,6 +69,39 @@ def createTransform(config):
 
     return dataset_transforms
 
+def getLabelsAttribute(dataset_config):
+    labels_attribute = {}
+
+    for attribute in dataset_config["attributes"]:
+        attribute["labels"].remove("")
+        labels_attribute[attribute["name"]] = attribute["labels"]
+
+    return labels_attribute
+
+def getLabelsOriginal(dataset_config):
+    return list(dataset_config["mappings"].keys())
+
+def getIndicesFromLabelsAttribute(labels_attribute):
+    indices = {}
+
+    for attribute in labels_attribute.keys():
+        labels_to_indices = {}
+
+        for i in range(len(labels_attribute[attribute])):
+            labels_to_indices[labels_attribute[attribute][i]] = i
+
+        indices[attribute] = labels_to_indices
+
+    return indices
+
+def getIndicesFromLabelsOriginal(labels_original):
+    labels_to_indices = {}
+
+    for i in range(len(labels_original)):
+        labels_to_indices[labels_original[i]] = i
+
+    return labels_to_indices
+
 def wAndBGenerateRunName(model_name, model_type, seed, fine_tuning):
     date_time_list = list(datetime.datetime.now().timetuple())[:-4]
     run_name = model_name

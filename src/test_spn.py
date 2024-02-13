@@ -1,106 +1,50 @@
 #!/usr/bin/env python3
 
 import header
+import json
 import logger
 import spn
 import torch
+import utility
 
 def main():
+    file_dataset_config = open(header.file_path_dataset_config, "r")
+    dataset_config = json.load(file_dataset_config)
+    file_dataset_config.close()
+
     device = torch.device("cuda")
+    labels_attribute = utility.getLabelsAttribute(dataset_config)
+    labels_original = utility.getLabelsOriginal(dataset_config)
+    indices_attribute = utility.getIndicesFromLabelsAttribute(labels_attribute)
+    indices_original = utility.getIndicesFromLabelsOriginal(labels_original)
     spn_joint = spn.SPN()
     spn_marginal = spn.SPN()
-    # GTSRB ground truth attribute and original labels
-    spn_settings_gtsrb_joint = torch.Tensor([
-        [2, 0, 0, 9, 15, 2, 2, 0],
-        [2, 0, 0, 9, 15, 2, 3, 1],
-        [2, 0, 0, 9, 15, 2, 4, 2],
-        [2, 0, 0, 9, 15, 2, 5, 3],
-        [2, 0, 0, 9, 15, 2, 6, 4],
-        [2, 0, 0, 9, 15, 2, 7, 5],
-        [2, 1, 0, 9, 15, 2, 7, 6],
-        [2, 0, 0, 9, 15, 2, 0, 7],
-        [2, 0, 0, 9, 15, 2, 1, 8],
-        [2, 0, 0, 9,  4, 1, 8, 9],
-        [2, 0, 0, 9,  3, 1, 8, 10],
-        [2, 0, 3, 6, 15, 0, 8, 11],
-        [2, 2, 1, 9, 15, 3, 8, 12],
-        [2, 0, 3, 9, 15, 3, 8, 13],
-        [1, 2, 2, 9, 12, 1, 8, 14],
-        [2, 0, 0, 9, 15, 3, 8, 15],
-        [2, 0, 0, 9, 14, 1, 8, 16],
-        [1, 1, 0, 9, 15, 3, 8, 17],
-        [2, 0, 3, 9,  6, 1, 8, 18],
-        [2, 0, 3, 3, 15, 0, 8, 19],
-        [2, 0, 3, 4, 15, 0, 8, 20],
-        [2, 0, 3, 0, 15, 0, 8, 21],
-        [2, 0, 3, 9,  1, 1, 8, 22],
-        [2, 0, 3, 9,  2, 1, 8, 23],
-        [2, 0, 3, 9, 10, 1, 8, 24],
-        [2, 0, 3, 9, 11, 1, 8, 25],
-        [2, 0, 3, 9, 13, 1, 8, 26],
-        [2, 0, 3, 9,  8, 1, 8, 27],
-        [2, 0, 3, 9,  9, 1, 8, 28],
-        [2, 0, 3, 9,  0, 1, 8, 29],
-        [2, 0, 3, 9,  7, 1, 8, 30],
-        [2, 0, 3, 9,  5, 1, 8, 31],
-        [2, 1, 0, 9, 15, 3, 8, 32],
-        [0, 2, 0, 4, 15, 0, 8, 33],
-        [0, 2, 0, 3, 15, 0, 8, 34],
-        [0, 2, 0, 6, 15, 0, 8, 35],
-        [0, 2, 0, 8, 15, 0, 8, 36],
-        [0, 2, 0, 7, 15, 0, 8, 37],
-        [0, 2, 0, 2, 15, 0, 8, 38],
-        [0, 2, 0, 1, 15, 0, 8, 39],
-        [0, 2, 0, 5, 15, 0, 8, 40],
-        [2, 1, 0, 9,  4, 1, 8, 41],
-        [2, 1, 0, 9,  3, 1, 8, 42]
-    ])
-    # GTSRB ground truth attribute labels with original labels marginalized
-    spn_settings_gtsrb_marginal = torch.Tensor([
-        [2, 0, 0, 9, 15, 2, 2, -1],
-        [2, 0, 0, 9, 15, 2, 3, -1],
-        [2, 0, 0, 9, 15, 2, 4, -1],
-        [2, 0, 0, 9, 15, 2, 5, -1],
-        [2, 0, 0, 9, 15, 2, 6, -1],
-        [2, 0, 0, 9, 15, 2, 7, -1],
-        [2, 1, 0, 9, 15, 2, 7, -1],
-        [2, 0, 0, 9, 15, 2, 0, -1],
-        [2, 0, 0, 9, 15, 2, 1, -1],
-        [2, 0, 0, 9,  4, 1, 8, -1],
-        [2, 0, 0, 9,  3, 1, 8, -1],
-        [2, 0, 3, 6, 15, 0, 8, -1],
-        [2, 2, 1, 9, 15, 3, 8, -1],
-        [2, 0, 3, 9, 15, 3, 8, -1],
-        [1, 2, 2, 9, 12, 1, 8, -1],
-        [2, 0, 0, 9, 15, 3, 8, -1],
-        [2, 0, 0, 9, 14, 1, 8, -1],
-        [1, 1, 0, 9, 15, 3, 8, -1],
-        [2, 0, 3, 9,  6, 1, 8, -1],
-        [2, 0, 3, 3, 15, 0, 8, -1],
-        [2, 0, 3, 4, 15, 0, 8, -1],
-        [2, 0, 3, 0, 15, 0, 8, -1],
-        [2, 0, 3, 9,  1, 1, 8, -1],
-        [2, 0, 3, 9,  2, 1, 8, -1],
-        [2, 0, 3, 9, 10, 1, 8, -1],
-        [2, 0, 3, 9, 11, 1, 8, -1],
-        [2, 0, 3, 9, 13, 1, 8, -1],
-        [2, 0, 3, 9,  8, 1, 8, -1],
-        [2, 0, 3, 9,  9, 1, 8, -1],
-        [2, 0, 3, 9,  0, 1, 8, -1],
-        [2, 0, 3, 9,  7, 1, 8, -1],
-        [2, 0, 3, 9,  5, 1, 8, -1],
-        [2, 1, 0, 9, 15, 3, 8, -1],
-        [0, 2, 0, 4, 15, 0, 8, -1],
-        [0, 2, 0, 3, 15, 0, 8, -1],
-        [0, 2, 0, 6, 15, 0, 8, -1],
-        [0, 2, 0, 8, 15, 0, 8, -1],
-        [0, 2, 0, 7, 15, 0, 8, -1],
-        [0, 2, 0, 2, 15, 0, 8, -1],
-        [0, 2, 0, 1, 15, 0, 8, -1],
-        [0, 2, 0, 5, 15, 0, 8, -1],
-        [2, 1, 0, 9,  4, 1, 8, -1],
-        [2, 1, 0, 9,  3, 1, 8, -1]
-    ])
+    spn_settings_joint = []
+    spn_settings_marginal = []
+
+    for label_original in dataset_config["mappings"].keys():
+        spn_setting_joint = []
+        spn_setting_marginal = []
+
+        for attribute_name in dataset_config["mappings"][label_original]["labels"].keys():
+            label_attribute = dataset_config["mappings"][label_original]["labels"][attribute_name]
+            index_attribute = indices_attribute[attribute_name][label_attribute]
+
+            spn_setting_joint.append(index_attribute)
+            spn_setting_marginal.append(index_attribute)
+
+        index_original = indices_original[label_original]
+
+        spn_setting_joint.append(index_original)
+        spn_setting_marginal.append(-1)
+
+        spn_settings_joint.append(spn_setting_joint)
+        spn_settings_marginal.append(spn_setting_marginal)
+
+    spn_settings_joint = torch.Tensor(spn_settings_joint)
+    spn_settings_marginal = torch.Tensor(spn_settings_marginal)
+    spn_settings_joint = spn_settings_joint.to(device)
+    spn_settings_marginal = spn_settings_marginal.to(device)
 
     logger.log_info("Loading SPN from \"" + header.file_path_spn + "\"...")
 
@@ -115,11 +59,8 @@ def main():
 
     logger.log_info("Setting SPN leaf nodes...")
 
-    spn_settings_gtsrb_joint = spn_settings_gtsrb_joint.to(device)
-    spn_settings_gtsrb_marginal = spn_settings_gtsrb_marginal.to(device)
-
-    spn_joint.set_leaf_nodes(spn_settings_gtsrb_joint)
-    spn_marginal.set_leaf_nodes(spn_settings_gtsrb_joint)
+    spn_joint.set_leaf_nodes(spn_settings_joint)
+    spn_marginal.set_leaf_nodes(spn_settings_marginal)
 
     logger.log_info("Performing SPN forward pass...")
 
