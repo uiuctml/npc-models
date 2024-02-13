@@ -17,6 +17,12 @@ import utility
 def main():
     utility.processArgumentsTestDecomposed()
 
+    header.run_name_baseline = header.config_decomposed["run_name"]
+    header.config_baseline["dir_dataset_test"] = header.config_decomposed["dir_dataset_test"]
+    header.config_baseline["file_name_checkpoint"] = header.run_name_decomposed + ".tar"
+    header.config_baseline["file_name_checkpoint_best"] = header.run_name_decomposed + ".best.tar"
+    header.config_baseline["run_name"] = header.run_name_decomposed
+
     utility.setSeed(header.seed)
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
 
