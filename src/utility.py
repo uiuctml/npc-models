@@ -340,6 +340,27 @@ def processArgumentsTestAll():
 
     return
 
+def processArgumentsTestBaseline():
+    arguments = initializeArgumentsTest()
+
+    header.config_baseline["seed"] = arguments.seed
+
+    if arguments.test_dataset_dir != "":
+        header.config_baseline["dir_dataset_test"] = arguments.test_dataset_dir
+
+    if not initializeRunNameBaseline(arguments.run_name) or header.run_name_baseline == "":
+        logger.log_fatal("Run name missing. Quit.")
+        exit(1)
+
+    header.config_baseline["model"] = header.run_name_baseline.split(".")[1]
+
+    logger.log_trace("WandB run name: \"" + header.run_name_baseline + "\".")
+    logger.log_trace("Model type: \"" + header.config_baseline["model"] + "\".")
+    logger.log_trace("Randomization seed: " + str(header.config_baseline["seed"]) + ".")
+    logger.log_trace("Directory of dataset testing split: \"" + header.config_baseline["dir_dataset_test"] + "\".")
+
+    return
+
 def processArgumentsTestDecomposed():
     arguments = initializeArgumentsTest()
 

@@ -4,73 +4,12 @@ import dataset
 import header
 import logger
 import model
-import sklearn.metrics
+import test_dl_baseline
 import torch
-import torch.nn
-import torch.optim
 import torchsummary
 import tqdm
 import utility
 import wandb
-
-def test(model_baseline, data_loader, device, batch_step):
-    utility.loadCheckpointBest(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint_best"], model_baseline)
-
-    accuracy_epoch = 0
-    ground_truths_epoch = []
-    output_list = []
-    predictions_epoch = []
-    progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
-
-    model_baseline.eval()
-    progress_bar.set_description_str("[INFO]: Testing progress")
-
-    with torch.no_grad():
-        for (batch_index, (input, _, labels, _)) in enumerate(data_loader):
-            input = input.to(device, non_blocking = True)
-            labels = labels.to(device, non_blocking = True)
-
-            with torch.set_grad_enabled(False):
-                output = model_baseline(input)
-                (_, predictions) = torch.max(output, 1)
-
-            corrects = torch.sum(predictions == labels.data).item()
-
-            accuracy_batch = corrects / input.size(0)
-            accuracy_epoch += corrects
-
-            progress_bar.n = batch_index + 1
-            progress_bar.refresh()
-
-            wandb.log({"testing/batch/accuracy": accuracy_batch})
-            wandb.log({"testing/batch/step": batch_step})
-
-            ground_truths_epoch += labels.data.tolist()
-            predictions_epoch += predictions.tolist()
-
-            batch_step += 1
-
-    progress_bar.close()
-
-    accuracy_epoch /= len(data_loader.dataset)
-    precision_epoch = sklearn.metrics.precision_score(ground_truths_epoch, predictions_epoch, average = "macro", zero_division = 0)
-    recall_epoch = sklearn.metrics.recall_score(ground_truths_epoch, predictions_epoch, average = "macro", zero_division = 0)
-    output_list += [accuracy_epoch, precision_epoch, recall_epoch]
-
-    wandb.log({"testing/epoch/accuracy": accuracy_epoch})
-    wandb.log({"testing/epoch/precision": precision_epoch})
-    wandb.log({"testing/epoch/recall": recall_epoch})
-    wandb.summary["testing/epoch/accuracy"] = accuracy_epoch
-    wandb.summary["testing/epoch/precision"] = precision_epoch
-    wandb.summary["testing/epoch/recall"] = recall_epoch
-
-    logger.log_info("Testing accuracy: " + str(accuracy_epoch) + ".")
-    logger.log_trace("Testing precision: " + str(precision_epoch) + ".")
-    logger.log_trace("Testing recall: " + str(recall_epoch) + ".")
-
-    utility.logTestOutput(header.config_baseline, output_list)
-
-    return batch_step
 
 def train(model_baseline, data_loader, criterion, optimizer, device, batch_step):
     accuracy_epoch = 0
@@ -249,8 +188,8 @@ def main():
     logger.log_info("Best validation accuracy: " + str(accuracy_validation_best) + ".")
     wandb.summary["validation/epoch/accuracy_best"] = accuracy_validation_best
 
-    wandb.log({"testing/epoch/step": 1})
-    batch_step_test = test(model_baseline, data_loader_test, device, batch_step_test)
+    wandb.log({"testing/epoch/step": batch_step_test})
+    test_dl_baseline.test(model_baseline, data_loader_test, device, batch_step_test)
 
     wandb.finish()
 

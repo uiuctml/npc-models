@@ -330,8 +330,8 @@ def main():
     logger.log_info("Best validation accuracy: " + str(accuracy_validation_best) + ".")
     wandb.summary["validation/epoch/accuracy_best"] = accuracy_validation_best
 
-    wandb.log({"testing/epoch/step": 1})
-    batch_step_test = test(model_decomposed, config_dataset, data_loader_test, device, batch_step_test)
+    wandb.log({"testing/epoch/step": batch_step_test})
+    test(model_decomposed, config_dataset, data_loader_test, device, batch_step_test)
 
     wandb.finish()
 
