@@ -1,7 +1,6 @@
 import header
 import logger
 import torch
-import torch.nn
 
 class Composition():
     def __init__(self, dataset, device):

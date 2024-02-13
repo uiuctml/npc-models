@@ -2,7 +2,6 @@ import header
 import json
 import logger
 import os
-import PIL
 import PIL.Image
 import torch
 

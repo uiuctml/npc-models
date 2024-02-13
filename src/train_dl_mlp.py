@@ -6,8 +6,6 @@ import logger
 import model
 import test_dl_mlp
 import torch
-import torch.nn
-import torch.optim
 import torchsummary
 import tqdm
 import utility

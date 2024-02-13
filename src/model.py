@@ -2,7 +2,7 @@ import abc
 import header
 import json
 import logger
-import torch.nn
+import torch
 import torchvision
 import type
 

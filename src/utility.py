@@ -9,7 +9,6 @@ import os
 import random
 import socket
 import torch
-import torch.nn
 import torchvision
 import wandb
 
