@@ -20,7 +20,7 @@ def attack_pgd(model_decomposed, x, y, attribute, num_steps = 20, step_size=1e-2
     model_decomposed = model_decomposed.train()
 
     for _ in range(num_steps):
-        prediction = model_decomposed(x_adv)
+        (prediction, _) = model_decomposed(x_adv)
 
         loss = loss_fn(prediction[attribute], y_target if targeted else y[:, attribute])
         loss.backward()
@@ -54,7 +54,7 @@ def attack_pgd(model_decomposed, x, y, attribute, num_steps = 20, step_size=1e-2
     return x_adv
 
 def main():
-    utility.processArgumentsTestDecomposed()
+    utility.processArgumentsAttack()
 
     utility.setSeed(header.seed)
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
@@ -62,13 +62,18 @@ def main():
     if not os.path.exists(header.dir_dataset_test_adversarial):
         os.makedirs(header.dir_dataset_test_adversarial, exist_ok = True)
 
-    attribute = 0
     dataset_transforms = utility.createTransform(header.config_decomposed)
     dataset_test = dataset.VISATDataset(header.config_decomposed["dir_dataset_test"], dataset_transforms)
     config_dataset = dataset_test.config
+
+    if header.attack_targeted_attribute >= len(config_dataset["attributes"]):
+        logger.log_fatal("Invalid targeted attribute. Quit.")
+        exit(-1)
+
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
-    dir_attack = header.config_decomposed["model"] + "_" + "pgd" + "_" + config_dataset["attributes"][attribute]["name"]
+    attribute_name = config_dataset["attributes"][header.attack_targeted_attribute]["name"]
+    dir_attack = header.config_decomposed["model"] + "_" + "pgd" + "_" + attribute_name
     dir_dataset_test_adversarial_attack = os.path.join(header.dir_dataset_test_adversarial, dir_attack)
 
     if not os.path.exists(dir_dataset_test_adversarial_attack):
@@ -84,15 +89,15 @@ def main():
     utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
 
     progress_bar = tqdm.tqdm(total = len(data_loader_test), position = 0, leave = False)
-    progress_bar.set_description_str("[INFO]: Attack progress")
+    progress_bar.set_description_str("[INFO]: Attacking \"" + attribute_name + "\" attribute")
 
     for (batch_index, (input, labels, _, input_file_paths)) in enumerate(data_loader_test):
         input = input.to(device, non_blocking = True)
         labels = labels.to(device, non_blocking = True)
-        input_attacked_list = attack_pgd(model_decomposed, input, labels, attribute)
+        input_attacked_list = attack_pgd(model_decomposed, input, labels, header.attack_targeted_attribute)
 
         progress_bar_save = tqdm.tqdm(total = len(input_attacked_list), position = 1, leave = False)
-        progress_bar_save.set_description_str("[INFO]: Saving progress")
+        progress_bar_save.set_description_str("[INFO]: Saving attacks")
 
         for (input_index, (input_attacked, input_file_path)) in enumerate(zip(input_attacked_list, input_file_paths)):
             file_name_input = os.path.basename(input_file_path)
