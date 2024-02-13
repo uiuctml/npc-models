@@ -148,8 +148,8 @@ def main():
 
     logger.log_info("Composed testing accuracy: " + str(accuracy_epoch_composed) + ".")
 
-    utility.logTestOutput(header.config_baseline, output_list_composed, True)
-    utility.logTestOutput(header.config_decomposed, output_list_decomposed)
+    utility.logTestOutput(output_list_composed, header.config_baseline, config_dataset, True)
+    utility.logTestOutput(output_list_decomposed, header.config_decomposed, config_dataset)
 
     return
 

@@ -82,7 +82,7 @@ def test(model_decomposed, config_dataset, data_loader, device, batch_step):
     output_list += output_list_precision
     output_list += output_list_recall
 
-    utility.logTestOutput(header.config_decomposed, output_list)
+    utility.logTestOutput(output_list, header.config_decomposed, config_dataset)
 
     return batch_step
 

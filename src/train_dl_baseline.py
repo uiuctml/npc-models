@@ -138,6 +138,7 @@ def main():
     dataset_test = dataset.VISATDataset(header.config_baseline["dir_dataset_test"], dataset_transforms)
     dataset_train = dataset.VISATDataset(header.config_baseline["dir_dataset_train"], dataset_transforms)
     dataset_validation = dataset.VISATDataset(header.config_baseline["dir_dataset_validation"], dataset_transforms)
+    config_dataset = dataset_test.config
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_baseline["data_loader_batch_size"], shuffle = False, num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
     data_loader_train = torch.utils.data.DataLoader(dataset_train, batch_size = header.config_baseline["data_loader_batch_size"], shuffle = header.config_baseline["data_loader_shuffle"], num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
     data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_baseline["data_loader_batch_size"], shuffle = header.config_baseline["data_loader_shuffle"], num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
@@ -189,7 +190,7 @@ def main():
     wandb.summary["validation/epoch/accuracy_best"] = accuracy_validation_best
 
     wandb.log({"testing/epoch/step": batch_step_test})
-    test_dl_baseline.test(model_baseline, data_loader_test, device, batch_step_test)
+    test_dl_baseline.test(model_baseline, config_dataset, data_loader_test, device, batch_step_test)
 
     wandb.finish()
 

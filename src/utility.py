@@ -243,7 +243,7 @@ def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
 
     return
 
-def logTestOutput(config, output, composed = False):
+def logTestOutput(output, config, config_dataset, composed = False):
     if config["log_test_output"] == False:
         return
 
@@ -288,7 +288,16 @@ def logTestOutput(config, output, composed = False):
             if config["type"] == "baseline":
                 file_test_output.write("# seed\tmodel\tattack\tcomposed\taccuracy\tprecision\trecall\n")
             elif config["type"] == "decomposed":
-                file_test_output.write("# seed\tmodel\tattack\tcomposed\taccuracy_color\taccuracy_shape\taccuracy_symbol\taccuracy_text\tprecision_color\tprecision_shape\tprecision_symbol\tprecision_text\trecall_color\trecall_shape\trecall_symbol\trecall_text\n")
+                file_line_header = "# seed\tmodel\tattack\tcomposed"
+
+                for data_type in ["accuracy", "precision", "recall"]:
+                    for attribute in config_dataset["attributes"]:
+                        attribute_name = attribute["name"]
+                        file_line_header += "\t"
+                        file_line_header += data_type + "_" + attribute_name
+
+                file_line_header += "\n"
+                file_test_output.write(file_line_header)
             else:
                 logger.log_fatal("Unknown configuration type")
                 exit(1)
