@@ -134,16 +134,6 @@ def initializeArgumentsTest():
 
     return parser.parse_args()
 
-def initializeArgumentsTestAll():
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("-rb", "--run-name-baseline", type = str, default = "", help = "Baseline WandB run name.", required = True)
-    parser.add_argument("-rd", "--run-name-decomposed", type = str, default = "", help = "Decomposed WandB run name.", required = True)
-    parser.add_argument("-s", "--seed", type = int, default = 42, help = "Randomization seed.")
-    parser.add_argument("-d", "--test-dataset-dir", type = str, default = "", help = "Directory of dataset testing split.")
-
-    return parser.parse_args()
-
 def initializeArgumentsTrain():
     parser = argparse.ArgumentParser()
 
@@ -306,36 +296,6 @@ def logTestOutput(config, output, composed = False):
         file_test_output.write(file_line)
 
     logger.log_info("Logged test output to \"" + file_path_test_output + "\".")
-
-    return
-
-def processArgumentsTestAll():
-    arguments = initializeArgumentsTestAll()
-
-    header.config_baseline["seed"] = arguments.seed
-    header.config_decomposed["seed"] = arguments.seed
-
-    if arguments.test_dataset_dir != "":
-        header.config_baseline["dir_dataset_test"] = arguments.test_dataset_dir
-        header.config_decomposed["dir_dataset_test"] = arguments.test_dataset_dir
-
-    if not initializeRunNameBaseline(arguments.run_name_baseline) or header.run_name_baseline == "":
-        logger.log_fatal("Baseline run name missing. Quit.")
-        exit(1)
-
-    if not initializeRunNameDecomposed(arguments.run_name_decomposed) or header.run_name_decomposed == "":
-        logger.log_fatal("Decomposed run name missing. Quit.")
-        exit(1)
-
-    header.config_baseline["model"] = header.run_name_baseline.split(".")[1]
-    header.config_decomposed["model"] = header.run_name_decomposed.split(".")[1]
-
-    logger.log_trace("Baseline WandB run name: \"" + header.run_name_baseline + "\".")
-    logger.log_trace("Baseline model type: \"" + header.config_baseline["model"] + "\".")
-    logger.log_trace("Decomposed WandB run name: \"" + header.run_name_decomposed + "\".")
-    logger.log_trace("Decomposed model type: \"" + header.config_decomposed["model"] + "\".")
-    logger.log_trace("Randomization seed: " + str(header.config_baseline["seed"]) + ".")
-    logger.log_trace("Directory of dataset testing split: \"" + header.config_baseline["dir_dataset_test"] + "\".")
 
     return
 
