@@ -11,32 +11,6 @@ import torch
 import tqdm
 import utility
 
-def generateSPNSettings(config_dataset, device):
-    attribute_ranges = []
-    labels_attribute = utility.getLabelsAttribute(config_dataset)
-    labels_original = utility.getLabelsOriginal(config_dataset)
-
-    for attribute in labels_attribute.keys():
-        attribute_count = len(labels_attribute[attribute])
-        attribute_range = torch.Tensor(range(attribute_count))
-        attribute_range = attribute_range.to(device)
-        attribute_ranges.append(attribute_range)
-
-        logger.log_trace("Number of attribute labels for \"" + attribute + "\": " + str(attribute_count) + ".")
-
-    original_count = len(labels_original)
-    original_range = torch.Tensor(range(original_count))
-    original_range = original_range.to(device)
-
-    logger.log_trace("Number of original labels: " + str(original_count) + ".")
-
-    spn_settings = torch.cartesian_prod(*attribute_ranges)
-    original_range = original_range.repeat_interleave(spn_settings.shape[0]).reshape(-1, 1)
-    spn_settings = spn_settings.repeat(original_count, 1)
-    spn_settings = torch.cat((spn_settings, original_range), 1)
-
-    return spn_settings
-
 def test(model_decomposed, spn_joint, spn_marginal, dataset_test, config_dataset, data_loader, device, batch_step):
     utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
     utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
@@ -159,7 +133,7 @@ def main():
 
     logger.log_info("Loading SPN leaf node settings...")
 
-    spn_settings_joint = generateSPNSettings(config_dataset, device)
+    spn_settings_joint = utility.generateSPNSettings(config_dataset, device)
     spn_settings_marginal = torch.clone(spn_settings_joint)
     spn_settings_marginal[:, -1] = -1
 

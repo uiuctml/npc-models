@@ -68,6 +68,30 @@ def createTransform(config):
 
     return dataset_transforms
 
+def generateRunName(model, type, seed, fine_tuning):
+    date_time_list = list(datetime.datetime.now().timetuple())[:-4]
+    run_name = model
+    run_name += "."
+    run_name += type
+    run_name += "."
+
+    if fine_tuning:
+        run_name += "ft"
+    else:
+        run_name += "ftl"
+
+    run_name += "."
+    run_name += str(seed)
+
+    for entry in date_time_list:
+        run_name += "."
+        run_name += str(entry)
+
+    run_name += "."
+    run_name += socket.gethostname()
+
+    return run_name
+
 def getLabelsAttribute(dataset_config):
     labels_attribute = {}
 
@@ -103,29 +127,31 @@ def getIndicesFromLabelsOriginal(labels_original):
 
     return labels_to_indices
 
-def generateRunName(model, type, seed, fine_tuning):
-    date_time_list = list(datetime.datetime.now().timetuple())[:-4]
-    run_name = model
-    run_name += "."
-    run_name += type
-    run_name += "."
+def generateSPNSettings(config_dataset, device):
+    attribute_ranges = []
+    labels_attribute = getLabelsAttribute(config_dataset)
+    labels_original = getLabelsOriginal(config_dataset)
 
-    if fine_tuning:
-        run_name += "ft"
-    else:
-        run_name += "ftl"
+    for attribute in labels_attribute.keys():
+        attribute_count = len(labels_attribute[attribute])
+        attribute_range = torch.Tensor(range(attribute_count))
+        attribute_range = attribute_range.to(device)
+        attribute_ranges.append(attribute_range)
 
-    run_name += "."
-    run_name += str(seed)
+        logger.log_trace("Number of attribute labels for \"" + attribute + "\": " + str(attribute_count) + ".")
 
-    for entry in date_time_list:
-        run_name += "."
-        run_name += str(entry)
+    original_count = len(labels_original)
+    original_range = torch.Tensor(range(original_count))
+    original_range = original_range.to(device)
 
-    run_name += "."
-    run_name += socket.gethostname()
+    logger.log_trace("Number of original labels: " + str(original_count) + ".")
 
-    return run_name
+    spn_settings = torch.cartesian_prod(*attribute_ranges)
+    original_range = original_range.repeat_interleave(spn_settings.shape[0]).reshape(-1, 1)
+    spn_settings = spn_settings.repeat(original_count, 1)
+    spn_settings = torch.cat((spn_settings, original_range), 1)
+
+    return spn_settings
 
 def initializeArgumentsAttack():
     parser = argparse.ArgumentParser()
