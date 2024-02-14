@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argument
 import header
 import logger
 import spn
@@ -50,7 +51,7 @@ def validate(spn_joint, settings):
     return torch.mean(log_likelihoods).item()
 
 def main():
-    resume = utility.processArgumentsTrainSPN()
+    resume = argument.processArgumentsTrainSPN()
 
     utility.setSeed(header.config_spn["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32

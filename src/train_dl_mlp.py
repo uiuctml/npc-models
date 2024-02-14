@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argument
 import dataset
 import header
 import logger
@@ -132,7 +133,7 @@ def validate(model_decomposed, config_dataset, data_loader, criterions, device, 
     return (accuracy_epoch_list, loss_epoch_list, batch_step)
 
 def main():
-    resume = utility.processArgumentsTrainDecomposed()
+    resume = argument.processArgumentsTrainDecomposed()
 
     utility.setSeed(header.config_decomposed["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argument
 import composition
 import dataset
 import header
@@ -104,7 +105,7 @@ def test(model_decomposed, spn_joint, spn_marginal, dataset_test, config_dataset
     return
 
 def main():
-    utility.processArgumentsTestComposed()
+    argument.processArgumentsTestComposed()
 
     header.run_name_baseline = header.config_decomposed["run_name"]
     header.config_baseline["dir_dataset_test"] = header.config_decomposed["dir_dataset_test"]

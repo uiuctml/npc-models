@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argument
 import dataset
 import header
 import logger
@@ -115,7 +116,7 @@ def validate(model_baseline, data_loader, criterion, device, batch_step):
     return (accuracy_epoch, loss_epoch, batch_step)
 
 def main():
-    resume = utility.processArgumentsTrainBaseline()
+    resume = argument.processArgumentsTrainBaseline()
 
     utility.setSeed(header.config_baseline["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32

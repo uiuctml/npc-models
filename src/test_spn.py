@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argument
 import header
 import json
 import logger
@@ -32,7 +33,7 @@ def generateSPNSettings(config_dataset, device):
     return spn_settings
 
 def main():
-    utility.processArgumentsTestSPN()
+    argument.processArgumentsTestSPN()
 
     utility.setSeed(header.seed)
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32

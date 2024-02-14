@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argument
 import dataset
 import header
 import logger
@@ -70,7 +71,7 @@ def test(model_baseline, config_dataset, data_loader, device, batch_step):
     return batch_step
 
 def main():
-    utility.processArgumentsTestBaseline()
+    argument.processArgumentsTestBaseline()
 
     utility.setSeed(header.config_baseline["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
