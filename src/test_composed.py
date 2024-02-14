@@ -8,7 +8,6 @@ import model
 import sklearn.metrics
 import spn
 import torch
-import torch.nn
 import tqdm
 import utility
 
@@ -38,17 +37,10 @@ def generateSPNSettings(config_dataset, device):
 
     return spn_settings
 
-def main():
-    utility.processArgumentsTestComposed()
-
-    header.run_name_baseline = header.config_decomposed["run_name"]
-    header.config_baseline["dir_dataset_test"] = header.config_decomposed["dir_dataset_test"]
-    header.config_baseline["file_name_checkpoint"] = header.run_name_decomposed + ".tar"
-    header.config_baseline["file_name_checkpoint_best"] = header.run_name_decomposed + ".best.tar"
-    header.config_baseline["run_name"] = header.run_name_decomposed
-
-    utility.setSeed(header.seed)
-    torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
+def test(model_decomposed, spn_joint, spn_marginal, dataset_test, config_dataset, data_loader, device, batch_step):
+    utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
+    utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
+    utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
 
     accuracy_epoch_composed = 0
     accuracy_epoch_list_decomposed = []
@@ -61,62 +53,24 @@ def main():
     output_list_decomposed_recall = []
     predictions_epoch_composed = []
     predictions_epoch_list_decomposed = []
-    dataset_transforms = utility.createTransform(header.config_decomposed)
-    dataset_test = dataset.VISATDataset(header.config_decomposed["dir_dataset_test"], dataset_transforms)
-    config_dataset = dataset_test.config
-    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
-    device = torch.device("cuda")
-    model_decomposed = model.createModelDecomposed(device)
-    model_decomposed = torch.nn.DataParallel(model_decomposed)
-    model_decomposed = model_decomposed.to(device)
-    spn_joint = spn.SPN()
-    spn_marginal = spn.SPN()
     spn_output_rows = len(dataset_test.classes_original)
     spn_output_cols = 1
 
     for attribute in dataset_test.classes:
         spn_output_cols *= len(attribute)
 
-    logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
-
-    spn_joint.load(header.config_spn["file_path_spn"])
-    spn_marginal.load(header.config_spn["file_path_spn"])
-
-    logger.log_info("Loading SPN leaf node settings...")
-
-    spn_settings_joint = generateSPNSettings(config_dataset, device)
-    spn_settings_marginal = torch.clone(spn_settings_joint)
-    spn_settings_marginal[:, -1] = -1
-
-    logger.log_info("Setting SPN leaf nodes...")
-
-    spn_joint.set_leaf_nodes(spn_settings_joint)
-    spn_marginal.set_leaf_nodes(spn_settings_marginal)
-
     for _ in config_dataset["attributes"]:
         accuracy_epoch_list_decomposed.append(0)
         ground_truths_epoch_list_decomposed.append([])
         predictions_epoch_list_decomposed.append([])
 
-    utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
-    utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
-    utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
-
-    if header.show_model_summary:
-        logger.log_info("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
-        logger.log_info("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
-        logger.log_info("Number of product nodes: " + str(len(spn_joint.product_nodes)) + ".")
-        logger.log_info("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
-        logger.log_info("SPN depths: " + str(spn_joint.depth) + ".")
-        logger.log_info("SPN leaf node setting dimension: (" + str(int(spn_settings_joint.shape[0])) + ", " + str(int(spn_settings_joint.shape[1])) + ").")
-
-    progress_bar = tqdm.tqdm(total = len(data_loader_test), position = 0, leave = False)
+    progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
 
     model_decomposed.eval()
     progress_bar.set_description_str("[INFO]: Inference progress")
 
     with torch.no_grad():
-        for (batch_index, (input, labels_decomposed, labels_original, _)) in enumerate(data_loader_test):
+        for (batch_index, (input, labels_decomposed, labels_original, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
             labels_decomposed = labels_decomposed.to(device, non_blocking = True)
             labels_original = labels_original.to(device, non_blocking = True)
@@ -149,7 +103,7 @@ def main():
     progress_bar.close()
 
     for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
-        accuracy_epoch_list_decomposed[i] /= len(data_loader_test.dataset)
+        accuracy_epoch_list_decomposed[i] /= len(data_loader.dataset)
         precision_epoch_decomposed = sklearn.metrics.precision_score(ground_truths_epoch_list_decomposed[i], predictions_epoch_list_decomposed[i], average = "macro", zero_division = 0)
         recall_epoch_decomposed = sklearn.metrics.recall_score(ground_truths_epoch_list_decomposed[i], predictions_epoch_list_decomposed[i], average = "macro", zero_division = 0)
 
@@ -159,7 +113,7 @@ def main():
 
         logger.log_info("Decomposed testing accuracy for \"" + dataset_entry["name"] + "\": " + str(accuracy_epoch_list_decomposed[i]) + ".")
 
-    accuracy_epoch_composed /= len(data_loader_test.dataset)
+    accuracy_epoch_composed /= len(data_loader.dataset)
 
     precision_epoch_composed = sklearn.metrics.precision_score(ground_truths_epoch_composed, predictions_epoch_composed, average = "macro", zero_division = 0)
     recall_epoch_composed = sklearn.metrics.recall_score(ground_truths_epoch_composed, predictions_epoch_composed, average = "macro", zero_division = 0)
@@ -172,6 +126,57 @@ def main():
 
     utility.logTestOutput(output_list_composed, header.config_baseline, config_dataset, True)
     utility.logTestOutput(output_list_decomposed, header.config_decomposed, config_dataset)
+
+    return
+
+def main():
+    utility.processArgumentsTestComposed()
+
+    header.run_name_baseline = header.config_decomposed["run_name"]
+    header.config_baseline["dir_dataset_test"] = header.config_decomposed["dir_dataset_test"]
+    header.config_baseline["file_name_checkpoint"] = header.run_name_decomposed + ".tar"
+    header.config_baseline["file_name_checkpoint_best"] = header.run_name_decomposed + ".best.tar"
+    header.config_baseline["run_name"] = header.run_name_decomposed
+
+    utility.setSeed(header.seed)
+    torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
+
+    dataset_transforms = utility.createTransform(header.config_decomposed)
+    dataset_test = dataset.VISATDataset(header.config_decomposed["dir_dataset_test"], dataset_transforms)
+    config_dataset = dataset_test.config
+    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
+    device = torch.device("cuda")
+    model_decomposed = model.createModelDecomposed(device)
+    model_decomposed = torch.nn.DataParallel(model_decomposed)
+    model_decomposed = model_decomposed.to(device)
+    spn_joint = spn.SPN()
+    spn_marginal = spn.SPN()
+
+    logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
+
+    spn_joint.load(header.config_spn["file_path_spn"])
+    spn_marginal.load(header.config_spn["file_path_spn"])
+
+    logger.log_info("Loading SPN leaf node settings...")
+
+    spn_settings_joint = generateSPNSettings(config_dataset, device)
+    spn_settings_marginal = torch.clone(spn_settings_joint)
+    spn_settings_marginal[:, -1] = -1
+
+    logger.log_info("Setting SPN leaf nodes...")
+
+    spn_joint.set_leaf_nodes(spn_settings_joint)
+    spn_marginal.set_leaf_nodes(spn_settings_marginal)
+
+    if header.show_model_summary:
+        logger.log_info("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
+        logger.log_info("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
+        logger.log_info("Number of product nodes: " + str(len(spn_joint.product_nodes)) + ".")
+        logger.log_info("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
+        logger.log_info("SPN depths: " + str(spn_joint.depth) + ".")
+        logger.log_info("SPN leaf node setting dimension: (" + str(int(spn_settings_joint.shape[0])) + ", " + str(int(spn_settings_joint.shape[1])) + ").")
+
+    test(model_decomposed, spn_joint, spn_marginal, dataset_test, config_dataset, data_loader_test, device, 1)
 
     return
 
