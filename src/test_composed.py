@@ -71,6 +71,11 @@ def main():
     model_decomposed = model_decomposed.to(device)
     spn_joint = spn.SPN()
     spn_marginal = spn.SPN()
+    spn_output_rows = len(dataset_test.classes_original)
+    spn_output_cols = 1
+
+    for attribute in dataset_test.classes:
+        spn_output_cols *= len(attribute)
 
     logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
 
@@ -82,16 +87,6 @@ def main():
     spn_settings_joint = generateSPNSettings(config_dataset, device)
     spn_settings_marginal = torch.clone(spn_settings_joint)
     spn_settings_marginal[:, -1] = -1
-
-    logger.log_info("SPN leaf node setting dimension: (" + str(int(spn_settings_joint.shape[0])) + ", " + str(int(spn_settings_joint.shape[1])) + ").")
-
-    spn_output_rows = len(dataset_test.classes_original)
-    spn_output_cols = 1
-
-    for attribute in dataset_test.classes:
-        spn_output_cols *= len(attribute)
-
-    logger.log_info("SPN output dimension: (" + str(int(spn_output_rows)) + ", " + str(int(spn_output_cols)) + ").")
 
     logger.log_info("Setting SPN leaf nodes...")
 
@@ -106,6 +101,14 @@ def main():
     utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
     utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
     utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
+
+    if header.show_model_summary:
+        logger.log_info("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
+        logger.log_info("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
+        logger.log_info("Number of product nodes: " + str(len(spn_joint.product_nodes)) + ".")
+        logger.log_info("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
+        logger.log_info("SPN depths: " + str(spn_joint.depth) + ".")
+        logger.log_info("SPN leaf node setting dimension: (" + str(int(spn_settings_joint.shape[0])) + ", " + str(int(spn_settings_joint.shape[1])) + ").")
 
     progress_bar = tqdm.tqdm(total = len(data_loader_test), position = 0, leave = False)
 
