@@ -413,6 +413,17 @@ class SPN:
 
         return
 
+    def randomize_weights(self):
+        weights = self.get_weights()
+
+        for i in range(len(weights)):
+            weights[i] = weights[i].uniform_(0, 1)
+            weights[i] /= torch.sum(weights[i])
+
+        self.set_weights(weights)
+
+        return
+
     def set_leaf_nodes(self, settings):
         self.settings = settings
 

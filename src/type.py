@@ -38,3 +38,6 @@ class ModelDecomposed(enum.Enum):
     mlp_set = 0
     resnet152_mtl = 1
     vit_b_32_mtl = 2
+
+class OptimizerSPN(enum.Enum):
+    cccp_offline = 0

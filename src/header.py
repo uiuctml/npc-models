@@ -5,17 +5,15 @@ attack_targeted_attribute = 0
 cuda_allow_tf32 = False
 dir_dataset_test_adversarial = "../../gtsrb-dataset/images/split/adversarial/test"
 file_path_dataset_config = "../../visat-dataset-tools/config/gtsrb.json"
-file_path_spn = "../../learnspn/output/learnspn/gtsrb.spn.txt"
-file_path_spn_dataset_test = "../../gtsrb-dataset/images/split/spn/test.txt"
-file_path_spn_dataset_train = "../../gtsrb-dataset/images/split/spn/train.txt"
-file_path_spn_dataset_validation = "../../gtsrb-dataset/images/split/spn/validate.txt"
 log_level = type.LogLevel.debug
 project_name = "visat-models"
 run_mode = "disabled"
 run_name_baseline_keyword = "baseline"
 run_name_decomposed_keyword = "decomposed"
+run_name_spn_keyword = "spn"
 run_name_baseline = ""
 run_name_decomposed = ""
+run_name_spn = ""
 seed = 42
 show_model_summary = False
 
@@ -105,4 +103,22 @@ config_decomposed = {
     "type": "decomposed",
     "use_l2_loss": False,
     "use_covariance_loss": False
+}
+
+config_spn = {
+    "dir_checkpoints": "../checkpoints",
+    "epochs": 30,
+    "file_path_spn": "../../learnspn/output/learnspn/gtsrb.spn.txt",
+    "file_path_spn_dataset_test": "../../gtsrb-dataset/images/split/spn/test.txt",
+    "file_path_spn_dataset_train": "../../gtsrb-dataset/images/split/spn/train.txt",
+    "file_path_spn_dataset_validation": "../../gtsrb-dataset/images/split/spn/validate.txt",
+    "file_name_checkpoint": run_name_spn + ".tar",
+    "file_name_checkpoint_best": run_name_spn + ".best.tar",
+    "fine_tuning": True,
+    "optimizer": "cccp_offline",
+    "run_name": run_name_spn,
+    "seed": seed,
+    "stopping_criterion": 1e-4,
+    "type": "spn",
+    "use_l2_loss": False
 }

@@ -7,49 +7,52 @@ import spn
 import torch
 import utility
 
+def generateSPNSettings(config_dataset, device):
+    labels_attribute = utility.getLabelsAttribute(config_dataset)
+    labels_original = utility.getLabelsOriginal(config_dataset)
+    indices_attribute = utility.getIndicesFromLabelsAttribute(labels_attribute)
+    indices_original = utility.getIndicesFromLabelsOriginal(labels_original)
+    spn_settings = []
+
+    for label_original in config_dataset["mappings"].keys():
+        spn_setting = []
+
+        for attribute_name in config_dataset["mappings"][label_original]["labels"].keys():
+            label_attribute = config_dataset["mappings"][label_original]["labels"][attribute_name]
+            index_attribute = indices_attribute[attribute_name][label_attribute]
+            spn_setting.append(index_attribute)
+
+        index_original = indices_original[label_original]
+        spn_setting.append(index_original)
+        spn_settings.append(spn_setting)
+
+    spn_settings = torch.Tensor(spn_settings)
+    spn_settings = spn_settings.to(device)
+
+    return spn_settings
+
 def main():
+    utility.processArgumentsTestSPN()
+
+    utility.setSeed(header.seed)
+    torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
+
     file_dataset_config = open(header.file_path_dataset_config, "r")
     dataset_config = json.load(file_dataset_config)
     file_dataset_config.close()
 
     device = torch.device("cuda")
-    labels_attribute = utility.getLabelsAttribute(dataset_config)
-    labels_original = utility.getLabelsOriginal(dataset_config)
-    indices_attribute = utility.getIndicesFromLabelsAttribute(labels_attribute)
-    indices_original = utility.getIndicesFromLabelsOriginal(labels_original)
     spn_joint = spn.SPN()
     spn_marginal = spn.SPN()
-    spn_settings_joint = []
-    spn_settings_marginal = []
 
-    for label_original in dataset_config["mappings"].keys():
-        spn_setting_joint = []
-        spn_setting_marginal = []
+    spn_settings_joint = generateSPNSettings(dataset_config, device)
+    spn_settings_marginal = torch.clone(spn_settings_joint)
+    spn_settings_marginal[:, -1] = -1
 
-        for attribute_name in dataset_config["mappings"][label_original]["labels"].keys():
-            label_attribute = dataset_config["mappings"][label_original]["labels"][attribute_name]
-            index_attribute = indices_attribute[attribute_name][label_attribute]
+    logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
 
-            spn_setting_joint.append(index_attribute)
-            spn_setting_marginal.append(index_attribute)
-
-        index_original = indices_original[label_original]
-
-        spn_setting_joint.append(index_original)
-        spn_setting_marginal.append(-1)
-
-        spn_settings_joint.append(spn_setting_joint)
-        spn_settings_marginal.append(spn_setting_marginal)
-
-    spn_settings_joint = torch.Tensor(spn_settings_joint)
-    spn_settings_marginal = torch.Tensor(spn_settings_marginal)
-    spn_settings_joint = spn_settings_joint.to(device)
-    spn_settings_marginal = spn_settings_marginal.to(device)
-
-    logger.log_info("Loading SPN from \"" + header.file_path_spn + "\"...")
-
-    spn_joint.load(header.file_path_spn)
-    spn_marginal.load(header.file_path_spn)
+    spn_joint.load(header.config_spn["file_path_spn"])
+    spn_marginal.load(header.config_spn["file_path_spn"])
 
     logger.log_info("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
     logger.log_info("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
@@ -57,12 +60,21 @@ def main():
     logger.log_info("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
     logger.log_info("SPN depths: " + str(spn_joint.depth) + ".")
 
+    logger.log_info("Loading SPN leaf node settings...")
+
+    spn_settings_joint = generateSPNSettings(dataset_config, device)
+    spn_settings_marginal = torch.clone(spn_settings_joint)
+    spn_settings_marginal[:, -1] = -1
+
+    logger.log_info("SPN leaf node setting dimension: (" + str(int(spn_settings_joint.shape[0])) + ", " + str(int(spn_settings_joint.shape[1])) + ").")
+
     logger.log_info("Setting SPN leaf nodes...")
 
     spn_joint.set_leaf_nodes(spn_settings_joint)
     spn_marginal.set_leaf_nodes(spn_settings_marginal)
 
-    logger.log_info("Performing SPN forward pass...")
+    utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
+    utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
 
     log_likelihoods_joint = spn_joint.forward()
     log_likelihoods_marginal = spn_marginal.forward()

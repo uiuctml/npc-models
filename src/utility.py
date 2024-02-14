@@ -103,11 +103,11 @@ def getIndicesFromLabelsOriginal(labels_original):
 
     return labels_to_indices
 
-def wAndBGenerateRunName(model_name, model_type, seed, fine_tuning):
+def generateRunName(model, type, seed, fine_tuning):
     date_time_list = list(datetime.datetime.now().timetuple())[:-4]
-    run_name = model_name
+    run_name = model
     run_name += "."
-    run_name += model_type
+    run_name += type
     run_name += "."
 
     if fine_tuning:
@@ -130,7 +130,7 @@ def wAndBGenerateRunName(model_name, model_type, seed, fine_tuning):
 def initializeArgumentsAttack():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-r", "--run-name", type = str, default = "", help = "WandB run name.", required = True)
+    parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.", required = True)
     parser.add_argument("-s", "--seed", type = int, default = 42, help = "Randomization seed.")
     parser.add_argument("-d", "--test-dataset-dir", type = str, default = "", help = "Directory of dataset testing split.")
     parser.add_argument("-a", "--attribute", type = int, default = 0, help = "Targeted attribute.")
@@ -140,16 +140,34 @@ def initializeArgumentsAttack():
 def initializeArgumentsTest():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-r", "--run-name", type = str, default = "", help = "WandB run name.", required = True)
+    parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.", required = True)
     parser.add_argument("-s", "--seed", type = int, default = 42, help = "Randomization seed.")
     parser.add_argument("-d", "--test-dataset-dir", type = str, default = "", help = "Directory of dataset testing split.")
+
+    return parser.parse_args()
+
+def initializeArgumentsTestComposed():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-rd", "--decomposed-run-name", type = str, default = "", help = "Decomposed run name.", required = True)
+    parser.add_argument("-rs", "--spn-run-name", type = str, default = "", help = "SPN run name.", required = True)
+    parser.add_argument("-s", "--seed", type = int, default = 42, help = "Randomization seed.")
+    parser.add_argument("-d", "--test-dataset-dir", type = str, default = "", help = "Directory of dataset testing split.")
+
+    return parser.parse_args()
+
+def initializeArgumentsTestSPN():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.", required = True)
+    parser.add_argument("-s", "--seed", type = int, default = 42, help = "Randomization seed.")
 
     return parser.parse_args()
 
 def initializeArgumentsTrain():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-r", "--run-name", type = str, default = "", help = "WandB run name.")
+    parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.")
     parser.add_argument("-m", "--model", type = str, default = "", help = "Model to train.")
     parser.add_argument("-b", "--batch-size", type = int, default = 512, help = "Batch size.")
     parser.add_argument("-e", "--epochs", type = int, default = 100, help = "Number of training epochs.")
@@ -159,8 +177,21 @@ def initializeArgumentsTrain():
 
     return parser.parse_args()
 
+def initializeArgumentsTrainSPN():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.")
+    parser.add_argument("-o", "--optimizer", type = str, default = "", help = "SPN optimizer.")
+    parser.add_argument("-e", "--epochs", type = int, default = 30, help = "Number of training epochs.")
+    parser.add_argument("-f", "--fine-tune", type = int, default = 1, help = "Whether to perform fine-tuning.")
+    parser.add_argument("-c", "--stopping-criterion", type = float, default = 1e-4, help = "Stopping criterion.")
+    parser.add_argument("-s", "--seed", type = int, default = 42, help = "Randomization seed.")
+
+    return parser.parse_args()
+
 def initializeRunNameBaseline(run_name):
     resume = False
+
     if run_name != "":
         if run_name.split(".")[0] != header.run_name_baseline_keyword:
             logger.log_fatal("Invalid baseline run name. Quit.")
@@ -169,7 +200,7 @@ def initializeRunNameBaseline(run_name):
         header.run_name_baseline = run_name
         resume = True
     else:
-        header.run_name_baseline = wAndBGenerateRunName(header.run_name_baseline_keyword, header.config_baseline["model"], header.config_baseline["seed"], header.config_baseline["fine_tuning"])
+        header.run_name_baseline = generateRunName(header.run_name_baseline_keyword, header.config_baseline["model"], header.config_baseline["seed"], header.config_baseline["fine_tuning"])
 
     header.config_baseline["file_name_checkpoint"] = header.run_name_baseline + ".tar"
     header.config_baseline["file_name_checkpoint_best"] = header.run_name_baseline + ".best.tar"
@@ -179,6 +210,7 @@ def initializeRunNameBaseline(run_name):
 
 def initializeRunNameDecomposed(run_name):
     resume = False
+
     if run_name != "":
         if run_name.split(".")[0] != header.run_name_decomposed_keyword:
             logger.log_fatal("Invalid decomposed run name. Quit.")
@@ -187,11 +219,30 @@ def initializeRunNameDecomposed(run_name):
         header.run_name_decomposed = run_name
         resume = True
     else:
-        header.run_name_decomposed = wAndBGenerateRunName(header.run_name_decomposed_keyword, header.config_decomposed["model"], header.config_decomposed["seed"], header.config_decomposed["fine_tuning"])
+        header.run_name_decomposed = generateRunName(header.run_name_decomposed_keyword, header.config_decomposed["model"], header.config_decomposed["seed"], header.config_decomposed["fine_tuning"])
 
     header.config_decomposed["file_name_checkpoint"] = header.run_name_decomposed + ".tar"
     header.config_decomposed["file_name_checkpoint_best"] = header.run_name_decomposed + ".best.tar"
     header.config_decomposed["run_name"] = header.run_name_decomposed
+
+    return resume
+
+def initializeRunNameSPN(run_name):
+    resume = False
+
+    if run_name != "":
+        if run_name.split(".")[0] != header.run_name_spn_keyword:
+            logger.log_fatal("Invalid SPN run name. Quit.")
+            exit(-1)
+
+        header.run_name_spn = run_name
+        resume = True
+    else:
+        header.run_name_spn = generateRunName(header.run_name_spn_keyword, header.config_spn["optimizer"], header.config_spn["seed"], header.config_spn["fine_tuning"])
+
+    header.config_spn["file_name_checkpoint"] = header.run_name_spn + ".tar"
+    header.config_spn["file_name_checkpoint_best"] = header.run_name_spn + ".best.tar"
+    header.config_spn["run_name"] = header.run_name_spn
 
     return resume
 
@@ -254,6 +305,46 @@ def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
         exit(-1)
 
     return
+
+def loadCheckpointBestSPN(spn, dir_checkpoints, file_name_checkpoint):
+    if not os.path.isdir(dir_checkpoints):
+        logger.log_fatal("Checkpoint directory \"" + dir_checkpoints + "\" missing.")
+        exit(-1)
+
+    file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
+
+    if os.path.isfile(file_path_checkpoint):
+        checkpoint = torch.load(file_path_checkpoint)
+        spn.set_weights(checkpoint["weights"])
+
+        logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
+    else:
+        logger.log_fatal("Checkpoint file \"" + file_name_checkpoint + "\" missing.")
+        exit(-1)
+
+    return
+
+def loadCheckpointSPN(spn, dir_checkpoints, file_name_checkpoint, resume, log_likelihood_best, log_likelihood_train_last, epoch):
+    if resume:
+        if not os.path.isdir(dir_checkpoints):
+            logger.log_fatal("Checkpoint directory \"" + dir_checkpoints + "\" missing.")
+            exit(-1)
+
+        file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
+
+        if os.path.isfile(file_path_checkpoint):
+            checkpoint = torch.load(file_path_checkpoint)
+            epoch = checkpoint["epoch"]
+            log_likelihood_best = checkpoint["log_likelihood_best"]
+            log_likelihood_train_last = checkpoint["log_likelihood_train_last"]
+            spn.set_weights(checkpoint["weights"])
+
+            logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
+        else:
+            logger.log_fatal("Checkpoint file \"" + file_name_checkpoint + "\" missing.")
+            exit(-1)
+
+    return (log_likelihood_best, log_likelihood_train_last, epoch)
 
 def logTestOutput(output, config, config_dataset, composed = False):
     if config["log_test_output"] == False:
@@ -336,8 +427,8 @@ def processArgumentsAttack():
 
     header.attack_targeted_attribute = arguments.attribute
 
-    logger.log_trace("WandB run name: \"" + header.run_name_decomposed + "\".")
-    logger.log_trace("Model type: \"" + header.config_decomposed["model"] + "\".")
+    logger.log_trace("Run name: \"" + header.run_name_decomposed + "\".")
+    logger.log_trace("Model: \"" + header.config_decomposed["model"] + "\".")
     logger.log_trace("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
     logger.log_trace("Directory of dataset testing split: \"" + header.config_decomposed["dir_dataset_test"] + "\".")
     logger.log_trace("Targeted attribute: \"" + str(header.attack_targeted_attribute) + "\".")
@@ -358,10 +449,39 @@ def processArgumentsTestBaseline():
 
     header.config_baseline["model"] = header.run_name_baseline.split(".")[1]
 
-    logger.log_trace("WandB run name: \"" + header.run_name_baseline + "\".")
-    logger.log_trace("Model type: \"" + header.config_baseline["model"] + "\".")
+    logger.log_trace("Run name: \"" + header.run_name_baseline + "\".")
+    logger.log_trace("Model: \"" + header.config_baseline["model"] + "\".")
     logger.log_trace("Randomization seed: " + str(header.config_baseline["seed"]) + ".")
     logger.log_trace("Directory of dataset testing split: \"" + header.config_baseline["dir_dataset_test"] + "\".")
+
+    return
+
+def processArgumentsTestComposed():
+    arguments = initializeArgumentsTestComposed()
+
+    header.config_decomposed["seed"] = arguments.seed
+    header.config_spn["seed"] = arguments.seed
+
+    if arguments.test_dataset_dir != "":
+        header.config_decomposed["dir_dataset_test"] = arguments.test_dataset_dir
+
+    if not initializeRunNameDecomposed(arguments.decomposed_run_name) or header.run_name_decomposed == "":
+        logger.log_fatal("Decomposed run name missing. Quit.")
+        exit(-1)
+
+    if not initializeRunNameSPN(arguments.spn_run_name) or header.run_name_spn == "":
+        logger.log_fatal("SPN run name missing. Quit.")
+        exit(-1)
+
+    header.config_decomposed["model"] = header.run_name_decomposed.split(".")[1]
+    header.config_spn["optimizer"] = header.run_name_spn.split(".")[1]
+
+    logger.log_trace("Decomposed run name: \"" + header.run_name_decomposed + "\".")
+    logger.log_trace("SPN run name: \"" + header.run_name_spn + "\".")
+    logger.log_trace("Decomposed model: \"" + header.config_decomposed["model"] + "\".")
+    logger.log_trace("SPN optimizer: \"" + header.config_spn["optimizer"] + "\".")
+    logger.log_trace("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
+    logger.log_trace("Directory of dataset testing split: \"" + header.config_decomposed["dir_dataset_test"] + "\".")
 
     return
 
@@ -379,12 +499,28 @@ def processArgumentsTestDecomposed():
 
     header.config_decomposed["model"] = header.run_name_decomposed.split(".")[1]
 
-    logger.log_trace("WandB run name: \"" + header.run_name_decomposed + "\".")
-    logger.log_trace("Model type: \"" + header.config_decomposed["model"] + "\".")
+    logger.log_trace("Run name: \"" + header.run_name_decomposed + "\".")
+    logger.log_trace("Model: \"" + header.config_decomposed["model"] + "\".")
     logger.log_trace("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
     logger.log_trace("Directory of dataset testing split: \"" + header.config_decomposed["dir_dataset_test"] + "\".")
 
     return
+
+def processArgumentsTestSPN():
+    arguments = initializeArgumentsTestSPN()
+
+    header.config_spn["seed"] = arguments.seed
+
+    resume = initializeRunNameSPN(arguments.run_name)
+
+    if header.run_name_spn == "":
+        logger.log_fatal("Run name missing. Quit.")
+        exit(-1)
+
+    logger.log_trace("Run name: \"" + header.run_name_spn + "\".")
+    logger.log_trace("Randomization seed: " + str(header.config_spn["seed"]) + ".")
+
+    return resume
 
 def processArgumentsTrainBaseline():
     arguments = initializeArgumentsTrain()
@@ -410,8 +546,8 @@ def processArgumentsTrainBaseline():
 
     header.config_baseline["model"] = header.run_name_baseline.split(".")[1]
 
-    logger.log_trace("WandB run name: \"" + header.run_name_baseline + "\".")
-    logger.log_trace("Model type: \"" + header.config_baseline["model"] + "\".")
+    logger.log_trace("Run name: \"" + header.run_name_baseline + "\".")
+    logger.log_trace("Model: \"" + header.config_baseline["model"] + "\".")
     logger.log_trace("Batch size: " + str(header.config_baseline["data_loader_batch_size"]) + ".")
     logger.log_trace("Epochs: " + str(header.config_baseline["epochs"]) + ".")
     logger.log_trace("Whether to perform backbone fine-tuning: " + str(header.config_baseline["fine_tuning"]) + ".")
@@ -448,13 +584,46 @@ def processArgumentsTrainDecomposed():
 
     header.config_decomposed["model"] = header.run_name_decomposed.split(".")[1]
 
-    logger.log_trace("WandB run name: \"" + header.run_name_decomposed + "\".")
-    logger.log_trace("Model type: \"" + header.config_decomposed["model"] + "\".")
+    logger.log_trace("Run name: \"" + header.run_name_decomposed + "\".")
+    logger.log_trace("Model: \"" + header.config_decomposed["model"] + "\".")
     logger.log_trace("Batch size: " + str(header.config_decomposed["data_loader_batch_size"]) + ".")
     logger.log_trace("Epochs: " + str(header.config_decomposed["epochs"]) + ".")
     logger.log_trace("Whether to perform backbone fine-tuning: " + str(header.config_decomposed["fine_tuning"]) + ".")
     logger.log_trace("Whether to use covariance loss: " + str(header.config_decomposed["use_covariance_loss"]) + ".")
     logger.log_trace("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
+
+    return resume
+
+def processArgumentsTrainSPN():
+    arguments = initializeArgumentsTrainSPN()
+
+    if arguments.optimizer != "":
+        header.config_spn["optimizer"] = arguments.optimizer
+
+    header.config_spn["epochs"] = arguments.epochs
+
+    if arguments.fine_tune == 0:
+        header.config_spn["fine_tuning"] = False
+    else:
+        header.config_spn["fine_tuning"] = True
+
+    header.config_spn["stopping_criterion"] = arguments.stopping_criterion
+    header.config_spn["seed"] = arguments.seed
+
+    resume = initializeRunNameSPN(arguments.run_name)
+
+    if header.run_name_spn == "":
+        logger.log_fatal("Run name missing. Quit.")
+        exit(-1)
+
+    header.config_spn["optimizer"] = header.run_name_spn.split(".")[1]
+
+    logger.log_trace("Run name: \"" + header.run_name_spn + "\".")
+    logger.log_trace("Optimizer: \"" + header.config_spn["optimizer"] + "\".")
+    logger.log_trace("Epochs: " + str(header.config_spn["epochs"]) + ".")
+    logger.log_trace("Whether to perform fine-tuning: " + str(header.config_spn["fine_tuning"]) + ".")
+    logger.log_trace("Stopping criterion: " + str(header.config_spn["stopping_criterion"]) + ".")
+    logger.log_trace("Randomization seed: " + str(header.config_spn["seed"]) + ".")
 
     return resume
 
@@ -511,6 +680,26 @@ def saveCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_be
         pass
     else:
         logger.log_info("Saved checkpoint \"" + file_name_checkpoint + "\" to Weights & Biases.")
+
+    logger.log_info("Saved checkpoint \"" + file_name_checkpoint + "\".")
+
+    return
+
+def saveCheckpointSPN(spn, dir_checkpoints, file_name_checkpoint, log_likelihood_best, log_likelihood_train_last, epoch):
+    weights = spn.get_weights()
+
+    if not os.path.isdir(dir_checkpoints):
+        os.makedirs(dir_checkpoints, exist_ok = True)
+
+    checkpoint = {
+        "epoch": epoch,
+        "log_likelihood_best": log_likelihood_best,
+        "log_likelihood_train_last": log_likelihood_train_last,
+        "weights": weights
+    }
+    file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
+
+    torch.save(checkpoint, file_path_checkpoint)
 
     logger.log_info("Saved checkpoint \"" + file_name_checkpoint + "\".")
 
