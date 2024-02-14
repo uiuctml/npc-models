@@ -306,6 +306,56 @@ def processArgumentsTrainBaseline():
 
     return resume
 
+def processArgumentsTrainComposed():
+    arguments = initializeArgumentsTrainComposed()
+
+    if arguments.model != "":
+        header.config_decomposed["model"] = arguments.model
+
+    if arguments.optimizer != "":
+        header.config_spn["optimizer"] = arguments.optimizer
+
+    header.config_decomposed["data_loader_batch_size"] = arguments.batch_size
+    header.config_decomposed["epochs"] = arguments.epochs
+
+    if arguments.fine_tune == 0:
+        header.config_decomposed["fine_tuning"] = False
+    else:
+        header.config_decomposed["fine_tuning"] = True
+
+    if arguments.use_covariance_loss == 0:
+        header.config_decomposed["use_covariance_loss"] = False
+    else:
+        header.config_decomposed["use_covariance_loss"] = True
+
+    header.config_decomposed["seed"] = arguments.seed
+
+    resume = initializeRunNameDecomposed(arguments.decomposed_run_name)
+    resume = resume and initializeRunNameSPN(arguments.spn_run_name)
+
+    if header.run_name_decomposed == "":
+        logger.log_fatal("Decomposed run name missing. Quit.")
+        exit(-1)
+
+    if header.run_name_spn == "":
+        logger.log_fatal("SPN run name missing. Quit.")
+        exit(-1)
+
+    header.config_decomposed["model"] = header.run_name_decomposed.split(".")[1]
+    header.config_spn["optimizer"] = header.run_name_spn.split(".")[1]
+
+    logger.log_trace("Decomposed run name: \"" + header.run_name_decomposed + "\".")
+    logger.log_trace("SPN run name: \"" + header.run_name_spn + "\".")
+    logger.log_trace("Decomposed model: \"" + header.config_decomposed["model"] + "\".")
+    logger.log_trace("SPN optimizer: \"" + header.config_spn["optimizer"] + "\".")
+    logger.log_trace("Batch size: " + str(header.config_decomposed["data_loader_batch_size"]) + ".")
+    logger.log_trace("Epochs: " + str(header.config_decomposed["epochs"]) + ".")
+    logger.log_trace("Whether to perform decomposed backbone fine-tuning: " + str(header.config_decomposed["fine_tuning"]) + ".")
+    logger.log_trace("Whether to use covariance loss: " + str(header.config_decomposed["use_covariance_loss"]) + ".")
+    logger.log_trace("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
+
+    return resume
+
 def processArgumentsTrainDecomposed():
     arguments = initializeArgumentsTrain()
 
