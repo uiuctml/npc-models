@@ -15,6 +15,7 @@ import wandb
 
 def negativeLogLikelihood(output, label):
     label = label.reshape(-1, 1)
+    # TODO In forward pass, don't actually compute the unused y's
     output = torch.gather(output, 1, label)
 
     return torch.sum(-1 * torch.log(output))
