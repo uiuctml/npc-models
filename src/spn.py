@@ -14,6 +14,37 @@ class SPNOptimizer:
     def step(self):
         pass
 
+class CCCPComposedSPNOptimizer(SPNOptimizer):
+    def __init__(self, spn, device = torch.device("cuda")):
+        super().__init__(spn, device)
+
+        self.machine_epsilon = torch.finfo(torch.float).eps
+
+        return
+
+    def step(self, matrix_b, labels_original, spn_output_rows, spn_output_cols):
+        labels_original = labels_original.unsqueeze(0)
+
+        for sum_node in self.spn.sum_nodes:
+            weight_normalization_sum_node = 0
+
+            for (i, child) in enumerate(sum_node.children):
+                weights = sum_node.weights[i] * torch.exp(sum_node.value_backward + child.value_forward - self.spn.root_node.value_forward)
+                weights = weights.reshape(spn_output_rows, spn_output_cols)
+                weights = torch.matmul(weights, matrix_b)
+                # TODO Optimization: compute for only y's given by the batch
+                weights = torch.gather(weights, 1, labels_original)
+
+                sum_node.weights[i] = torch.sum(weights)
+
+            # Local weight normalization with Laplace smoothing
+            for weight_sum_node in sum_node.weights:
+                weight_normalization_sum_node += weight_sum_node + self.machine_epsilon
+
+            sum_node.weights = (sum_node.weights + self.machine_epsilon) / weight_normalization_sum_node
+
+        return
+
 class CCCPOfflineSPNOptimizer(SPNOptimizer):
     def __init__(self, spn, device = torch.device("cuda")):
         super().__init__(spn, device)

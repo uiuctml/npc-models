@@ -52,7 +52,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
             (outputs_decomposed, _) = model_decomposed(input)
 
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
-            output_composed = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+            (output_composed, _) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
 

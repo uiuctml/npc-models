@@ -9,13 +9,14 @@ import model
 import spn
 import test_composed
 import torch
+import torchsummary
 import tqdm
 import utility
 import wandb
 
 def negativeLogLikelihood(output, label):
     label = label.reshape(-1, 1)
-    # TODO In forward pass, don't actually compute the unused y's
+    # TODO Optimization: compute for only y's given by the batch
     output = torch.gather(output, 1, label)
 
     return torch.sum(-1 * torch.log(output))
@@ -46,7 +47,7 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
             (outputs_decomposed, _) = model_decomposed(input)
 
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
-            output_composed = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+            (output_composed, matrix_b) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
             loss = criterion(output_composed, labels_original)
@@ -60,10 +61,8 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
             optimizer_decomposed.step()
 
             spn_joint.backward()
-            # TODO Step SPN optimizer
-            # optimizer_spn.step()
-
-            # TODO Copy SPN weights from joint to marginal
+            optimizer_spn.step(matrix_b, labels_original, spn_output_rows, spn_output_cols)
+            spn_marginal.set_weights(spn_joint.get_weights())
 
             corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
 
@@ -123,7 +122,7 @@ def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, 
             (outputs_decomposed, _) = model_decomposed(input)
 
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
-            output_composed = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+            (output_composed, _) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
             loss = criterion(output_composed, labels_original)
@@ -202,7 +201,7 @@ def main():
     spn_joint = spn.SPN()
     spn_marginal = spn.SPN()
     optimizer_decomposed = torch.optim.SGD(model_decomposed.parameters(), lr = header.config_decomposed["optimizer_learning_rate"], momentum = header.config_decomposed["optimizer_momentum"], weight_decay = header.config_decomposed["optimizer_weight_decay"])
-    optimizer_spn = spn.CCCPOfflineSPNOptimizer(spn_joint, device)
+    optimizer_spn = spn.CCCPComposedSPNOptimizer(spn_joint, device)
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_decomposed, header.config_decomposed["learning_rate_scheduler_mode"], header.config_decomposed["learning_rate_scheduler_factor"], header.config_decomposed["learning_rate_scheduler_patience"], header.config_decomposed["learning_rate_scheduler_threshold"], header.config_decomposed["learning_rate_scheduler_threshold_mode"], header.config_decomposed["learning_rate_scheduler_cooldown"], header.config_decomposed["learning_rate_scheduler_min_learning_rate"], header.config_decomposed["learning_rate_scheduler_min_learning_rate_decay"], header.config_decomposed["learning_rate_scheduler_verbose"])
 
     logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
@@ -226,6 +225,9 @@ def main():
     utility.loadCheckpointSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], resume, 0, 0, 0)
 
     if header.show_model_summary:
+        model_input_size = (header.config_decomposed["model_input_channels"], header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])
+        torchsummary.summary(model_decomposed, input_size = model_input_size)
+
         logger.log_info("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
         logger.log_info("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
         logger.log_info("Number of product nodes: " + str(len(spn_joint.product_nodes)) + ".")

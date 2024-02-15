@@ -16,7 +16,7 @@ class Composition():
         for class_name_original in self.dataset.classes_original:
             class_indices_decomposed = []
 
-            for (dataset_index, dataset) in enumerate(self.dataset.config["attributes"]):
+            for dataset in self.dataset.config["attributes"]:
                 dataset_name = dataset["name"]
                 class_name_decomposed = self.dataset.config["mappings"][class_name_original]["labels"][dataset_name]
 
@@ -80,4 +80,4 @@ class Composition():
 
         matrix_c = torch.matmul(matrix_a, matrix_b).t()
 
-        return matrix_c
+        return (matrix_c, matrix_b)
