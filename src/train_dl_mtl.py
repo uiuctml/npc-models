@@ -26,16 +26,16 @@ def train(model_decomposed, config_dataset, data_loader, criterions, optimizer, 
     model_decomposed.train()
     progress_bar.set_description_str("[INFO]: Training progress")
 
-    for (batch_index, (input, labels, _, _)) in enumerate(data_loader):
-        loss_covariance = 0
-        loss_criterions = 0
+    with torch.set_grad_enabled(True):
+        for (batch_index, (input, labels, _, _)) in enumerate(data_loader):
+            loss_covariance = 0
+            loss_criterions = 0
 
-        input = input.to(device, non_blocking = True)
-        labels = labels.to(device, non_blocking = True)
+            input = input.to(device, non_blocking = True)
+            labels = labels.to(device, non_blocking = True)
 
-        optimizer.zero_grad()
+            optimizer.zero_grad()
 
-        with torch.set_grad_enabled(True):
             (outputs, outputs_head_hidden) = model_decomposed(input)
 
             for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
@@ -70,20 +70,20 @@ def train(model_decomposed, config_dataset, data_loader, criterions, optimizer, 
             loss_overall.backward()
             optimizer.step()
 
-        loss_covariance_batch = loss_covariance.item()
-        loss_criterions_batch = loss_criterions.item()
-        loss_overall_batch = loss_overall.item()
-        loss_overall_epoch += loss_overall_batch
+            loss_covariance_batch = loss_covariance.item()
+            loss_criterions_batch = loss_criterions.item()
+            loss_overall_batch = loss_overall.item()
+            loss_overall_epoch += loss_overall_batch
 
-        progress_bar.n = batch_index + 1
-        progress_bar.refresh()
+            progress_bar.n = batch_index + 1
+            progress_bar.refresh()
 
-        wandb.log({"training/batch/step": batch_step})
-        wandb.log({"training/batch/loss": loss_overall_batch})
-        wandb.log({"training/batch/loss_covariance": loss_covariance_batch})
-        wandb.log({"training/batch/loss_criterions": loss_criterions_batch})
+            wandb.log({"training/batch/step": batch_step})
+            wandb.log({"training/batch/loss": loss_overall_batch})
+            wandb.log({"training/batch/loss_covariance": loss_covariance_batch})
+            wandb.log({"training/batch/loss_criterions": loss_criterions_batch})
 
-        batch_step += 1
+            batch_step += 1
 
     progress_bar.close()
 
@@ -112,13 +112,13 @@ def validate(model_decomposed, config_dataset, data_loader, criterions, device, 
     model_decomposed.eval()
     progress_bar.set_description_str("[INFO]: Validation progress")
 
-    for (batch_index, (input, labels, _, _)) in enumerate(data_loader):
-        loss_overall = 0
+    with torch.set_grad_enabled(False):
+        for (batch_index, (input, labels, _, _)) in enumerate(data_loader):
+            loss_overall = 0
 
-        input = input.to(device, non_blocking = True)
-        labels = labels.to(device, non_blocking = True)
+            input = input.to(device, non_blocking = True)
+            labels = labels.to(device, non_blocking = True)
 
-        with torch.set_grad_enabled(False):
             (outputs, outputs_head_hidden) = model_decomposed(input)
 
             for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
@@ -147,16 +147,16 @@ def validate(model_decomposed, config_dataset, data_loader, criterions, device, 
             if header.config_decomposed["use_covariance_loss"]:
                 loss_overall += utility.computeCovarianceRegularization(outputs_head_hidden)
 
-        loss_overall_batch = loss_overall.item()
-        loss_overall_epoch += loss_overall_batch
+            loss_overall_batch = loss_overall.item()
+            loss_overall_epoch += loss_overall_batch
 
-        progress_bar.n = batch_index + 1
-        progress_bar.refresh()
+            progress_bar.n = batch_index + 1
+            progress_bar.refresh()
 
-        wandb.log({"validation/batch/step": batch_step})
-        wandb.log({"validation/batch/loss": loss_overall_batch})
+            wandb.log({"validation/batch/step": batch_step})
+            wandb.log({"validation/batch/loss": loss_overall_batch})
 
-        batch_step += 1
+            batch_step += 1
 
     progress_bar.close()
 

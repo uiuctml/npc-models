@@ -20,13 +20,13 @@ def train(model_baseline, data_loader, criterion, optimizer, device, batch_step)
     model_baseline.train()
     progress_bar.set_description_str("[INFO]: Training progress")
 
-    for (batch_index, (input, _, labels, _)) in enumerate(data_loader):
-        input = input.to(device, non_blocking = True)
-        labels = labels.to(device, non_blocking = True)
+    with torch.set_grad_enabled(True):
+        for (batch_index, (input, _, labels, _)) in enumerate(data_loader):
+            input = input.to(device, non_blocking = True)
+            labels = labels.to(device, non_blocking = True)
 
-        optimizer.zero_grad()
+            optimizer.zero_grad()
 
-        with torch.set_grad_enabled(True):
             output = model_baseline(input)
             (_, predictions) = torch.max(output, 1)
             loss = criterion(output, labels)
@@ -39,22 +39,22 @@ def train(model_baseline, data_loader, criterion, optimizer, device, batch_step)
             loss.backward()
             optimizer.step()
 
-        corrects = torch.sum(predictions == labels.data).item()
+            corrects = torch.sum(predictions == labels.data).item()
 
-        accuracy_batch = corrects / input.size(0)
-        loss_batch = loss.item()
+            accuracy_batch = corrects / input.size(0)
+            loss_batch = loss.item()
 
-        accuracy_epoch += corrects
-        loss_epoch += loss_batch
+            accuracy_epoch += corrects
+            loss_epoch += loss_batch
 
-        progress_bar.n = batch_index + 1
-        progress_bar.refresh()
+            progress_bar.n = batch_index + 1
+            progress_bar.refresh()
 
-        wandb.log({"training/batch/accuracy": accuracy_batch})
-        wandb.log({"training/batch/step": batch_step})
-        wandb.log({"training/batch/loss": loss_batch})
+            wandb.log({"training/batch/accuracy": accuracy_batch})
+            wandb.log({"training/batch/step": batch_step})
+            wandb.log({"training/batch/loss": loss_batch})
 
-        batch_step += 1
+            batch_step += 1
 
     progress_bar.close()
 
@@ -74,11 +74,11 @@ def validate(model_baseline, data_loader, criterion, device, batch_step):
     model_baseline.eval()
     progress_bar.set_description_str("[INFO]: Validation progress")
 
-    for (batch_index, (input, _, labels, _)) in enumerate(data_loader):
-        input = input.to(device, non_blocking = True)
-        labels = labels.to(device, non_blocking = True)
+    with torch.set_grad_enabled(False):
+        for (batch_index, (input, _, labels, _)) in enumerate(data_loader):
+            input = input.to(device, non_blocking = True)
+            labels = labels.to(device, non_blocking = True)
 
-        with torch.set_grad_enabled(False):
             output = model_baseline(input)
             (_, predictions) = torch.max(output, 1)
             loss = criterion(output, labels)
@@ -88,22 +88,22 @@ def validate(model_baseline, data_loader, criterion, device, batch_step):
                 loss_l2 = header.config_baseline["l2_lambda"] * l2_norm
                 loss += loss_l2
 
-        corrects = torch.sum(predictions == labels.data).item()
+            corrects = torch.sum(predictions == labels.data).item()
 
-        accuracy_batch = corrects / input.size(0)
-        loss_batch = loss.item()
+            accuracy_batch = corrects / input.size(0)
+            loss_batch = loss.item()
 
-        accuracy_epoch += corrects
-        loss_epoch += loss_batch
+            accuracy_epoch += corrects
+            loss_epoch += loss_batch
 
-        progress_bar.n = batch_index + 1
-        progress_bar.refresh()
+            progress_bar.n = batch_index + 1
+            progress_bar.refresh()
 
-        wandb.log({"validation/batch/accuracy": accuracy_batch})
-        wandb.log({"validation/batch/step": batch_step})
-        wandb.log({"validation/batch/loss": loss_batch})
+            wandb.log({"validation/batch/accuracy": accuracy_batch})
+            wandb.log({"validation/batch/step": batch_step})
+            wandb.log({"validation/batch/loss": loss_batch})
 
-        batch_step += 1
+            batch_step += 1
 
     progress_bar.close()
 

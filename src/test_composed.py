@@ -29,46 +29,42 @@ def test(model_decomposed, spn_joint, spn_marginal, dataset_test, data_loader, d
     output_list_decomposed_recall = []
     predictions_epoch_composed = []
     predictions_epoch_list_decomposed = []
+    progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
     spn_output_rows = len(dataset_test.classes_original)
     spn_output_cols = 1
 
     for attribute in config_dataset["attributes"]:
         attribute_labels = attribute["labels"]
         spn_output_cols *= len(attribute_labels)
-
-    for _ in config_dataset["attributes"]:
         accuracy_epoch_list_decomposed.append(0)
         ground_truths_epoch_list_decomposed.append([])
         predictions_epoch_list_decomposed.append([])
 
-    progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
-
     model_decomposed.eval()
     progress_bar.set_description_str("[INFO]: Inference progress")
 
-    with torch.no_grad():
+    with torch.set_grad_enabled(False):
         for (batch_index, (input, labels_decomposed, labels_original, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
             labels_decomposed = labels_decomposed.to(device, non_blocking = True)
             labels_original = labels_original.to(device, non_blocking = True)
 
-            with torch.set_grad_enabled(False):
-                (outputs_decomposed, _) = model_decomposed(input)
+            (outputs_decomposed, _) = model_decomposed(input)
 
-                outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
-                output_composed = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+            outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
+            output_composed = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
 
-                (_, predictions_composed) = torch.max(output_composed, 1)
+            (_, predictions_composed) = torch.max(output_composed, 1)
 
-                corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
+            corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
 
-                for i in range(0, len(config_dataset["attributes"])):
-                    (_, predictions_decomposed) = torch.max(outputs_decomposed[i], 1)
+            for i in range(0, len(config_dataset["attributes"])):
+                (_, predictions_decomposed) = torch.max(outputs_decomposed[i], 1)
 
-                    corrects_decomposed = torch.sum(predictions_decomposed == labels_decomposed[:, i].data).item()
-                    accuracy_epoch_list_decomposed[i] += corrects_decomposed
-                    ground_truths_epoch_list_decomposed[i] += labels_decomposed[:, i].data.tolist()
-                    predictions_epoch_list_decomposed[i] += predictions_decomposed.tolist()
+                corrects_decomposed = torch.sum(predictions_decomposed == labels_decomposed[:, i].data).item()
+                accuracy_epoch_list_decomposed[i] += corrects_decomposed
+                ground_truths_epoch_list_decomposed[i] += labels_decomposed[:, i].data.tolist()
+                predictions_epoch_list_decomposed[i] += predictions_decomposed.tolist()
 
             accuracy_epoch_composed += corrects_composed
             ground_truths_epoch_composed += labels_original.data.tolist()
