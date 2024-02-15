@@ -122,8 +122,8 @@ def main():
     model_decomposed = model.createModelDecomposed(device)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
-    spn_joint = spn.SPN()
-    spn_marginal = spn.SPN()
+    spn_joint = spn.SPN(device)
+    spn_marginal = spn.SPN(device)
 
     logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
 
