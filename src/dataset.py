@@ -4,6 +4,7 @@ import logger
 import os
 import PIL.Image
 import torch
+import utility
 
 class VISATDataset(torch.utils.data.Dataset):
     def __init__(self, root, transform = None):
@@ -28,24 +29,13 @@ class VISATDataset(torch.utils.data.Dataset):
         self.config = json.load(file_config_dataset)
         file_config_dataset.close()
 
-        self.classes_original = list(self.config["mappings"].keys())
+        self.classes = utility.getLabelsAttribute(self.config)
+        self.classes_original = utility.getLabelsOriginal(self.config)
+        self.class_to_idx = utility.getIndicesFromLabelsAttribute(self.classes)
+        self.class_to_idx_original = utility.getIndicesFromLabelsOriginal(self.classes_original)
 
-        for dataset in self.config["attributes"]:
-            dataset_labels = dataset["labels"]
-            dataset_labels.remove("")
-            self.classes.append(dataset_labels)
+        for _ in self.config["attributes"]:
             self.labels.append([])
-
-        for classes_dataset in self.classes:
-            class_to_idx_dataset = {}
-
-            for (class_index, class_name) in enumerate(classes_dataset):
-                class_to_idx_dataset[class_name] = class_index
-
-            self.class_to_idx.append(class_to_idx_dataset)
-
-        for (class_index, class_name) in enumerate(self.classes_original):
-            self.class_to_idx_original[class_name] = class_index
 
         for class_name_original in self.classes_original:
             for file_name in os.listdir(os.path.join(root, class_name_original)):
@@ -57,7 +47,7 @@ class VISATDataset(torch.utils.data.Dataset):
                 for (attribute_index, attribute) in enumerate(self.config["attributes"]):
                     attribute_name = attribute["name"]
                     class_name_decomposed = self.config["mappings"][class_name_original]["labels"][attribute_name]
-                    label = self.class_to_idx[attribute_index][class_name_decomposed]
+                    label = self.class_to_idx[attribute_name][class_name_decomposed]
                     self.labels[attribute_index].append(label)
 
         return

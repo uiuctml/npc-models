@@ -32,8 +32,9 @@ def test(model_decomposed, spn_joint, spn_marginal, dataset_test, data_loader, d
     spn_output_rows = len(dataset_test.classes_original)
     spn_output_cols = 1
 
-    for attribute in dataset_test.classes:
-        spn_output_cols *= len(attribute)
+    for attribute in config_dataset["attributes"]:
+        attribute_labels = attribute["labels"]
+        spn_output_cols *= len(attribute_labels)
 
     for _ in config_dataset["attributes"]:
         accuracy_epoch_list_decomposed.append(0)

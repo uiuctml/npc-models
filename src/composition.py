@@ -24,7 +24,7 @@ class Composition():
                     logger.log_warn("\"" + class_name_original + "\" contains an empty label for dataset \"" + dataset_name + "\".")
                     class_name_decomposed = dataset_name + header.config_decomposed["dataset_delimiter_label"] + header.config_decomposed["dataset_label_undefined_keyword"]
 
-                class_indices_decomposed.append(self.dataset.class_to_idx[dataset_index][class_name_decomposed])
+                class_indices_decomposed.append(self.dataset.class_to_idx[dataset_name][class_name_decomposed])
 
             self.class_indices_decomposed.append(class_indices_decomposed)
 
