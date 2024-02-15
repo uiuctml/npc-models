@@ -12,14 +12,14 @@ import torch
 import tqdm
 import utility
 
-def test(model_decomposed, spn_joint, spn_marginal, dataset_test, data_loader, device, batch_step):
+def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_step):
     utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
     utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
     utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
 
     accuracy_epoch_composed = 0
     accuracy_epoch_list_decomposed = []
-    config_dataset = dataset_test.config
+    config_dataset = data_loader.dataset.config
     ground_truths_epoch_composed = []
     ground_truths_epoch_list_decomposed = []
     output_list_composed = []
@@ -30,7 +30,7 @@ def test(model_decomposed, spn_joint, spn_marginal, dataset_test, data_loader, d
     predictions_epoch_composed = []
     predictions_epoch_list_decomposed = []
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
-    spn_output_rows = len(dataset_test.classes_original)
+    spn_output_rows = len(data_loader.dataset.classes_original)
     spn_output_cols = 1
 
     for attribute in config_dataset["attributes"]:
@@ -149,7 +149,7 @@ def main():
         logger.log_info("SPN depths: " + str(spn_joint.depth) + ".")
         logger.log_info("SPN leaf node setting dimension: (" + str(int(spn_settings_joint.shape[0])) + ", " + str(int(spn_settings_joint.shape[1])) + ").")
 
-    test(model_decomposed, spn_joint, spn_marginal, dataset_test, data_loader_test, device, 1)
+    test(model_decomposed, spn_joint, spn_marginal, data_loader_test, device, 1)
 
     return
 

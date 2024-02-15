@@ -11,10 +11,11 @@ import tqdm
 import utility
 import wandb
 
-def test(model_baseline, config_dataset, data_loader, device, batch_step):
+def test(model_baseline, data_loader, device, batch_step):
     utility.loadCheckpointBest(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint_best"], model_baseline)
 
     accuracy_epoch = 0
+    config_dataset = data_loader.dataset.config
     ground_truths_epoch = []
     output_list = []
     predictions_epoch = []
@@ -80,14 +81,13 @@ def main():
 
     dataset_transforms = utility.createTransform(header.config_baseline)
     dataset_test = dataset.VISATDataset(header.config_baseline["dir_dataset_test"], dataset_transforms)
-    config_dataset = dataset_test.config
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_baseline["data_loader_batch_size"], shuffle = False, num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     model_baseline = model.createModelBaseline(device)
     model_baseline = torch.nn.DataParallel(model_baseline)
     model_baseline = model_baseline.to(device)
 
-    test(model_baseline, config_dataset, data_loader_test, device, 1)
+    test(model_baseline, data_loader_test, device, 1)
 
     return
 

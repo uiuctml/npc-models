@@ -11,10 +11,11 @@ import tqdm
 import utility
 import wandb
 
-def test(model_decomposed, config_dataset, data_loader, device, batch_step):
+def test(model_decomposed, data_loader, device, batch_step):
     utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
 
     accuracy_epoch_list = []
+    config_dataset = data_loader.dataset.config
     ground_truths_epoch_list = []
     output_list = []
     output_list_accuracy = []
@@ -97,14 +98,13 @@ def main():
 
     dataset_transforms = utility.createTransform(header.config_decomposed)
     dataset_test = dataset.VISATDataset(header.config_decomposed["dir_dataset_test"], dataset_transforms)
-    config_dataset = dataset_test.config
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     model_decomposed = model.createModelDecomposed(device)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
 
-    test(model_decomposed, config_dataset, data_loader_test, device, 1)
+    test(model_decomposed, data_loader_test, device, 1)
 
     return
 

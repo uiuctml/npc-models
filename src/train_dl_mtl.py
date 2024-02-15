@@ -13,8 +13,9 @@ import tqdm
 import utility
 import wandb
 
-def train(model_decomposed, config_dataset, data_loader, criterions, optimizer, device, batch_step):
+def train(model_decomposed, data_loader, criterions, optimizer, device, batch_step):
     accuracy_epoch_list = []
+    config_dataset = data_loader.dataset.config
     loss_epoch_list = []
     loss_overall_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
@@ -99,8 +100,9 @@ def train(model_decomposed, config_dataset, data_loader, criterions, optimizer, 
 
     return batch_step
 
-def validate(model_decomposed, config_dataset, data_loader, criterions, device, batch_step):
+def validate(model_decomposed, data_loader, criterions, device, batch_step):
     accuracy_epoch_list = []
+    config_dataset = data_loader.dataset.config
     loss_epoch_list = []
     loss_overall_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
@@ -230,8 +232,8 @@ def main():
         wandb.log({"training/epoch/step": epoch})
         wandb.log({"validation/epoch/step": epoch})
 
-        batch_step_train = train(model_decomposed, config_dataset, data_loader_train, criterions, optimizer, device, batch_step_train)
-        (accuracy_validation_epoch_list, loss_overall_validation_epoch, batch_step_validate) = validate(model_decomposed, config_dataset, data_loader_validation, criterions, device, batch_step_validate)
+        batch_step_train = train(model_decomposed, data_loader_train, criterions, optimizer, device, batch_step_train)
+        (accuracy_validation_epoch_list, loss_overall_validation_epoch, batch_step_validate) = validate(model_decomposed, data_loader_validation, criterions, device, batch_step_validate)
 
         learning_rate_scheduler.step(loss_overall_validation_epoch)
 
@@ -253,7 +255,7 @@ def main():
     wandb.summary["validation/epoch/accuracy_best"] = accuracy_validation_best
 
     wandb.log({"testing/epoch/step": batch_step_test})
-    test_dl_decomposed.test(model_decomposed, config_dataset, data_loader_test, device, batch_step_test)
+    test_dl_decomposed.test(model_decomposed, data_loader_test, device, batch_step_test)
 
     wandb.finish()
 
