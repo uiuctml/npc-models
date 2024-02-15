@@ -81,8 +81,8 @@ def initializeArgumentsTrain():
 def initializeArgumentsTrainComposed():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-rd", "--decomposed-run-name", type = str, default = "", help = "Decomposed run name.", required = True)
-    parser.add_argument("-rs", "--spn-run-name", type = str, default = "", help = "SPN run name.", required = True)
+    parser.add_argument("-rd", "--decomposed-run-name", type = str, default = "", help = "Decomposed run name.")
+    parser.add_argument("-rs", "--spn-run-name", type = str, default = "", help = "SPN run name.")
     parser.add_argument("-m", "--model", type = str, default = "", help = "Model to train.")
     parser.add_argument("-o", "--optimizer", type = str, default = "", help = "SPN optimizer.")
     parser.add_argument("-b", "--batch-size", type = int, default = 512, help = "Batch size.")
@@ -330,8 +330,9 @@ def processArgumentsTrainComposed():
 
     header.config_decomposed["seed"] = arguments.seed
 
-    resume = initializeRunNameDecomposed(arguments.decomposed_run_name)
-    resume = resume and initializeRunNameSPN(arguments.spn_run_name)
+    resume_decomposed = initializeRunNameDecomposed(arguments.decomposed_run_name)
+    resume_spn = initializeRunNameSPN(arguments.spn_run_name)
+    resume = resume_decomposed and resume_spn
 
     if header.run_name_decomposed == "":
         logger.log_fatal("Decomposed run name missing. Quit.")
