@@ -23,19 +23,17 @@ class CCCPComposedSPNOptimizer(SPNOptimizer):
         return
 
     def step(self, matrix_b, labels_original, spn_output_rows, spn_output_cols):
-        labels_original = labels_original.unsqueeze(0)
-
         for sum_node in self.spn.sum_nodes:
             weight_normalization_sum_node = 0
 
             for (i, child) in enumerate(sum_node.children):
                 weights = sum_node.weights[i] * torch.exp(sum_node.value_backward + child.value_forward - self.spn.root_node.value_forward)
-                weights = weights.reshape(spn_output_rows, spn_output_cols)
-                weights = torch.matmul(weights, matrix_b)
-                # TODO Optimization: compute for only y's given by the batch
-                weights = torch.gather(weights, 1, labels_original)
-
-                sum_node.weights[i] = torch.sum(weights)
+                weights = weights.reshape(spn_output_rows, spn_output_cols) # number of original labels x product of category size of all attributes
+                weights = weights.t()   # product of category size of all attributes x number of original labels
+                weights = torch.index_select(weights, 1, labels_original)   # product of category size of all attributes x batch size
+                weights *= matrix_b # product of category size of all attributes x batch size
+                weights = torch.sum(weights, 0) # 1 x batch size
+                sum_node.weights[i] = torch.sum(weights)    # 1 x 1
 
             # Local weight normalization with Laplace smoothing
             for weight_sum_node in sum_node.weights:
