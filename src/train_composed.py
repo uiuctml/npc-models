@@ -16,7 +16,6 @@ import wandb
 
 def negativeLogLikelihood(output, label):
     label = label.reshape(-1, 1)
-    # TODO Optimization: compute for only y's given by the batch
     output = torch.gather(output, 1, label)
 
     return torch.sum(-1 * torch.log(output))
@@ -61,7 +60,7 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
             optimizer_decomposed.step()
 
             spn_joint.backward()
-            optimizer_spn.step(matrix_b, labels_original, spn_output_rows, spn_output_cols)
+            optimizer_spn.step(matrix_b.detach(), labels_original, spn_output_rows, spn_output_cols)
             spn_marginal.set_weights(spn_joint.get_weights())
 
             corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
