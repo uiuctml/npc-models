@@ -44,6 +44,8 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
             labels_decomposed = labels_decomposed.to(device, non_blocking = True)
             labels_original = labels_original.to(device, non_blocking = True)
 
+            optimizer_decomposed.zero_grad()
+
             (outputs_decomposed, _) = model_decomposed(input)
 
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
@@ -118,7 +120,7 @@ def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, 
         spn_output_cols *= len(attribute_labels)
         accuracy_epoch_list_decomposed.append(0)
 
-    model_decomposed.train()
+    model_decomposed.eval()
     progress_bar.set_description_str("[INFO]: Validation progress")
 
     with torch.set_grad_enabled(False):
