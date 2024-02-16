@@ -65,12 +65,16 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
 
             corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
 
-            for i in range(0, len(config_dataset["attributes"])):
+            for (i, attribute) in enumerate(config_dataset["attributes"]):
                 (_, predictions_decomposed) = torch.max(outputs_decomposed[i], 1)
 
                 corrects_decomposed = torch.sum(predictions_decomposed == labels_decomposed[:, i].data).item()
+                accuracy_batch_decomposed = corrects_decomposed / input.size(0)
                 accuracy_epoch_list_decomposed[i] += corrects_decomposed
 
+                wandb.log({"training/batch/" + attribute["name"] + "/accuracy": accuracy_batch_decomposed})
+
+            accuracy_batch_composed = corrects_composed / input.size(0)
             loss_batch = loss.item()
 
             accuracy_epoch_composed += corrects_composed
@@ -79,19 +83,23 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
 
+            wandb.log({"training/batch/accuracy": accuracy_batch_composed})
+            wandb.log({"training/batch/step": batch_step})
+            wandb.log({"training/batch/loss": loss_batch})
+
+            batch_step += 1
+
     progress_bar.close()
 
-    for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
+    for (i, attribute) in enumerate(config_dataset["attributes"]):
         accuracy_epoch_list_decomposed[i] /= len(data_loader.dataset)
-
-        # TODO Replace with wandb
-        logger.log_info("Decomposed training accuracy for \"" + dataset_entry["name"] + "\": " + str(accuracy_epoch_list_decomposed[i]) + ".")
+        wandb.log({"training/epoch/" + attribute["name"] + "/accuracy": accuracy_epoch_list_decomposed[i]})
 
     accuracy_epoch_composed /= len(data_loader.dataset)
     loss_epoch /= len(data_loader)
 
-    # TODO Replace with wandb
-    logger.log_info("Composed training accuracy: " + str(accuracy_epoch_composed) + ".")
+    wandb.log({"training/epoch/accuracy": accuracy_epoch_composed})
+    wandb.log({"training/epoch/loss": loss_epoch})
 
     return batch_step
 
@@ -110,9 +118,9 @@ def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, 
         accuracy_epoch_list_decomposed.append(0)
 
     model_decomposed.train()
-    progress_bar.set_description_str("[INFO]: Training progress")
+    progress_bar.set_description_str("[INFO]: Validation progress")
 
-    with torch.set_grad_enabled(True):
+    with torch.set_grad_enabled(False):
         for (batch_index, (input, labels_decomposed, labels_original, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
             labels_decomposed = labels_decomposed.to(device, non_blocking = True)
@@ -133,12 +141,16 @@ def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, 
 
             corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
 
-            for i in range(0, len(config_dataset["attributes"])):
+            for (i, attribute) in enumerate(config_dataset["attributes"]):
                 (_, predictions_decomposed) = torch.max(outputs_decomposed[i], 1)
 
                 corrects_decomposed = torch.sum(predictions_decomposed == labels_decomposed[:, i].data).item()
+                accuracy_batch_decomposed = corrects_decomposed / input.size(0)
                 accuracy_epoch_list_decomposed[i] += corrects_decomposed
 
+                wandb.log({"validation/batch/" + attribute["name"] + "/accuracy": accuracy_batch_decomposed})
+
+            accuracy_batch_composed = corrects_composed / input.size(0)
             loss_batch = loss.item()
 
             accuracy_epoch_composed += corrects_composed
@@ -147,19 +159,23 @@ def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
 
+            wandb.log({"validation/batch/accuracy": accuracy_batch_composed})
+            wandb.log({"validation/batch/step": batch_step})
+            wandb.log({"validation/batch/loss": loss_batch})
+
+            batch_step += 1
+
     progress_bar.close()
 
-    for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
+    for (i, attribute) in enumerate(config_dataset["attributes"]):
         accuracy_epoch_list_decomposed[i] /= len(data_loader.dataset)
-
-        # TODO Replace with wandb
-        logger.log_info("Decomposed validation accuracy for \"" + dataset_entry["name"] + "\": " + str(accuracy_epoch_list_decomposed[i]) + ".")
+        wandb.log({"validation/epoch/" + attribute["name"] + "/accuracy": accuracy_epoch_list_decomposed[i]})
 
     accuracy_epoch_composed /= len(data_loader.dataset)
     loss_epoch /= len(data_loader)
 
-    # TODO Replace with wandb
-    logger.log_info("Composed validation accuracy: " + str(accuracy_epoch_composed) + ".")
+    wandb.log({"validation/epoch/accuracy": accuracy_epoch_composed})
+    wandb.log({"validation/epoch/loss": loss_epoch})
 
     return (accuracy_epoch_composed, loss_epoch, batch_step)
 
@@ -255,8 +271,10 @@ def main():
             accuracy_validation_best = accuracy_validation_epoch
             wandb.log({"validation/epoch/accuracy_best": accuracy_validation_best})
             utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], accuracy_validation_best, batch_step_train, batch_step_validate, [criterion], epoch, [learning_rate_scheduler], model_decomposed, [optimizer_decomposed])
+            utility.saveCheckpointSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"], 0, 0, 0)
 
         utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, [criterion], epoch, [learning_rate_scheduler], model_decomposed, [optimizer_decomposed])
+        utility.saveCheckpointSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], 0, 0, 0)
 
         epoch += 1
 
