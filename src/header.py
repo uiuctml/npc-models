@@ -115,6 +115,7 @@ config_spn = {
     "file_name_checkpoint": run_name_spn + ".tar",
     "file_name_checkpoint_best": run_name_spn + ".best.tar",
     "fine_tuning": True,
+    "model_pretrained_weights": "spn.cccp_offline.ft.42.2024.2.13.22.3.Aurora-R11.best.tar",
     "optimizer": "cccp_offline",
     "run_name": run_name_spn,
     "seed": seed,

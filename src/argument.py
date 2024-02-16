@@ -83,6 +83,8 @@ def initializeArgumentsTrainComposed():
 
     parser.add_argument("-rd", "--decomposed-run-name", type = str, default = "", help = "Decomposed run name.")
     parser.add_argument("-rs", "--spn-run-name", type = str, default = "", help = "SPN run name.")
+    parser.add_argument("-wd", "--decomposed-pretrained-weights", type = str, default = "", help = "Decomposed pretrained weights.")
+    parser.add_argument("-ws", "--spn-pretrained-weights", type = str, default = "", help = "SPN pretrained weights.")
     parser.add_argument("-m", "--model", type = str, default = "", help = "Model to train.")
     parser.add_argument("-o", "--optimizer", type = str, default = "", help = "SPN optimizer.")
     parser.add_argument("-b", "--batch-size", type = int, default = 512, help = "Batch size.")
@@ -309,6 +311,12 @@ def processArgumentsTrainBaseline():
 def processArgumentsTrainComposed():
     arguments = initializeArgumentsTrainComposed()
 
+    if arguments.decomposed_pretrained_weights != "":
+        header.config_decomposed["model_pretrained_weights"] = arguments.decomposed_pretrained_weights
+
+    if arguments.spn_pretrained_weights != "":
+        header.config_spn["model_pretrained_weights"] = arguments.spn_pretrained_weights
+
     if arguments.model != "":
         header.config_decomposed["model"] = arguments.model
 
@@ -320,8 +328,10 @@ def processArgumentsTrainComposed():
 
     if arguments.fine_tune == 0:
         header.config_decomposed["fine_tuning"] = False
+        header.config_spn["fine_tuning"] = False
     else:
         header.config_decomposed["fine_tuning"] = True
+        header.config_spn["fine_tuning"] = True
 
     if arguments.use_covariance_loss == 0:
         header.config_decomposed["use_covariance_loss"] = False
