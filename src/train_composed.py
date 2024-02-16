@@ -18,8 +18,9 @@ import wandb
 def negativeLogLikelihood(output, label):
     label = label.reshape(-1, 1)
     output = torch.gather(output, 1, label)
+    negative_log_likelihood = -1 * torch.log(output)
 
-    return torch.sum(-1 * torch.log(output))
+    return negative_log_likelihood.mean()
 
 def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, optimizer_decomposed, optimizer_spn, device, batch_step):
     accuracy_epoch_composed = 0
