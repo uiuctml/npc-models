@@ -11,6 +11,7 @@ import test_composed
 import torch
 import torchsummary
 import tqdm
+import type
 import utility
 import wandb
 
@@ -25,7 +26,7 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
     accuracy_epoch_list_decomposed = []
     loss_epoch = 0
     config_dataset = data_loader.dataset.config
-    progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
+    progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
     spn_output_rows = len(data_loader.dataset.classes_original)
     spn_output_cols = 1
 
@@ -108,7 +109,7 @@ def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, 
     accuracy_epoch_list_decomposed = []
     loss_epoch = 0
     config_dataset = data_loader.dataset.config
-    progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
+    progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
     spn_output_rows = len(data_loader.dataset.classes_original)
     spn_output_cols = 1
 
@@ -216,8 +217,16 @@ def main():
     spn_joint = spn.SPN(device)
     spn_marginal = spn.SPN(device)
     optimizer_decomposed = torch.optim.SGD(model_decomposed.parameters(), lr = header.config_decomposed["optimizer_learning_rate"], momentum = header.config_decomposed["optimizer_momentum"], weight_decay = header.config_decomposed["optimizer_weight_decay"])
-    optimizer_spn = spn.CCCPComposedSPNOptimizer(spn_joint, device)
+    optimizer_spn = None
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_decomposed, header.config_decomposed["learning_rate_scheduler_mode"], header.config_decomposed["learning_rate_scheduler_factor"], header.config_decomposed["learning_rate_scheduler_patience"], header.config_decomposed["learning_rate_scheduler_threshold"], header.config_decomposed["learning_rate_scheduler_threshold_mode"], header.config_decomposed["learning_rate_scheduler_cooldown"], header.config_decomposed["learning_rate_scheduler_min_learning_rate"], header.config_decomposed["learning_rate_scheduler_min_learning_rate_decay"], header.config_decomposed["learning_rate_scheduler_verbose"])
+
+    if header.config_spn["optimizer"] == type.OptimizerSPN.cccp_composed.name:
+        optimizer_spn = spn.CCCPComposedSPNOptimizer(spn_joint, device)
+    elif header.config_spn["optimizer"] == type.OptimizerSPN.cccp_offline.name:
+        optimizer_spn = spn.CCCPOfflineSPNOptimizer(spn_joint, device)
+    else:
+        logger.log_fatal("Unknown SPN optimizer \"" + header.config_spn["optimizer"] + "\".")
+        exit(-1)
 
     logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
 
