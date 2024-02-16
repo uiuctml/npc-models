@@ -204,11 +204,18 @@ def loadCheckpointBestSPN(spn, dir_checkpoints, file_name_checkpoint):
 
     return
 
-def loadCheckpointSPN(spn, dir_checkpoints, file_name_checkpoint, resume, log_likelihood_best, log_likelihood_train_last, epoch):
-    if resume:
+def loadCheckpointSPN(spn, dir_checkpoints, file_name_checkpoint, log_likelihood_best, log_likelihood_train_last, epoch):
+    if wandb.run.resumed:
         if not os.path.isdir(dir_checkpoints):
             logger.log_fatal("Checkpoint directory \"" + dir_checkpoints + "\" missing.")
             exit(-1)
+
+        try:
+            wandb.restore(file_name_checkpoint, root = dir_checkpoints)
+        except:
+            pass
+        else:
+            logger.log_info("Restored checkpoint \"" + file_name_checkpoint + "\" from Weights & Biases.")
 
         file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
 
@@ -364,6 +371,13 @@ def saveCheckpointSPN(spn, dir_checkpoints, file_name_checkpoint, log_likelihood
     file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
 
     torch.save(checkpoint, file_path_checkpoint)
+
+    try:
+        wandb.save(file_path_checkpoint, base_path = dir_checkpoints)
+    except:
+        pass
+    else:
+        logger.log_info("Saved checkpoint \"" + file_name_checkpoint + "\" to Weights & Biases.")
 
     logger.log_info("Saved checkpoint \"" + file_name_checkpoint + "\".")
 

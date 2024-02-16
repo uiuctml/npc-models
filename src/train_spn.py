@@ -8,6 +8,7 @@ import torch
 import tqdm
 import type
 import utility
+import wandb
 
 def loadDataset(file_path_dataset, device):
     dataset = []
@@ -56,6 +57,10 @@ def main():
     utility.setSeed(header.config_spn["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
 
+    wandb.init(project = header.project_name, name = header.run_name_spn, config = header.config_spn, resume = resume, mode = header.run_mode)
+
+    utility.wAndBDefineMetrics()
+
     logger.log_info("Started run \"" + header.run_name_spn + "\".")
 
     device = torch.device("cuda")
@@ -80,7 +85,7 @@ def main():
         logger.log_fatal("Unknown SPN optimizer \"" + header.config_spn["optimizer"] + "\".")
         exit(-1)
 
-    (log_likelihood_best, log_likelihood_train_last, epoch) = utility.loadCheckpointSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], resume, log_likelihood_best, log_likelihood_train_last, epoch)
+    (log_likelihood_best, log_likelihood_train_last, epoch) = utility.loadCheckpointSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], log_likelihood_best, log_likelihood_train_last, epoch)
     log_likelihood_train = log_likelihood_train_last
 
     if not resume and not header.config_spn["fine_tuning"]:
