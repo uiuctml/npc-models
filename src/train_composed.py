@@ -253,8 +253,13 @@ def main():
 
     if header.config_decomposed["fine_tuning"]:
         utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["model_pretrained_weights"], model_decomposed)
+
+    if header.config_spn["fine_tuning"]:
         utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["model_pretrained_weights"])
         utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["model_pretrained_weights"])
+    else:
+        spn_joint.randomize_weights()
+        spn_marginal.set_weights(spn_joint.get_weights())
 
     if header.show_model_summary:
         model_input_size = (header.config_decomposed["model_input_channels"], header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])
