@@ -192,7 +192,12 @@ def main():
     if header.run_mode == "online":
         wandb.login()
 
-    wandb.init(project = header.project_name, name = header.run_name_decomposed, config = header.config_decomposed, resume = resume, mode = header.run_mode)
+    config = {
+        "decomposed": header.config_decomposed,
+        "spn": header.config_spn
+    }
+
+    wandb.init(project = header.project_name, name = header.run_name_decomposed, config = config, resume = resume, mode = header.run_mode)
 
     utility.wAndBDefineMetrics()
 
