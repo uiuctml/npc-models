@@ -15,13 +15,6 @@ import type
 import utility
 import wandb
 
-def negativeLogLikelihood(output, label):
-    label = label.reshape(-1, 1)
-    output = torch.gather(output, 1, label)
-    negative_log_likelihood = -1 * torch.log(output)
-
-    return negative_log_likelihood.mean()
-
 def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, optimizer_decomposed, optimizer_spn, device, batch_step):
     accuracy_epoch_composed = 0
     accuracy_epoch_list_decomposed = []
@@ -207,7 +200,7 @@ def main():
     batch_step_test = 1
     batch_step_train = 1
     batch_step_validate = 1
-    criterion = negativeLogLikelihood
+    criterion = utility.lossNegativeLogLikelihood
     dataset_transforms = utility.createTransform(header.config_decomposed)
     dataset_test = dataset.VISATDataset(header.config_decomposed["dir_dataset_test"], dataset_transforms)
     dataset_train = dataset.VISATDataset(header.config_decomposed["dir_dataset_train"], dataset_transforms)

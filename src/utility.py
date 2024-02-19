@@ -298,6 +298,13 @@ def logTestOutput(output, config, config_dataset, composed = False):
 
     return
 
+def lossNegativeLogLikelihood(output, label):
+    label = label.reshape(-1, 1)
+    output = torch.gather(output, 1, label)
+    negative_log_likelihood = -1 * torch.log(output)
+
+    return negative_log_likelihood.mean()
+
 def resize(image, width = None, height = None, inter = cv2.INTER_AREA):
     width_image = image.shape[1]
     width_resize = image.shape[1]
