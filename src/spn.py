@@ -23,18 +23,20 @@ class CCCPComposedSPNOptimizer(SPNOptimizer):
         return
 
     def step(self, matrix_b, labels_original, spn_output_rows, spn_output_cols):
+        self.spn.reuse_forward = False
+
         for sum_node in self.spn.sum_nodes:
             weight_normalization_sum_node = 0
 
             # TODO Optimization: unroll this for loop (compute all weight updates at once)
             for (i, child) in enumerate(sum_node.children):
-                weights = sum_node.weights[i] * torch.exp(sum_node.value_backward + child.value_forward - self.spn.root_node.value_forward)
-                weights = weights.reshape(spn_output_rows, spn_output_cols) # number of original labels x product of category size of all attributes
-                weights = weights.t()   # product of category size of all attributes x number of original labels
-                weights = torch.index_select(weights, 1, labels_original)   # product of category size of all attributes x batch size
-                weights *= matrix_b # product of category size of all attributes x batch size
-                weights = torch.sum(weights, 0) # 1 x batch size
-                sum_node.weights[i] = torch.sum(weights)    # 1 x 1
+                weight_updates = torch.exp(sum_node.value_backward + child.value_forward - self.spn.root_node.value_forward)
+                weight_updates = weight_updates.reshape(spn_output_rows, spn_output_cols) # number of original labels x product of category size of all attributes
+                weight_updates = weight_updates.t()   # product of category size of all attributes x number of original labels
+                weight_updates = torch.index_select(weight_updates, 1, labels_original)   # product of category size of all attributes x batch size
+                weight_updates *= matrix_b # product of category size of all attributes x batch size
+                weight_updates = torch.sum(weight_updates, 0) # 1 x batch size
+                sum_node.weights[i] *= torch.sum(weight_updates)    # 1 x 1
 
             # Local weight normalization with Laplace smoothing
             for weight_sum_node in sum_node.weights:
@@ -53,13 +55,15 @@ class CCCPOfflineSPNOptimizer(SPNOptimizer):
         return
 
     def step(self):
+        self.spn.reuse_forward = False
+
         for sum_node in self.spn.sum_nodes:
             weight_normalization_sum_node = 0
 
             # TODO Optimization: unroll this for loop (compute all weight updates at once)
             for (i, child) in enumerate(sum_node.children):
-                weights = sum_node.weights[i] * torch.exp(sum_node.value_backward + child.value_forward - self.spn.root_node.value_forward)
-                sum_node.weights[i] = torch.sum(weights, 0)
+                weight_updates = torch.exp(sum_node.value_backward + child.value_forward - self.spn.root_node.value_forward)
+                sum_node.weights[i] *= torch.sum(weight_updates, 0)
 
             # Local weight normalization with Laplace smoothing
             for weight_sum_node in sum_node.weights:
