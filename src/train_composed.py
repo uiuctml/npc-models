@@ -262,7 +262,8 @@ def main():
     if header.config_spn["fine_tuning"]:
         utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["model_pretrained_weights"])
         utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["model_pretrained_weights"])
-    else:
+    elif header.config_spn["randomize_weights"]:
+        logger.log_info("Randomizing SPN weights...")
         spn_joint.randomize_weights()
         spn_marginal.set_weights(spn_joint.get_weights())
 

@@ -92,6 +92,7 @@ def initializeArgumentsTrainComposed():
     parser.add_argument("-b", "--batch-size", type = int, default = 512, help = "Batch size.")
     parser.add_argument("-e", "--epochs", type = int, default = 100, help = "Number of training epochs.")
     parser.add_argument("-c", "--use-covariance-loss", type = int, default = 0, help = "Whether to use covariance loss.")
+    parser.add_argument("-r", "--randomize-weights", type = int, default = 0, help = "Whether to randomize weights.")
     parser.add_argument("-s", "--seed", type = int, default = 42, help = "Randomization seed.")
 
     return parser.parse_args()
@@ -342,6 +343,11 @@ def processArgumentsTrainComposed():
     else:
         header.config_decomposed["use_covariance_loss"] = True
 
+    if arguments.randomize_weights == 0:
+        header.config_spn["randomize_weights"] = False
+    else:
+        header.config_spn["randomize_weights"] = True
+
     header.config_decomposed["seed"] = arguments.seed
 
     resume_decomposed = initializeRunNameDecomposed(arguments.decomposed_run_name)
@@ -370,6 +376,7 @@ def processArgumentsTrainComposed():
     logger.log_trace("Batch size: " + str(header.config_decomposed["data_loader_batch_size"]) + ".")
     logger.log_trace("Epochs: " + str(header.config_decomposed["epochs"]) + ".")
     logger.log_trace("Whether to use covariance loss: " + str(header.config_decomposed["use_covariance_loss"]) + ".")
+    logger.log_trace("Whether to randomize SPN weights: " + str(header.config_spn["randomize_weights"]) + ".")
     logger.log_trace("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
 
     return resume

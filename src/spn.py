@@ -26,6 +26,7 @@ class CCCPComposedSPNOptimizer(SPNOptimizer):
         for sum_node in self.spn.sum_nodes:
             weight_normalization_sum_node = 0
 
+            # TODO Optimization: unroll this for loop (compute all weight updates at once)
             for (i, child) in enumerate(sum_node.children):
                 weights = sum_node.weights[i] * torch.exp(sum_node.value_backward + child.value_forward - self.spn.root_node.value_forward)
                 weights = weights.reshape(spn_output_rows, spn_output_cols) # number of original labels x product of category size of all attributes
@@ -55,6 +56,7 @@ class CCCPOfflineSPNOptimizer(SPNOptimizer):
         for sum_node in self.spn.sum_nodes:
             weight_normalization_sum_node = 0
 
+            # TODO Optimization: unroll this for loop (compute all weight updates at once)
             for (i, child) in enumerate(sum_node.children):
                 weights = sum_node.weights[i] * torch.exp(sum_node.value_backward + child.value_forward - self.spn.root_node.value_forward)
                 sum_node.weights[i] = torch.sum(weights, 0)
