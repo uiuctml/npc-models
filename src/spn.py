@@ -266,6 +266,8 @@ class SPN:
                 logger.log_fatal("Missing root node forward value. Quit.")
                 exit(-1)
 
+            self.reuse_backward = True
+
             # Initialize root node backward value in log space
             self.root_node.value_backward = torch.log(torch.ones(self.settings.shape[0]))
             self.root_node.value_backward = self.root_node.value_backward.to(self.device)
@@ -276,8 +278,6 @@ class SPN:
                     continue
 
                 node.backward()
-
-            self.reuse_backward = True
 
         return
 
@@ -291,11 +291,11 @@ class SPN:
                 logger.log_fatal("Missing root node. Quit.")
                 exit(-1)
 
-            for node in self.traversal_order_forward:
-                node.forward()
-
             self.reuse_backward = False
             self.reuse_forward = True
+
+            for node in self.traversal_order_forward:
+                node.forward()
 
         return self.root_node.value_forward
 
@@ -311,6 +311,9 @@ class SPN:
         if not os.path.exists(file_path_spn):
             logger.log_fatal("Invalid SPN file path. Quit.")
             exit(-1)
+
+        self.reuse_backward = False
+        self.reuse_forward = False
 
         with open(file_path_spn, "r") as file_spn:
             categorical_leaf_node_id = -1
@@ -449,6 +452,9 @@ class SPN:
         return
 
     def randomize_weights(self):
+        self.reuse_backward = False
+        self.reuse_forward = False
+
         weights = self.get_weights()
 
         for i in range(len(weights)):
@@ -460,13 +466,12 @@ class SPN:
         return
 
     def set_leaf_nodes(self, settings):
+        self.reuse_backward = False
+        self.reuse_forward = False
         self.settings = settings
 
         for leaf_node in self.leaf_nodes:
             leaf_node.set(self.settings)
-
-        self.reuse_backward = False
-        self.reuse_forward = False
 
         return
 
@@ -474,6 +479,9 @@ class SPN:
         if len(weights) != len(self.sum_nodes):
             logger.log_fatal("Invalid weights. Quit.")
             exit(-1)
+
+        self.reuse_backward = False
+        self.reuse_forward = False
 
         for (sum_node, sum_node_weights) in zip(self.sum_nodes, weights):
             sum_node.weights = torch.clone(sum_node_weights)
