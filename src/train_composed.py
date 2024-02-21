@@ -222,9 +222,9 @@ def main():
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_decomposed, header.config_decomposed["learning_rate_scheduler_mode"], header.config_decomposed["learning_rate_scheduler_factor"], header.config_decomposed["learning_rate_scheduler_patience"], header.config_decomposed["learning_rate_scheduler_threshold"], header.config_decomposed["learning_rate_scheduler_threshold_mode"], header.config_decomposed["learning_rate_scheduler_cooldown"], header.config_decomposed["learning_rate_scheduler_min_learning_rate"], header.config_decomposed["learning_rate_scheduler_min_learning_rate_decay"], header.config_decomposed["learning_rate_scheduler_verbose"])
 
     if header.config_spn["optimizer"] == type.OptimizerSPN.cccp_composed.name:
-        optimizer_spn = spn.CCCPComposedSPNOptimizer(spn_joint, device)
+        optimizer_spn = spn.CCCPComposedSPNOptimizer(spn_joint, spn_marginal, device)
     elif header.config_spn["optimizer"] == type.OptimizerSPN.cccp_offline.name:
-        optimizer_spn = spn.CCCPOfflineSPNOptimizer(spn_joint, device)
+        optimizer_spn = spn.CCCPOfflineSPNOptimizer(spn_joint, spn_marginal, device)
     else:
         logger.log_fatal("Unknown SPN optimizer \"" + header.config_spn["optimizer"] + "\".")
         exit(-1)

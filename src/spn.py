@@ -4,9 +4,10 @@ import os
 import torch
 
 class SPNOptimizer:
-    def __init__(self, spn, device = torch.device("cuda")):
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda")):
         self.device = device
-        self.spn = spn
+        self.spn_joint = spn_joint
+        self.spn_marginal = spn_marginal
 
         return
 
@@ -15,22 +16,22 @@ class SPNOptimizer:
         pass
 
 class CCCPComposedSPNOptimizer(SPNOptimizer):
-    def __init__(self, spn, device = torch.device("cuda")):
-        super().__init__(spn, device)
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda")):
+        super().__init__(spn_joint, spn_marginal, device)
 
         self.machine_epsilon = torch.finfo(torch.float).eps
 
         return
 
     def step(self, matrix_b, labels_original, spn_output_rows, spn_output_cols):
-        self.spn.reuse_forward = False
+        self.spn_joint.reuse_forward = False
 
-        for sum_node in self.spn.sum_nodes:
+        for sum_node in self.spn_joint.sum_nodes:
             weight_normalization_sum_node = 0
 
             # TODO Optimization: unroll this for loop (compute all weight updates at once)
             for (i, child) in enumerate(sum_node.children):
-                weight_updates = torch.exp(sum_node.value_backward + child.value_forward - self.spn.root_node.value_forward)
+                weight_updates = torch.exp(sum_node.value_backward + child.value_forward - self.spn_joint.root_node.value_forward)
                 weight_updates = weight_updates.reshape(spn_output_rows, spn_output_cols) # number of original labels x product of category size of all attributes
                 weight_updates = weight_updates.t()   # product of category size of all attributes x number of original labels
                 weight_updates = torch.index_select(weight_updates, 1, labels_original)   # product of category size of all attributes x batch size
@@ -47,22 +48,22 @@ class CCCPComposedSPNOptimizer(SPNOptimizer):
         return
 
 class CCCPOfflineSPNOptimizer(SPNOptimizer):
-    def __init__(self, spn, device = torch.device("cuda")):
-        super().__init__(spn, device)
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda")):
+        super().__init__(spn_joint, spn_marginal, device)
 
         self.machine_epsilon = torch.finfo(torch.float).eps
 
         return
 
     def step(self):
-        self.spn.reuse_forward = False
+        self.spn_joint.reuse_forward = False
 
-        for sum_node in self.spn.sum_nodes:
+        for sum_node in self.spn_joint.sum_nodes:
             weight_normalization_sum_node = 0
 
             # TODO Optimization: unroll this for loop (compute all weight updates at once)
             for (i, child) in enumerate(sum_node.children):
-                weight_updates = torch.exp(sum_node.value_backward + child.value_forward - self.spn.root_node.value_forward)
+                weight_updates = torch.exp(sum_node.value_backward + child.value_forward - self.spn_joint.root_node.value_forward)
                 sum_node.weights[i] *= torch.sum(weight_updates, 0)
 
             # Local weight normalization with Laplace smoothing

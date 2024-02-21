@@ -80,9 +80,9 @@ def main():
     spn_joint.load(header.config_spn["file_path_spn"])
 
     if header.config_spn["optimizer"] == type.OptimizerSPN.cccp_composed.name:
-        optimizer = spn.CCCPComposedSPNOptimizer(spn_joint, device)
+        optimizer = spn.CCCPComposedSPNOptimizer(spn_joint, None, device)
     elif header.config_spn["optimizer"] == type.OptimizerSPN.cccp_offline.name:
-        optimizer = spn.CCCPOfflineSPNOptimizer(spn_joint, device)
+        optimizer = spn.CCCPOfflineSPNOptimizer(spn_joint, None, device)
     else:
         logger.log_fatal("Unknown SPN optimizer \"" + header.config_spn["optimizer"] + "\".")
         exit(-1)
