@@ -31,13 +31,15 @@ class CCCPComposedSPNOptimizer(SPNOptimizer):
 
             # TODO Optimization: unroll this for loop (compute all weight updates at once)
             for (i, child) in enumerate(sum_node.children):
+                # Compute weight updates in log space
                 weight_updates = torch.exp(sum_node.value_backward + child.value_forward - self.spn_joint.root_node.value_forward)
                 weight_updates = weight_updates.reshape(spn_output_rows, spn_output_cols) # number of original labels x product of category size of all attributes
                 weight_updates = weight_updates.t()   # product of category size of all attributes x number of original labels
                 weight_updates = torch.index_select(weight_updates, 1, labels_original)   # product of category size of all attributes x batch size
                 weight_updates *= matrix_b # product of category size of all attributes x batch size
                 weight_updates = torch.sum(weight_updates, 0) # 1 x batch size
-                sum_node.weights[i] *= torch.sum(weight_updates)    # 1 x 1
+                weight_updates = torch.sum(weight_updates)  # 1 x 1
+                sum_node.weights[i] *= weight_updates
 
             # Local weight normalization with Laplace smoothing
             for weight_sum_node in sum_node.weights:
@@ -63,8 +65,10 @@ class CCCPOfflineSPNOptimizer(SPNOptimizer):
 
             # TODO Optimization: unroll this for loop (compute all weight updates at once)
             for (i, child) in enumerate(sum_node.children):
+                # Compute weight updates in log space
                 weight_updates = torch.exp(sum_node.value_backward + child.value_forward - self.spn_joint.root_node.value_forward)
-                sum_node.weights[i] *= torch.sum(weight_updates, 0)
+                weight_updates = torch.sum(weight_updates, 0)
+                sum_node.weights[i] *= weight_updates
 
             # Local weight normalization with Laplace smoothing
             for weight_sum_node in sum_node.weights:
