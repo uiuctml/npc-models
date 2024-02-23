@@ -102,8 +102,8 @@ def initializeArgumentsTrainSPN():
 
     parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.")
     parser.add_argument("-o", "--optimizer", type = str, default = "", help = "SPN optimizer.")
-    parser.add_argument("-e", "--epochs", type = int, default = 30, help = "Number of training epochs.")
-    parser.add_argument("-f", "--fine-tune", type = int, default = 1, help = "Whether to perform fine-tuning.")
+    parser.add_argument("-e", "--epochs", type = int, default = 50, help = "Number of training epochs.")
+    parser.add_argument("-f", "--fine-tune", type = int, default = 0, help = "Whether to perform fine-tuning.")
     parser.add_argument("-c", "--stopping-criterion", type = float, default = 1e-4, help = "Stopping criterion.")
     parser.add_argument("-s", "--seed", type = int, default = 42, help = "Randomization seed.")
 

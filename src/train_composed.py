@@ -57,8 +57,8 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
             optimizer_decomposed.step()
 
             spn_joint.backward()
+            spn_marginal.backward()
             optimizer_spn.step(matrix_b.detach(), labels_original, spn_output_rows, spn_output_cols)
-            spn_marginal.set_weights(spn_joint.get_weights())
 
             corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
 
@@ -225,6 +225,8 @@ def main():
         optimizer_spn = spn.CCCPComposedSPNOptimizer(spn_joint, spn_marginal, device)
     elif header.config_spn["optimizer"] == type.OptimizerSPN.cccp_offline.name:
         optimizer_spn = spn.CCCPOfflineSPNOptimizer(spn_joint, spn_marginal, device)
+    elif header.config_spn["optimizer"] == type.OptimizerSPN.pgd_offline.name:
+        optimizer_spn = spn.PGDOfflineSPNOptimizer(spn_joint, spn_marginal, device, header.config_spn["optimizer_learning_rate"], header.config_spn["epsilon_projection"])
     else:
         logger.log_fatal("Unknown SPN optimizer \"" + header.config_spn["optimizer"] + "\".")
         exit(-1)
@@ -304,6 +306,8 @@ def main():
 
     logger.log_info("Best validation accuracy: " + str(accuracy_validation_best) + ".")
     wandb.summary["validation/epoch/accuracy_best"] = accuracy_validation_best
+
+    # TODO normalize weights for only PGD
 
     wandb.log({"testing/epoch/step": batch_step_test})
     test_composed.test(model_decomposed, spn_joint, spn_marginal, data_loader_test, device, batch_step_test)

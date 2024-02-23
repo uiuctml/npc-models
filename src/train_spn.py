@@ -38,16 +38,26 @@ def test(spn_joint, settings):
 
     return
 
-def train(spn_joint, settings, optimizer):
-    log_likelihoods = spn_joint(settings)
+def train(spn_joint, spn_marginal, settings_joint, settings_marginal, optimizer, use_probability):
+    log_likelihoods = spn_joint(settings_joint)
+    log_likelihoods_marginal = spn_marginal(settings_marginal)
 
     spn_joint.backward()
+    spn_marginal.backward()
+
     optimizer.step()
+
+    if use_probability:
+        log_likelihoods -= log_likelihoods_marginal
 
     return torch.mean(log_likelihoods).item()
 
-def validate(spn_joint, settings):
-    log_likelihoods = spn_joint(settings)
+def validate(spn_joint, spn_marginal, settings_joint, settings_marginal, use_probability):
+    log_likelihoods = spn_joint(settings_joint)
+    log_likelihoods_marginal = spn_marginal(settings_marginal)
+
+    if use_probability:
+        log_likelihoods -= log_likelihoods_marginal
 
     return torch.mean(log_likelihoods).item()
 
@@ -71,27 +81,43 @@ def main():
     log_likelihood_best = float("-inf")
     log_likelihood_train = 0
     log_likelihood_train_last = 0
+    normalize = False
+    use_probability = False
+    settings_marginal = torch.full((1, dataset_test.shape[1]), -1).to(device)
     spn_joint = spn.SPN(device)
+    spn_marginal = spn.SPN(device)
     optimizer = None
     progress_bar = None
 
     logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
 
     spn_joint.load(header.config_spn["file_path_spn"])
+    spn_marginal.load(header.config_spn["file_path_spn"])
 
     if header.config_spn["optimizer"] == type.OptimizerSPN.cccp_composed.name:
-        optimizer = spn.CCCPComposedSPNOptimizer(spn_joint, None, device)
+        optimizer = spn.CCCPComposedSPNOptimizer(spn_joint, spn_marginal, device)
     elif header.config_spn["optimizer"] == type.OptimizerSPN.cccp_offline.name:
-        optimizer = spn.CCCPOfflineSPNOptimizer(spn_joint, None, device)
+        optimizer = spn.CCCPOfflineSPNOptimizer(spn_joint, spn_marginal, device)
+    elif header.config_spn["optimizer"] == type.OptimizerSPN.pgd_offline.name:
+        optimizer = spn.PGDOfflineSPNOptimizer(spn_joint, spn_marginal, device, header.config_spn["optimizer_learning_rate"], header.config_spn["epsilon_projection"])
+        normalize = True
+        use_probability = True
     else:
         logger.log_fatal("Unknown SPN optimizer \"" + header.config_spn["optimizer"] + "\".")
         exit(-1)
 
+    learning_rate_scheduler = spn.SPNLearningRateScheduler(optimizer, header.config_spn["learning_rate_scheduler_factor"])
+
     (log_likelihood_best, log_likelihood_train_last, epoch) = utility.loadCheckpointSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], log_likelihood_best, log_likelihood_train_last, epoch)
     log_likelihood_train = log_likelihood_train_last
 
-    if not resume and not header.config_spn["fine_tuning"]:
+    if header.config_spn["fine_tuning"]:
+        utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["model_pretrained_weights"])
+        utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["model_pretrained_weights"])
+    elif header.config_spn["randomize_weights"]:
+        logger.log_info("Randomizing SPN weights...")
         spn_joint.randomize_weights()
+        spn_marginal.set_weights(spn_joint.get_weights())
 
     if header.show_model_summary:
         logger.log_info("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
@@ -112,11 +138,17 @@ def main():
             progress_bar.refresh()
 
         log_likelihood_train_last = log_likelihood_train
-        log_likelihood_train = train(spn_joint, dataset_train, optimizer)
-        log_likelihood_validate = validate(spn_joint, dataset_validation)
+        log_likelihood_train = train(spn_joint, spn_marginal, dataset_train, settings_marginal, optimizer, use_probability)
+        log_likelihood_validate = validate(spn_joint, spn_marginal, dataset_validation, settings_marginal, use_probability)
 
-        logger.log_info("Training log likelihood: " + str(log_likelihood_train) + ".")
-        logger.log_info("Validation log likelihood: " + str(log_likelihood_validate) + ".")
+        if use_probability:
+            logger.log_info("Training log probability: " + str(log_likelihood_train) + ".")
+            logger.log_info("Validation log probability: " + str(log_likelihood_validate) + ".")
+        else:
+            logger.log_info("Training log likelihood: " + str(log_likelihood_train) + ".")
+            logger.log_info("Validation log likelihood: " + str(log_likelihood_validate) + ".")
+
+        learning_rate_scheduler.step(log_likelihood_train)
 
         if log_likelihood_validate > log_likelihood_best:
             log_likelihood_best = log_likelihood_validate
@@ -124,7 +156,7 @@ def main():
 
         utility.saveCheckpointSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], log_likelihood_best, log_likelihood_train_last, epoch)
 
-        if epoch > 1 and log_likelihood_train - log_likelihood_train_last < header.config_spn["stopping_criterion"]:
+        if epoch > 1 and abs(log_likelihood_train - log_likelihood_train_last) < header.config_spn["stopping_criterion"]:
             logger.log_info("Stopping criterion reached.")
             break
 
@@ -132,6 +164,23 @@ def main():
 
     if progress_bar is not None:
         progress_bar.close()
+
+    if normalize:
+        wandb.run.resumed = True
+
+        logger.log_info("Normalizing SPN weights.")
+
+        utility.loadCheckpointSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], 0, 0, 0)
+        spn_marginal(settings_marginal)
+        spn_marginal.normalize_weights(header.config_spn["epsilon_smoothing"])
+        utility.saveCheckpointSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], log_likelihood_best, log_likelihood_train_last, epoch)
+
+        (log_likelihood_best, log_likelihood_train_last, epoch) = utility.loadCheckpointSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"], log_likelihood_best, log_likelihood_train_last, epoch)
+        spn_marginal(settings_marginal)
+        spn_marginal.normalize_weights(header.config_spn["epsilon_smoothing"])
+        utility.saveCheckpointSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"], log_likelihood_best, log_likelihood_train_last, epoch)
+
+        wandb.run.resumed = False
 
     utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
     test(spn_joint, dataset_test)

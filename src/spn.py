@@ -3,28 +3,46 @@ import logger
 import os
 import torch
 
+class SPNLearningRateScheduler:
+    def __init__(self, optimizer, factor = 0.8):
+        self.factor = factor
+        self.metrics = None
+        self.optimizer = optimizer
+
+        return
+
+    def step(self, metrics):
+        if self.metrics is not None:
+            if metrics < self.metrics:
+                self.optimizer.learning_rate *= self.factor
+                logger.log_info("Reducing learning rate to " + "{:e}".format(self.optimizer.learning_rate) + "...")
+
+        self.metrics = metrics
+
 class SPNOptimizer:
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda")):
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, projection_epsilon = 1e-2):
         self.device = device
+        self.learning_rate = learning_rate
+        self.smoothing_epsilon = torch.finfo(torch.float).eps
+        self.projection_epsilon = projection_epsilon
         self.spn_joint = spn_joint
         self.spn_marginal = spn_marginal
 
         return
 
     @abc.abstractmethod
-    def step(self):
+    def step(self, matrix_b = None, labels_original = None, spn_output_rows = None, spn_output_cols = None):
         pass
 
 class CCCPComposedSPNOptimizer(SPNOptimizer):
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda")):
-        super().__init__(spn_joint, spn_marginal, device)
-
-        self.machine_epsilon = torch.finfo(torch.float).eps
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, projection_epsilon = 1e-2):
+        super().__init__(spn_joint, spn_marginal, device, learning_rate, projection_epsilon)
 
         return
 
-    def step(self, matrix_b, labels_original, spn_output_rows, spn_output_cols):
+    def step(self, matrix_b = None, labels_original = None, spn_output_rows = None, spn_output_cols = None):
         self.spn_joint.reuse_forward = False
+        self.spn_marginal.reuse_forward = False
 
         for sum_node in self.spn_joint.sum_nodes:
             weight_normalization_sum_node = 0
@@ -43,22 +61,23 @@ class CCCPComposedSPNOptimizer(SPNOptimizer):
 
             # Local weight normalization with Laplace smoothing
             for weight_sum_node in sum_node.weights:
-                weight_normalization_sum_node += weight_sum_node + self.machine_epsilon
+                weight_normalization_sum_node += weight_sum_node + self.smoothing_epsilon
 
-            sum_node.weights = (sum_node.weights + self.machine_epsilon) / weight_normalization_sum_node
+            sum_node.weights = (sum_node.weights + self.smoothing_epsilon) / weight_normalization_sum_node
+
+        self.spn_marginal.set_weights(self.spn_joint.get_weights())
 
         return
 
 class CCCPOfflineSPNOptimizer(SPNOptimizer):
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda")):
-        super().__init__(spn_joint, spn_marginal, device)
-
-        self.machine_epsilon = torch.finfo(torch.float).eps
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, projection_epsilon = 1e-2):
+        super().__init__(spn_joint, spn_marginal, device, learning_rate, projection_epsilon)
 
         return
 
-    def step(self):
+    def step(self, matrix_b = None, labels_original = None, spn_output_rows = None, spn_output_cols = None):
         self.spn_joint.reuse_forward = False
+        self.spn_marginal.reuse_forward = False
 
         for sum_node in self.spn_joint.sum_nodes:
             weight_normalization_sum_node = 0
@@ -72,9 +91,37 @@ class CCCPOfflineSPNOptimizer(SPNOptimizer):
 
             # Local weight normalization with Laplace smoothing
             for weight_sum_node in sum_node.weights:
-                weight_normalization_sum_node += weight_sum_node + self.machine_epsilon
+                weight_normalization_sum_node += weight_sum_node + self.smoothing_epsilon
 
-            sum_node.weights = (sum_node.weights + self.machine_epsilon) / weight_normalization_sum_node
+            sum_node.weights = (sum_node.weights + self.smoothing_epsilon) / weight_normalization_sum_node
+
+        self.spn_marginal.set_weights(self.spn_joint.get_weights())
+
+        return
+
+class PGDOfflineSPNOptimizer(SPNOptimizer):
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, projection_epsilon = 1e-2):
+        super().__init__(spn_joint, spn_marginal, device, learning_rate, projection_epsilon)
+
+        return
+
+    def step(self, matrix_b = None, labels_original = None, spn_output_rows = None, spn_output_cols = None):
+        self.spn_joint.reuse_forward = False
+        self.spn_marginal.reuse_forward = False
+
+        for (sum_node_joint, sum_node_marginal) in zip(self.spn_joint.sum_nodes, self.spn_marginal.sum_nodes):
+            for (i, (child_joint, child_marginal)) in enumerate(zip(sum_node_joint.children, sum_node_marginal.children)):
+                # Compute weight updates in log space
+                weight_updates_joint = torch.exp(sum_node_joint.value_backward + child_joint.value_forward - self.spn_joint.root_node.value_forward)
+                weight_updates_marginal = torch.exp(sum_node_marginal.value_backward + child_marginal.value_forward - self.spn_marginal.root_node.value_forward)
+                weight_updates = weight_updates_joint - weight_updates_marginal
+                weight_updates = torch.mean(weight_updates)
+                sum_node_joint.weights[i] += self.learning_rate * weight_updates
+
+                if sum_node_joint.weights[i] <= 0:
+                    sum_node_joint.weights[i] = self.projection_epsilon
+
+        self.spn_marginal.set_weights(self.spn_joint.get_weights())
 
         return
 
@@ -453,6 +500,27 @@ class SPN:
         if len(self.traversal_order_forward) != len(self.nodes):
             logger.log_fatal("Invalid SPN forward traversal")
             exit(-1)
+
+        return
+
+    def normalize_weights(self, smoothing_epsilon):
+        for sum_node in self.sum_nodes:
+            value_forward_children = []
+            weight_normalization = 0
+
+            for child in sum_node.children:
+                value_forward_children.append(child.value_forward)
+
+            value_forward_children = torch.stack(value_forward_children)
+            value_forward_children_max = torch.max(value_forward_children, 0)[0]
+
+            for (i, child) in enumerate(sum_node.children):
+                weight_normalization += sum_node.weights[i] * torch.exp(child.value_forward - value_forward_children_max) + smoothing_epsilon
+
+            # Local weight normalization with Laplace smoothing
+            for (i, child) in enumerate(sum_node.children):
+                weight = sum_node.weights[i] * torch.exp(child.value_forward - value_forward_children_max) + smoothing_epsilon
+                sum_node.weights[i] = weight / weight_normalization
 
         return
 

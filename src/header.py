@@ -107,7 +107,7 @@ config_decomposed = {
 
 config_spn = {
     "dir_checkpoints": "../checkpoints",
-    "epochs": 30,
+    "epochs": 50,
     "file_path_spn": "../../learnspn/output/learnspn/gtsrb.spn.txt",
     "file_path_spn_dataset_test": "../../gtsrb-dataset/images/split/spn/test.txt",
     "file_path_spn_dataset_train": "../../gtsrb-dataset/images/split/spn/train.txt",
@@ -115,8 +115,12 @@ config_spn = {
     "file_name_checkpoint": run_name_spn + ".tar",
     "file_name_checkpoint_best": run_name_spn + ".best.tar",
     "fine_tuning": False,
+    "epsilon_projection": 1e-2,
+    "epsilon_smoothing": 1e-3,
+    "learning_rate_scheduler_factor": 0.8,
     "model_pretrained_weights": "spn.cccp_offline.ft.42.2024.2.13.22.3.Aurora-R11.best.tar",
     "optimizer": "cccp_offline",
+    "optimizer_learning_rate": 1e-1,
     "randomize_weights": False,
     "run_name": run_name_spn,
     "seed": seed,
