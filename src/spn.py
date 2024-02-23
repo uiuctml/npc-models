@@ -20,10 +20,11 @@ class SPNLearningRateScheduler:
         self.metrics = metrics
 
 class SPNOptimizer:
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, projection_epsilon = 1e-2):
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2):
         self.device = device
         self.learning_rate = learning_rate
         self.smoothing_epsilon = torch.finfo(torch.float).eps
+        self.prior_factor = prior_factor
         self.projection_epsilon = projection_epsilon
         self.spn_joint = spn_joint
         self.spn_marginal = spn_marginal
@@ -35,8 +36,8 @@ class SPNOptimizer:
         pass
 
 class CCCPComposedSPNOptimizer(SPNOptimizer):
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, projection_epsilon = 1e-2):
-        super().__init__(spn_joint, spn_marginal, device, learning_rate, projection_epsilon)
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2):
+        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon)
 
         return
 
@@ -70,8 +71,8 @@ class CCCPComposedSPNOptimizer(SPNOptimizer):
         return
 
 class CCCPOfflineSPNOptimizer(SPNOptimizer):
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, projection_epsilon = 1e-2):
-        super().__init__(spn_joint, spn_marginal, device, learning_rate, projection_epsilon)
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2):
+        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon)
 
         return
 
@@ -100,8 +101,11 @@ class CCCPOfflineSPNOptimizer(SPNOptimizer):
         return
 
 class PGDOfflineSPNOptimizer(SPNOptimizer):
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, projection_epsilon = 1e-2):
-        super().__init__(spn_joint, spn_marginal, device, learning_rate, projection_epsilon)
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2):
+        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon)
+
+        self.initialized = False
+        self.weights_prior = None
 
         return
 
@@ -109,13 +113,27 @@ class PGDOfflineSPNOptimizer(SPNOptimizer):
         self.spn_joint.reuse_forward = False
         self.spn_marginal.reuse_forward = False
 
-        for (sum_node_joint, sum_node_marginal) in zip(self.spn_joint.sum_nodes, self.spn_marginal.sum_nodes):
+        if not self.initialized:
+            self.weights_prior = self.spn_joint.get_weights()
+
+            for i in range(len(self.weights_prior)):
+                self.weights_prior[i] *= self.prior_factor
+
+            self.initialized = True
+
+        for (sum_node_joint, sum_node_marginal, weights_prior) in zip(self.spn_joint.sum_nodes, self.spn_marginal.sum_nodes, self.weights_prior):
             for (i, (child_joint, child_marginal)) in enumerate(zip(sum_node_joint.children, sum_node_marginal.children)):
                 # Compute weight updates in log space
                 weight_updates_joint = torch.exp(sum_node_joint.value_backward + child_joint.value_forward - self.spn_joint.root_node.value_forward)
                 weight_updates_marginal = torch.exp(sum_node_marginal.value_backward + child_marginal.value_forward - self.spn_marginal.root_node.value_forward)
                 weight_updates = weight_updates_joint - weight_updates_marginal
-                weight_updates = torch.mean(weight_updates)
+
+                # Average weight updates with prior regularization
+                weight_updates_count = weight_updates.shape[0]
+                weight_updates = torch.sum(weight_updates, 0, keepdim = True)
+                weight_updates += (weights_prior[i] - 1) / sum_node_joint.weights[i]
+                weight_updates /= weight_updates_count
+
                 sum_node_joint.weights[i] += self.learning_rate * weight_updates
 
                 if sum_node_joint.weights[i] <= 0:

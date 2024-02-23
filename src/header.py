@@ -121,6 +121,7 @@ config_spn = {
     "model_pretrained_weights": "spn.cccp_offline.ft.42.2024.2.13.22.3.Aurora-R11.best.tar",
     "optimizer": "cccp_offline",
     "optimizer_learning_rate": 1e-1,
+    "optimizer_prior_factor": 1e2,
     "randomize_weights": False,
     "run_name": run_name_spn,
     "seed": seed,

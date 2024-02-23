@@ -226,7 +226,7 @@ def main():
     elif header.config_spn["optimizer"] == type.OptimizerSPN.cccp_offline.name:
         optimizer_spn = spn.CCCPOfflineSPNOptimizer(spn_joint, spn_marginal, device)
     elif header.config_spn["optimizer"] == type.OptimizerSPN.pgd_offline.name:
-        optimizer_spn = spn.PGDOfflineSPNOptimizer(spn_joint, spn_marginal, device, header.config_spn["optimizer_learning_rate"], header.config_spn["epsilon_projection"])
+        optimizer_spn = spn.PGDOfflineSPNOptimizer(spn_joint, spn_marginal, device, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
     else:
         logger.log_fatal("Unknown SPN optimizer \"" + header.config_spn["optimizer"] + "\".")
         exit(-1)

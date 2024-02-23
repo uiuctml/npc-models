@@ -99,7 +99,7 @@ def main():
     elif header.config_spn["optimizer"] == type.OptimizerSPN.cccp_offline.name:
         optimizer = spn.CCCPOfflineSPNOptimizer(spn_joint, spn_marginal, device)
     elif header.config_spn["optimizer"] == type.OptimizerSPN.pgd_offline.name:
-        optimizer = spn.PGDOfflineSPNOptimizer(spn_joint, spn_marginal, device, header.config_spn["optimizer_learning_rate"], header.config_spn["epsilon_projection"])
+        optimizer = spn.PGDOfflineSPNOptimizer(spn_joint, spn_marginal, device, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
         normalize = True
         use_probability = True
     else:
