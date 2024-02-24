@@ -42,4 +42,5 @@ class ModelDecomposed(enum.Enum):
 class OptimizerSPN(enum.Enum):
     cccp_composed = 0
     cccp_offline = 1
-    pgd_offline = 2
+    pgd_composed = 2
+    pgd_offline = 3

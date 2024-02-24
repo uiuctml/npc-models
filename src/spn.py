@@ -11,11 +11,35 @@ class SPNLearningRateScheduler:
 
         return
 
+    @abc.abstractmethod
+    def step(self, metrics):
+        pass
+
+class LikelihoodSPNLearningRateScheduler(SPNLearningRateScheduler):
+    def __init__(self, optimizer, factor = 0.8):
+        super().__init__(optimizer, factor)
+
+        return
+
     def step(self, metrics):
         if self.metrics is not None:
             if metrics < self.metrics:
                 self.optimizer.learning_rate *= self.factor
-                logger.log_info("Reducing learning rate to " + "{:e}".format(self.optimizer.learning_rate) + "...")
+                logger.log_info("Reducing SPN learning rate to " + "{:e}".format(self.optimizer.learning_rate) + "...")
+
+        self.metrics = metrics
+
+class LossSPNLearningRateScheduler(SPNLearningRateScheduler):
+    def __init__(self, optimizer, factor = 0.8):
+        super().__init__(optimizer, factor)
+
+        return
+
+    def step(self, metrics):
+        if self.metrics is not None:
+            if metrics > self.metrics:
+                self.optimizer.learning_rate *= self.factor
+                logger.log_info("Reducing SPN learning rate to " + "{:e}".format(self.optimizer.learning_rate) + "...")
 
         self.metrics = metrics
 
@@ -28,11 +52,20 @@ class SPNOptimizer:
         self.projection_epsilon = projection_epsilon
         self.spn_joint = spn_joint
         self.spn_marginal = spn_marginal
+        self.weights_prior = None
+
+        return
+
+    def set_weights_prior(self, weights_prior):
+        self.weights_prior = weights_prior
+
+        for i in range(len(self.weights_prior)):
+            self.weights_prior[i] *= self.prior_factor
 
         return
 
     @abc.abstractmethod
-    def step(self, matrix_b = None, labels_original = None, spn_output_rows = None, spn_output_cols = None):
+    def step(self, matrix_a = None, matrix_b = None, matrix_c = None, labels_original = None):
         pass
 
 class CCCPComposedSPNOptimizer(SPNOptimizer):
@@ -41,7 +74,7 @@ class CCCPComposedSPNOptimizer(SPNOptimizer):
 
         return
 
-    def step(self, matrix_b = None, labels_original = None, spn_output_rows = None, spn_output_cols = None):
+    def step(self, matrix_a = None, matrix_b = None, matrix_c = None, labels_original = None):
         self.spn_joint.reuse_forward = False
         self.spn_marginal.reuse_forward = False
 
@@ -52,7 +85,7 @@ class CCCPComposedSPNOptimizer(SPNOptimizer):
             for (i, child) in enumerate(sum_node.children):
                 # Compute weight updates in log space
                 weight_updates = torch.exp(sum_node.value_backward + child.value_forward - self.spn_joint.root_node.value_forward)
-                weight_updates = weight_updates.reshape(spn_output_rows, spn_output_cols) # number of original labels x product of category size of all attributes
+                weight_updates = weight_updates.reshape(matrix_a.shape) # number of original labels x product of category size of all attributes
                 weight_updates = weight_updates.t()   # product of category size of all attributes x number of original labels
                 weight_updates = torch.index_select(weight_updates, 1, labels_original)   # product of category size of all attributes x batch size
                 weight_updates *= matrix_b # product of category size of all attributes x batch size
@@ -76,7 +109,7 @@ class CCCPOfflineSPNOptimizer(SPNOptimizer):
 
         return
 
-    def step(self, matrix_b = None, labels_original = None, spn_output_rows = None, spn_output_cols = None):
+    def step(self, matrix_a = None, matrix_b = None, matrix_c = None, labels_original = None):
         self.spn_joint.reuse_forward = False
         self.spn_marginal.reuse_forward = False
 
@@ -100,26 +133,56 @@ class CCCPOfflineSPNOptimizer(SPNOptimizer):
 
         return
 
+class PGDComposedSPNOptimizer(SPNOptimizer):
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2):
+        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon)
+
+        return
+
+    def step(self, matrix_a = None, matrix_b = None, matrix_c = None, labels_original = None):
+        self.spn_joint.reuse_forward = False
+        self.spn_marginal.reuse_forward = False
+
+        matrix_c_transposed = matrix_c.t()  # number of original labels x batch size
+
+        for (sum_node_joint, sum_node_marginal, weights_prior) in zip(self.spn_joint.sum_nodes, self.spn_marginal.sum_nodes, self.weights_prior):
+            for (i, (child_joint, child_marginal)) in enumerate(zip(sum_node_joint.children, sum_node_marginal.children)):
+                # Compute weight updates in log space
+                weight_updates_joint = torch.exp(sum_node_joint.value_backward + child_joint.value_forward - self.spn_joint.root_node.value_forward)
+                weight_updates_marginal = torch.exp(sum_node_marginal.value_backward + child_marginal.value_forward - self.spn_marginal.root_node.value_forward)
+                weight_updates = weight_updates_joint - weight_updates_marginal
+                weight_updates = weight_updates.reshape(matrix_a.shape) # number of original labels x product of category size of all attributes
+                weight_updates *= matrix_a  # number of original labels x product of category size of all attributes
+                weight_updates = weight_updates.t()   # product of category size of all attributes x number of original labels
+                weight_updates = torch.index_select(weight_updates, 1, labels_original)   # product of category size of all attributes x batch size
+                weight_updates *= matrix_b # product of category size of all attributes x batch size
+                weight_updates = torch.sum(weight_updates, 0) # 1 x batch size
+                weight_updates /=  matrix_c_transposed[labels_original, torch.arange(matrix_c_transposed.shape[1])]   # 1 x batch size
+
+                # Average weight updates with prior regularization
+                weight_updates_count = weight_updates.shape[0]
+                weight_updates = torch.sum(weight_updates, 0, keepdim = True)
+                weight_updates += (weights_prior[i] - 1) / sum_node_joint.weights[i]
+                weight_updates /= weight_updates_count
+
+                sum_node_joint.weights[i] += self.learning_rate * weight_updates
+
+                if sum_node_joint.weights[i] <= 0:
+                    sum_node_joint.weights[i] = self.projection_epsilon
+
+        self.spn_marginal.set_weights(self.spn_joint.get_weights())
+
+        return
+
 class PGDOfflineSPNOptimizer(SPNOptimizer):
     def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2):
         super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon)
 
-        self.initialized = False
-        self.weights_prior = None
-
         return
 
-    def step(self, matrix_b = None, labels_original = None, spn_output_rows = None, spn_output_cols = None):
+    def step(self, matrix_a = None, matrix_b = None, matrix_c = None, labels_original = None):
         self.spn_joint.reuse_forward = False
         self.spn_marginal.reuse_forward = False
-
-        if not self.initialized:
-            self.weights_prior = self.spn_joint.get_weights()
-
-            for i in range(len(self.weights_prior)):
-                self.weights_prior[i] *= self.prior_factor
-
-            self.initialized = True
 
         for (sum_node_joint, sum_node_marginal, weights_prior) in zip(self.spn_joint.sum_nodes, self.spn_marginal.sum_nodes, self.weights_prior):
             for (i, (child_joint, child_marginal)) in enumerate(zip(sum_node_joint.children, sum_node_marginal.children)):

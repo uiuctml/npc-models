@@ -43,7 +43,7 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
             (outputs_decomposed, _) = model_decomposed(input)
 
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
-            (output_composed, matrix_b) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+            (matrix_a, matrix_b, output_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
             loss = criterion(output_composed, labels_original)
@@ -58,7 +58,7 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
 
             spn_joint.backward()
             spn_marginal.backward()
-            optimizer_spn.step(matrix_b.detach(), labels_original, spn_output_rows, spn_output_cols)
+            optimizer_spn.step(matrix_a.detach(), matrix_b.detach(), output_composed.detach(), labels_original)
 
             corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
 
@@ -126,7 +126,7 @@ def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, 
             (outputs_decomposed, _) = model_decomposed(input)
 
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
-            (output_composed, _) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+            (_, _, output_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
             loss = criterion(output_composed, labels_original)
@@ -220,21 +220,27 @@ def main():
     optimizer_decomposed = torch.optim.SGD(model_decomposed.parameters(), lr = header.config_decomposed["optimizer_learning_rate"], momentum = header.config_decomposed["optimizer_momentum"], weight_decay = header.config_decomposed["optimizer_weight_decay"])
     optimizer_spn = None
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_decomposed, header.config_decomposed["learning_rate_scheduler_mode"], header.config_decomposed["learning_rate_scheduler_factor"], header.config_decomposed["learning_rate_scheduler_patience"], header.config_decomposed["learning_rate_scheduler_threshold"], header.config_decomposed["learning_rate_scheduler_threshold_mode"], header.config_decomposed["learning_rate_scheduler_cooldown"], header.config_decomposed["learning_rate_scheduler_min_learning_rate"], header.config_decomposed["learning_rate_scheduler_min_learning_rate_decay"], header.config_decomposed["learning_rate_scheduler_verbose"])
+    learning_rate_scheduler_spn = None
 
     if header.config_spn["optimizer"] == type.OptimizerSPN.cccp_composed.name:
         optimizer_spn = spn.CCCPComposedSPNOptimizer(spn_joint, spn_marginal, device)
     elif header.config_spn["optimizer"] == type.OptimizerSPN.cccp_offline.name:
         optimizer_spn = spn.CCCPOfflineSPNOptimizer(spn_joint, spn_marginal, device)
+    elif header.config_spn["optimizer"] == type.OptimizerSPN.pgd_composed.name:
+        optimizer_spn = spn.PGDComposedSPNOptimizer(spn_joint, spn_marginal, device, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
     elif header.config_spn["optimizer"] == type.OptimizerSPN.pgd_offline.name:
         optimizer_spn = spn.PGDOfflineSPNOptimizer(spn_joint, spn_marginal, device, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
     else:
         logger.log_fatal("Unknown SPN optimizer \"" + header.config_spn["optimizer"] + "\".")
         exit(-1)
 
+    learning_rate_scheduler_spn = spn.LossSPNLearningRateScheduler(optimizer_spn, header.config_spn["learning_rate_scheduler_factor"])
+
     logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
 
     spn_joint.load(header.config_spn["file_path_spn"])
     spn_marginal.load(header.config_spn["file_path_spn"])
+    optimizer_spn.set_weights_prior(spn_joint.get_weights())
 
     logger.log_info("Loading SPN leaf node settings...")
 
@@ -289,6 +295,7 @@ def main():
         (accuracy_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_decomposed, spn_joint, spn_marginal, data_loader_validation, criterion, device, batch_step_validate)
 
         learning_rate_scheduler.step(loss_validation_epoch)
+        learning_rate_scheduler_spn.step(loss_validation_epoch)
 
         if accuracy_validation_epoch > accuracy_validation_best:
             accuracy_validation_best = accuracy_validation_epoch

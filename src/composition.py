@@ -80,4 +80,4 @@ class Composition():
 
         matrix_c = torch.matmul(matrix_a, matrix_b).t()
 
-        return (matrix_c, matrix_b)
+        return (matrix_a, matrix_b, matrix_c)

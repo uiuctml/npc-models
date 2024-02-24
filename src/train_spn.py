@@ -89,24 +89,23 @@ def main():
     optimizer = None
     progress_bar = None
 
-    logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
-
-    spn_joint.load(header.config_spn["file_path_spn"])
-    spn_marginal.load(header.config_spn["file_path_spn"])
-
-    if header.config_spn["optimizer"] == type.OptimizerSPN.cccp_composed.name:
-        optimizer = spn.CCCPComposedSPNOptimizer(spn_joint, spn_marginal, device)
-    elif header.config_spn["optimizer"] == type.OptimizerSPN.cccp_offline.name:
+    if header.config_spn["optimizer"] == type.OptimizerSPN.cccp_offline.name:
         optimizer = spn.CCCPOfflineSPNOptimizer(spn_joint, spn_marginal, device)
     elif header.config_spn["optimizer"] == type.OptimizerSPN.pgd_offline.name:
         optimizer = spn.PGDOfflineSPNOptimizer(spn_joint, spn_marginal, device, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
         normalize = True
         use_probability = True
     else:
-        logger.log_fatal("Unknown SPN optimizer \"" + header.config_spn["optimizer"] + "\".")
+        logger.log_fatal("Unknown or unsupported SPN optimizer \"" + header.config_spn["optimizer"] + "\".")
         exit(-1)
 
-    learning_rate_scheduler = spn.SPNLearningRateScheduler(optimizer, header.config_spn["learning_rate_scheduler_factor"])
+    learning_rate_scheduler = spn.LikelihoodSPNLearningRateScheduler(optimizer, header.config_spn["learning_rate_scheduler_factor"])
+
+    logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
+
+    spn_joint.load(header.config_spn["file_path_spn"])
+    spn_marginal.load(header.config_spn["file_path_spn"])
+    optimizer.set_weights_prior(spn_joint.get_weights())
 
     (log_likelihood_best, log_likelihood_train_last, epoch) = utility.loadCheckpointSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], log_likelihood_best, log_likelihood_train_last, epoch)
     log_likelihood_train = log_likelihood_train_last
