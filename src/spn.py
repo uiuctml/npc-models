@@ -4,10 +4,16 @@ import os
 import torch
 
 class SPNLearningRateScheduler:
-    def __init__(self, optimizer, factor = 0.8):
+    def __init__(self, optimizer, factor = 0.8, patience = 2, threshold = 1e-4, cooldown = 2, min_learning_rate = 1e-6):
+        self.cooldown = cooldown
+        self.cooldown_counter = 0
         self.factor = factor
         self.metrics = None
+        self.min_learning_rate = min_learning_rate
         self.optimizer = optimizer
+        self.patience = patience
+        self.patience_counter = 0
+        self.threshold = threshold
 
         return
 
@@ -30,18 +36,42 @@ class LikelihoodSPNLearningRateScheduler(SPNLearningRateScheduler):
         self.metrics = metrics
 
 class LossSPNLearningRateScheduler(SPNLearningRateScheduler):
-    def __init__(self, optimizer, factor = 0.8):
-        super().__init__(optimizer, factor)
+    def __init__(self, optimizer, factor = 0.8, patience = 2, threshold = 1e-4, cooldown = 2, min_learning_rate = 1e-6):
+        super().__init__(optimizer, factor, patience, threshold, cooldown, min_learning_rate)
 
         return
 
     def step(self, metrics):
-        if self.metrics is not None:
-            if metrics > self.metrics:
-                self.optimizer.learning_rate *= self.factor
-                logger.log_info("Reducing SPN learning rate to " + "{:e}".format(self.optimizer.learning_rate) + "...")
+        if self.metrics is None:
+            self.metrics = metrics
+            return
+
+        if self.optimizer.learning_rate < self.min_learning_rate:
+            self.metrics = metrics
+            return
+
+        if self.cooldown_counter > 0:
+            self.cooldown_counter -= 1
+            self.metrics = metrics
+            return
+
+        if abs(self.metrics - metrics) < self.threshold:
+            if self.patience_counter < self.patience:
+                self.patience_counter += 1
+                self.metrics = metrics
+                return
+
+            self.optimizer.learning_rate *= self.factor
+            logger.log_info("Reducing SPN learning rate to " + "{:e}".format(self.optimizer.learning_rate) + "...")
+
+            self.cooldown_counter = self.cooldown
+            self.patience_counter = 0
+        else:
+            self.patience_counter = 0
 
         self.metrics = metrics
+
+        return
 
 class SPNOptimizer:
     def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2):
@@ -159,7 +189,7 @@ class PGDComposedSPNOptimizer(SPNOptimizer):
                 weight_updates = torch.sum(weight_updates, 0) # 1 x batch size
                 weight_updates /=  matrix_c_transposed[labels_original, torch.arange(matrix_c_transposed.shape[1])]   # 1 x batch size
 
-                # Average weight updates with prior regularization
+                # Average weight updates with Dirichlet prior
                 weight_updates_count = weight_updates.shape[0]
                 weight_updates = torch.sum(weight_updates, 0, keepdim = True)
                 weight_updates += (weights_prior[i] - 1) / sum_node_joint.weights[i]
@@ -191,7 +221,7 @@ class PGDOfflineSPNOptimizer(SPNOptimizer):
                 weight_updates_marginal = torch.exp(sum_node_marginal.value_backward + child_marginal.value_forward - self.spn_marginal.root_node.value_forward)
                 weight_updates = weight_updates_joint - weight_updates_marginal
 
-                # Average weight updates with prior regularization
+                # Average weight updates with Dirichlet prior
                 weight_updates_count = weight_updates.shape[0]
                 weight_updates = torch.sum(weight_updates, 0, keepdim = True)
                 weight_updates += (weights_prior[i] - 1) / sum_node_joint.weights[i]

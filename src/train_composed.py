@@ -234,7 +234,7 @@ def main():
         logger.log_fatal("Unknown SPN optimizer \"" + header.config_spn["optimizer"] + "\".")
         exit(-1)
 
-    learning_rate_scheduler_spn = spn.LossSPNLearningRateScheduler(optimizer_spn, header.config_spn["learning_rate_scheduler_factor"])
+    learning_rate_scheduler_spn = spn.LossSPNLearningRateScheduler(optimizer_spn, header.config_spn["learning_rate_scheduler_factor"], header.config_spn["learning_rate_scheduler_patience"], header.config_spn["learning_rate_scheduler_threshold"], header.config_spn["learning_rate_scheduler_cooldown"], header.config_spn["learning_rate_scheduler_min_learning_rate"])
 
     logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
 
