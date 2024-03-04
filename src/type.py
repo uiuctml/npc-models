@@ -40,7 +40,7 @@ class ModelDecomposed(enum.Enum):
     vit_b_32_mtl = 2
 
 class OptimizerSPN(enum.Enum):
-    cccp_composed = 0
-    cccp_offline = 1
-    pgd_composed = 2
-    pgd_offline = 3
+    cccp_discriminative = 0
+    cccp_generative = 1
+    pgd_discriminative = 2
+    pgd_generative = 3

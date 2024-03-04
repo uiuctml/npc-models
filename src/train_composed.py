@@ -222,14 +222,14 @@ def main():
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_decomposed, header.config_decomposed["learning_rate_scheduler_mode"], header.config_decomposed["learning_rate_scheduler_factor"], header.config_decomposed["learning_rate_scheduler_patience"], header.config_decomposed["learning_rate_scheduler_threshold"], header.config_decomposed["learning_rate_scheduler_threshold_mode"], header.config_decomposed["learning_rate_scheduler_cooldown"], header.config_decomposed["learning_rate_scheduler_min_learning_rate"], header.config_decomposed["learning_rate_scheduler_min_learning_rate_decay"], header.config_decomposed["learning_rate_scheduler_verbose"])
     learning_rate_scheduler_spn = None
 
-    if header.config_spn["optimizer"] == type.OptimizerSPN.cccp_composed.name:
-        optimizer_spn = spn.CCCPComposedSPNOptimizer(spn_joint, spn_marginal, device)
-    elif header.config_spn["optimizer"] == type.OptimizerSPN.cccp_offline.name:
-        optimizer_spn = spn.CCCPOfflineSPNOptimizer(spn_joint, spn_marginal, device)
-    elif header.config_spn["optimizer"] == type.OptimizerSPN.pgd_composed.name:
-        optimizer_spn = spn.PGDComposedSPNOptimizer(spn_joint, spn_marginal, device, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
-    elif header.config_spn["optimizer"] == type.OptimizerSPN.pgd_offline.name:
-        optimizer_spn = spn.PGDOfflineSPNOptimizer(spn_joint, spn_marginal, device, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
+    if header.config_spn["optimizer"] == type.OptimizerSPN.cccp_discriminative.name:
+        optimizer_spn = spn.CCCPDiscriminativeSPNOptimizer(spn_joint, spn_marginal, device)
+    elif header.config_spn["optimizer"] == type.OptimizerSPN.cccp_generative.name:
+        optimizer_spn = spn.CCCPGenerativeSPNOptimizer(spn_joint, spn_marginal, device)
+    elif header.config_spn["optimizer"] == type.OptimizerSPN.pgd_discriminative.name:
+        optimizer_spn = spn.PGDDiscriminativeSPNOptimizer(spn_joint, spn_marginal, device, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
+    elif header.config_spn["optimizer"] == type.OptimizerSPN.pgd_generative.name:
+        optimizer_spn = spn.PGDGenerativeSPNOptimizer(spn_joint, spn_marginal, device, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
     else:
         logger.log_fatal("Unknown SPN optimizer \"" + header.config_spn["optimizer"] + "\".")
         exit(-1)
