@@ -214,6 +214,7 @@ def main():
     model_decomposed = model.createModelDecomposed(device)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
+    normalize = False
     progress_bar = None
     spn_joint = spn.SPN(device)
     spn_marginal = spn.SPN(device)
@@ -228,8 +229,10 @@ def main():
         optimizer_spn = spn.CCCPGenerativeSPNOptimizer(spn_joint, spn_marginal, device)
     elif header.config_spn["optimizer"] == type.OptimizerSPN.pgd_discriminative.name:
         optimizer_spn = spn.PGDDiscriminativeSPNOptimizer(spn_joint, spn_marginal, device, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
+        normalize = True
     elif header.config_spn["optimizer"] == type.OptimizerSPN.pgd_generative.name:
         optimizer_spn = spn.PGDGenerativeSPNOptimizer(spn_joint, spn_marginal, device, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
+        normalize = True
     else:
         logger.log_fatal("Unknown SPN optimizer \"" + header.config_spn["optimizer"] + "\".")
         exit(-1)
@@ -314,7 +317,23 @@ def main():
     logger.log_info("Best validation accuracy: " + str(accuracy_validation_best) + ".")
     wandb.summary["validation/epoch/accuracy_best"] = accuracy_validation_best
 
-    # TODO normalize weights for only PGD
+    if normalize:
+        settings_marginal = torch.full((1, spn_settings_joint.shape[1]), -1).to(device)
+        wandb.run.resumed = True
+
+        logger.log_info("Normalizing SPN weights...")
+
+        utility.loadCheckpointSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], 0, 0, 0)
+        spn_marginal(settings_marginal)
+        spn_marginal.normalize_weights(header.config_spn["epsilon_smoothing"])
+        utility.saveCheckpointSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], 0, 0, 0)
+
+        utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
+        spn_marginal(settings_marginal)
+        spn_marginal.normalize_weights(header.config_spn["epsilon_smoothing"])
+        utility.saveCheckpointSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"], 0, 0, 0)
+
+        wandb.run.resumed = False
 
     wandb.log({"testing/epoch/step": batch_step_test})
     test_composed.test(model_decomposed, spn_joint, spn_marginal, data_loader_test, device, batch_step_test)

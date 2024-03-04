@@ -167,7 +167,7 @@ def main():
     if normalize:
         wandb.run.resumed = True
 
-        logger.log_info("Normalizing SPN weights.")
+        logger.log_info("Normalizing SPN weights...")
 
         utility.loadCheckpointSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], 0, 0, 0)
         spn_marginal(settings_marginal)
