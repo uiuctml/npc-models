@@ -74,8 +74,9 @@ class LossSPNLearningRateScheduler(SPNLearningRateScheduler):
         return
 
 class SPNOptimizer:
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2):
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
         self.device = device
+        self.growth_threshold = growth_threshold
         self.learning_rate = learning_rate
         self.smoothing_epsilon = torch.finfo(torch.float).eps
         self.prior_factor = prior_factor
@@ -99,8 +100,8 @@ class SPNOptimizer:
         pass
 
 class CCCPDiscriminativeSPNOptimizer(SPNOptimizer):
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2):
-        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon)
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
+        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold)
 
         return
 
@@ -134,8 +135,8 @@ class CCCPDiscriminativeSPNOptimizer(SPNOptimizer):
         return
 
 class CCCPGenerativeSPNOptimizer(SPNOptimizer):
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2):
-        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon)
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
+        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold)
 
         return
 
@@ -163,9 +164,48 @@ class CCCPGenerativeSPNOptimizer(SPNOptimizer):
 
         return
 
+class EBWDiscriminativeSPNOptimizer(SPNOptimizer):
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
+        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold)
+
+        return
+
+    def step(self, matrix_a = None, matrix_b = None, matrix_c = None, labels_original = None):
+        self.spn_joint.reuse_forward = False
+        self.spn_marginal.reuse_forward = False
+
+        for (sum_node_joint, sum_node_marginal) in zip(self.spn_joint.sum_nodes, self.spn_marginal.sum_nodes):
+            weight_normalization_sum_node = 0
+
+            # TODO Optimization: unroll this for loop (compute all weight updates at once)
+            for (i, (child_joint, child_marginal)) in enumerate(zip(sum_node_joint.children, sum_node_marginal.children)):
+                # Compute weight updates in log space
+                weight_updates_joint = torch.exp(sum_node_joint.value_backward + child_joint.value_forward - self.spn_joint.root_node.value_forward)
+                weight_updates_marginal = torch.exp(sum_node_marginal.value_backward + child_marginal.value_forward - self.spn_marginal.root_node.value_forward)
+                weight_updates = weight_updates_joint - weight_updates_marginal
+                weight_updates *= torch.exp(self.spn_joint.root_node.value_forward)
+                weight_updates += self.growth_threshold
+                weight_updates = weight_updates.reshape(matrix_a.shape) # number of original labels x product of category size of all attributes
+                weight_updates = weight_updates.t()   # product of category size of all attributes x number of original labels
+                weight_updates = torch.index_select(weight_updates, 1, labels_original)   # product of category size of all attributes x batch size
+                weight_updates *= matrix_b # product of category size of all attributes x batch size
+                weight_updates = torch.sum(weight_updates, 0) # 1 x batch size
+                weight_updates = torch.mean(weight_updates, 0)  # 1 x 1
+                sum_node_joint.weights[i] *= weight_updates
+
+            # Local weight normalization with Laplace smoothing
+            for weight_sum_node in sum_node_joint.weights:
+                weight_normalization_sum_node += weight_sum_node + self.smoothing_epsilon
+
+            sum_node_joint.weights = (sum_node_joint.weights + self.smoothing_epsilon) / weight_normalization_sum_node
+
+        self.spn_marginal.set_weights(self.spn_joint.get_weights())
+
+        return
+
 class PGDDiscriminativeSPNOptimizer(SPNOptimizer):
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2):
-        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon)
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
+        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold)
 
         return
 
@@ -176,6 +216,7 @@ class PGDDiscriminativeSPNOptimizer(SPNOptimizer):
         matrix_c_transposed = matrix_c.t()  # number of original labels x batch size
 
         for (sum_node_joint, sum_node_marginal, weights_prior) in zip(self.spn_joint.sum_nodes, self.spn_marginal.sum_nodes, self.weights_prior):
+            # TODO Optimization: unroll this for loop (compute all weight updates at once)
             for (i, (child_joint, child_marginal)) in enumerate(zip(sum_node_joint.children, sum_node_marginal.children)):
                 # Compute weight updates in log space
                 weight_updates_joint = torch.exp(sum_node_joint.value_backward + child_joint.value_forward - self.spn_joint.root_node.value_forward)
@@ -205,8 +246,8 @@ class PGDDiscriminativeSPNOptimizer(SPNOptimizer):
         return
 
 class PGDGenerativeSPNOptimizer(SPNOptimizer):
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2):
-        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon)
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
+        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold)
 
         return
 
@@ -215,6 +256,7 @@ class PGDGenerativeSPNOptimizer(SPNOptimizer):
         self.spn_marginal.reuse_forward = False
 
         for (sum_node_joint, sum_node_marginal, weights_prior) in zip(self.spn_joint.sum_nodes, self.spn_marginal.sum_nodes, self.weights_prior):
+            # TODO Optimization: unroll this for loop (compute all weight updates at once)
             for (i, (child_joint, child_marginal)) in enumerate(zip(sum_node_joint.children, sum_node_marginal.children)):
                 # Compute weight updates in log space
                 weight_updates_joint = torch.exp(sum_node_joint.value_backward + child_joint.value_forward - self.spn_joint.root_node.value_forward)

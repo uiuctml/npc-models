@@ -227,6 +227,8 @@ def main():
         optimizer_spn = spn.CCCPDiscriminativeSPNOptimizer(spn_joint, spn_marginal, device)
     elif header.config_spn["optimizer"] == type.OptimizerSPN.cccp_generative.name:
         optimizer_spn = spn.CCCPGenerativeSPNOptimizer(spn_joint, spn_marginal, device)
+    elif header.config_spn["optimizer"] == type.OptimizerSPN.ebw_discriminative.name:
+        optimizer_spn = spn.EBWDiscriminativeSPNOptimizer(spn_joint, spn_marginal, device, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"], header.config_spn["growth_threshold"])
     elif header.config_spn["optimizer"] == type.OptimizerSPN.pgd_discriminative.name:
         optimizer_spn = spn.PGDDiscriminativeSPNOptimizer(spn_joint, spn_marginal, device, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
         normalize = True

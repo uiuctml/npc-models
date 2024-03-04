@@ -117,6 +117,7 @@ config_spn = {
     "fine_tuning": False,
     "epsilon_projection": 1e-2,
     "epsilon_smoothing": 1e-3,
+    "growth_threshold": 100,
     "learning_rate_scheduler_factor": 0.5,
     "learning_rate_scheduler_patience": 1,
     "learning_rate_scheduler_threshold": 1e-2,

@@ -42,5 +42,6 @@ class ModelDecomposed(enum.Enum):
 class OptimizerSPN(enum.Enum):
     cccp_discriminative = 0
     cccp_generative = 1
-    pgd_discriminative = 2
-    pgd_generative = 3
+    ebw_discriminative = 2
+    pgd_discriminative = 3
+    pgd_generative = 4
