@@ -41,7 +41,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
         predictions_epoch_list_decomposed.append([])
 
     model_decomposed.eval()
-    progress_bar.set_description_str("[INFO]: Inference progress")
+    progress_bar.set_description_str("[INFO]: Testing progress")
 
     with torch.set_grad_enabled(False):
         for (batch_index, (input, labels_decomposed, labels_original, _)) in enumerate(data_loader):
