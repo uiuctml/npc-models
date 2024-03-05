@@ -321,11 +321,9 @@ def main():
 
     if normalize:
         settings_marginal = torch.full((1, spn_settings_joint.shape[1]), -1).to(device)
-        wandb.run.resumed = True
-
         logger.log_info("Normalizing SPN weights...")
 
-        utility.loadCheckpointSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], 0, 0, 0)
+        utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"])
         spn_marginal(settings_marginal)
         spn_marginal.normalize_weights(header.config_spn["epsilon_smoothing"])
         utility.saveCheckpointSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], 0, 0, 0)
@@ -334,8 +332,6 @@ def main():
         spn_marginal(settings_marginal)
         spn_marginal.normalize_weights(header.config_spn["epsilon_smoothing"])
         utility.saveCheckpointSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"], 0, 0, 0)
-
-        wandb.run.resumed = False
 
     wandb.log({"testing/epoch/step": batch_step_test})
     test_composed.test(model_decomposed, spn_joint, spn_marginal, data_loader_test, device, batch_step_test)
