@@ -54,7 +54,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
 
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
 
-            for i in range(0, len(config_dataset["attributes"])):
+            for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
                 (_, predictions_decomposed) = torch.max(outputs_decomposed[i], 1)
 
                 corrects_decomposed = torch.sum(predictions_decomposed == labels_decomposed[:, i].data).item()
