@@ -144,6 +144,13 @@ def main():
     utility.setSeed(header.seed)
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
 
+    config = {
+        "decomposed": header.config_decomposed,
+        "spn": header.config_spn
+    }
+
+    wandb.init(config = config, mode = "disabled")
+
     dataset_transforms = utility.createTransform(header.config_decomposed)
     dataset_test = dataset.VISATDataset(header.config_decomposed["dir_dataset_test"], dataset_transforms)
     config_dataset = dataset_test.config
