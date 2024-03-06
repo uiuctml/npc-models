@@ -11,6 +11,7 @@ import spn
 import torch
 import tqdm
 import utility
+import wandb
 
 def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_step):
     utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
@@ -52,26 +53,37 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
             (outputs_decomposed, _) = model_decomposed(input)
 
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
-            (_, _, output_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
-
-            (_, predictions_composed) = torch.max(output_composed, 1)
-
-            corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
 
             for i in range(0, len(config_dataset["attributes"])):
                 (_, predictions_decomposed) = torch.max(outputs_decomposed[i], 1)
 
                 corrects_decomposed = torch.sum(predictions_decomposed == labels_decomposed[:, i].data).item()
+                accuracy_batch_decomposed = corrects_decomposed / input.size(0)
                 accuracy_epoch_list_decomposed[i] += corrects_decomposed
+
+                wandb.log({"testing/batch/" + dataset_entry["name"] + "/accuracy": accuracy_batch_decomposed})
+
                 ground_truths_epoch_list_decomposed[i] += labels_decomposed[:, i].data.tolist()
                 predictions_epoch_list_decomposed[i] += predictions_decomposed.tolist()
 
+            (_, _, output_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+            (_, predictions_composed) = torch.max(output_composed, 1)
+
+            corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
+
+            accuracy_batch_composed = corrects_composed / input.size(0)
             accuracy_epoch_composed += corrects_composed
-            ground_truths_epoch_composed += labels_original.data.tolist()
-            predictions_epoch_composed += predictions_composed.tolist()
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
+
+            wandb.log({"testing/batch/accuracy": accuracy_batch_composed})
+            wandb.log({"testing/batch/step": batch_step})
+
+            ground_truths_epoch_composed += labels_original.data.tolist()
+            predictions_epoch_composed += predictions_composed.tolist()
+
+            batch_step += 1
 
     progress_bar.close()
 
@@ -84,7 +96,16 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
         output_list_decomposed_precision.append(precision_epoch_decomposed)
         output_list_decomposed_recall.append(recall_epoch_decomposed)
 
+        wandb.log({"testing/epoch/" + dataset_entry["name"] + "/accuracy": accuracy_epoch_list_decomposed[i]})
+        wandb.log({"testing/epoch/" + dataset_entry["name"] + "/precision": precision_epoch_decomposed})
+        wandb.log({"testing/epoch/" + dataset_entry["name"] + "/recall": recall_epoch_decomposed})
+        wandb.summary["testing/epoch/" + dataset_entry["name"] + "/accuracy"] = accuracy_epoch_list_decomposed[i]
+        wandb.summary["testing/epoch/" + dataset_entry["name"] + "/precision"] = precision_epoch_decomposed
+        wandb.summary["testing/epoch/" + dataset_entry["name"] + "/recall"] = recall_epoch_decomposed
+
         logger.log_info("Decomposed testing accuracy for \"" + dataset_entry["name"] + "\": " + str(accuracy_epoch_list_decomposed[i]) + ".")
+        logger.log_trace("Decomposed testing precision for \"" + dataset_entry["name"] + "\": " + str(precision_epoch_decomposed) + ".")
+        logger.log_trace("Decomposed testing recall for \"" + dataset_entry["name"] + "\": " + str(recall_epoch_decomposed) + ".")
 
     accuracy_epoch_composed /= len(data_loader.dataset)
 
@@ -95,7 +116,16 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
     output_list_decomposed += output_list_decomposed_precision
     output_list_decomposed += output_list_decomposed_recall
 
+    wandb.log({"testing/epoch/accuracy": accuracy_epoch_composed})
+    wandb.log({"testing/epoch/precision": precision_epoch_composed})
+    wandb.log({"testing/epoch/recall": recall_epoch_composed})
+    wandb.summary["testing/epoch/accuracy"] = accuracy_epoch_composed
+    wandb.summary["testing/epoch/precision"] = precision_epoch_composed
+    wandb.summary["testing/epoch/recall"] = recall_epoch_composed
+
     logger.log_info("Composed testing accuracy: " + str(accuracy_epoch_composed) + ".")
+    logger.log_trace("Composed testing precision: " + str(precision_epoch_composed) + ".")
+    logger.log_trace("Composed testing recall: " + str(recall_epoch_composed) + ".")
 
     utility.logTestOutput(output_list_composed, header.config_baseline, config_dataset, True)
     utility.logTestOutput(output_list_decomposed, header.config_decomposed, config_dataset)

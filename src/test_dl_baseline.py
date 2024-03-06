@@ -24,14 +24,13 @@ def test(model_baseline, data_loader, device, batch_step):
     model_baseline.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")
 
-    with torch.no_grad():
+    with torch.set_grad_enabled(False):
         for (batch_index, (input, _, labels, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
             labels = labels.to(device, non_blocking = True)
 
-            with torch.set_grad_enabled(False):
-                output = model_baseline(input)
-                (_, predictions) = torch.max(output, 1)
+            output = model_baseline(input)
+            (_, predictions) = torch.max(output, 1)
 
             corrects = torch.sum(predictions == labels.data).item()
 
