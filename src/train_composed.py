@@ -333,6 +333,8 @@ def main():
         spn_marginal.normalize_weights(header.config_spn["epsilon_smoothing"])
         utility.saveCheckpointSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"], 0, 0, 0)
 
+        spn_marginal.set_leaf_nodes(spn_settings_marginal)
+
     wandb.log({"testing/epoch/step": batch_step_test})
     test_composed.test(model_decomposed, spn_joint, spn_marginal, data_loader_test, device, batch_step_test)
 
