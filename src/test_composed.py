@@ -66,8 +66,8 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
                 ground_truths_epoch_list_decomposed[i] += labels_decomposed[:, i].data.tolist()
                 predictions_epoch_list_decomposed[i] += predictions_decomposed.tolist()
 
-            (_, _, output_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
-            (_, predictions_composed) = torch.max(output_composed, 1)
+            (_, _, outputs_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+            (_, predictions_composed) = torch.max(outputs_composed, 1)
 
             corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
 
