@@ -11,17 +11,17 @@ import torch
 import tqdm
 import utility
 
-def counterfactual_cccp(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
-    # TODO 1. Perform forward pass using outputs_decomposed and composition.Composition.spn
-    # TODO 2. Index-select P(Y = y' | X) from output_composed where y' are ground-truth labels of the current batch
-    # TODO 3. Sum up P(Y = y' | X) for all y' ground-truth labels in the batch
-    # TODO 4. Perform backward pass on the sum, which computes partial derivatives of P(Y = y' | X) with respect to all P(A | X) for all batches
-    # TODO 5. Set the gradients of P(Y = y' | X) that are already MPE to 1
-    # TODO 6. Multiply the gradients to the current outputs_decomposed
-    # TODO 7. Repeat until all P(Y = y' | X) in the current batch are MPE
-    # TODO 8. The resulting outputs_decomposed contains the counterfactual explanations
-    # TODO 9. Reset gradient and repeat the above for all batches
+# 1. Perform forward pass using outputs_decomposed and composition.Composition.spn
+# 2. Index-select P(Y = y' | X) from output_composed where y' are ground-truth labels of the current batch
+# 3. Sum up P(Y = y' | X) for all y' ground-truth labels in the batch
+# 4. Perform backward pass on the sum, which computes partial derivatives of P(Y = y' | X) with respect to all P(A | X) for all batches
+# 5. If gradients are multiplicative, set the gradients of P(Y = y' | X) that are already MPE to 1
+# 6. Apply the gradients to the current outputs_decomposed
+# 7. Repeat until all P(Y = y' | X) in the current batch are MPE
+# 8. The resulting outputs_decomposed contains the counterfactual explanations
+# 9. Reset gradient and repeat the above for all batches
 
+def counterfactual_cccp(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
     batch_size = labels_original.nelement()
     outputs_decomposed = []
     outputs_decomposed_original = utility.applySoftmaxDecomposed(outputs_decomposed_original)
@@ -63,15 +63,6 @@ def counterfactual_cccp(outputs_decomposed_original, spn_joint, spn_marginal, sp
     return outputs_decomposed
 
 def counterfactual_gd(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
-    # TODO 1. Perform forward pass using outputs_decomposed and composition.Composition.spn
-    # TODO 2. Index-select P(Y = y' | X) from output_composed where y' are ground-truth labels of the current batch
-    # TODO 3. Sum up P(Y = y' | X) for all y' ground-truth labels in the batch
-    # TODO 4. Perform backward pass on the sum, which computes partial derivatives of P(Y = y' | X) with respect to all P(A | X) for all batches
-    # TODO 5. Add the gradients to the current outputs_decomposed
-    # TODO 6. Repeat until all P(Y = y' | X) in the current batch are MPE
-    # TODO 7. The resulting outputs_decomposed contains the counterfactual explanations
-    # TODO 8. Reset gradient and repeat the above for all batches
-
     batch_size = labels_original.nelement()
     outputs_decomposed = []
     progress_bar = tqdm.tqdm(total = batch_size, position = 1, leave = False)
@@ -164,7 +155,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
     accuracy_epoch_composed_counterfactual /= len(data_loader.dataset)
 
     logger.log_info("Composed testing accuracy: " + str(accuracy_epoch_composed) + ".")
-    logger.log_info("Composed counterfactual testing accuracy: " + str(accuracy_epoch_composed_counterfactual) + ".")
+    logger.log_info("Composed counterfactual accuracy: " + str(accuracy_epoch_composed_counterfactual) + ".")
 
     return
 
