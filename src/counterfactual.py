@@ -11,7 +11,7 @@ import torch
 import tqdm
 import utility
 
-def explain_cccp(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, input_file_paths, device):
+def counterfactual_cccp(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
     # TODO 1. Perform forward pass using outputs_decomposed and composition.Composition.spn
     # TODO 2. Index-select P(Y = y' | X) from output_composed where y' are ground-truth labels of the current batch
     # TODO 3. Sum up P(Y = y' | X) for all y' ground-truth labels in the batch
@@ -21,8 +21,6 @@ def explain_cccp(outputs_decomposed_original, spn_joint, spn_marginal, spn_outpu
     # TODO 7. Repeat until all P(Y = y' | X) in the current batch are MPE
     # TODO 8. The resulting outputs_decomposed contains the counterfactual explanations
     # TODO 9. Reset gradient and repeat the above for all batches
-    # TODO Save original outputs_decomposed
-    # TODO Save perturbed outputs_decomposed
 
     batch_size = labels_original.nelement()
     outputs_decomposed = []
@@ -34,7 +32,7 @@ def explain_cccp(outputs_decomposed_original, spn_joint, spn_marginal, spn_outpu
     for i in range(len(outputs_decomposed_original)):
         outputs_decomposed.append(outputs_decomposed_original[i].detach().clone().requires_grad_(True))
 
-    while True:
+    for _ in range(header.counterfactual_steps):
         (_, _, output_composed_original) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
         output_composed_mpe = torch.max(output_composed_original, 1)[1]
         output_composed_indices = torch.where(output_composed_mpe != labels_original)[0]
@@ -57,12 +55,60 @@ def explain_cccp(outputs_decomposed_original, spn_joint, spn_marginal, spn_outpu
                 outputs_decomposed[i] *= outputs_decomposed[i].grad + smoothing_epsilon
                 outputs_decomposed[i] /= torch.sum(outputs_decomposed[i], 1, keepdim = True) + smoothing_epsilon
 
-        for i in range(len(outputs_decomposed_original)):
+        for i in range(len(outputs_decomposed)):
             outputs_decomposed[i] = outputs_decomposed[i].detach().clone().requires_grad_(True)
 
     progress_bar.close()
 
     return outputs_decomposed
+
+def counterfactual_gd(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
+    # TODO 1. Perform forward pass using outputs_decomposed and composition.Composition.spn
+    # TODO 2. Index-select P(Y = y' | X) from output_composed where y' are ground-truth labels of the current batch
+    # TODO 3. Sum up P(Y = y' | X) for all y' ground-truth labels in the batch
+    # TODO 4. Perform backward pass on the sum, which computes partial derivatives of P(Y = y' | X) with respect to all P(A | X) for all batches
+    # TODO 5. Add the gradients to the current outputs_decomposed
+    # TODO 6. Repeat until all P(Y = y' | X) in the current batch are MPE
+    # TODO 7. The resulting outputs_decomposed contains the counterfactual explanations
+    # TODO 8. Reset gradient and repeat the above for all batches
+
+    batch_size = labels_original.nelement()
+    outputs_decomposed = []
+    progress_bar = tqdm.tqdm(total = batch_size, position = 1, leave = False)
+    progress_bar.set_description_str("[INFO]: Optimizing MPEs")
+
+    for i in range(len(outputs_decomposed_original)):
+        outputs_decomposed.append(outputs_decomposed_original[i].detach().clone().requires_grad_(True))
+
+    for _ in range(header.counterfactual_steps):
+        outputs_decomposed_softmax = utility.applySoftmaxDecomposed(outputs_decomposed)
+        (_, _, output_composed_original) = composition.Composition.spn(outputs_decomposed_softmax, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+
+        output_composed_mpe = torch.max(output_composed_original, 1)[1]
+        output_composed_indices = torch.where(output_composed_mpe != labels_original)[0]
+
+        progress_bar.n = batch_size - output_composed_indices.nelement()
+        progress_bar.refresh()
+
+        if output_composed_indices.nelement() == 0:
+            break
+
+        output_composed = output_composed_original.t()   # number of original labels x batch size
+        output_composed = output_composed[labels_original, torch.arange(output_composed.shape[1])]  # 1 x batch size
+        output_composed = torch.log(output_composed)   # 1 x batch size
+        output_composed = torch.sum(output_composed[output_composed_indices], 0) # 1 x 1
+        output_composed.backward(retain_graph = True)
+
+        with torch.set_grad_enabled(False):
+            for i in range(len(outputs_decomposed)):
+                outputs_decomposed[i] += header.counterfactual_learning_rate * outputs_decomposed[i].grad
+
+        for i in range(len(outputs_decomposed_original)):
+            outputs_decomposed[i] = outputs_decomposed[i].detach().clone().requires_grad_(True)
+
+    progress_bar.close()
+
+    return utility.applySoftmaxDecomposed(outputs_decomposed)
 
 def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_step):
     utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
@@ -81,7 +127,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
         spn_output_cols *= len(attribute["labels"])
 
     model_decomposed.eval()
-    progress_bar.set_description_str("[INFO]: Explaining progress")
+    progress_bar.set_description_str("[INFO]: Counterfactual progress")
 
     for (batch_index, (input, labels_decomposed, labels_original, input_file_paths)) in enumerate(data_loader):
         input = input.to(device, non_blocking = True)
@@ -89,13 +135,17 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
         labels_original = labels_original.to(device, non_blocking = True)
 
         with torch.set_grad_enabled(False):
-            (outputs_decomposed, _) = model_decomposed(input)
+            (outputs_decomposed_original, _) = model_decomposed(input)
+            outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed_original)
 
         with torch.set_grad_enabled(True):
-            outputs_decomposed_counterfactual = explain_cccp(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, input_file_paths, device)
+            outputs_decomposed_counterfactual = counterfactual_gd(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device)
+
+        # TODO Save outputs_decomposed and outputs_decomposed_counterfactual
 
         (_, _, output_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
         (_, _, output_composed_counterfactual) = composition.Composition.spn(outputs_decomposed_counterfactual, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+
         (_, predictions_composed) = torch.max(output_composed, 1)
         (_, predictions_composed_counterfactual) = torch.max(output_composed_counterfactual, 1)
 

@@ -13,10 +13,12 @@ def applySoftmax(output):
     return torch.nn.functional.softmax(output, dim = 1)
 
 def applySoftmaxDecomposed(outputs_decomposed):
-    for task_index in range(0, len(outputs_decomposed)):
-        outputs_decomposed[task_index] = torch.nn.functional.softmax(outputs_decomposed[task_index], dim = 1)
+    outputs_decomposed_softmax = []
 
-    return outputs_decomposed
+    for i in range(len(outputs_decomposed)):
+        outputs_decomposed_softmax.append(applySoftmax(outputs_decomposed[i]))
+
+    return outputs_decomposed_softmax
 
 def computeCovarianceRegularization(features):
     loss = 0
