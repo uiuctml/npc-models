@@ -11,7 +11,7 @@ import torch
 import tqdm
 import utility
 
-def explain(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, input_file_paths, device):
+def explain_cccp(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, input_file_paths, device):
     # TODO 1. Perform forward pass using outputs_decomposed and composition.Composition.spn
     # TODO 2. Index-select P(Y = y' | X) from output_composed where y' are ground-truth labels of the current batch
     # TODO 3. Sum up P(Y = y' | X) for all y' ground-truth labels in the batch
@@ -26,6 +26,7 @@ def explain(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_row
 
     batch_size = labels_original.nelement()
     outputs_decomposed = []
+    outputs_decomposed_original = utility.applySoftmaxDecomposed(outputs_decomposed_original)
     smoothing_epsilon = torch.finfo(torch.float).eps
     progress_bar = tqdm.tqdm(total = batch_size, position = 1, leave = False)
     progress_bar.set_description_str("[INFO]: Optimizing MPEs")
@@ -89,10 +90,9 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
 
         with torch.set_grad_enabled(False):
             (outputs_decomposed, _) = model_decomposed(input)
-            outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
 
         with torch.set_grad_enabled(True):
-            outputs_decomposed_counterfactual = explain(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, input_file_paths, device)
+            outputs_decomposed_counterfactual = explain_cccp(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, input_file_paths, device)
 
         (_, _, output_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
         (_, _, output_composed_counterfactual) = composition.Composition.spn(outputs_decomposed_counterfactual, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
