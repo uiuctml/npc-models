@@ -36,16 +36,10 @@ def explain(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_row
     while True:
         (_, _, output_composed_original) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
         output_composed_mpe = torch.max(output_composed_original, 1)[1]
-
-        logger.log_debug(output_composed_mpe)
-        logger.log_debug(output_composed_mpe.shape)
-
         output_composed_indices = torch.where(output_composed_mpe != labels_original)[0]
 
         progress_bar.n = batch_size - output_composed_indices.nelement()
         progress_bar.refresh()
-
-        logger.log_debug(output_composed_indices)
 
         if output_composed_indices.nelement() == 0:
             break
@@ -57,27 +51,10 @@ def explain(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_row
 
         with torch.set_grad_enabled(False):
             for i in range(len(outputs_decomposed)):
-                torch.set_printoptions(edgeitems = 10)
-                logger.log_debug(outputs_decomposed[i].grad)
-
                 outputs_decomposed_grad_row_indices = torch.where(torch.sum(outputs_decomposed[i].grad, 1) == 0)[0]
-
-                logger.log_debug(outputs_decomposed_grad_row_indices)
-
                 outputs_decomposed[i].grad[outputs_decomposed_grad_row_indices, :] = 1
-
-                logger.log_debug(outputs_decomposed[i].grad)
-
                 outputs_decomposed[i] *= outputs_decomposed[i].grad + smoothing_epsilon
-
-                logger.log_debug(outputs_decomposed[i])
-                logger.log_debug(torch.sum(outputs_decomposed[i], 1, keepdim = True))
-                logger.log_debug(outputs_decomposed[i].shape)
-                logger.log_debug(torch.sum(outputs_decomposed[i], 1, keepdim = True).shape)
-
                 outputs_decomposed[i] /= torch.sum(outputs_decomposed[i], 1, keepdim = True) + smoothing_epsilon
-
-                logger.log_debug(outputs_decomposed[i])
 
         for i in range(len(outputs_decomposed_original)):
             outputs_decomposed[i] = outputs_decomposed[i].detach().clone().requires_grad_(True)
@@ -91,10 +68,8 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
     utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
     utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
 
-    # TEST
     accuracy_epoch_composed = 0
     accuracy_epoch_composed_counterfactual = 0
-    # TEST
 
     config_dataset = data_loader.dataset.config
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
@@ -105,7 +80,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
         spn_output_cols *= len(attribute["labels"])
 
     model_decomposed.eval()
-    progress_bar.set_description_str("[INFO]: Testing progress")
+    progress_bar.set_description_str("[INFO]: Explaining progress")
 
     for (batch_index, (input, labels_decomposed, labels_original, input_file_paths)) in enumerate(data_loader):
         input = input.to(device, non_blocking = True)
