@@ -15,6 +15,31 @@ label_viewer = PyQt5.QtWidgets.QLabel()
 layout_counterfactual = PyQt5.QtWidgets.QHBoxLayout()
 layout_ground_truth = PyQt5.QtWidgets.QHBoxLayout()
 layout_prediction = PyQt5.QtWidgets.QHBoxLayout()
+layout_summary = PyQt5.QtWidgets.QHBoxLayout()
+
+def generateSummary(attribute_labels):
+    initialized = False
+    summary = "The final prediction would have been correct if "
+
+    for i in range(len(attribute_labels)):
+        if not initialized:
+            initialized = True
+        elif i < 2 and i >= len(attribute_labels) - 1:
+            summary += " and "
+        elif i >= len(attribute_labels) - 1:
+            summary += ", and "
+        else:
+            summary += ", "
+
+        attribute_label_counterfactual = attribute_labels[i][1].split(header.interpret_delimiter_label)[1]
+        attribute_label_prediction = attribute_labels[i][0].split(header.interpret_delimiter_label)[1]
+        attribute_name = attribute_labels[i][0].split(header.interpret_delimiter_label)[0]
+
+        summary += "<b>" + attribute_name + "</b> was predicted as <span style='color: blue;'><b>" + attribute_label_counterfactual + "</b></span> instead of <span style='color: red;'><b>" + attribute_label_prediction + "</b></span>"
+
+    summary += "."
+
+    return summary
 
 def pushButtonLastSlot():
     if combo_box_application_control.currentIndex() <= 0:
@@ -33,6 +58,7 @@ def pushButtonNextSlot():
     return
 
 def updateInterpretationWidget():
+    attribute_labels = []
     file_name = combo_box_application_control.currentText()
 
     for (i, attribute_name) in enumerate(counterfactuals[file_name]["counterfactual"].keys()):
@@ -44,6 +70,9 @@ def updateInterpretationWidget():
         label.setText(text)
 
         if attribute_label_prediction != attribute_label:
+            if attribute_name != "original":
+                attribute_labels.append((attribute_label_prediction, attribute_label))
+
             label.setStyleSheet("color: blue;")
         else:
             label.setStyleSheet("")
@@ -66,6 +95,9 @@ def updateInterpretationWidget():
             label.setStyleSheet("color: red;")
         else:
             label.setStyleSheet("")
+
+    label = layout_summary.itemAt(0).widget()
+    label.setText(generateSummary(attribute_labels))
 
     return
 
@@ -117,6 +149,7 @@ def createInterpretationWidget():
     group_box_ground_truth = PyQt5.QtWidgets.QGroupBox()
     group_box_interpretation = PyQt5.QtWidgets.QGroupBox()
     group_box_prediction = PyQt5.QtWidgets.QGroupBox()
+    group_box_summary = PyQt5.QtWidgets.QGroupBox()
     layout_interpretation = PyQt5.QtWidgets.QVBoxLayout()
 
     group_box_counterfactual.setAlignment(PyQt5.QtCore.Qt.AlignLeft)
@@ -131,11 +164,16 @@ def createInterpretationWidget():
     group_box_prediction.setAlignment(PyQt5.QtCore.Qt.AlignLeft)
     group_box_prediction.setLayout(layout_prediction)
     group_box_prediction.setTitle("Prediction")
+    group_box_summary.setAlignment(PyQt5.QtCore.Qt.AlignLeft)
+    group_box_summary.setLayout(layout_summary)
+    group_box_summary.setTitle("Summary")
 
     layout_interpretation.addWidget(group_box_ground_truth)
     layout_interpretation.addWidget(group_box_prediction)
     layout_interpretation.addWidget(group_box_counterfactual)
+    layout_interpretation.addWidget(group_box_summary)
 
+    attribute_labels = []
     file_name = combo_box_application_control.currentText()
 
     for attribute_name in counterfactuals[file_name]["counterfactual"].keys():
@@ -153,6 +191,9 @@ def createInterpretationWidget():
             label.setFixedWidth(header.interpret_label_width_attribute)
 
         if attribute_label_prediction != attribute_label:
+            if attribute_name != "original":
+                attribute_labels.append((attribute_label_prediction, attribute_label))
+
             label.setStyleSheet("color: blue;")
 
     for attribute_name in counterfactuals[file_name]["ground_truth"].keys():
@@ -182,6 +223,11 @@ def createInterpretationWidget():
 
         if attribute_label != attribute_label_counterfactual:
             label.setStyleSheet("color: red;")
+
+    label = PyQt5.QtWidgets.QLabel()
+    label.setTextFormat(PyQt5.QtCore.Qt.RichText)
+    label.setText(generateSummary(attribute_labels))
+    layout_summary.addWidget(label)
 
     return group_box_interpretation
 
@@ -222,14 +268,7 @@ def preprocessCounterfactuals():
     file_names_correct = []
 
     for file_name in counterfactuals.keys():
-        correct = True
-
-        for attribute_name in counterfactuals[file_name]["ground_truth"].keys():
-            if counterfactuals[file_name]["prediction"][attribute_name][0] != counterfactuals[file_name]["ground_truth"][attribute_name]:
-                correct = False
-                break
-
-        if correct:
+        if counterfactuals[file_name]["prediction"]["original"][0] == counterfactuals[file_name]["ground_truth"]["original"]:
             file_names_correct.append(file_name)
 
     for file_name_correct in file_names_correct:
