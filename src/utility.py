@@ -102,6 +102,42 @@ def getIndicesFromLabelsOriginal(labels_original):
 
     return labels_to_indices
 
+def generateAttributeJointProbabilities(config_dataset):
+    attribute_ranges = []
+    label_probabilities = {}
+    labels_attribute = getLabelsAttribute(config_dataset)
+    labels_attribute_indices = getIndicesFromLabelsAttribute(labels_attribute)
+    dataset_size = 0
+
+    for attribute in labels_attribute.keys():
+        attribute_count = len(labels_attribute[attribute])
+        attribute_range = torch.Tensor(range(attribute_count))
+        attribute_ranges.append(attribute_range)
+
+    attributes_indices = torch.cartesian_prod(*attribute_ranges)
+    joint_probabilities = torch.zeros(attributes_indices.shape[0], 1)
+    joint_probabilities_indices = {}
+
+    for (i, attribute_indices) in enumerate(attributes_indices.tolist()):
+        joint_probabilities_indices[tuple(attribute_indices)] = i
+
+    for (class_label, class_attributes) in config_dataset["mappings"].items():
+        attribute_indices = []
+        # Convert attribute strings to corresponding tensor indices
+        for (attribute_name, attribute_label) in class_attributes["labels"].items():
+            attribute_indices.append(labels_attribute_indices[attribute_name][attribute_label])
+
+        attribute_indices = tuple(attribute_indices)
+        class_size = len(os.listdir(os.path.join(header.config_decomposed["dir_dataset_train"], class_label)))
+        label_probabilities[class_label] = (attribute_indices, class_size)
+        dataset_size += class_size
+
+    for (attribute_indices, class_size) in label_probabilities.values():
+        index = joint_probabilities_indices[attribute_indices]
+        joint_probabilities[index] = class_size / dataset_size
+
+    return (joint_probabilities, joint_probabilities_indices)
+
 def generateSPNSettings(config_dataset, device):
     attribute_ranges = []
     labels_attribute = getLabelsAttribute(config_dataset)
