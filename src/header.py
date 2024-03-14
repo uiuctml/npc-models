@@ -10,6 +10,7 @@ dir_output_counterfactual = "../output/counterfactual"
 file_name_counterfactual = "counterfactual.json"
 file_path_dataset_config = "../../visat-dataset-tools/config/gtsrb.json"
 interpret_delimiter_label = "--"
+interpret_dir_dataset = "../../gtsrb-dataset/images/split/original/test"
 interpret_label_width_attribute = 200
 interpret_label_width_original = 350
 interpret_threshold_probability = 0.1

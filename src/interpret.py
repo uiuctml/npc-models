@@ -164,7 +164,7 @@ def updateInterpretationWidget():
 def updateViewerWidget():
     file_name = combo_box_application_control.currentText()
     dir_name_label = counterfactuals[file_name]["ground_truth"]["original"]
-    file_path_image = os.path.join(header.config_decomposed["dir_dataset_test"], dir_name_label, file_name)
+    file_path_image = os.path.join(header.interpret_dir_dataset, dir_name_label, file_name)
 
     pixmap = PyQt5.QtGui.QPixmap(file_path_image)
     label_viewer.setPixmap(pixmap.scaled(header.interpret_viewer_width, header.interpret_viewer_height, PyQt5.QtCore.Qt.IgnoreAspectRatio))
