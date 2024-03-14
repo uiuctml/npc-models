@@ -12,6 +12,7 @@ file_path_dataset_config = "../../visat-dataset-tools/config/gtsrb.json"
 interpret_delimiter_label = "--"
 interpret_label_width_attribute = 200
 interpret_label_width_original = 350
+interpret_threshold_probability = 0.1
 interpret_viewer_height = 300
 interpret_viewer_width = 300
 log_level = type.LogLevel.debug

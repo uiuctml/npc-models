@@ -17,7 +17,7 @@ layout_ground_truth = PyQt5.QtWidgets.QHBoxLayout()
 layout_prediction = PyQt5.QtWidgets.QHBoxLayout()
 layout_summary = PyQt5.QtWidgets.QHBoxLayout()
 
-def generateSummary(attribute_labels):
+def generateSummaryLabel(attribute_labels):
     initialized = False
     summary = "The final prediction would have been correct if "
 
@@ -41,6 +41,31 @@ def generateSummary(attribute_labels):
 
     return summary
 
+def generateSummaryProbability(attribute_probabilities):
+    initialized = False
+    summary = "The final prediction would have been correct if "
+
+    for i in range(len(attribute_probabilities)):
+        if not initialized:
+            initialized = True
+        elif i < 2 and i >= len(attribute_probabilities) - 1:
+            summary += " and "
+        elif i >= len(attribute_probabilities) - 1:
+            summary += ", and "
+        else:
+            summary += ", "
+
+        attribute_probability_counterfactual = "{:.1f}%".format(attribute_probabilities[i][2] * 100)
+        attribute_probability_prediction = "{:.1f}%".format(attribute_probabilities[i][1] * 100)
+        attribute_label = attribute_probabilities[i][0].split(header.interpret_delimiter_label)[1]
+        attribute_name = attribute_probabilities[i][0].split(header.interpret_delimiter_label)[0]
+
+        summary += "<b>" + attribute_name + "</b> was predicted as <b>" + attribute_label + "</b> with a probability of <span style='color: blue;'><b>" + attribute_probability_counterfactual + "</b></span> instead of <span style='color: red;'><b>" + attribute_probability_prediction + "</b></span>"
+
+    summary += "."
+
+    return summary
+
 def pushButtonLastSlot():
     if combo_box_application_control.currentIndex() <= 0:
         return
@@ -59,6 +84,7 @@ def pushButtonNextSlot():
 
 def updateInterpretationWidget():
     attribute_labels = []
+    attribute_probabilities = []
     file_name = combo_box_application_control.currentText()
 
     for (i, attribute_name) in enumerate(counterfactuals[file_name]["counterfactual"].keys()):
@@ -96,8 +122,42 @@ def updateInterpretationWidget():
         else:
             label.setStyleSheet("")
 
+    if len(attribute_labels) == 0:
+        for (i, attribute_name) in enumerate(counterfactuals[file_name]["counterfactual"].keys()):
+            if attribute_name == "original":
+                continue
+
+            attribute_label_prediction = counterfactuals[file_name]["prediction"][attribute_name][0]
+            attribute_probability = counterfactuals[file_name]["counterfactual"][attribute_name][1]
+            attribute_probability_prediction = counterfactuals[file_name]["prediction"][attribute_name][1]
+            label = layout_counterfactual.itemAt(i).widget()
+
+            if abs(attribute_probability - attribute_probability_prediction) > header.interpret_threshold_probability:
+                attribute_probabilities.append((attribute_label_prediction, attribute_probability_prediction, attribute_probability))
+
+                label.setStyleSheet("color: blue;")
+            else:
+                label.setStyleSheet("")
+
+        for (i, attribute_name) in enumerate(counterfactuals[file_name]["prediction"].keys()):
+            if attribute_name == "original":
+                continue
+
+            attribute_probability_counterfactual = counterfactuals[file_name]["counterfactual"][attribute_name][1]
+            attribute_probability = counterfactuals[file_name]["prediction"][attribute_name][1]
+            label = layout_prediction.itemAt(i).widget()
+
+            if abs(attribute_probability_counterfactual - attribute_probability) > header.interpret_threshold_probability:
+                label.setStyleSheet("color: red;")
+            else:
+                label.setStyleSheet("")
+
     label = layout_summary.itemAt(0).widget()
-    label.setText(generateSummary(attribute_labels))
+
+    if len(attribute_labels) == 0:
+        label.setText(generateSummaryProbability(attribute_probabilities))
+    else:
+        label.setText(generateSummaryLabel(attribute_labels))
 
     return
 
@@ -174,6 +234,7 @@ def createInterpretationWidget():
     layout_interpretation.addWidget(group_box_summary)
 
     attribute_labels = []
+    attribute_probabilities = []
     file_name = combo_box_application_control.currentText()
 
     for attribute_name in counterfactuals[file_name]["counterfactual"].keys():
@@ -224,9 +285,44 @@ def createInterpretationWidget():
         if attribute_label != attribute_label_counterfactual:
             label.setStyleSheet("color: red;")
 
+    if len(attribute_labels) == 0:
+        for (i, attribute_name) in enumerate(counterfactuals[file_name]["counterfactual"].keys()):
+            if attribute_name == "original":
+                continue
+
+            attribute_label_prediction = counterfactuals[file_name]["prediction"][attribute_name][0]
+            attribute_probability = counterfactuals[file_name]["counterfactual"][attribute_name][1]
+            attribute_probability_prediction = counterfactuals[file_name]["prediction"][attribute_name][1]
+            label = layout_counterfactual.itemAt(i).widget()
+
+            if abs(attribute_probability - attribute_probability_prediction) > header.interpret_threshold_probability:
+                attribute_probabilities.append((attribute_label_prediction, attribute_probability_prediction, attribute_probability))
+
+                label.setStyleSheet("color: blue;")
+            else:
+                label.setStyleSheet("")
+
+        for (i, attribute_name) in enumerate(counterfactuals[file_name]["prediction"].keys()):
+            if attribute_name == "original":
+                continue
+
+            attribute_probability_counterfactual = counterfactuals[file_name]["counterfactual"][attribute_name][1]
+            attribute_probability = counterfactuals[file_name]["prediction"][attribute_name][1]
+            label = layout_prediction.itemAt(i).widget()
+
+            if abs(attribute_probability_counterfactual - attribute_probability) > header.interpret_threshold_probability:
+                label.setStyleSheet("color: red;")
+            else:
+                label.setStyleSheet("")
+
     label = PyQt5.QtWidgets.QLabel()
     label.setTextFormat(PyQt5.QtCore.Qt.RichText)
-    label.setText(generateSummary(attribute_labels))
+
+    if len(attribute_labels) == 0:
+        label.setText(generateSummaryProbability(attribute_probabilities))
+    else:
+        label.setText(generateSummaryLabel(attribute_labels))
+
     layout_summary.addWidget(label)
 
     return group_box_interpretation
