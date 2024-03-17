@@ -15,7 +15,7 @@ import type
 import utility
 import wandb
 
-def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, optimizer_decomposed, optimizer_spn, device, batch_step):
+def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, optimizer_decomposed, optimizer_spn, device, batch_step, marginal_probabilities_counted = None):
     accuracy_epoch_composed = 0
     accuracy_epoch_list_decomposed = []
     loss_epoch = 0
@@ -43,7 +43,7 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
             (outputs_decomposed, _) = model_decomposed(input)
 
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
-            (matrix_a, matrix_b, output_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+            (matrix_a, matrix_b, output_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
             loss = criterion(output_composed, labels_original)
@@ -57,7 +57,10 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
             optimizer_decomposed.step()
 
             spn_joint.backward()
-            spn_marginal.backward()
+
+            if marginal_probabilities_counted is None:
+                spn_marginal.backward()
+
             optimizer_spn.step(matrix_a.detach(), matrix_b.detach(), output_composed.detach(), labels_original)
 
             corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
@@ -100,7 +103,7 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
 
     return batch_step
 
-def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, device, batch_step):
+def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, device, batch_step, marginal_probabilities_counted = None):
     accuracy_epoch_composed = 0
     accuracy_epoch_list_decomposed = []
     loss_epoch = 0
@@ -126,7 +129,7 @@ def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, 
             (outputs_decomposed, _) = model_decomposed(input)
 
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
-            (_, _, output_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+            (_, _, output_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
             loss = criterion(output_composed, labels_original)
@@ -211,6 +214,7 @@ def main():
     data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     epoch = 1
+    marginal_probabilities_counted = None
     model_decomposed = model.createModelDecomposed(device)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
@@ -224,7 +228,8 @@ def main():
     learning_rate_scheduler_spn = None
 
     if header.config_spn["optimizer"] == type.OptimizerSPN.cccp_discriminative.name:
-        optimizer_spn = spn.CCCPDiscriminativeSPNOptimizer(spn_joint, spn_marginal, device)
+        marginal_probabilities_counted = utility.countAttributeJointProbabilities(config_dataset, device)
+        optimizer_spn = spn.CCCPDiscriminativeSPNOptimizer(spn_joint, spn_marginal, device, marginal_probabilities_counted = marginal_probabilities_counted)
     elif header.config_spn["optimizer"] == type.OptimizerSPN.cccp_generative.name:
         optimizer_spn = spn.CCCPGenerativeSPNOptimizer(spn_joint, spn_marginal, device)
     elif header.config_spn["optimizer"] == type.OptimizerSPN.ebw_discriminative.name:
@@ -296,8 +301,8 @@ def main():
         wandb.log({"training/epoch/step": epoch})
         wandb.log({"validation/epoch/step": epoch})
 
-        batch_step_train = train(model_decomposed, spn_joint, spn_marginal, data_loader_train, criterion, optimizer_decomposed, optimizer_spn, device, batch_step_train)
-        (accuracy_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_decomposed, spn_joint, spn_marginal, data_loader_validation, criterion, device, batch_step_validate)
+        batch_step_train = train(model_decomposed, spn_joint, spn_marginal, data_loader_train, criterion, optimizer_decomposed, optimizer_spn, device, batch_step_train, marginal_probabilities_counted)
+        (accuracy_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_decomposed, spn_joint, spn_marginal, data_loader_validation, criterion, device, batch_step_validate, marginal_probabilities_counted)
 
         learning_rate_scheduler.step(loss_validation_epoch)
         learning_rate_scheduler_spn.step(loss_validation_epoch)
@@ -336,7 +341,7 @@ def main():
         spn_marginal.set_leaf_nodes(spn_settings_marginal)
 
     wandb.log({"testing/epoch/step": batch_step_test})
-    test_composed.test(model_decomposed, spn_joint, spn_marginal, data_loader_test, device, batch_step_test)
+    test_composed.test(model_decomposed, spn_joint, spn_marginal, data_loader_test, device, batch_step_test, marginal_probabilities_counted)
 
     wandb.finish()
 

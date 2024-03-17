@@ -74,10 +74,11 @@ class LossSPNLearningRateScheduler(SPNLearningRateScheduler):
         return
 
 class SPNOptimizer:
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1, marginal_probabilities_counted = None):
         self.device = device
         self.growth_threshold = growth_threshold
         self.learning_rate = learning_rate
+        self.marginal_probabilities_counted = marginal_probabilities_counted
         self.smoothing_epsilon = torch.finfo(torch.float).eps
         self.prior_factor = prior_factor
         self.projection_epsilon = projection_epsilon
@@ -100,8 +101,8 @@ class SPNOptimizer:
         pass
 
 class CCCPDiscriminativeSPNOptimizer(SPNOptimizer):
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
-        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold)
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1, marginal_probabilities_counted = None):
+        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold, marginal_probabilities_counted)
 
         return
 
@@ -115,7 +116,7 @@ class CCCPDiscriminativeSPNOptimizer(SPNOptimizer):
             # TODO Optimization: unroll this for loop (compute all weight updates at once)
             for (i, child) in enumerate(sum_node.children):
                 # Compute weight updates in log space
-                weight_updates = torch.exp(sum_node.value_backward + child.value_forward - self.spn_joint.root_node.value_forward)
+                weight_updates = torch.exp(sum_node.value_backward + child.value_forward - self.spn_joint.root_node.value_forward - torch.log(self.marginal_probabilities_counted))
                 weight_updates = weight_updates.reshape(matrix_a.shape) # number of original labels x product of category size of all attributes
                 weight_updates = weight_updates.t()   # product of category size of all attributes x number of original labels
                 weight_updates = torch.index_select(weight_updates, 1, labels_original)   # product of category size of all attributes x batch size
@@ -135,8 +136,8 @@ class CCCPDiscriminativeSPNOptimizer(SPNOptimizer):
         return
 
 class CCCPGenerativeSPNOptimizer(SPNOptimizer):
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
-        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold)
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1, marginal_probabilities_counted = None):
+        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold, marginal_probabilities_counted)
 
         return
 
@@ -165,8 +166,8 @@ class CCCPGenerativeSPNOptimizer(SPNOptimizer):
         return
 
 class EBWDiscriminativeSPNOptimizer(SPNOptimizer):
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
-        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold)
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1, marginal_probabilities_counted = None):
+        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold, marginal_probabilities_counted)
 
         return
 
@@ -204,8 +205,8 @@ class EBWDiscriminativeSPNOptimizer(SPNOptimizer):
         return
 
 class PGDDiscriminativeSPNOptimizer(SPNOptimizer):
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
-        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold)
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1, marginal_probabilities_counted = None):
+        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold, marginal_probabilities_counted)
 
         return
 
@@ -246,8 +247,8 @@ class PGDDiscriminativeSPNOptimizer(SPNOptimizer):
         return
 
 class PGDGenerativeSPNOptimizer(SPNOptimizer):
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
-        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold)
+    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1, marginal_probabilities_counted = None):
+        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold, marginal_probabilities_counted)
 
         return
 

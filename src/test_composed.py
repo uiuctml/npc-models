@@ -10,10 +10,11 @@ import sklearn.metrics
 import spn
 import torch
 import tqdm
+import type
 import utility
 import wandb
 
-def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_step):
+def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_step, marginal_probabilities_counted = None):
     utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
     utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
     utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
@@ -66,7 +67,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
                 ground_truths_epoch_list_decomposed[i] += labels_decomposed[:, i].data.tolist()
                 predictions_epoch_list_decomposed[i] += predictions_decomposed.tolist()
 
-            (_, _, outputs_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+            (_, _, outputs_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted)
             (_, predictions_composed) = torch.max(outputs_composed, 1)
 
             corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
@@ -156,11 +157,15 @@ def main():
     config_dataset = dataset_test.config
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
+    marginal_probabilities_counted = None
     model_decomposed = model.createModelDecomposed(device)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
     spn_joint = spn.SPN(device)
     spn_marginal = spn.SPN(device)
+
+    if header.config_spn["optimizer"] == type.OptimizerSPN.cccp_discriminative.name:
+        marginal_probabilities_counted = utility.countAttributeJointProbabilities(config_dataset, device)
 
     logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
 
@@ -186,7 +191,7 @@ def main():
         logger.log_info("SPN depths: " + str(spn_joint.depth) + ".")
         logger.log_info("SPN leaf node setting dimension: (" + str(int(spn_settings_joint.shape[0])) + ", " + str(int(spn_settings_joint.shape[1])) + ").")
 
-    test(model_decomposed, spn_joint, spn_marginal, data_loader_test, device, 1)
+    test(model_decomposed, spn_joint, spn_marginal, data_loader_test, device, 1, marginal_probabilities_counted)
 
     return
 
