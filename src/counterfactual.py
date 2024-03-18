@@ -103,6 +103,75 @@ def counterfactual_gd(outputs_decomposed_original, spn_joint, spn_marginal, spn_
 
     return utility.applySoftmaxDecomposed(outputs_decomposed)
 
+def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
+    batch_size = labels_original.nelement()
+    outputs_decomposed = []
+    outputs_decomposed_original = utility.applySoftmaxDecomposed(outputs_decomposed_original)
+    progress_bar = tqdm.tqdm(total = batch_size, position = 1, leave = False)
+    progress_bar.set_description_str("[INFO]: Optimizing MPEs")
+
+    for i in range(len(outputs_decomposed_original)):
+        outputs_decomposed.append(outputs_decomposed_original[i].detach().clone().requires_grad_(True))
+
+    for _ in range(header.counterfactual_steps):
+        (_, _, outputs_composed_original) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+        outputs_composed_mpe = torch.max(outputs_composed_original, 1)[1]
+        outputs_composed_indices = torch.where(outputs_composed_mpe != labels_original)[0]
+
+        progress_bar.n = batch_size - outputs_composed_indices.nelement()
+        progress_bar.refresh()
+
+        if outputs_composed_indices.nelement() == 0:
+            break
+
+        rhos = []
+
+        for i in range(len(outputs_decomposed)):
+            rho_rhs = outputs_decomposed[i].detach().clone().requires_grad_(False)
+            rho_rhs = torch.sort(rho_rhs, descending = True, dim = 1)[0]
+            rho_lhs = rho_rhs.clone()   # batch size x attribute category size
+
+            rho_rhs = torch.cumsum(rho_rhs, dim = 1)
+            rho_rhs -= 1
+            rho_rhs /= torch.arange(1, rho_rhs.shape[1] + 1).to(device) # batch size x attribute category size
+
+            rho = torch.sum(rho_lhs > rho_rhs, dim = 1, keepdim = True)   # batch size x 1
+            rhos.append(rho)
+
+        lambdas = []
+
+        for i in range(len(rhos)):
+            output_decomposed = outputs_decomposed[i].detach().clone().requires_grad_(False)
+            lambda_i = torch.sort(output_decomposed, descending = True, dim = 1)[0] # batch size x attribute category size
+
+            lambda_i_row_indices = torch.arange(lambda_i.shape[1]).long().expand_as(lambda_i).to(device)
+            rho = rhos[i].expand_as(lambda_i)
+            lambda_i_zero_mask = lambda_i_row_indices >= rho
+            lambda_i[lambda_i_zero_mask] = 0
+
+            lambda_i = torch.sum(lambda_i, dim = 1, keepdim = True) # batch size x 1
+            lambda_i = 1 - lambda_i
+            lambda_i /= rhos[i]
+
+            lambdas.append(lambda_i)
+
+        outputs_composed = outputs_composed_original.t()   # number of original labels x batch size
+        outputs_composed = outputs_composed[labels_original, torch.arange(outputs_composed.shape[1])]  # 1 x batch size
+        outputs_composed = torch.log(outputs_composed)   # 1 x batch size
+        outputs_composed = torch.sum(outputs_composed[outputs_composed_indices], 0) # 1 x 1
+        outputs_composed.backward(retain_graph = True)
+
+        with torch.set_grad_enabled(False):
+            for i in range(len(outputs_decomposed)):
+                outputs_decomposed[i] = torch.clamp(outputs_decomposed[i] + header.counterfactual_learning_rate * outputs_decomposed[i].grad + lambdas[i], min = 0)
+
+        for i in range(len(outputs_decomposed)):
+            outputs_decomposed[i] = outputs_decomposed[i].detach().clone().requires_grad_(True)
+
+    progress_bar.close()
+
+    return outputs_decomposed
+
 def save(input_file_paths, counterfactuals, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_counterfactual, outputs_composed, outputs_composed_counterfactual):
     batch_size = labels_original.nelement()
     config_dataset = dataset.config
