@@ -124,6 +124,16 @@ def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn
         if outputs_composed_indices.nelement() == 0:
             break
 
+        outputs_composed = outputs_composed_original.t()   # number of original labels x batch size
+        outputs_composed = outputs_composed[labels_original, torch.arange(outputs_composed.shape[1])]  # 1 x batch size
+        outputs_composed = torch.log(outputs_composed)   # 1 x batch size
+        outputs_composed = torch.sum(outputs_composed[outputs_composed_indices], 0) # 1 x 1
+        outputs_composed.backward(retain_graph = True)
+
+        with torch.set_grad_enabled(False):
+            for i in range(len(outputs_decomposed)):
+                outputs_decomposed[i] += header.counterfactual_learning_rate * outputs_decomposed[i].grad
+
         rhos = []
 
         for i in range(len(outputs_decomposed)):
@@ -155,15 +165,9 @@ def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn
 
             lambdas.append(lambda_i)
 
-        outputs_composed = outputs_composed_original.t()   # number of original labels x batch size
-        outputs_composed = outputs_composed[labels_original, torch.arange(outputs_composed.shape[1])]  # 1 x batch size
-        outputs_composed = torch.log(outputs_composed)   # 1 x batch size
-        outputs_composed = torch.sum(outputs_composed[outputs_composed_indices], 0) # 1 x 1
-        outputs_composed.backward(retain_graph = True)
-
         with torch.set_grad_enabled(False):
             for i in range(len(outputs_decomposed)):
-                outputs_decomposed[i] = torch.clamp(outputs_decomposed[i] + header.counterfactual_learning_rate * outputs_decomposed[i].grad + lambdas[i], min = 0)
+                outputs_decomposed[i] = torch.clamp(outputs_decomposed[i] + lambdas[i], min = 0)
 
         for i in range(len(outputs_decomposed)):
             outputs_decomposed[i] = outputs_decomposed[i].detach().clone().requires_grad_(True)
