@@ -165,7 +165,7 @@ def main():
     spn_marginal = spn.SPN(device)
 
     if header.config_spn["optimizer"] == type.OptimizerSPN.cccp_discriminative.name:
-        marginal_probabilities_counted = utility.countAttributeJointProbabilities(config_dataset, device)
+        (marginal_probabilities_counted, _) = utility.countAttributeJointProbabilities(config_dataset, device)
 
     logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
 

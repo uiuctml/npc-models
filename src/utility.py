@@ -82,14 +82,17 @@ def countAttributeJointProbabilities(config_dataset, device):
         label_probabilities[class_label] = (attribute_indices, class_size)
         dataset_size += class_size
 
-    for (attribute_indices, class_size) in label_probabilities.values():
+    for (class_label, _) in config_dataset["mappings"].items():
+        label_probabilities[class_label] = (label_probabilities[class_label][0], label_probabilities[class_label][1] / dataset_size)
+
+    for (attribute_indices, probabilities) in label_probabilities.values():
         index = joint_probabilities_indices[attribute_indices]
-        joint_probabilities[index] = class_size / dataset_size
+        joint_probabilities[index] = probabilities
 
     joint_probabilities = joint_probabilities.repeat(len(config_dataset["mappings"]), 1)
     joint_probabilities = joint_probabilities.squeeze()
 
-    return joint_probabilities.to(device)
+    return (joint_probabilities.to(device), label_probabilities)
 
 def createTransform(config):
     dataset_transforms = torchvision.transforms.Compose([
