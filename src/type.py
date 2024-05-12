@@ -35,7 +35,8 @@ class ModelBaseline(enum.Enum):
     vit_b_32 = 1
 
 class ModelDecomposed(enum.Enum):
-    mlp_set = 0
+    cnn_set = 0
+    mlp_set = 1
     resnet152_mtl = 1
     vit_b_32_mtl = 2
 

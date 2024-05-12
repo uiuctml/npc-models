@@ -20,6 +20,57 @@ class Model(torch.nn.Module):
     def get_parameters(self):
         pass
 
+class CNNSet(Model):
+    def __init__(self, config_dataset, device):
+        super().__init__()
+
+        self.model_list = []
+
+        for attribute in config_dataset["attributes"]:
+            attribute_labels = attribute["labels"]
+            attribute_labels.remove("")
+
+            conv_channel_size = 16
+            conv_filter_size = 5
+            max_pool_size = 3
+            input_size = header.config_decomposed["model_input_height"]
+            conv_output_size = (input_size - (conv_filter_size - 1) - (conv_filter_size - 1)) // max_pool_size
+            linear_input_size = conv_output_size * conv_output_size * conv_channel_size
+            linear_hidden_size = 1024
+            output_size = len(attribute_labels)
+
+            model = torch.nn.Sequential(
+                torch.nn.Conv2d(header.config_decomposed["model_input_channels"], conv_channel_size, conv_filter_size),
+                torch.nn.Conv2d(conv_channel_size, conv_channel_size, conv_filter_size),
+                torch.nn.MaxPool2d(max_pool_size),
+                torch.nn.Flatten(),
+                torch.nn.Linear(linear_input_size, linear_hidden_size),
+                torch.nn.ReLU(),
+                torch.nn.Linear(linear_hidden_size, output_size)
+            )
+
+            self.model_list.append(model)
+
+        self.model_list = torch.nn.ModuleList(self.model_list)
+
+        return
+
+    def forward(self, input):
+        outputs = []
+
+        for model in self.model_list:
+            outputs.append(model(input))
+
+        return (outputs, None)
+
+    def get_parameters(self):
+        parameters = []
+
+        for model in self.model_list:
+            parameters.append(model.parameters())
+
+        return parameters
+
 class MLPSet(Model):
     def __init__(self, config_dataset, device):
         super().__init__()
@@ -253,7 +304,9 @@ def createModelDecomposed(device):
     config_dataset = json.load(file_config_dataset)
     file_config_dataset.close()
 
-    if header.config_decomposed["model"] == type.ModelDecomposed.mlp_set.name:
+    if header.config_decomposed["model"] == type.ModelDecomposed.cnn_set.name:
+        return CNNSet(config_dataset, device)
+    elif header.config_decomposed["model"] == type.ModelDecomposed.mlp_set.name:
         return MLPSet(config_dataset, device)
     elif header.config_decomposed["model"] == type.ModelDecomposed.resnet152_mtl.name:
         header.config_decomposed["model_pretrained_weights"] = "IMAGENET1K_V2"
