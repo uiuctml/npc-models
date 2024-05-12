@@ -30,9 +30,9 @@ class CNNSet(Model):
             attribute_labels = attribute["labels"]
             attribute_labels.remove("")
 
-            conv_channel_size = 16
-            conv_filter_size = 5
-            max_pool_size = 3
+            conv_channel_size = 6
+            conv_filter_size = 3
+            max_pool_size = 2
             input_size = header.config_decomposed["model_input_height"]
             conv_output_size = (input_size - (conv_filter_size - 1) - (conv_filter_size - 1)) // max_pool_size
             linear_input_size = conv_output_size * conv_output_size * conv_channel_size
