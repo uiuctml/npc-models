@@ -13,19 +13,25 @@ def main():
     config_dataset = json.load(file_config_dataset)
     file_config_dataset.close()
 
+    # Get visual attribute labeling data
     labels_attribute = utility.getLabelsAttribute(config_dataset)
+    labels_original = utility.getLabelsOriginal(config_dataset)
     labels_attribute_indices = utility.getIndicesFromLabelsAttribute(labels_attribute)
+    labels_original_indices = utility.getIndicesFromLabelsOriginal(labels_original)
     (_, label_probabilities) = utility.countAttributeJointProbabilities(config_dataset, device)
 
+    attribute_index_original_label = len(config_dataset["attributes"])
     cat_node_dict = {}
     lines_edges = "##EDGES##\n"
     lines_nodes = "##NODES##\n"
     node_sequence = 0
     node_sequence_root = node_sequence
 
+    # Add sum root node
     lines_nodes += str(node_sequence_root) + ",SUM\n"
     node_sequence += 1
 
+    # Add visual attribute leaf nodes
     for (attribute_index, attribute) in enumerate(config_dataset["attributes"]):
         for category_index in labels_attribute_indices[attribute["name"]].values():
             line_cat_node = "CATNODEPRD," + str(attribute_index) + "," + str(category_index)
@@ -33,21 +39,36 @@ def main():
             lines_nodes += str(node_sequence) + "," + line_cat_node + "\n"
             node_sequence += 1
 
-    for probability in label_probabilities.values():
-        category_indices = probability[0]
-        frequency = probability[1]
+    # Add original label leaf nodes
+    for category_index in range(0, len(config_dataset["mappings"])):
+        line_cat_node = "CATNODEPRD," + str(attribute_index_original_label) + "," + str(category_index)
+        cat_node_dict[line_cat_node] = node_sequence
+        lines_nodes += str(node_sequence) + "," + line_cat_node + "\n"
+        node_sequence += 1
 
+    for label_original in label_probabilities.keys():
+        category_indices = label_probabilities[label_original][0]
+        frequency = label_probabilities[label_original][1]
+
+        # Add product nodes
         node_sequence_prd = node_sequence
         lines_nodes += str(node_sequence_prd) + ",PRD\n"
         node_sequence += 1
 
+        # Add root-to-product edges
         lines_edges += str(node_sequence_root) + "," + str(node_sequence_prd) + "," + str(frequency) + "\n"
 
+        # Add product-to-visual-attribute-leaf edges
         for (attribute_index, category_index) in enumerate(category_indices):
             line_cat_node = "CATNODEPRD," + str(attribute_index) + "," + str(category_index)
             node_sequence_cat = cat_node_dict[line_cat_node]
-
             lines_edges += str(node_sequence_prd) + "," + str(node_sequence_cat) + "\n"
+
+        # Add product-to-orignal-label-leaf edges
+        category_index_original_label = labels_original_indices[label_original]
+        line_cat_node = "CATNODEPRD," + str(attribute_index_original_label) + "," + str(category_index_original_label)
+        node_sequence_cat = cat_node_dict[line_cat_node]
+        lines_edges += str(node_sequence_prd) + "," + str(node_sequence_cat) + "\n"
 
     lines = lines_nodes + lines_edges
 
