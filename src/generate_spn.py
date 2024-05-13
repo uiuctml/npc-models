@@ -29,14 +29,14 @@ def main():
     lines_nodes = "##NODES##\n"
     node_count_leaf = 0
     node_count_prd = 0
-    node_count_sum = 1
+    node_count_sum = 0
     node_sequence = 0
     node_sequence_root = node_sequence
 
     # Add sum root node
     lines_nodes += str(node_sequence_root) + ",SUM\n"
     node_sequence += 1
-    node_count_sum +=1
+    node_count_sum += 1
 
     # Log visual attribute statistics
     for attribute_name in labels_attribute.keys():
