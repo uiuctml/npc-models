@@ -84,8 +84,9 @@ def main():
     logger.log_trace("Testing marginal log likelihoods: " + str(log_likelihoods_marginal) + ".")
 
     probabilities = torch.exp(log_likelihoods_joint - log_likelihoods_marginal)
+    accuracy = torch.mean(probabilities).item()
 
-    logger.log_info("Testing probabilities: " + str(probabilities) + ".")
+    logger.log_info("Testing accuracy: " + str(accuracy) + ".")
 
     return
 
