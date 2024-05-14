@@ -114,6 +114,37 @@ class MLPSet(Model):
 
         return parameters
 
+class RelationNN(Model):
+    def __init__(self, config_dataset, device):
+        super().__init__()
+
+        input_size = 0
+        hidden_size = 1024
+        output_size = len(config_dataset["mappings"])
+
+        for attribute in config_dataset["attributes"]:
+            attribute_labels = attribute["labels"]
+
+            if "" in attribute_labels:
+                attribute_labels.remove("")
+
+            input_size += len(attribute_labels)
+
+        self.model = torch.nn.Sequential(
+            torch.nn.Flatten(),
+            torch.nn.Linear(input_size, hidden_size),
+            torch.nn.ReLU(),
+            torch.nn.Linear(hidden_size, output_size)
+        )
+
+        return
+
+    def forward(self, inputs):
+        return self.model(torch.cat(inputs, 1))
+
+    def get_parameters(self):
+        return self.model.parameters()
+
 class ResNet152(Model):
     def __init__(self, config_dataset, device):
         super().__init__()
