@@ -35,10 +35,11 @@ class ModelBaseline(enum.Enum):
     vit_b_32 = 1
 
 class ModelDecomposed(enum.Enum):
-    cnn_set = 0
-    mlp_set = 1
-    resnet152_mtl = 1
-    vit_b_32_mtl = 2
+    cnn_mtl = 0
+    cnn_set = 1
+    mlp_set = 2
+    resnet152_mtl = 3
+    vit_b_32_mtl = 4
 
 class OptimizerSPN(enum.Enum):
     cccp_discriminative = 0

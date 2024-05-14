@@ -20,6 +20,71 @@ class Model(torch.nn.Module):
     def get_parameters(self):
         pass
 
+class CNNMTL(Model):
+    def __init__(self, config_dataset, device):
+        super().__init__()
+
+        conv_channel_size = 10
+        conv_filter_size = 3
+        max_pool_size = 2
+        input_size = header.config_decomposed["model_input_height"]
+        conv_output_size = (input_size - (conv_filter_size - 1) - (conv_filter_size - 1)) // max_pool_size
+        linear_input_size = conv_output_size * conv_output_size * conv_channel_size
+
+        self.neck = torch.nn.Sequential(
+            torch.nn.Conv2d(header.config_decomposed["model_input_channels"], conv_channel_size, conv_filter_size),
+            torch.nn.Conv2d(conv_channel_size, conv_channel_size, conv_filter_size),
+            torch.nn.MaxPool2d(max_pool_size),
+            torch.nn.Flatten()
+        )
+
+        if not header.config_decomposed["fine_tuning"]:
+            for parameter in self.neck.parameters():
+                parameter.requires_grad = False
+
+        layer_list = []
+
+        for dataset_entry in config_dataset["attributes"]:
+            dataset_name = dataset_entry["name"]
+            dataset_labels = dataset_entry["labels"]
+            head_hidden_size = header.config_decomposed["head_hidden_size"]
+
+            dataset_labels.remove("")
+
+            layers_hidden = torch.nn.Sequential(torch.nn.Linear(linear_input_size, head_hidden_size), torch.nn.ReLU())
+            layer_final = torch.nn.Linear(head_hidden_size, len(dataset_labels))
+
+            layer_dict = torch.nn.ModuleDict({"hidden": layers_hidden, "final": layer_final})
+            layer_dict_task = torch.nn.ModuleDict({dataset_name: layer_dict})
+
+            layer_list.append(layer_dict_task)
+
+        self.heads = torch.nn.ModuleList(layer_list)
+
+        return
+
+    def forward(self, input):
+        outputs_head = []
+        outputs_head_hidden = []
+        output_neck = self.neck(input)
+
+        for head in self.heads:
+            head_layer_dict = list(head.values())[0]
+
+            output_head_hidden = head_layer_dict["hidden"](output_neck)
+            output_head = head_layer_dict["final"](output_head_hidden)
+
+            outputs_head.append(output_head)
+            outputs_head_hidden.append(output_head_hidden)
+
+        return (outputs_head, outputs_head_hidden)
+
+    def get_parameters(self):
+        if header.config_decomposed["fine_tuning"]:
+            return list(self.neck.parameters()) + list(self.heads.parameters())
+        else:
+            return self.heads.parameters()
+
 class CNNSet(Model):
     def __init__(self, config_dataset, device):
         super().__init__()
@@ -30,13 +95,13 @@ class CNNSet(Model):
             attribute_labels = attribute["labels"]
             attribute_labels.remove("")
 
-            conv_channel_size = 6
+            conv_channel_size = 10
             conv_filter_size = 3
             max_pool_size = 2
             input_size = header.config_decomposed["model_input_height"]
             conv_output_size = (input_size - (conv_filter_size - 1) - (conv_filter_size - 1)) // max_pool_size
+            head_hidden_size = header.config_decomposed["head_hidden_size"]
             linear_input_size = conv_output_size * conv_output_size * conv_channel_size
-            linear_hidden_size = 1024
             output_size = len(attribute_labels)
 
             model = torch.nn.Sequential(
@@ -44,9 +109,9 @@ class CNNSet(Model):
                 torch.nn.Conv2d(conv_channel_size, conv_channel_size, conv_filter_size),
                 torch.nn.MaxPool2d(max_pool_size),
                 torch.nn.Flatten(),
-                torch.nn.Linear(linear_input_size, linear_hidden_size),
+                torch.nn.Linear(linear_input_size, head_hidden_size),
                 torch.nn.ReLU(),
-                torch.nn.Linear(linear_hidden_size, output_size)
+                torch.nn.Linear(head_hidden_size, output_size)
             )
 
             self.model_list.append(model)
@@ -119,7 +184,7 @@ class RelationNN(Model):
         super().__init__()
 
         input_size = 0
-        hidden_size = 1024
+        head_hidden_size = header.config_decomposed["head_hidden_size"]
         output_size = len(config_dataset["mappings"])
 
         for attribute in config_dataset["attributes"]:
@@ -132,9 +197,9 @@ class RelationNN(Model):
 
         self.model = torch.nn.Sequential(
             torch.nn.Flatten(),
-            torch.nn.Linear(input_size, hidden_size),
+            torch.nn.Linear(input_size, head_hidden_size),
             torch.nn.ReLU(),
-            torch.nn.Linear(hidden_size, output_size)
+            torch.nn.Linear(head_hidden_size, output_size)
         )
 
         return
@@ -335,7 +400,9 @@ def createModelDecomposed(device):
     config_dataset = json.load(file_config_dataset)
     file_config_dataset.close()
 
-    if header.config_decomposed["model"] == type.ModelDecomposed.cnn_set.name:
+    if header.config_decomposed["model"] == type.ModelDecomposed.cnn_mtl.name:
+        return CNNMTL(config_dataset, device)
+    elif header.config_decomposed["model"] == type.ModelDecomposed.cnn_set.name:
         return CNNSet(config_dataset, device)
     elif header.config_decomposed["model"] == type.ModelDecomposed.mlp_set.name:
         return MLPSet(config_dataset, device)
