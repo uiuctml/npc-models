@@ -593,6 +593,18 @@ class SPN:
                         for (i, categorical_leaf_node) in enumerate(categorical_leaf_node_list):
                             sum_node.weights_index_by_child_id[categorical_leaf_node.id] = i
                             categorical_leaf_node.parents.append(sum_node)
+                    elif node_type == "CATNODEPRD":
+                        node_attribute_index = int(line_list[2])
+                        node_category_index = int(line_list[3])
+
+                        categorical_leaf_node = CategoricalLeafNode()
+                        categorical_leaf_node.attribute_index = node_attribute_index
+                        categorical_leaf_node.category_index = node_category_index
+                        categorical_leaf_node.device = self.device
+                        categorical_leaf_node.id = node_id
+
+                        self.leaf_nodes.append(categorical_leaf_node)
+                        self.nodes.append(categorical_leaf_node)
                 else:
                     nodes = []
                     node_id_first = int(line_list[0])
