@@ -63,10 +63,10 @@ class Composition():
         if marginal_probabilities_counted is None:
             log_likelihoods_marginal = spn_marginal.forward()
 
+            # Compute matrix A and set entries with zero joint and marginal probabilities to zero
             mask_joint = (log_likelihoods_joint == -float("inf"))
             mask_marginal = (log_likelihoods_joint == -float("inf"))
             mask_matrix_a = mask_joint & mask_marginal
-
             matrix_a = torch.exp(log_likelihoods_joint - log_likelihoods_marginal)
             matrix_a[mask_matrix_a] = 0
         else:

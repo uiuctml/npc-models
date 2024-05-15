@@ -222,6 +222,17 @@ class PGDDiscriminativeSPNOptimizer(SPNOptimizer):
                 # Compute weight updates in log space
                 weight_updates_joint = torch.exp(sum_node_joint.value_backward + child_joint.value_forward - self.spn_joint.root_node.value_forward)
                 weight_updates_marginal = torch.exp(sum_node_marginal.value_backward + child_marginal.value_forward - self.spn_marginal.root_node.value_forward)
+
+                # Set gradients corresponding to zero root node forward values to zero
+                mask_1_joint = ((sum_node_joint.value_backward + child_joint.value_forward) == -float("inf"))
+                mask_2_joint = (self.spn_joint.root_node.value_forward == -float("inf"))
+                mask_joint = mask_1_joint & mask_2_joint
+                mask_1_marginal = ((sum_node_marginal.value_backward + child_marginal.value_forward) == -float("inf"))
+                mask_2_marginal = (self.spn_marginal.root_node.value_forward == -float("inf"))
+                mask_marginal = mask_1_marginal & mask_2_marginal
+                weight_updates_joint[mask_joint] = 0
+                weight_updates_marginal[mask_marginal] = 0
+
                 weight_updates = weight_updates_joint - weight_updates_marginal
                 weight_updates = weight_updates.reshape(matrix_a.shape) # number of original labels x product of category size of all attributes
                 weight_updates *= matrix_a  # number of original labels x product of category size of all attributes
