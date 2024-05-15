@@ -181,6 +181,7 @@ def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, 
 
 def main():
     resume = argument.processArgumentsTrainComposed()
+    model_pretrained_weights = header.config_decomposed["model_pretrained_weights"]
 
     utility.setSeed(header.seed)
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
@@ -268,7 +269,7 @@ def main():
     utility.loadCheckpointSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], 0, 0, 0)
 
     if header.config_decomposed["fine_tuning"]:
-        utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["model_pretrained_weights"], model_decomposed)
+        utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], model_pretrained_weights, model_decomposed)
 
     if header.config_spn["fine_tuning"]:
         utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["model_pretrained_weights"])
