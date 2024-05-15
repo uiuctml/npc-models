@@ -427,6 +427,7 @@ class SumNode(Node):
         # Log-Sum-Exp trick: https://gregorygundersen.com/blog/2020/02/09/log-sum-exp/
         value_forward_children = torch.stack(value_forward_children)
         value_forward_children_max = torch.max(value_forward_children, 0)[0]
+        value_forward_children_max[value_forward_children_max == -float("inf")] = 0
         value_forward_children -= value_forward_children_max
         value_forward_children = torch.exp(value_forward_children)
         value_forward_children *= self.weights
