@@ -163,6 +163,7 @@ def main():
     header.run_name_relation = header.run_name_decomposed.replace(header.run_name_decomposed_keyword, header.run_name_relation_keyword)
     file_name_checkpoint_relation = header.run_name_relation + ".tar"
     file_name_checkpoint_best_relation = header.run_name_relation + ".best.tar"
+    model_pretrained_weights = header.config_decomposed["model_pretrained_weights"]
 
     utility.setSeed(header.seed)
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
@@ -204,7 +205,7 @@ def main():
     (accuracy_validation_best, batch_step_train, batch_step_validate, [criterion], epoch) = utility.loadCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, [criterion], epoch, [learning_rate_scheduler], model_decomposed, [optimizer_decomposed])
     utility.loadCheckpoint(header.config_decomposed["dir_checkpoints"], file_name_checkpoint_relation, accuracy_validation_best, batch_step_train, batch_step_validate, [criterion], epoch, [], model_relation_nn, [])
 
-    utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["model_pretrained_weights"], model_decomposed)
+    utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], model_pretrained_weights, model_decomposed)
 
     if epoch <= header.config_decomposed["epochs"]:
         progress_bar = tqdm.tqdm(total = header.config_decomposed["epochs"], position = 0)
