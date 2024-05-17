@@ -38,8 +38,9 @@ class ModelDecomposed(enum.Enum):
     cnn_mtl = 0
     cnn_set = 1
     mlp_set = 2
-    resnet152_mtl = 3
-    vit_b_32_mtl = 4
+    mlp_set_3 = 3
+    resnet152_mtl = 4
+    vit_b_32_mtl = 5
 
 class OptimizerSPN(enum.Enum):
     cccp_discriminative = 0

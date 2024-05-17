@@ -179,6 +179,51 @@ class MLPSet(Model):
 
         return parameters
 
+class MLPSet3(Model):
+    def __init__(self, config_dataset, device):
+        super().__init__()
+
+        self.model_list = []
+
+        for attribute in config_dataset["attributes"]:
+            attribute_labels = attribute["labels"]
+            attribute_labels.remove("")
+
+            input_size = header.config_decomposed["model_input_height"] * header.config_decomposed["model_input_width"] * header.config_decomposed["model_input_channels"]
+            hidden_size = header.config_decomposed["head_hidden_size"]
+            output_size = len(attribute_labels)
+
+            model = torch.nn.Sequential(
+                torch.nn.Flatten(),
+                torch.nn.Linear(input_size, hidden_size),
+                torch.nn.ReLU(),
+                torch.nn.Linear(hidden_size, hidden_size),
+                torch.nn.ReLU(),
+                torch.nn.Linear(hidden_size, output_size)
+            )
+
+            self.model_list.append(model)
+
+        self.model_list = torch.nn.ModuleList(self.model_list)
+
+        return
+
+    def forward(self, input):
+        outputs = []
+
+        for model in self.model_list:
+            outputs.append(model(input))
+
+        return (outputs, None)
+
+    def get_parameters(self):
+        parameters = []
+
+        for model in self.model_list:
+            parameters.append(model.parameters())
+
+        return parameters
+
 class RelationNN(Model):
     def __init__(self, config_dataset, device):
         super().__init__()
@@ -406,6 +451,8 @@ def createModelDecomposed(device):
         return CNNSet(config_dataset, device)
     elif header.config_decomposed["model"] == type.ModelDecomposed.mlp_set.name:
         return MLPSet(config_dataset, device)
+    elif header.config_decomposed["model"] == type.ModelDecomposed.mlp_set_3.name:
+        return MLPSet3(config_dataset, device)
     elif header.config_decomposed["model"] == type.ModelDecomposed.resnet152_mtl.name:
         header.config_decomposed["model_pretrained_weights"] = "IMAGENET1K_V2"
         logger.log_trace("Model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
