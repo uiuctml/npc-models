@@ -177,26 +177,89 @@ def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn
     return outputs_decomposed
 
 def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
+    # Apply softmax to original decomposed outputs
+    outputs_decomposed_original = utility.applySoftmaxDecomposed(outputs_decomposed_original)
+
+    # Initialize attribute sizes, attribute ranges, and x bar
+    attribute_sizes = []
+    attribute_index = 0
+    attribute_ranges = []
+    x_bar = []
+    for k in range(len(outputs_decomposed_original)):
+        attribute_sizes.append(outputs_decomposed_original[k].shape[1])
+        attribute_range_left = attribute_index
+        attribute_index += attribute_sizes[k]
+        attribute_ranges.append((attribute_range_left, attribute_index))
+        x_bar.append(outputs_decomposed_original[k].detach().clone().requires_grad_(False).t())
+    x_bar = torch.cat(x_bar, 0).requires_grad_(False)
+
+    # Initialize batch size, d, I_d, P, and G
     batch_size = labels_original.nelement()
+    d = sum(attribute_sizes)    # sum of |A_i| for i in [1, K] where K is the number of attributes
+    I_d = torch.eye(d).requires_grad_(False).to(device) # d x d
+    P = torch.cat([torch.cat([ I_d, -I_d], 1).to(device),
+                   torch.cat([-I_d,  I_d], 1).to(device)], 0).requires_grad_(False).to(device)  # 2d x 2d
+    G = torch.cat([torch.cat([ -I_d, I_d], 1).to(device),
+                   torch.ones(      1, 2 * d).to(device)], 0).requires_grad_(False).to(device)  # (d + 1) x 2d
+
+    # Initialize epsilon and h
+    epsilon = torch.full((1, batch_size), header.counterfactual_qp_epsilon).requires_grad_(False).to(device)   # 1 x batch size
+    h = torch.cat((x_bar, epsilon), 0).to(device)   # (d + 1) x batch size
+
+    # Initialize A and b
+    A_b_ones_list = []
+    for k in range(len(attribute_sizes)):
+        A_b_vector = torch.zeros(1, d).requires_grad_(False).to(device) # 1 x d
+        A_b_vector[0][attribute_ranges[k][0]:attribute_ranges[k][1]] = 1
+        A_b_ones_list.append(A_b_vector)
+    A_b_ones = torch.cat(A_b_ones_list, 0).requires_grad_(False).to(device) # K x d
+    A = torch.cat([A_b_ones, -1 * A_b_ones], 1).requires_grad_(False).to(device)    # K x 2d
+    b = 1 - torch.matmul(A_b_ones, x_bar)   # K x batch size
+
+    # Log debug prints
+    logger.log_trace("attribute_sizes:", attribute_sizes)
+    logger.log_trace("attribute_ranges:", attribute_ranges)
+    logger.log_trace("P:", P)
+    logger.log_trace("P.shape:", P.shape)
+    logger.log_trace("G:", G)
+    logger.log_trace("G.shape:", G.shape)
+    logger.log_trace("epsilon:", epsilon)
+    logger.log_trace("epsilon.shape:", epsilon.shape)
+    logger.log_trace("h:", h)
+    logger.log_trace("h.shape:", h.shape)
+    logger.log_trace("A:", A)
+    logger.log_trace("A.shape:", A.shape)
+    logger.log_trace("b:", b)
+    logger.log_trace("b.shape:", b.shape)
+
+    # Initialize gradients
     outputs_decomposed = []
-    outputs_decomposed_original = utility.applySoftmaxDecomposed(outputs_decomposed_original)   # TODO this is x bar
+    for k in range(len(outputs_decomposed_original)):
+        outputs_decomposed.append(outputs_decomposed_original[k].detach().clone().requires_grad_(True))
+
+    # Initialize progress bar
     progress_bar = tqdm.tqdm(total = batch_size, position = 1, leave = False)
     progress_bar.set_description_str("[INFO]: Optimizing Attributes")
 
-    # Initialize gradients
-    for i in range(len(outputs_decomposed_original)):
-        # TODO this is x
-        outputs_decomposed.append(outputs_decomposed_original[i].detach().clone().requires_grad_(True))
-
+    # Enter optimization loop
     for _ in range(header.counterfactual_steps):
+        # Initialize x
+        x = []
+        for k in range(len(outputs_decomposed)):
+            x.append(outputs_decomposed[k].detach().clone().requires_grad_(False).t())
+        x = torch.cat(x, 0)
+
+        # Initialize z, z+, and z-
+        z = x - x_bar
+        z_plus = torch.clamp(z, min = 0)
+        z_minus = -1 * torch.clamp(z, max = 0)
+
         # Compute composed output
         (_, _, outputs_composed_original) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
 
-        # Obtain indices of output in the batch with unsatisfied validity
+        # Obtain indices of output in the batch with unsatisfied validity and update progress bar
         outputs_composed_mpe = torch.max(outputs_composed_original, 1)[1]
         outputs_composed_indices = torch.where(outputs_composed_mpe != labels_original)[0]
-
-        # Update progress bar
         progress_bar.n = batch_size - outputs_composed_indices.nelement()
         progress_bar.refresh()
 
@@ -213,11 +276,11 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
 
         # Perturb decomposed outputs
         with torch.set_grad_enabled(False):
-            for i in range(len(outputs_decomposed)):
+            for k in range(len(outputs_decomposed)):
                 # TODO this is y (right hand side of +=)
-                outputs_decomposed[i] += header.counterfactual_learning_rate * outputs_decomposed[i].grad
+                outputs_decomposed[k] += header.counterfactual_learning_rate * outputs_decomposed[k].grad
 
-        # TODO concatenate [i] into one vector for outputs_decomposed, outputs_decomposed_original, and y
+        # TODO concatenate [k] into one vector for outputs_decomposed, outputs_decomposed_original, and y
         # TODO z = outputs_decomposed (x) - outputs_decomposed_original (x bar)
         # TODO z+ = max(0, z)
         # TODO z- = -min(0, z)
@@ -225,11 +288,13 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
         # TODO Compute z+ and z- right here using QP by forming P, q, G, h, A, b
 
         # Initialize gradients
-        for i in range(len(outputs_decomposed)):
-            outputs_decomposed[i] = outputs_decomposed[i].detach().clone().requires_grad_(True)
+        for k in range(len(outputs_decomposed)):
+            outputs_decomposed[k] = outputs_decomposed[k].detach().clone().requires_grad_(True)
 
+    # Close progress bar
     progress_bar.close()
 
+    # Return perturbed decomposed outputs
     return outputs_decomposed
 
 def save(input_file_paths, counterfactuals, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_counterfactual, outputs_composed, outputs_composed_counterfactual):
