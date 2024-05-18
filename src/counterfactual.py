@@ -29,7 +29,7 @@ def counterfactual_cccp(outputs_decomposed_original, spn_joint, spn_marginal, sp
     outputs_decomposed_original = utility.applySoftmaxDecomposed(outputs_decomposed_original)
     smoothing_epsilon = torch.finfo(torch.float).eps
     progress_bar = tqdm.tqdm(total = batch_size, position = 1, leave = False)
-    progress_bar.set_description_str("[INFO]: Optimizing MPEs")
+    progress_bar.set_description_str("[INFO]: Optimizing Attributes")
 
     for i in range(len(outputs_decomposed_original)):
         outputs_decomposed.append(outputs_decomposed_original[i].detach().clone().requires_grad_(True))
@@ -68,7 +68,7 @@ def counterfactual_gd(outputs_decomposed_original, spn_joint, spn_marginal, spn_
     batch_size = labels_original.nelement()
     outputs_decomposed = []
     progress_bar = tqdm.tqdm(total = batch_size, position = 1, leave = False)
-    progress_bar.set_description_str("[INFO]: Optimizing MPEs")
+    progress_bar.set_description_str("[INFO]: Optimizing Attributes")
 
     for i in range(len(outputs_decomposed_original)):
         outputs_decomposed.append(outputs_decomposed_original[i].detach().clone().requires_grad_(True))
@@ -108,7 +108,7 @@ def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn
     outputs_decomposed = []
     outputs_decomposed_original = utility.applySoftmaxDecomposed(outputs_decomposed_original)
     progress_bar = tqdm.tqdm(total = batch_size, position = 1, leave = False)
-    progress_bar.set_description_str("[INFO]: Optimizing MPEs")
+    progress_bar.set_description_str("[INFO]: Optimizing Attributes")
 
     for i in range(len(outputs_decomposed_original)):
         outputs_decomposed.append(outputs_decomposed_original[i].detach().clone().requires_grad_(True))
@@ -169,6 +169,62 @@ def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn
             for i in range(len(outputs_decomposed)):
                 outputs_decomposed[i] = torch.clamp(outputs_decomposed[i] + lambdas[i], min = 0)
 
+        for i in range(len(outputs_decomposed)):
+            outputs_decomposed[i] = outputs_decomposed[i].detach().clone().requires_grad_(True)
+
+    progress_bar.close()
+
+    return outputs_decomposed
+
+def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
+    batch_size = labels_original.nelement()
+    outputs_decomposed = []
+    outputs_decomposed_original = utility.applySoftmaxDecomposed(outputs_decomposed_original)   # TODO this is x bar
+    progress_bar = tqdm.tqdm(total = batch_size, position = 1, leave = False)
+    progress_bar.set_description_str("[INFO]: Optimizing Attributes")
+
+    # Initialize gradients
+    for i in range(len(outputs_decomposed_original)):
+        # TODO this is x
+        outputs_decomposed.append(outputs_decomposed_original[i].detach().clone().requires_grad_(True))
+
+    for _ in range(header.counterfactual_steps):
+        # Compute composed output
+        (_, _, outputs_composed_original) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+
+        # Obtain indices of output in the batch with unsatisfied validity
+        outputs_composed_mpe = torch.max(outputs_composed_original, 1)[1]
+        outputs_composed_indices = torch.where(outputs_composed_mpe != labels_original)[0]
+
+        # Update progress bar
+        progress_bar.n = batch_size - outputs_composed_indices.nelement()
+        progress_bar.refresh()
+
+        # Break if validity of the entire batch is satisfied
+        if outputs_composed_indices.nelement() == 0:
+            break
+
+        # Compute gradients
+        outputs_composed = outputs_composed_original.t()   # number of original labels x batch size
+        outputs_composed = outputs_composed[labels_original, torch.arange(outputs_composed.shape[1])]  # 1 x batch size
+        outputs_composed = torch.log(outputs_composed)   # 1 x batch size
+        outputs_composed = torch.sum(outputs_composed[outputs_composed_indices], 0) # 1 x 1
+        outputs_composed.backward(retain_graph = True)
+
+        # Perturb decomposed outputs
+        with torch.set_grad_enabled(False):
+            for i in range(len(outputs_decomposed)):
+                # TODO this is y (right hand side of +=)
+                outputs_decomposed[i] += header.counterfactual_learning_rate * outputs_decomposed[i].grad
+
+        # TODO concatenate [i] into one vector for outputs_decomposed, outputs_decomposed_original, and y
+        # TODO z = outputs_decomposed (x) - outputs_decomposed_original (x bar)
+        # TODO z+ = max(0, z)
+        # TODO z- = -min(0, z)
+        # TODO outputs_decomposed (x) = z+ - z- + outputs_decomposed_original (x bar)
+        # TODO Compute z+ and z- right here using QP by forming P, q, G, h, A, b
+
+        # Initialize gradients
         for i in range(len(outputs_decomposed)):
             outputs_decomposed[i] = outputs_decomposed[i].detach().clone().requires_grad_(True)
 
@@ -237,7 +293,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed_original)
 
         with torch.set_grad_enabled(True):
-            outputs_decomposed_counterfactual = counterfactual_cccp(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device)
+            outputs_decomposed_counterfactual = counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device)
 
         (_, _, outputs_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
         (_, _, outputs_composed_counterfactual) = composition.Composition.spn(outputs_decomposed_counterfactual, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
