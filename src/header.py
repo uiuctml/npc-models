@@ -2,6 +2,8 @@ import multiprocessing
 import type
 
 attack_targeted_attribute = 0
+counterfactual_implausibility_margin_range = 1e-3
+counterfactual_implausibility_margin_sum = 1e-6
 counterfactual_learning_rate = 100
 counterfactual_qp_epsilon = 0.1
 counterfactual_qp_solver = "proxqp"

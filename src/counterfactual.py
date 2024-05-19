@@ -189,7 +189,6 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
     instance_count_done = False
     instance_count_qp_no_solution = 0
     instance_count_total = 0
-    margin_implausibility = 1e-3
     value_count_implausible = 0
 
     # Apply softmax to original decomposed outputs
@@ -361,9 +360,16 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
 
     # Count implausible values
     for k in range(len(outputs_decomposed)):
-        mask_lt_0 = (outputs_decomposed[k] < 0 - margin_implausibility)
-        mask_gt_1 = (outputs_decomposed[k] > 1 + margin_implausibility)
+        # Range plausibility
+        mask_lt_0 = (outputs_decomposed[k] < 0 - header.counterfactual_implausibility_margin_range)
+        mask_gt_1 = (outputs_decomposed[k] > 1 + header.counterfactual_implausibility_margin_range)
         value_count_implausible += torch.sum(mask_lt_0 | mask_gt_1).item()
+
+        # Sum plausibility
+        output_decomposed_sum = torch.sum(outputs_decomposed[k], 1)
+        mask_lt_1 = (output_decomposed_sum < 1 - header.counterfactual_implausibility_margin_sum)
+        mask_gt_1 = (output_decomposed_sum > 1 + header.counterfactual_implausibility_margin_sum)
+        value_count_implausible += torch.sum(mask_lt_1 | mask_gt_1).item()
 
     # Return perturbed decomposed outputs and instance counts
     return (outputs_decomposed, instance_count_qp_no_solution, instance_count_total, value_count_implausible)
