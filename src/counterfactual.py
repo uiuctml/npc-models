@@ -63,7 +63,7 @@ def counterfactual_cccp(outputs_decomposed_original, spn_joint, spn_marginal, sp
 
     progress_bar.close()
 
-    return (outputs_decomposed, _, _)
+    return (outputs_decomposed, _, _, _)
 
 def counterfactual_gd(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
     batch_size = labels_original.nelement()
@@ -102,7 +102,7 @@ def counterfactual_gd(outputs_decomposed_original, spn_joint, spn_marginal, spn_
 
     progress_bar.close()
 
-    return (utility.applySoftmaxDecomposed(outputs_decomposed), _, _)
+    return (utility.applySoftmaxDecomposed(outputs_decomposed), _, _, _)
 
 def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
     batch_size = labels_original.nelement()
@@ -175,7 +175,7 @@ def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn
 
     progress_bar.close()
 
-    return (outputs_decomposed, _, _)
+    return (outputs_decomposed, _, _, _)
 
 # Concatenate outputs_decomposed, outputs_decomposed_original, and y into one vector
 # z = outputs_decomposed (x) - outputs_decomposed_original (x bar)
@@ -189,6 +189,8 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
     instance_count_done = False
     instance_count_qp_no_solution = 0
     instance_count_total = 0
+    margin_implausibility = 1e-3
+    value_count_implausible = 0
 
     # Apply softmax to original decomposed outputs
     outputs_decomposed_original = utility.applySoftmaxDecomposed(outputs_decomposed_original)
@@ -357,8 +359,14 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
     # Close progress bar
     progress_bar.close()
 
+    # Count implausible values
+    for k in range(len(outputs_decomposed)):
+        mask_lt_0 = (outputs_decomposed[k] < 0 - margin_implausibility)
+        mask_gt_1 = (outputs_decomposed[k] > 1 + margin_implausibility)
+        value_count_implausible += torch.sum(mask_lt_0 | mask_gt_1).item()
+
     # Return perturbed decomposed outputs and instance counts
-    return (outputs_decomposed, instance_count_qp_no_solution, instance_count_total)
+    return (outputs_decomposed, instance_count_qp_no_solution, instance_count_total, value_count_implausible)
 
 def save(input_file_paths, counterfactuals, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_counterfactual, outputs_composed, outputs_composed_counterfactual):
     batch_size = labels_original.nelement()
@@ -400,6 +408,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
     accuracy_epoch_composed_counterfactual = 0
     instance_count_qp_no_solution = 0
     instance_count_total = 0
+    value_count_implausible = None
 
     config_dataset = data_loader.dataset.config
     counterfactuals = {}
@@ -423,13 +432,19 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed_original)
 
         with torch.set_grad_enabled(True):
-            (outputs_decomposed_counterfactual, instance_count_batch_qp_no_solution, instance_count_batch_total) = counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device)
+            (outputs_decomposed_counterfactual, instance_count_batch_qp_no_solution, instance_count_batch_total, value_count_batch_implausible) = counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device)
 
         if instance_count_batch_qp_no_solution is not None:
             instance_count_qp_no_solution += instance_count_batch_qp_no_solution
 
         if instance_count_batch_total is not None:
             instance_count_total += instance_count_batch_total
+
+        if value_count_batch_implausible is not None:
+            if value_count_implausible is None:
+                value_count_implausible = 0
+
+            value_count_implausible += value_count_batch_implausible
 
         (_, _, outputs_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
         (_, _, outputs_composed_counterfactual) = composition.Composition.spn(outputs_decomposed_counterfactual, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
@@ -458,6 +473,9 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
 
     if instance_count_total != 0:
         logger.log_info("QP solution rate: " + str((instance_count_total - instance_count_qp_no_solution) / instance_count_total) + ".")
+
+    if value_count_implausible is not None:
+        logger.log_info("Number of implausible values: " + str(value_count_implausible) + ".")
 
     if not os.path.isdir(header.dir_output_counterfactual):
         os.makedirs(header.dir_output_counterfactual, exist_ok = True)
