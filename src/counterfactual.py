@@ -301,9 +301,9 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
             z_minus_batch = []
             for batch in range(batch_size):
                 # Obtain column vectors for the current batch
-                q = q_batch[:, batch]   # 2d x 1
-                h = h_batch[:, batch]   # (d + 1) x 1
-                b = b_batch[:, batch]   # K x 1
+                q = q_batch[:, batch].unsqueeze(0).t()  # 2d x 1
+                h = h_batch[:, batch].unsqueeze(0).t()  # (d + 1) x 1
+                b = b_batch[:, batch].unsqueeze(0).t()  # K x 1
 
                 # Solve QP for z+ and z-
                 z_plus_minus = qpsolvers.solve_qp(P.cpu().double().numpy(), q.cpu().double().numpy(), G.cpu().double().numpy(), h.cpu().double().numpy(), A.cpu().double().numpy(), b.cpu().double().numpy(), solver = header.counterfactual_qp_solver) # 2d x 1
@@ -315,16 +315,16 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
 
                     # Obtain z+ and z- from unperturbed x
                     z = x - x_bar
-                    z_plus = torch.clamp(z, min = 0).unsqueeze(0).requires_grad_(False).to(device)  # d x 1
-                    z_minus = -1 * torch.clamp(z, max = 0).unsqueeze(0).requires_grad_(False).to(device)    # d x 1
+                    z_plus = torch.clamp(z, min = 0).unsqueeze(0).requires_grad_(False).to(device).t()  # d x 1
+                    z_minus = -1 * torch.clamp(z, max = 0).unsqueeze(0).requires_grad_(False).to(device).t()    # d x 1
 
                     # Count instances with no QP solutions
                     if not instance_count_done:
                         instance_count_qp_no_solution += 1
                 else:
                     # Obtain z+ and z- from QP
-                    z_plus = torch.from_numpy(z_plus_minus[:d]).unsqueeze(0).requires_grad_(False).to(device)    # d x 1
-                    z_minus = torch.from_numpy(z_plus_minus[d:]).unsqueeze(0).requires_grad_(False).to(device)   # d x 1
+                    z_plus = torch.from_numpy(z_plus_minus[:d]).unsqueeze(0).requires_grad_(False).to(device).t()   # d x 1
+                    z_minus = torch.from_numpy(z_plus_minus[d:]).unsqueeze(0).requires_grad_(False).to(device).t()  # d x 1
 
                 # Store z+ and z-
                 z_plus_batch.append(z_plus)
@@ -339,8 +339,8 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
                 progress_bar_qp.refresh()
 
             # Initialize batched z+ and z-
-            z_plus_batch = torch.cat(z_plus_batch, 0).requires_grad_(False).to(device).t()  # d x batch size
-            z_minus_batch = torch.cat(z_minus_batch, 0).requires_grad_(False).to(device).t()    # d x batch size
+            z_plus_batch = torch.cat(z_plus_batch, 1).requires_grad_(False).to(device)  # d x batch size
+            z_minus_batch = torch.cat(z_minus_batch, 1).requires_grad_(False).to(device)    # d x batch size
 
             # Compute batched perturbed x and restore to decomposed outputs format
             x_batch_perturbed = z_plus_batch - z_minus_batch + x_bar_batch  # d x batch size
