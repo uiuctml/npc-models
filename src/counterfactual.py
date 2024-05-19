@@ -30,7 +30,7 @@ def counterfactual_cccp(outputs_decomposed_original, spn_joint, spn_marginal, sp
     outputs_decomposed_original = utility.applySoftmaxDecomposed(outputs_decomposed_original)
     smoothing_epsilon = torch.finfo(torch.float).eps
     progress_bar = tqdm.tqdm(total = batch_size, position = 1, leave = False)
-    progress_bar.set_description_str("[INFO]: Optimizing Attributes")
+    progress_bar.set_description_str("[INFO]: Optimizing attributes")
 
     for i in range(len(outputs_decomposed_original)):
         outputs_decomposed.append(outputs_decomposed_original[i].detach().clone().requires_grad_(True))
@@ -69,7 +69,7 @@ def counterfactual_gd(outputs_decomposed_original, spn_joint, spn_marginal, spn_
     batch_size = labels_original.nelement()
     outputs_decomposed = []
     progress_bar = tqdm.tqdm(total = batch_size, position = 1, leave = False)
-    progress_bar.set_description_str("[INFO]: Optimizing Attributes")
+    progress_bar.set_description_str("[INFO]: Optimizing attributes")
 
     for i in range(len(outputs_decomposed_original)):
         outputs_decomposed.append(outputs_decomposed_original[i].detach().clone().requires_grad_(True))
@@ -109,7 +109,7 @@ def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn
     outputs_decomposed = []
     outputs_decomposed_original = utility.applySoftmaxDecomposed(outputs_decomposed_original)
     progress_bar = tqdm.tqdm(total = batch_size, position = 1, leave = False)
-    progress_bar.set_description_str("[INFO]: Optimizing Attributes")
+    progress_bar.set_description_str("[INFO]: Optimizing attributes")
 
     for i in range(len(outputs_decomposed_original)):
         outputs_decomposed.append(outputs_decomposed_original[i].detach().clone().requires_grad_(True))
@@ -251,7 +251,7 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
 
     # Initialize progress bar
     progress_bar = tqdm.tqdm(total = batch_size, position = 1, leave = False)
-    progress_bar.set_description_str("[INFO]: Optimizing Attributes")
+    progress_bar.set_description_str("[INFO]: Optimizing attributes")
 
     # Enter optimization loop
     for _ in range(header.counterfactual_steps):
@@ -291,6 +291,10 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
             # Initialize batched q
             q_batch = torch.cat([x_bar_batch - y_batch, -1 * (x_bar_batch - y_batch)], 0).requires_grad_(False).to(device)  # 2d x batch size
 
+            # Initialize QP progress bar
+            progress_bar_qp = tqdm.tqdm(total = batch_size, position = 2, leave = False)
+            progress_bar_qp.set_description_str("[INFO]: Solving QP")
+
             # Solve QP for each batch
             z_plus_batch = []
             z_minus_batch = []
@@ -328,6 +332,10 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
                 # Count total instances
                 if not instance_count_done:
                     instance_count_total += 1
+
+                # Update QP progress bar
+                progress_bar_qp.n = batch
+                progress_bar_qp.refresh()
 
             # Initialize batched z+ and z-
             z_plus_batch = torch.cat(z_plus_batch, 0).requires_grad_(False).to(device).t()  # d x batch size
