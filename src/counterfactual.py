@@ -8,6 +8,7 @@ import json
 import logger
 import model
 import os
+import qpsolvers
 import spn
 import torch
 import tqdm
@@ -62,7 +63,7 @@ def counterfactual_cccp(outputs_decomposed_original, spn_joint, spn_marginal, sp
 
     progress_bar.close()
 
-    return outputs_decomposed
+    return (outputs_decomposed, _, _)
 
 def counterfactual_gd(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
     batch_size = labels_original.nelement()
@@ -101,7 +102,7 @@ def counterfactual_gd(outputs_decomposed_original, spn_joint, spn_marginal, spn_
 
     progress_bar.close()
 
-    return utility.applySoftmaxDecomposed(outputs_decomposed)
+    return (utility.applySoftmaxDecomposed(outputs_decomposed), _, _)
 
 def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
     batch_size = labels_original.nelement()
@@ -174,63 +175,74 @@ def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn
 
     progress_bar.close()
 
-    return outputs_decomposed
+    return (outputs_decomposed, _, _)
+
+# Concatenate outputs_decomposed, outputs_decomposed_original, and y into one vector
+# z = outputs_decomposed (x) - outputs_decomposed_original (x bar)
+# z+ = max(0, z)
+# z- = -min(0, z)
+# outputs_decomposed (x) = z+ - z- + outputs_decomposed_original (x bar)
+# Compute z+ and z- using QP and P, q, G, h, A, b
 
 def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
+    # Declare variables
+    instance_count_done = False
+    instance_count_qp_no_solution = 0
+    instance_count_total = 0
+
     # Apply softmax to original decomposed outputs
     outputs_decomposed_original = utility.applySoftmaxDecomposed(outputs_decomposed_original)
 
-    # Initialize attribute sizes, attribute ranges, and x bar
-    attribute_sizes = []
-    attribute_index = 0
-    attribute_ranges = []
-    x_bar = []
-    for k in range(len(outputs_decomposed_original)):
-        attribute_sizes.append(outputs_decomposed_original[k].shape[1])
-        attribute_range_left = attribute_index
-        attribute_index += attribute_sizes[k]
-        attribute_ranges.append((attribute_range_left, attribute_index))
-        x_bar.append(outputs_decomposed_original[k].detach().clone().requires_grad_(False).t())
-    x_bar = torch.cat(x_bar, 0).requires_grad_(False)
+    with torch.set_grad_enabled(False):
+        # Initialize attribute sizes, attribute ranges, batch size, d, batched epsilon, and batched x bar
+        attribute_sizes = []
+        attribute_index = 0
+        attribute_ranges = []
+        batch_size = labels_original.nelement()
+        x_bar_batch = []
+        for k in range(len(outputs_decomposed_original)):
+            attribute_sizes.append(outputs_decomposed_original[k].shape[1])
+            attribute_range_left = attribute_index
+            attribute_index += attribute_sizes[k]
+            attribute_ranges.append((attribute_range_left, attribute_index))
+            x_bar_batch.append(outputs_decomposed_original[k].detach().clone().requires_grad_(False).t())
+        d = sum(attribute_sizes)    # sum of |A_i| for i in [1, K] where K is the number of attributes
+        epsilon_batch = torch.full((1, batch_size), header.counterfactual_qp_epsilon).requires_grad_(False).to(device)   # 1 x batch size
+        x_bar_batch = torch.cat(x_bar_batch, 0).requires_grad_(False)   # d x batch size
 
-    # Initialize batch size, d, I_d, P, and G
-    batch_size = labels_original.nelement()
-    d = sum(attribute_sizes)    # sum of |A_i| for i in [1, K] where K is the number of attributes
-    I_d = torch.eye(d).requires_grad_(False).to(device) # d x d
-    P = torch.cat([torch.cat([ I_d, -I_d], 1).to(device),
-                   torch.cat([-I_d,  I_d], 1).to(device)], 0).requires_grad_(False).to(device)  # 2d x 2d
-    G = torch.cat([torch.cat([ -I_d, I_d], 1).to(device),
-                   torch.ones(      1, 2 * d).to(device)], 0).requires_grad_(False).to(device)  # (d + 1) x 2d
+        # Initialize I_d, P, G, and batched h
+        I_d = torch.eye(d).requires_grad_(False).to(device) # d x d
+        P = torch.cat([torch.cat([ I_d, -I_d], 1).to(device),
+                    torch.cat([-I_d,  I_d], 1).to(device)], 0).requires_grad_(False).to(device)  # 2d x 2d
+        G = torch.cat([torch.cat([ -I_d, I_d], 1).to(device),
+                    torch.ones(      1, 2 * d).to(device)], 0).requires_grad_(False).to(device)  # (d + 1) x 2d
+        h_batch = torch.cat((x_bar_batch, epsilon_batch), 0).to(device)   # (d + 1) x batch size
 
-    # Initialize epsilon and h
-    epsilon = torch.full((1, batch_size), header.counterfactual_qp_epsilon).requires_grad_(False).to(device)   # 1 x batch size
-    h = torch.cat((x_bar, epsilon), 0).to(device)   # (d + 1) x batch size
+        # Initialize A and batched b
+        A_b_ones_list = []
+        for k in range(len(attribute_sizes)):
+            A_b_vector = torch.zeros(1, d).requires_grad_(False).to(device) # 1 x d
+            A_b_vector[0][attribute_ranges[k][0]:attribute_ranges[k][1]] = 1
+            A_b_ones_list.append(A_b_vector)
+        A_b_ones = torch.cat(A_b_ones_list, 0).requires_grad_(False).to(device) # K x d
+        A = torch.cat([A_b_ones, -1 * A_b_ones], 1).requires_grad_(False).to(device)    # K x 2d
+        b_batch = 1 - torch.matmul(A_b_ones, x_bar_batch).requires_grad_(False).to(device)   # K x batch size
 
-    # Initialize A and b
-    A_b_ones_list = []
-    for k in range(len(attribute_sizes)):
-        A_b_vector = torch.zeros(1, d).requires_grad_(False).to(device) # 1 x d
-        A_b_vector[0][attribute_ranges[k][0]:attribute_ranges[k][1]] = 1
-        A_b_ones_list.append(A_b_vector)
-    A_b_ones = torch.cat(A_b_ones_list, 0).requires_grad_(False).to(device) # K x d
-    A = torch.cat([A_b_ones, -1 * A_b_ones], 1).requires_grad_(False).to(device)    # K x 2d
-    b = 1 - torch.matmul(A_b_ones, x_bar)   # K x batch size
-
-    # Log debug prints
-    logger.log_trace("attribute_sizes:", attribute_sizes)
-    logger.log_trace("attribute_ranges:", attribute_ranges)
-    logger.log_trace("P:", P)
-    logger.log_trace("P.shape:", P.shape)
-    logger.log_trace("G:", G)
-    logger.log_trace("G.shape:", G.shape)
-    logger.log_trace("epsilon:", epsilon)
-    logger.log_trace("epsilon.shape:", epsilon.shape)
-    logger.log_trace("h:", h)
-    logger.log_trace("h.shape:", h.shape)
-    logger.log_trace("A:", A)
-    logger.log_trace("A.shape:", A.shape)
-    logger.log_trace("b:", b)
-    logger.log_trace("b.shape:", b.shape)
+        # Log debug prints
+        logger.log_trace("attribute_sizes:", attribute_sizes)
+        logger.log_trace("attribute_ranges:", attribute_ranges)
+        logger.log_trace("P:", P)
+        logger.log_trace("P.shape:", P.shape)
+        logger.log_trace("G:", G)
+        logger.log_trace("G.shape:", G.shape)
+        logger.log_trace("epsilon:", epsilon_batch)
+        logger.log_trace("epsilon.shape:", epsilon_batch.shape)
+        logger.log_trace("h:", h_batch)
+        logger.log_trace("h.shape:", h_batch.shape)
+        logger.log_trace("A:", A)
+        logger.log_trace("A.shape:", A.shape)
+        logger.log_trace("b_batch:", b_batch)
+        logger.log_trace("b_batch.shape:", b_batch.shape)
 
     # Initialize gradients
     outputs_decomposed = []
@@ -243,17 +255,6 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
 
     # Enter optimization loop
     for _ in range(header.counterfactual_steps):
-        # Initialize x
-        x = []
-        for k in range(len(outputs_decomposed)):
-            x.append(outputs_decomposed[k].detach().clone().requires_grad_(False).t())
-        x = torch.cat(x, 0)
-
-        # Initialize z, z+, and z-
-        z = x - x_bar
-        z_plus = torch.clamp(z, min = 0)
-        z_minus = -1 * torch.clamp(z, max = 0)
-
         # Compute composed output
         (_, _, outputs_composed_original) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
 
@@ -274,28 +275,82 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
         outputs_composed = torch.sum(outputs_composed[outputs_composed_indices], 0) # 1 x 1
         outputs_composed.backward(retain_graph = True)
 
-        # Perturb decomposed outputs
         with torch.set_grad_enabled(False):
+            # Initialize batched x
+            x_batch = []
             for k in range(len(outputs_decomposed)):
-                # TODO this is y (right hand side of +=)
-                outputs_decomposed[k] += header.counterfactual_learning_rate * outputs_decomposed[k].grad
+                x_batch.append(outputs_decomposed[k].detach().clone().requires_grad_(False).t())
+            x_batch = torch.cat(x_batch, 0).requires_grad_(False).to(device) # d x batch size
 
-        # TODO concatenate [k] into one vector for outputs_decomposed, outputs_decomposed_original, and y
-        # TODO z = outputs_decomposed (x) - outputs_decomposed_original (x bar)
-        # TODO z+ = max(0, z)
-        # TODO z- = -min(0, z)
-        # TODO outputs_decomposed (x) = z+ - z- + outputs_decomposed_original (x bar)
-        # TODO Compute z+ and z- right here using QP by forming P, q, G, h, A, b
+            # Initialize batched y
+            y_batch = []
+            for k in range(len(outputs_decomposed)):
+                y_batch.append((outputs_decomposed[k] + header.counterfactual_learning_rate * outputs_decomposed[k].grad).requires_grad_(False).t())
+            y_batch = torch.cat(y_batch, 0).requires_grad_(False).to(device) # d x batch size
+
+            # Initialize batched q
+            q_batch = torch.cat([x_bar_batch - y_batch, -1 * (x_bar_batch - y_batch)], 0).requires_grad_(False).to(device)  # 2d x batch size
+
+            # Solve QP for each batch
+            z_plus_batch = []
+            z_minus_batch = []
+            for batch in range(batch_size):
+                # Obtain column vectors for the current batch
+                q = q_batch[:, batch]   # 2d x 1
+                h = h_batch[:, batch]   # (d + 1) x 1
+                b = b_batch[:, batch]   # K x 1
+
+                # Solve QP for z+ and z-
+                z_plus_minus = qpsolvers.solve_qp(P.cpu().numpy(), q.cpu().numpy(), G.cpu().numpy(), h.cpu().numpy(), A.cpu().numpy(), b.cpu().numpy(), solver = header.counterfactual_qp_solver)   # 2d x 1
+
+                if z_plus_minus is None:
+                    # Obtain column vectors for the current batch
+                    x = x_batch[:, batch]   # d x 1
+                    x_bar = x_bar_batch[:, batch]   # d x 1
+
+                    # Obtain z+ and z- from unperturbed x
+                    z = x - x_bar
+                    z_plus = torch.clamp(z, min = 0).unsqueeze(0).requires_grad_(False).to(device)  # d x 1
+                    z_minus = -1 * torch.clamp(z, max = 0).unsqueeze(0).requires_grad_(False).to(device)    # d x 1
+
+                    # Count instances with no QP solutions
+                    if not instance_count_done:
+                        instance_count_qp_no_solution += 1
+                else:
+                    # Obtain z+ and z- from QP
+                    z_plus = torch.from_numpy(z_plus_minus[:d]).unsqueeze(0).requires_grad_(False).to(device)    # d x 1
+                    z_minus = torch.from_numpy(z_plus_minus[d:]).unsqueeze(0).requires_grad_(False).to(device)   # d x 1
+
+                # Store z+ and z-
+                z_plus_batch.append(z_plus)
+                z_minus_batch.append(z_minus)
+
+                # Count total instances
+                if not instance_count_done:
+                    instance_count_total += 1
+
+            # Initialize batched z+ and z-
+            z_plus_batch = torch.cat(z_plus_batch, 0).requires_grad_(False).to(device).t()  # d x batch size
+            z_minus_batch = torch.cat(z_minus_batch, 0).requires_grad_(False).to(device).t()    # d x batch size
+
+            # Compute batched perturbed x and restore to decomposed outputs format
+            x_batch_perturbed = z_plus_batch - z_minus_batch + x_bar_batch  # d x batch size
+            outputs_decomposed_perturbed = torch.split(x_batch_perturbed.t(), attribute_sizes, 1)
+            for k in range(len(outputs_decomposed)):
+                outputs_decomposed[k] = outputs_decomposed_perturbed[k].float()
 
         # Initialize gradients
         for k in range(len(outputs_decomposed)):
             outputs_decomposed[k] = outputs_decomposed[k].detach().clone().requires_grad_(True)
 
+        # Set instance count flag
+        instance_count_done = True
+
     # Close progress bar
     progress_bar.close()
 
-    # Return perturbed decomposed outputs
-    return outputs_decomposed
+    # Return perturbed decomposed outputs and instance counts
+    return (outputs_decomposed, instance_count_qp_no_solution, instance_count_total)
 
 def save(input_file_paths, counterfactuals, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_counterfactual, outputs_composed, outputs_composed_counterfactual):
     batch_size = labels_original.nelement()
@@ -335,6 +390,8 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
 
     accuracy_epoch_composed = 0
     accuracy_epoch_composed_counterfactual = 0
+    instance_count_qp_no_solution = 0
+    instance_count_total = 0
 
     config_dataset = data_loader.dataset.config
     counterfactuals = {}
@@ -358,7 +415,13 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed_original)
 
         with torch.set_grad_enabled(True):
-            outputs_decomposed_counterfactual = counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device)
+            (outputs_decomposed_counterfactual, instance_count_batch_qp_no_solution, instance_count_batch_total) = counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device)
+
+        if instance_count_batch_qp_no_solution is not None:
+            instance_count_qp_no_solution += instance_count_batch_qp_no_solution
+
+        if instance_count_batch_total is not None:
+            instance_count_total += instance_count_batch_total
 
         (_, _, outputs_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
         (_, _, outputs_composed_counterfactual) = composition.Composition.spn(outputs_decomposed_counterfactual, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
@@ -384,6 +447,9 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
 
     logger.log_info("Composed testing accuracy: " + str(accuracy_epoch_composed) + ".")
     logger.log_info("Composed counterfactual accuracy: " + str(accuracy_epoch_composed_counterfactual) + ".")
+
+    if instance_count_total != 0:
+        logger.log_info("QP solution rate: " + str((instance_count_total - instance_count_qp_no_solution) / instance_count_total) + ".")
 
     if not os.path.isdir(header.dir_output_counterfactual):
         os.makedirs(header.dir_output_counterfactual, exist_ok = True)

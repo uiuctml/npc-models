@@ -4,6 +4,7 @@ import type
 attack_targeted_attribute = 0
 counterfactual_learning_rate = 100
 counterfactual_qp_epsilon = 0.1
+counterfactual_qp_solver = "proxqp"
 counterfactual_steps = 20
 cuda_allow_tf32 = False
 dir_dataset_test_adversarial = "../../gtsrb-dataset/images/split/adversarial/test"
