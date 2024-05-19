@@ -306,7 +306,7 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
                 b = b_batch[:, batch]   # K x 1
 
                 # Solve QP for z+ and z-
-                z_plus_minus = qpsolvers.solve_qp(P.cpu().numpy(), q.cpu().numpy(), G.cpu().numpy(), h.cpu().numpy(), A.cpu().numpy(), b.cpu().numpy(), solver = header.counterfactual_qp_solver)   # 2d x 1
+                z_plus_minus = qpsolvers.solve_qp(P.cpu().double().numpy(), q.cpu().double().numpy(), G.cpu().double().numpy(), h.cpu().double().numpy(), A.cpu().double().numpy(), b.cpu().double().numpy(), solver = header.counterfactual_qp_solver) # 2d x 1
 
                 if z_plus_minus is None:
                     # Obtain column vectors for the current batch
@@ -357,6 +357,20 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
 
     # Close progress bar
     progress_bar.close()
+
+    # Disable gradients
+    for k in range(len(outputs_decomposed)):
+        outputs_decomposed[k] = outputs_decomposed[k].detach().clone().requires_grad_(False)
+
+    # Compute L1 norm
+    l1_norm = torch.zeros(batch_size).requires_grad_(False).to(device)  # batch size
+    for (output_decomposed, output_decomposed_original) in zip(outputs_decomposed, outputs_decomposed_original):
+        l1_norm += torch.norm((output_decomposed - output_decomposed_original), 1, 1).to(device).t()  # batch size
+
+    # Restore perturbed outputs with L1-norm violations to unperturbed outputs
+    mask_qp_epsilon = (l1_norm > header.counterfactual_qp_epsilon)
+    for k in range(len(outputs_decomposed)):
+        outputs_decomposed[k][mask_qp_epsilon, :] = outputs_decomposed_original[k][mask_qp_epsilon, :]
 
     # Count implausible values
     for k in range(len(outputs_decomposed)):
