@@ -1,5 +1,7 @@
 import abc
+import itertools
 import logger
+import numpy
 import os
 import torch
 
@@ -451,6 +453,7 @@ class SPN:
     def __init__(self, device = torch.device("cuda")):
         self.depth = None
         self.device = device
+        self.induced_trees = []
         self.leaf_nodes = []
         self.leaf_nodes_dict = {}
         self.nodes = []
@@ -516,6 +519,34 @@ class SPN:
                 node.forward()
 
         return self.root_node.value_forward
+
+    def gather_induced_trees(self, node):
+        if isinstance(node, SumNode):
+            for (i, child) in enumerate(node.children):
+                for sub_induced_tree in self.gather_induced_trees(child):
+                    induced_tree = [{node}, [node.weights[i].item()]]
+                    induced_tree[0].update(sub_induced_tree[0])
+                    induced_tree[1] += sub_induced_tree[1]
+                    yield induced_tree
+        elif isinstance(node, ProductNode):
+            sub_induced_trees_product = []
+
+            for child in node.children:
+                sub_induced_trees = []
+                for sub_induced_tree in self.gather_induced_trees(child):
+                    sub_induced_trees.append(sub_induced_tree)
+                sub_induced_trees_product.append(sub_induced_trees)
+
+            for sub_induced_trees in itertools.product(*sub_induced_trees_product):
+                induced_tree = [{node}, []]
+                for sub_induced_tree in sub_induced_trees:
+                    induced_tree[0].update(sub_induced_tree[0])
+                    induced_tree[1] += sub_induced_tree[1]
+                yield induced_tree
+        elif isinstance(node, CategoricalLeafNode):
+            yield [{node}, []]
+
+        return
 
     def get_weights(self):
         weights = []
@@ -672,12 +703,18 @@ class SPN:
         self.traversal_order_forward.reverse()
 
         if len(self.traversal_order_backward) != len(self.nodes):
-            logger.log_fatal("Invalid SPN backward traversal")
+            logger.log_fatal("Invalid SPN backward traversal.")
             exit(-1)
 
         if len(self.traversal_order_forward) != len(self.nodes):
-            logger.log_fatal("Invalid SPN forward traversal")
+            logger.log_fatal("Invalid SPN forward traversal.")
             exit(-1)
+
+        logger.log_info("Gathering induced SPNs...")
+
+        for induced_tree in self.gather_induced_trees(self.root_node):
+            induced_tree[1] = numpy.prod(induced_tree[1])
+            self.induced_trees.append(induced_tree)
 
         return
 
