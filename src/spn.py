@@ -521,8 +521,6 @@ class SPN:
         return self.root_node.value_forward
 
     def gather_induced_trees(self):
-        logger.log_info("Gathering induced SPNs...")
-
         for induced_tree in self.recurse_induced_trees(self.root_node):
             induced_tree[1] = numpy.prod(induced_tree[1])
             self.induced_trees.append(induced_tree)

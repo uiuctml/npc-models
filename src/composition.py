@@ -91,3 +91,26 @@ class Composition():
         matrix_c = torch.matmul(matrix_a, matrix_b).t()
 
         return (matrix_a, matrix_b, matrix_c)
+
+    @staticmethod
+    def spn_single(batch, outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device):
+        log_likelihoods_joint = spn_joint.forward()
+        log_likelihoods_marginal = spn_marginal.forward()
+
+        # Compute matrix A and set entries with zero joint and marginal probabilities to zero
+        mask_joint = (log_likelihoods_joint == -float("inf"))
+        mask_marginal = (log_likelihoods_joint == -float("inf"))
+        mask_matrix_a = mask_joint & mask_marginal
+        matrix_a = torch.exp(log_likelihoods_joint - log_likelihoods_marginal)
+        matrix_a[mask_matrix_a] = 0
+        matrix_a = matrix_a.reshape(spn_output_rows, spn_output_cols)
+
+        matrix_b_batch = outputs_decomposed[0][batch]
+
+        for task_index in range(1, len(outputs_decomposed)):
+            matrix_b_batch = torch.outer(matrix_b_batch, outputs_decomposed[task_index][batch]).flatten()
+
+        matrix_b_batch = matrix_b_batch.unsqueeze(0).to(device).t()
+        matrix_c = torch.matmul(matrix_a, matrix_b_batch).t().squeeze(0)
+
+        return (matrix_a, matrix_b_batch, matrix_c)

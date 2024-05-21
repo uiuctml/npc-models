@@ -338,6 +338,9 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
                 progress_bar_qp.n = batch
                 progress_bar_qp.refresh()
 
+            # Close QP progress bar
+            progress_bar_qp.close()
+
             # Initialize batched z+ and z-
             z_plus_batch = torch.cat(z_plus_batch, 1).requires_grad_(False).to(device)  # d x batch size
             z_minus_batch = torch.cat(z_minus_batch, 1).requires_grad_(False).to(device)    # d x batch size
@@ -387,37 +390,6 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
 
     # Return perturbed decomposed outputs and instance counts
     return (outputs_decomposed, instance_count_qp_no_solution, instance_count_total, value_count_implausible)
-
-def save(input_file_paths, counterfactuals, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_counterfactual, outputs_composed, outputs_composed_counterfactual):
-    batch_size = labels_original.nelement()
-    config_dataset = dataset.config
-
-    for batch_index in range(batch_size):
-        input_file_path = os.path.basename(input_file_paths[batch_index])
-
-        counterfactuals[input_file_path] = {}
-        counterfactuals[input_file_path]["counterfactual"] = {}
-        counterfactuals[input_file_path]["ground_truth"] = {}
-        counterfactuals[input_file_path]["prediction"] = {}
-
-        for (attribute_index, attribute) in enumerate(config_dataset["attributes"]):
-            attribute_name = attribute["name"]
-
-            (outputs_decomposed_counterfactual_mpe_probability, outputs_decomposed_counterfactual_mpe_label) = torch.max(outputs_decomposed_counterfactual[attribute_index][batch_index], 0)
-            (outputs_decomposed_mpe_probability, outputs_decomposed_mpe_label) = torch.max(outputs_decomposed[attribute_index][batch_index], 0)
-
-            counterfactuals[input_file_path]["counterfactual"][attribute_name] = (dataset.classes[attribute_name][outputs_decomposed_counterfactual_mpe_label], outputs_decomposed_counterfactual_mpe_probability.item())
-            counterfactuals[input_file_path]["ground_truth"][attribute_name] = dataset.classes[attribute_name][labels_decomposed[batch_index][attribute_index]]
-            counterfactuals[input_file_path]["prediction"][attribute_name] = (dataset.classes[attribute_name][outputs_decomposed_mpe_label], outputs_decomposed_mpe_probability.item())
-
-        (outputs_composed_counterfactual_mpe_probability, outputs_composed_counterfactual_mpe_label) = torch.max(outputs_composed_counterfactual[batch_index], 0)
-        (outputs_composed_mpe_probability, outputs_composed_mpe_label) = torch.max(outputs_composed[batch_index], 0)
-
-        counterfactuals[input_file_path]["counterfactual"]["original"] = (dataset.classes_original[outputs_composed_counterfactual_mpe_label], outputs_composed_counterfactual_mpe_probability.item())
-        counterfactuals[input_file_path]["ground_truth"]["original"] = dataset.classes_original[labels_original[batch_index]]
-        counterfactuals[input_file_path]["prediction"]["original"] = (dataset.classes_original[outputs_composed_mpe_label], outputs_composed_mpe_probability.item())
-
-    return
 
 def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_step):
     utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
@@ -469,7 +441,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
         (_, _, outputs_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
         (_, _, outputs_composed_counterfactual) = composition.Composition.spn(outputs_decomposed_counterfactual, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
 
-        save(input_file_paths, counterfactuals, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_counterfactual, outputs_composed, outputs_composed_counterfactual)
+        utility.saveCounterfactuals(input_file_paths, counterfactuals, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_counterfactual, outputs_composed, outputs_composed_counterfactual)
 
         (_, predictions_composed) = torch.max(outputs_composed, 1)
         (_, predictions_composed_counterfactual) = torch.max(outputs_composed_counterfactual, 1)

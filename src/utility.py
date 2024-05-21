@@ -460,6 +460,37 @@ def saveCheckpointSPN(spn, dir_checkpoints, file_name_checkpoint, log_likelihood
 
     return
 
+def saveCounterfactuals(input_file_paths, counterfactuals, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_counterfactual, outputs_composed, outputs_composed_counterfactual):
+    batch_size = labels_original.nelement()
+    config_dataset = dataset.config
+
+    for batch_index in range(batch_size):
+        input_file_path = os.path.basename(input_file_paths[batch_index])
+
+        counterfactuals[input_file_path] = {}
+        counterfactuals[input_file_path]["counterfactual"] = {}
+        counterfactuals[input_file_path]["ground_truth"] = {}
+        counterfactuals[input_file_path]["prediction"] = {}
+
+        for (attribute_index, attribute) in enumerate(config_dataset["attributes"]):
+            attribute_name = attribute["name"]
+
+            (outputs_decomposed_counterfactual_mpe_probability, outputs_decomposed_counterfactual_mpe_label) = torch.max(outputs_decomposed_counterfactual[attribute_index][batch_index], 0)
+            (outputs_decomposed_mpe_probability, outputs_decomposed_mpe_label) = torch.max(outputs_decomposed[attribute_index][batch_index], 0)
+
+            counterfactuals[input_file_path]["counterfactual"][attribute_name] = (dataset.classes[attribute_name][outputs_decomposed_counterfactual_mpe_label], outputs_decomposed_counterfactual_mpe_probability.item())
+            counterfactuals[input_file_path]["ground_truth"][attribute_name] = dataset.classes[attribute_name][labels_decomposed[batch_index][attribute_index]]
+            counterfactuals[input_file_path]["prediction"][attribute_name] = (dataset.classes[attribute_name][outputs_decomposed_mpe_label], outputs_decomposed_mpe_probability.item())
+
+        (outputs_composed_counterfactual_mpe_probability, outputs_composed_counterfactual_mpe_label) = torch.max(outputs_composed_counterfactual[batch_index], 0)
+        (outputs_composed_mpe_probability, outputs_composed_mpe_label) = torch.max(outputs_composed[batch_index], 0)
+
+        counterfactuals[input_file_path]["counterfactual"]["original"] = (dataset.classes_original[outputs_composed_counterfactual_mpe_label], outputs_composed_counterfactual_mpe_probability.item())
+        counterfactuals[input_file_path]["ground_truth"]["original"] = dataset.classes_original[labels_original[batch_index]]
+        counterfactuals[input_file_path]["prediction"]["original"] = (dataset.classes_original[outputs_composed_mpe_label], outputs_composed_mpe_probability.item())
+
+    return
+
 def saveMPEs(input_file_paths, mpes, mpe_attributes, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed):
     batch_size = labels_original.nelement()
     config_dataset = dataset.config
