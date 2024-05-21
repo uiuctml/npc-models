@@ -63,7 +63,7 @@ def counterfactual_cccp(outputs_decomposed_original, spn_joint, spn_marginal, sp
 
     progress_bar.close()
 
-    return (outputs_decomposed, _, _, _)
+    return (outputs_decomposed, _, _, _, _, _)
 
 def counterfactual_gd(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
     batch_size = labels_original.nelement()
@@ -102,7 +102,7 @@ def counterfactual_gd(outputs_decomposed_original, spn_joint, spn_marginal, spn_
 
     progress_bar.close()
 
-    return (utility.applySoftmaxDecomposed(outputs_decomposed), _, _, _)
+    return (utility.applySoftmaxDecomposed(outputs_decomposed), _, _, _, _, _)
 
 def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
     batch_size = labels_original.nelement()
@@ -175,7 +175,7 @@ def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn
 
     progress_bar.close()
 
-    return (outputs_decomposed, _, _, _)
+    return (outputs_decomposed, _, _, _, _, _)
 
 # Concatenate outputs_decomposed, outputs_decomposed_original, and y into one vector
 # z = outputs_decomposed (x) - outputs_decomposed_original (x bar)
@@ -186,7 +186,10 @@ def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn
 
 def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
     # Declare variables
+    instance_count_corrected = 0
     instance_count_done = False
+    instance_count_incorrect = 0
+    instance_count_incorrect_recorded = False
     instance_count_qp_no_solution = 0
     instance_count_total = 0
     value_count_implausible = 0
@@ -264,6 +267,12 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
         outputs_composed_indices = torch.where(outputs_composed_mpe != labels_original)[0]
         progress_bar.n = batch_size - outputs_composed_indices.nelement()
         progress_bar.refresh()
+
+        if not instance_count_incorrect_recorded:
+            instance_count_incorrect = outputs_composed_indices.nelement()
+            instance_count_incorrect_recorded = True
+
+        instance_count_corrected = instance_count_incorrect - outputs_composed_indices.nelement()
 
         # Break if validity of the entire batch is satisfied
         if outputs_composed_indices.nelement() == 0:
@@ -372,6 +381,7 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
 
     # Restore perturbed outputs with L1-norm violations to unperturbed outputs
     mask_qp_epsilon = (l1_norm > header.counterfactual_qp_epsilon)
+    instance_count_corrected -= torch.sum(mask_qp_epsilon).item()
     for k in range(len(outputs_decomposed)):
         outputs_decomposed[k][mask_qp_epsilon, :] = outputs_decomposed_original[k][mask_qp_epsilon, :]
 
@@ -389,7 +399,7 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
         value_count_implausible += torch.sum(mask_lt_1 | mask_gt_1).item()
 
     # Return perturbed decomposed outputs and instance counts
-    return (outputs_decomposed, instance_count_qp_no_solution, instance_count_total, value_count_implausible)
+    return (outputs_decomposed, instance_count_corrected, instance_count_incorrect, instance_count_qp_no_solution, instance_count_total, value_count_implausible)
 
 def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_step):
     utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
@@ -398,6 +408,8 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
 
     accuracy_epoch_composed = 0
     accuracy_epoch_composed_counterfactual = 0
+    instance_count_corrected = None
+    instance_count_incorrect = None
     instance_count_qp_no_solution = 0
     instance_count_total = 0
     value_count_implausible = None
@@ -424,7 +436,19 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed_original)
 
         with torch.set_grad_enabled(True):
-            (outputs_decomposed_counterfactual, instance_count_batch_qp_no_solution, instance_count_batch_total, value_count_batch_implausible) = counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device)
+            (outputs_decomposed_counterfactual, instance_count_batch_corrected, instance_count_batch_incorrect, instance_count_batch_qp_no_solution, instance_count_batch_total, value_count_batch_implausible) = counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device)
+
+        if instance_count_batch_corrected is not None:
+            if instance_count_corrected is None:
+                instance_count_corrected = 0
+
+            instance_count_corrected += instance_count_batch_corrected
+
+        if instance_count_batch_incorrect is not None:
+            if instance_count_incorrect is None:
+                instance_count_incorrect = 0
+
+            instance_count_incorrect += instance_count_batch_incorrect
 
         if instance_count_batch_qp_no_solution is not None:
             instance_count_qp_no_solution += instance_count_batch_qp_no_solution
@@ -462,6 +486,9 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
 
     logger.log_info("Composed testing accuracy: " + str(accuracy_epoch_composed) + ".")
     logger.log_info("Composed counterfactual accuracy: " + str(accuracy_epoch_composed_counterfactual) + ".")
+
+    if instance_count_corrected is not None and instance_count_incorrect:
+        logger.log_info("Correction rate: " + str(instance_count_corrected / instance_count_incorrect) + ".")
 
     if instance_count_total != 0:
         logger.log_info("QP solution rate: " + str((instance_count_total - instance_count_qp_no_solution) / instance_count_total) + ".")
