@@ -124,6 +124,8 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, spn_sett
 
     accuracy_epoch_composed = 0
     accuracy_epoch_composed_counterfactual = 0
+    instance_count_corrected = 0
+    instance_count_incorrect = 0
 
     config_dataset = data_loader.dataset.config
     counterfactuals = {}
@@ -159,6 +161,8 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, spn_sett
             if predictions_composed[batch] == labels_original[batch]:
                 output_composed_counterfactual = outputs_composed[batch]
             else:
+                instance_count_incorrect += 1
+
                 spn_joint_counterfactual = spn.SPN(device)
                 spn_marginal_counterfactual = spn.SPN(device)
 
@@ -184,6 +188,7 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, spn_sett
 
         corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
         corrects_composed_counterfactual = torch.sum(predictions_composed_counterfactual == labels_original.data).item()
+        instance_count_corrected += corrects_composed_counterfactual - corrects_composed
 
         accuracy_epoch_composed += corrects_composed
         accuracy_epoch_composed_counterfactual += corrects_composed_counterfactual
@@ -198,6 +203,7 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, spn_sett
 
     logger.log_info("Composed testing accuracy: " + str(accuracy_epoch_composed) + ".")
     logger.log_info("Composed counterfactual accuracy: " + str(accuracy_epoch_composed_counterfactual) + ".")
+    logger.log_info("Correction rate: " + str(instance_count_corrected / instance_count_incorrect) + ".")
 
     if not os.path.isdir(header.dir_output_counterfactual):
         os.makedirs(header.dir_output_counterfactual, exist_ok = True)
