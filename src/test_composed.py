@@ -4,8 +4,10 @@ import argument
 import composition
 import dataset
 import header
+import json
 import logger
 import model
+import os
 import sklearn.metrics
 import spn
 import torch
@@ -14,7 +16,7 @@ import type
 import utility
 import wandb
 
-def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_step, marginal_probabilities_counted = None):
+def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loader, device, batch_step, marginal_probabilities_counted = None):
     utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
     utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
     utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
@@ -24,6 +26,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
     config_dataset = data_loader.dataset.config
     ground_truths_epoch_composed = []
     ground_truths_epoch_list_decomposed = []
+    mpes = {}
     output_list_composed = []
     output_list_decomposed = []
     output_list_decomposed_accuracy = []
@@ -46,7 +49,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
     progress_bar.set_description_str("[INFO]: Testing progress")
 
     with torch.set_grad_enabled(False):
-        for (batch_index, (input, labels_decomposed, labels_original, _)) in enumerate(data_loader):
+        for (batch_index, (input, labels_decomposed, labels_original, input_file_paths)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
             labels_decomposed = labels_decomposed.to(device, non_blocking = True)
             labels_original = labels_original.to(device, non_blocking = True)
@@ -67,13 +70,16 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
                 ground_truths_epoch_list_decomposed[i] += labels_decomposed[:, i].data.tolist()
                 predictions_epoch_list_decomposed[i] += predictions_decomposed.tolist()
 
-            (_, _, outputs_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted)
+            (matrix_a, matrix_b, outputs_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted)
             (_, predictions_composed) = torch.max(outputs_composed, 1)
 
             corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
 
             accuracy_batch_composed = corrects_composed / input.size(0)
             accuracy_epoch_composed += corrects_composed
+
+            mpe_attributes = utility.findMPEs(matrix_a, matrix_b, spn_settings_joint, labels_original)
+            utility.saveMPEs(input_file_paths, mpes, mpe_attributes, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed)
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
@@ -87,6 +93,12 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
             batch_step += 1
 
     progress_bar.close()
+
+    if not os.path.isdir(header.dir_output_mpe):
+        os.makedirs(header.dir_output_mpe, exist_ok = True)
+
+    with open(os.path.join(header.dir_output_mpe, header.file_name_mpe), "w") as file_mpe:
+        json.dump(mpes, file_mpe, indent = 4)
 
     for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
         accuracy_epoch_list_decomposed[i] /= len(data_loader.dataset)
@@ -191,7 +203,7 @@ def main():
         logger.log_info("SPN depths: " + str(spn_joint.depth) + ".")
         logger.log_info("SPN leaf node setting dimension: (" + str(int(spn_settings_joint.shape[0])) + ", " + str(int(spn_settings_joint.shape[1])) + ").")
 
-    test(model_decomposed, spn_joint, spn_marginal, data_loader_test, device, 1, marginal_probabilities_counted)
+    test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loader_test, device, 1, marginal_probabilities_counted)
 
     return
 

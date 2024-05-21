@@ -91,22 +91,12 @@ def main():
     (_, label_probabilities) = utility.countAttributeJointProbabilities(config_dataset, device)
     matrix_a_joint_spn = torch.exp(log_likelihoods_joint.reshape(spn_output_rows, spn_output_cols))
     matrix_a_joint_counted = torch.zeros(matrix_a_joint_spn.shape).to(device)
+    (_, attribute_indices_to_matrix_a_col_indices) = utility.getMatrixAColIndicesAttributeIndicesMaps(spn_output_cols, spn_settings_joint)
 
     for (index_row, label_original) in enumerate(label_probabilities.keys()):
-        index_col = 0
         indices_attribute = label_probabilities[label_original][0]
         joint_probability_counted = label_probabilities[label_original][1]
-
-        for i in range(len(indices_attribute)):
-            base = indices_attribute[i]
-
-            for j in range(i + 1, len(indices_attribute)):
-                base *= attribute_sizes[j]
-
-            index_col += base
-
-        index_col = int(index_col)
-
+        index_col = attribute_indices_to_matrix_a_col_indices[indices_attribute]
         matrix_a_joint_counted[index_row][index_col] = joint_probability_counted
 
     error = torch.sum(torch.abs(matrix_a_joint_spn - matrix_a_joint_counted)).item() / 2

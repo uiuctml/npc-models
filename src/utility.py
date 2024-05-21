@@ -109,6 +109,20 @@ def createTransform(config):
 
     return dataset_transforms
 
+def findMPEs(matrix_a, matrix_b, spn_settings, labels_original):
+    (matrix_a_col_indices_to_attribute_indices, _) = getMatrixAColIndicesAttributeIndicesMaps(matrix_a.shape[1], spn_settings)
+    mpe_attributes = []
+
+    matrix_a = matrix_a.t() # product of category size of all attributes x number of original labels
+    matrix_a = torch.index_select(matrix_a, 1, labels_original)   # product of category size of all attributes x batch size
+    matrix_c = matrix_a * matrix_b  # product of category size of all attributes x batch size
+    mpes_matrix_a_col_indices = torch.argmax(matrix_c, 0)   # 0 x batch size
+
+    for mpes_matrix_a_col_index in mpes_matrix_a_col_indices.cpu().tolist():
+        mpe_attributes.append(matrix_a_col_indices_to_attribute_indices[mpes_matrix_a_col_index])
+
+    return mpe_attributes
+
 def getLabelsAttribute(dataset_config):
     labels_attribute = {}
 
@@ -144,6 +158,17 @@ def getIndicesFromLabelsOriginal(labels_original):
 
     return labels_to_indices
 
+def getMatrixAColIndicesAttributeIndicesMaps(matrix_a_cols, spn_settings):
+    attribute_indices_list = spn_settings[:matrix_a_cols, :-1].cpu().int().tolist()
+    matrix_a_col_indices_to_attribute_indices = {}
+    attribute_indices_to_matrix_a_col_indices = {}
+
+    for (matrix_a_row_index, attribute_indices) in enumerate(attribute_indices_list):
+        matrix_a_col_indices_to_attribute_indices[matrix_a_row_index] = tuple(attribute_indices)
+        attribute_indices_to_matrix_a_col_indices[tuple(attribute_indices)] = matrix_a_row_index
+
+    return (matrix_a_col_indices_to_attribute_indices, attribute_indices_to_matrix_a_col_indices)
+
 def generateSPNSettings(config_dataset, device):
     attribute_ranges = []
     labels_attribute = getLabelsAttribute(config_dataset)
@@ -164,6 +189,7 @@ def generateSPNSettings(config_dataset, device):
     logger.log_trace("Number of original labels: " + str(original_count) + ".")
 
     spn_settings = torch.cartesian_prod(*attribute_ranges)
+
     original_range = original_range.repeat_interleave(spn_settings.shape[0]).reshape(-1, 1)
     spn_settings = spn_settings.repeat(original_count, 1)
     spn_settings = torch.cat((spn_settings, original_range), 1)
@@ -431,6 +457,34 @@ def saveCheckpointSPN(spn, dir_checkpoints, file_name_checkpoint, log_likelihood
         logger.log_info("Saved checkpoint \"" + file_name_checkpoint + "\" to Weights & Biases.")
 
     logger.log_info("Saved checkpoint \"" + file_name_checkpoint + "\".")
+
+    return
+
+def saveMPEs(input_file_paths, mpes, mpe_attributes, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed):
+    batch_size = labels_original.nelement()
+    config_dataset = dataset.config
+
+    for batch_index in range(batch_size):
+        input_file_path = os.path.basename(input_file_paths[batch_index])
+
+        mpes[input_file_path] = {}
+        mpes[input_file_path]["mpe"] = {}
+        mpes[input_file_path]["ground_truth"] = {}
+        mpes[input_file_path]["prediction"] = {}
+
+        for (attribute_index, attribute) in enumerate(config_dataset["attributes"]):
+            attribute_name = attribute["name"]
+            (outputs_decomposed_mpe_probability, outputs_decomposed_mpe_label) = torch.max(outputs_decomposed[attribute_index][batch_index], 0)
+
+            mpes[input_file_path]["mpe"][attribute_name] = dataset.classes[attribute_name][mpe_attributes[batch_index][attribute_index]]
+            mpes[input_file_path]["ground_truth"][attribute_name] = dataset.classes[attribute_name][labels_decomposed[batch_index][attribute_index]]
+            mpes[input_file_path]["prediction"][attribute_name] = (dataset.classes[attribute_name][outputs_decomposed_mpe_label], outputs_decomposed_mpe_probability.item())
+
+        (outputs_composed_mpe_probability, outputs_composed_mpe_label) = torch.max(outputs_composed[batch_index], 0)
+
+        mpes[input_file_path]["mpe"]["original"] = "N/A"
+        mpes[input_file_path]["ground_truth"]["original"] = dataset.classes_original[labels_original[batch_index]]
+        mpes[input_file_path]["prediction"]["original"] = (dataset.classes_original[outputs_composed_mpe_label], outputs_composed_mpe_probability.item())
 
     return
 

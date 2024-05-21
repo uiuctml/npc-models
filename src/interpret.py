@@ -9,10 +9,10 @@ import PyQt5.QtWidgets
 
 application = PyQt5.QtWidgets.QApplication([])
 combo_box_application_control = PyQt5.QtWidgets.QComboBox()
-counterfactuals = {}
+explanations = {}
 group_box_viewer = PyQt5.QtWidgets.QGroupBox()
 label_viewer = PyQt5.QtWidgets.QLabel()
-layout_counterfactual = PyQt5.QtWidgets.QHBoxLayout()
+layout_explanation = PyQt5.QtWidgets.QHBoxLayout()
 layout_ground_truth = PyQt5.QtWidgets.QHBoxLayout()
 layout_prediction = PyQt5.QtWidgets.QHBoxLayout()
 layout_summary = PyQt5.QtWidgets.QHBoxLayout()
@@ -87,83 +87,96 @@ def updateInterpretationWidget():
     attribute_probabilities = []
     file_name = combo_box_application_control.currentText()
 
-    for (i, attribute_name) in enumerate(counterfactuals[file_name]["counterfactual"].keys()):
-        attribute_label = counterfactuals[file_name]["counterfactual"][attribute_name][0]
-        attribute_label_prediction = counterfactuals[file_name]["prediction"][attribute_name][0]
-        attribute_probability = "{:.1f}".format(counterfactuals[file_name]["counterfactual"][attribute_name][1] * 100)
-        label = layout_counterfactual.itemAt(i).widget()
-        text = attribute_label + ": " + attribute_probability + "%"
-        label.setText(text)
+    if header.interpret_mpe:
+        for (i, attribute_name) in enumerate(explanations[file_name]["mpe"].keys()):
+            attribute_label = explanations[file_name]["mpe"][attribute_name]
+            label = layout_explanation.itemAt(i).widget()
+            label.setText(attribute_label)
+    else:
+        for (i, attribute_name) in enumerate(explanations[file_name]["counterfactual"].keys()):
+            attribute_label = explanations[file_name]["counterfactual"][attribute_name][0]
+            attribute_label_prediction = explanations[file_name]["prediction"][attribute_name][0]
+            attribute_probability = "{:.1f}".format(explanations[file_name]["counterfactual"][attribute_name][1] * 100)
+            label = layout_explanation.itemAt(i).widget()
+            text = attribute_label + ": " + attribute_probability + "%"
+            label.setText(text)
 
-        if attribute_label_prediction != attribute_label:
-            if attribute_name != "original":
-                attribute_labels.append((attribute_label_prediction, attribute_label))
-
-            label.setStyleSheet("color: blue;")
-        else:
-            label.setStyleSheet("")
-
-    for (i, attribute_name) in enumerate(counterfactuals[file_name]["ground_truth"].keys()):
-        attribute_label = counterfactuals[file_name]["ground_truth"][attribute_name]
-        attribute_label_prediction = counterfactuals[file_name]["prediction"][attribute_name][0]
-        label = layout_ground_truth.itemAt(i).widget()
-        label.setText(attribute_label)
-
-    for (i, attribute_name) in enumerate(counterfactuals[file_name]["prediction"].keys()):
-        attribute_label = counterfactuals[file_name]["prediction"][attribute_name][0]
-        attribute_label_counterfactual = counterfactuals[file_name]["counterfactual"][attribute_name][0]
-        attribute_probability = "{:.1f}".format(counterfactuals[file_name]["prediction"][attribute_name][1] * 100)
-        label = layout_prediction.itemAt(i).widget()
-        text = attribute_label + ": " + attribute_probability + "%"
-        label.setText(text)
-
-        if attribute_label != attribute_label_counterfactual:
-            label.setStyleSheet("color: red;")
-        else:
-            label.setStyleSheet("")
-
-    if len(attribute_labels) == 0:
-        for (i, attribute_name) in enumerate(counterfactuals[file_name]["counterfactual"].keys()):
-            if attribute_name == "original":
-                continue
-
-            attribute_label_prediction = counterfactuals[file_name]["prediction"][attribute_name][0]
-            attribute_probability = counterfactuals[file_name]["counterfactual"][attribute_name][1]
-            attribute_probability_prediction = counterfactuals[file_name]["prediction"][attribute_name][1]
-            label = layout_counterfactual.itemAt(i).widget()
-
-            if abs(attribute_probability - attribute_probability_prediction) > header.interpret_threshold_probability:
-                attribute_probabilities.append((attribute_label_prediction, attribute_probability_prediction, attribute_probability))
+            if attribute_label_prediction != attribute_label:
+                if attribute_name != "original":
+                    attribute_labels.append((attribute_label_prediction, attribute_label))
 
                 label.setStyleSheet("color: blue;")
             else:
                 label.setStyleSheet("")
 
-        for (i, attribute_name) in enumerate(counterfactuals[file_name]["prediction"].keys()):
-            if attribute_name == "original":
-                continue
+    for (i, attribute_name) in enumerate(explanations[file_name]["ground_truth"].keys()):
+        attribute_label = explanations[file_name]["ground_truth"][attribute_name]
+        attribute_label_prediction = explanations[file_name]["prediction"][attribute_name][0]
+        label = layout_ground_truth.itemAt(i).widget()
+        label.setText(attribute_label)
 
-            attribute_probability_counterfactual = counterfactuals[file_name]["counterfactual"][attribute_name][1]
-            attribute_probability = counterfactuals[file_name]["prediction"][attribute_name][1]
-            label = layout_prediction.itemAt(i).widget()
+    for (i, attribute_name) in enumerate(explanations[file_name]["prediction"].keys()):
+        attribute_label = explanations[file_name]["prediction"][attribute_name][0]
 
-            if abs(attribute_probability_counterfactual - attribute_probability) > header.interpret_threshold_probability:
+        if header.interpret_mpe:
+            attribute_label_explanation = explanations[file_name]["mpe"][attribute_name]
+        else:
+            attribute_label_explanation = explanations[file_name]["counterfactual"][attribute_name][0]
+
+        attribute_probability = "{:.1f}".format(explanations[file_name]["prediction"][attribute_name][1] * 100)
+        label = layout_prediction.itemAt(i).widget()
+        text = attribute_label + ": " + attribute_probability + "%"
+        label.setText(text)
+
+        if not header.interpret_mpe:
+            if attribute_label != attribute_label_explanation:
                 label.setStyleSheet("color: red;")
             else:
                 label.setStyleSheet("")
 
-    label = layout_summary.itemAt(0).widget()
+    if not header.interpret_mpe:
+        if len(attribute_labels) == 0:
+            for (i, attribute_name) in enumerate(explanations[file_name]["counterfactual"].keys()):
+                if attribute_name == "original":
+                    continue
 
-    if len(attribute_labels) == 0:
-        label.setText(generateSummaryProbability(attribute_probabilities))
-    else:
-        label.setText(generateSummaryLabel(attribute_labels))
+                attribute_label_prediction = explanations[file_name]["prediction"][attribute_name][0]
+                attribute_probability = explanations[file_name]["counterfactual"][attribute_name][1]
+                attribute_probability_prediction = explanations[file_name]["prediction"][attribute_name][1]
+                label = layout_explanation.itemAt(i).widget()
+
+                if abs(attribute_probability - attribute_probability_prediction) > header.interpret_threshold_probability:
+                    attribute_probabilities.append((attribute_label_prediction, attribute_probability_prediction, attribute_probability))
+
+                    label.setStyleSheet("color: blue;")
+                else:
+                    label.setStyleSheet("")
+
+            for (i, attribute_name) in enumerate(explanations[file_name]["prediction"].keys()):
+                if attribute_name == "original":
+                    continue
+
+                attribute_probability_counterfactual = explanations[file_name]["counterfactual"][attribute_name][1]
+                attribute_probability = explanations[file_name]["prediction"][attribute_name][1]
+                label = layout_prediction.itemAt(i).widget()
+
+                if abs(attribute_probability_counterfactual - attribute_probability) > header.interpret_threshold_probability:
+                    label.setStyleSheet("color: red;")
+                else:
+                    label.setStyleSheet("")
+
+        label = layout_summary.itemAt(0).widget()
+
+        if len(attribute_labels) == 0:
+            label.setText(generateSummaryProbability(attribute_probabilities))
+        else:
+            label.setText(generateSummaryLabel(attribute_labels))
 
     return
 
 def updateViewerWidget():
     file_name = combo_box_application_control.currentText()
-    dir_name_label = counterfactuals[file_name]["ground_truth"]["original"]
+    dir_name_label = explanations[file_name]["ground_truth"]["original"]
     file_path_image = os.path.join(header.interpret_dir_dataset, dir_name_label, file_name)
 
     pixmap = PyQt5.QtGui.QPixmap(file_path_image)
@@ -195,7 +208,7 @@ def createApplicationControlWidget():
     push_button_next_application_control.clicked.connect(pushButtonNextSlot)
     push_button_next_application_control.setText("Next")
 
-    for file_name in counterfactuals.keys():
+    for file_name in explanations.keys():
         combo_box_application_control.addItem(file_name)
 
     combo_box_application_control.model().sort(0)
@@ -205,16 +218,21 @@ def createApplicationControlWidget():
     return group_box_application_control
 
 def createInterpretationWidget():
-    group_box_counterfactual = PyQt5.QtWidgets.QGroupBox()
+    group_box_explanation = PyQt5.QtWidgets.QGroupBox()
     group_box_ground_truth = PyQt5.QtWidgets.QGroupBox()
     group_box_interpretation = PyQt5.QtWidgets.QGroupBox()
     group_box_prediction = PyQt5.QtWidgets.QGroupBox()
     group_box_summary = PyQt5.QtWidgets.QGroupBox()
     layout_interpretation = PyQt5.QtWidgets.QVBoxLayout()
 
-    group_box_counterfactual.setAlignment(PyQt5.QtCore.Qt.AlignLeft)
-    group_box_counterfactual.setLayout(layout_counterfactual)
-    group_box_counterfactual.setTitle("Counterfactual")
+    group_box_explanation.setAlignment(PyQt5.QtCore.Qt.AlignLeft)
+    group_box_explanation.setLayout(layout_explanation)
+
+    if header.interpret_mpe:
+        group_box_explanation.setTitle("Most Probable Explanation")
+    else:
+        group_box_explanation.setTitle("Counterfactual Explanation")
+
     group_box_ground_truth.setAlignment(PyQt5.QtCore.Qt.AlignLeft)
     group_box_ground_truth.setLayout(layout_ground_truth)
     group_box_ground_truth.setTitle("Ground Truth")
@@ -224,41 +242,56 @@ def createInterpretationWidget():
     group_box_prediction.setAlignment(PyQt5.QtCore.Qt.AlignLeft)
     group_box_prediction.setLayout(layout_prediction)
     group_box_prediction.setTitle("Prediction")
-    group_box_summary.setAlignment(PyQt5.QtCore.Qt.AlignLeft)
-    group_box_summary.setLayout(layout_summary)
-    group_box_summary.setTitle("Summary")
 
     layout_interpretation.addWidget(group_box_ground_truth)
     layout_interpretation.addWidget(group_box_prediction)
-    layout_interpretation.addWidget(group_box_counterfactual)
-    layout_interpretation.addWidget(group_box_summary)
+    layout_interpretation.addWidget(group_box_explanation)
+
+    if not header.interpret_mpe:
+        group_box_summary.setAlignment(PyQt5.QtCore.Qt.AlignLeft)
+        group_box_summary.setLayout(layout_summary)
+        group_box_summary.setTitle("Summary")
+        layout_interpretation.addWidget(group_box_summary)
 
     attribute_labels = []
     attribute_probabilities = []
     file_name = combo_box_application_control.currentText()
 
-    for attribute_name in counterfactuals[file_name]["counterfactual"].keys():
-        attribute_label = counterfactuals[file_name]["counterfactual"][attribute_name][0]
-        attribute_label_prediction = counterfactuals[file_name]["prediction"][attribute_name][0]
-        attribute_probability = "{:.1f}".format(counterfactuals[file_name]["counterfactual"][attribute_name][1] * 100)
-        text = attribute_label + ": " + attribute_probability + "%"
-        label = PyQt5.QtWidgets.QLabel()
-        label.setText(text)
-        layout_counterfactual.addWidget(label)
+    if header.interpret_mpe:
+        for attribute_name in explanations[file_name]["mpe"].keys():
+            attribute_label = explanations[file_name]["mpe"][attribute_name]
+            attribute_label_prediction = explanations[file_name]["prediction"][attribute_name][0]
+            label = PyQt5.QtWidgets.QLabel()
+            label.setText(attribute_label)
+            layout_explanation.addWidget(label)
 
-        if attribute_name == "original":
-            label.setFixedWidth(header.interpret_label_width_original)
-        else:
-            label.setFixedWidth(header.interpret_label_width_attribute)
+            if attribute_name == "original":
+                label.setFixedWidth(header.interpret_label_width_original)
+            else:
+                label.setFixedWidth(header.interpret_label_width_attribute)
+    else:
+        for attribute_name in explanations[file_name]["counterfactual"].keys():
+            attribute_label = explanations[file_name]["counterfactual"][attribute_name][0]
+            attribute_label_prediction = explanations[file_name]["prediction"][attribute_name][0]
+            attribute_probability = "{:.1f}".format(explanations[file_name]["counterfactual"][attribute_name][1] * 100)
+            text = attribute_label + ": " + attribute_probability + "%"
+            label = PyQt5.QtWidgets.QLabel()
+            label.setText(text)
+            layout_explanation.addWidget(label)
 
-        if attribute_label_prediction != attribute_label:
-            if attribute_name != "original":
-                attribute_labels.append((attribute_label_prediction, attribute_label))
+            if attribute_name == "original":
+                label.setFixedWidth(header.interpret_label_width_original)
+            else:
+                label.setFixedWidth(header.interpret_label_width_attribute)
 
-            label.setStyleSheet("color: blue;")
+            if attribute_label_prediction != attribute_label:
+                if attribute_name != "original":
+                    attribute_labels.append((attribute_label_prediction, attribute_label))
 
-    for attribute_name in counterfactuals[file_name]["ground_truth"].keys():
-        attribute_label = counterfactuals[file_name]["ground_truth"][attribute_name]
+                label.setStyleSheet("color: blue;")
+
+    for attribute_name in explanations[file_name]["ground_truth"].keys():
+        attribute_label = explanations[file_name]["ground_truth"][attribute_name]
         label = PyQt5.QtWidgets.QLabel()
         label.setText(attribute_label)
         layout_ground_truth.addWidget(label)
@@ -268,10 +301,15 @@ def createInterpretationWidget():
         else:
             label.setFixedWidth(header.interpret_label_width_attribute)
 
-    for attribute_name in counterfactuals[file_name]["prediction"].keys():
-        attribute_label = counterfactuals[file_name]["prediction"][attribute_name][0]
-        attribute_label_counterfactual = counterfactuals[file_name]["counterfactual"][attribute_name][0]
-        attribute_probability = "{:.1f}".format(counterfactuals[file_name]["prediction"][attribute_name][1] * 100)
+    for attribute_name in explanations[file_name]["prediction"].keys():
+        attribute_label = explanations[file_name]["prediction"][attribute_name][0]
+
+        if header.interpret_mpe:
+            attribute_label_explanation = explanations[file_name]["mpe"][attribute_name]
+        else:
+            attribute_label_explanation = explanations[file_name]["counterfactual"][attribute_name][0]
+
+        attribute_probability = "{:.1f}".format(explanations[file_name]["prediction"][attribute_name][1] * 100)
         text = attribute_label + ": " + attribute_probability + "%"
         label = PyQt5.QtWidgets.QLabel()
         label.setText(text)
@@ -282,48 +320,50 @@ def createInterpretationWidget():
         else:
             label.setFixedWidth(header.interpret_label_width_attribute)
 
-        if attribute_label != attribute_label_counterfactual:
-            label.setStyleSheet("color: red;")
-
-    if len(attribute_labels) == 0:
-        for (i, attribute_name) in enumerate(counterfactuals[file_name]["counterfactual"].keys()):
-            if attribute_name == "original":
-                continue
-
-            attribute_label_prediction = counterfactuals[file_name]["prediction"][attribute_name][0]
-            attribute_probability = counterfactuals[file_name]["counterfactual"][attribute_name][1]
-            attribute_probability_prediction = counterfactuals[file_name]["prediction"][attribute_name][1]
-            label = layout_counterfactual.itemAt(i).widget()
-
-            if abs(attribute_probability - attribute_probability_prediction) > header.interpret_threshold_probability:
-                attribute_probabilities.append((attribute_label_prediction, attribute_probability_prediction, attribute_probability))
-
-                label.setStyleSheet("color: blue;")
-            else:
-                label.setStyleSheet("")
-
-        for (i, attribute_name) in enumerate(counterfactuals[file_name]["prediction"].keys()):
-            if attribute_name == "original":
-                continue
-
-            attribute_probability_counterfactual = counterfactuals[file_name]["counterfactual"][attribute_name][1]
-            attribute_probability = counterfactuals[file_name]["prediction"][attribute_name][1]
-            label = layout_prediction.itemAt(i).widget()
-
-            if abs(attribute_probability_counterfactual - attribute_probability) > header.interpret_threshold_probability:
+        if not header.interpret_mpe:
+            if attribute_label != attribute_label_explanation:
                 label.setStyleSheet("color: red;")
-            else:
-                label.setStyleSheet("")
 
-    label = PyQt5.QtWidgets.QLabel()
-    label.setTextFormat(PyQt5.QtCore.Qt.RichText)
+    if not header.interpret_mpe:
+        if len(attribute_labels) == 0:
+            for (i, attribute_name) in enumerate(explanations[file_name]["counterfactual"].keys()):
+                if attribute_name == "original":
+                    continue
 
-    if len(attribute_labels) == 0:
-        label.setText(generateSummaryProbability(attribute_probabilities))
-    else:
-        label.setText(generateSummaryLabel(attribute_labels))
+                attribute_label_prediction = explanations[file_name]["prediction"][attribute_name][0]
+                attribute_probability = explanations[file_name]["counterfactual"][attribute_name][1]
+                attribute_probability_prediction = explanations[file_name]["prediction"][attribute_name][1]
+                label = layout_explanation.itemAt(i).widget()
 
-    layout_summary.addWidget(label)
+                if abs(attribute_probability - attribute_probability_prediction) > header.interpret_threshold_probability:
+                    attribute_probabilities.append((attribute_label_prediction, attribute_probability_prediction, attribute_probability))
+
+                    label.setStyleSheet("color: blue;")
+                else:
+                    label.setStyleSheet("")
+
+            for (i, attribute_name) in enumerate(explanations[file_name]["prediction"].keys()):
+                if attribute_name == "original":
+                    continue
+
+                attribute_probability_counterfactual = explanations[file_name]["counterfactual"][attribute_name][1]
+                attribute_probability = explanations[file_name]["prediction"][attribute_name][1]
+                label = layout_prediction.itemAt(i).widget()
+
+                if abs(attribute_probability_counterfactual - attribute_probability) > header.interpret_threshold_probability:
+                    label.setStyleSheet("color: red;")
+                else:
+                    label.setStyleSheet("")
+
+        label = PyQt5.QtWidgets.QLabel()
+        label.setTextFormat(PyQt5.QtCore.Qt.RichText)
+
+        if len(attribute_labels) == 0:
+            label.setText(generateSummaryProbability(attribute_probabilities))
+        else:
+            label.setText(generateSummaryLabel(attribute_labels))
+
+        layout_summary.addWidget(label)
 
     return group_box_interpretation
 
@@ -363,21 +403,38 @@ def createWindowLayout():
 def preprocessCounterfactuals():
     file_names_correct = []
 
-    for file_name in counterfactuals.keys():
-        if counterfactuals[file_name]["prediction"]["original"][0] == counterfactuals[file_name]["ground_truth"]["original"]:
+    for file_name in explanations.keys():
+        if explanations[file_name]["prediction"]["original"][0] == explanations[file_name]["ground_truth"]["original"]:
             file_names_correct.append(file_name)
 
     for file_name_correct in file_names_correct:
-        del counterfactuals[file_name_correct]
+        del explanations[file_name_correct]
+
+    return
+
+def preprocessMPEs():
+    file_names_incorrect = []
+
+    for file_name in explanations.keys():
+        if explanations[file_name]["prediction"]["original"][0] != explanations[file_name]["ground_truth"]["original"]:
+            file_names_incorrect.append(file_name)
+
+    for file_name_incorrect in file_names_incorrect:
+        del explanations[file_name_incorrect]
 
     return
 
 def main():
-    global counterfactuals
+    global explanations
 
-    with open(os.path.join(header.dir_output_counterfactual, header.file_name_counterfactual), "r") as file_counterfactual:
-        counterfactuals = json.load(file_counterfactual)
-        preprocessCounterfactuals()
+    if header.interpret_mpe:
+        with open(os.path.join(header.dir_output_mpe, header.file_name_mpe), "r") as file_mpe:
+            explanations = json.load(file_mpe)
+            preprocessMPEs()
+    else:
+        with open(os.path.join(header.dir_output_counterfactual, header.file_name_counterfactual), "r") as file_counterfactual:
+            explanations = json.load(file_counterfactual)
+            preprocessCounterfactuals()
 
     window = PyQt5.QtWidgets.QWidget()
 

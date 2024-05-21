@@ -342,7 +342,7 @@ def main():
         spn_marginal.set_leaf_nodes(spn_settings_marginal)
 
     wandb.log({"testing/epoch/step": batch_step_test})
-    test_composed.test(model_decomposed, spn_joint, spn_marginal, data_loader_test, device, batch_step_test, marginal_probabilities_counted)
+    test_composed.test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loader_test, device, batch_step_test, marginal_probabilities_counted)
 
     wandb.finish()
 
