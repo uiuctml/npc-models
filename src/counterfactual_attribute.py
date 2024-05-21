@@ -2,13 +2,13 @@
 
 import argument
 import composition
+import cvxpy
 import dataset
 import header
 import json
 import logger
 import model
 import os
-import qpsolvers
 import spn
 import torch
 import tqdm
@@ -311,12 +311,28 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
             z_minus_batch = []
             for batch in range(batch_size):
                 # Obtain column vectors for the current batch
-                q = q_batch[:, batch].unsqueeze(0).t()  # 2d x 1
-                h = h_batch[:, batch].unsqueeze(0).t()  # (d + 1) x 1
-                b = b_batch[:, batch].unsqueeze(0).t()  # K x 1
+                q = q_batch[:, batch]   # 2d
+                h = h_batch[:, batch]   # (d + 1)
+                b = b_batch[:, batch]   # K
+
+                # Conver to Numpy
+                P_numpy = P.cpu().double().numpy()
+                q_numpy = q.cpu().double().numpy()
+                G_numpy = G.cpu().double().numpy()
+                h_numpy = h.cpu().double().numpy()
+                A_numpy = A.cpu().double().numpy()
+                b_numpy = b.cpu().double().numpy()
+
+                # Initialize QP variable and problem
+                z_plus_minus = cvxpy.Variable(2 * d)
+                qp = cvxpy.Problem(
+                    cvxpy.Minimize((1 / 2) * cvxpy.quad_form(z_plus_minus, P_numpy) + q_numpy.T @ z_plus_minus),
+                    [G_numpy @ z_plus_minus <= h_numpy,
+                     A_numpy @ z_plus_minus == b_numpy])
 
                 # Solve QP for z+ and z-
-                z_plus_minus = qpsolvers.solve_qp(P.cpu().double().numpy(), q.cpu().double().numpy(), G.cpu().double().numpy(), h.cpu().double().numpy(), A.cpu().double().numpy(), b.cpu().double().numpy(), solver = header.counterfactual_qp_solver) # 2d x 1
+                qp.solve()
+                z_plus_minus = z_plus_minus.value
 
                 if z_plus_minus is None:
                     # Obtain column vectors for the current batch
