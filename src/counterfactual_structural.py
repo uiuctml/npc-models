@@ -12,7 +12,7 @@ import torch
 import tqdm
 import utility
 
-def counterfactual_structural(spn_tree, device, batch, outputs_decomposed, labels_original):
+def counterfactual_structural(spn_tree, device, batch, outputs_decomposed, labels_original, input_file_paths, config_dataset):
     attribute_sizes = []
     induced_tree_candidates = []
     label_original = labels_original.cpu().tolist()[batch]
@@ -114,6 +114,12 @@ def counterfactual_structural(spn_tree, device, batch, outputs_decomposed, label
         leaf_node_original_ground_truth.parents.append(leaf_node_original_parent)
         leaf_node_original_parent.children.append(leaf_node_original_ground_truth)
 
+        # Identify moved edge
+        if input_file_paths[batch].split("/")[-1] == "00014_00017_00001.png":
+            labels_original = utility.getLabelsOriginal(config_dataset)
+            logger.log_info("Moved edge from " + labels_original[leaf_node_original.category_index] + " to " + labels_original[leaf_node_original_ground_truth.category_index] + ".")
+            exit()
+
     return
 
 def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, spn_settings_marginal, data_loader, device, batch_step):
@@ -165,8 +171,8 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, spn_sett
                 spn_joint_counterfactual = spn.SPN(device)
                 spn_marginal_counterfactual = spn.SPN(device)
 
-                counterfactual_structural(spn_joint_counterfactual, device, batch, outputs_decomposed, labels_original)
-                counterfactual_structural(spn_marginal_counterfactual, device, batch, outputs_decomposed, labels_original)
+                counterfactual_structural(spn_joint_counterfactual, device, batch, outputs_decomposed, labels_original, input_file_paths, config_dataset)
+                counterfactual_structural(spn_marginal_counterfactual, device, batch, outputs_decomposed, labels_original, input_file_paths, config_dataset)
 
                 spn_joint_counterfactual.set_leaf_nodes(spn_settings_joint)
                 spn_marginal_counterfactual.set_leaf_nodes(spn_settings_marginal)
