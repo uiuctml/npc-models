@@ -87,13 +87,15 @@ def counterfactual_structural(spn_tree, device, batch, outputs_decomposed, label
 
     # Move edges
     for induced_tree_candidate in induced_tree_candidates:
-        if moving_cost > header.counterfactual_moving_epsilon:
-            break
-
         nodes = induced_tree_candidate[0]
         weight = induced_tree_candidate[1]
         leaf_node_original = list(induced_tree_candidate[3])[0]
         leaf_node_original_ground_truth = list(leaf_nodes_original_ground_truth)[0]
+
+        moving_cost += weight
+
+        if moving_cost > header.counterfactual_moving_epsilon:
+            break
 
         # Locate original class leaf node parent in induced SPN
         leaf_node_original_parents = set(leaf_node_original.parents)
@@ -112,8 +114,6 @@ def counterfactual_structural(spn_tree, device, batch, outputs_decomposed, label
         # Add edge between original class ground truth leaf node the parent of original class leaf node in induced SPN
         leaf_node_original_ground_truth.parents.append(leaf_node_original_parent)
         leaf_node_original_parent.children.append(leaf_node_original_ground_truth)
-
-        moving_cost += weight
 
     return
 
