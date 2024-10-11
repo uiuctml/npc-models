@@ -30,25 +30,45 @@ class VISATDataset(torch.utils.data.Dataset):
         file_config_dataset.close()
 
         self.classes = utility.getLabelsAttribute(self.config)
-        self.classes_original = utility.getLabelsOriginal(self.config)
+
+        if self.config["instance_wise"]:
+            self.classes_original = utility.getLabelsOriginalInstanceWise(self.config)
+        else:
+            self.classes_original = utility.getLabelsOriginal(self.config)
+
         self.class_to_idx = utility.getIndicesFromLabelsAttribute(self.classes)
         self.class_to_idx_original = utility.getIndicesFromLabelsOriginal(self.classes_original)
 
         for _ in self.config["attributes"]:
             self.labels.append([])
 
-        for class_name_original in self.classes_original:
-            for file_name in os.listdir(os.path.join(root, class_name_original)):
-                label_original = self.class_to_idx_original[class_name_original]
+        if self.config["instance_wise"]:
+            for class_name_original in os.listdir(root):
+                for file_name in os.listdir(os.path.join(root, class_name_original)):
+                    image_name = os.path.join(class_name_original, file_name)
+                    label_original = self.class_to_idx_original[class_name_original]
 
-                self.file_paths.append(os.path.abspath(os.path.join(root, class_name_original, file_name)))
-                self.labels_original.append(label_original)
+                    self.file_paths.append(os.path.abspath(os.path.join(root, image_name)))
+                    self.labels_original.append(label_original)
 
-                for (attribute_index, attribute) in enumerate(self.config["attributes"]):
-                    attribute_name = attribute["name"]
-                    class_name_decomposed = self.config["mappings"][class_name_original]["labels"][attribute_name]
-                    label = self.class_to_idx[attribute_name][class_name_decomposed]
-                    self.labels[attribute_index].append(label)
+                    for (attribute_index, attribute) in enumerate(self.config["attributes"]):
+                        attribute_name = attribute["name"]
+                        class_name_decomposed = self.config["mappings"][image_name]["labels"][attribute_name]
+                        label = self.class_to_idx[attribute_name][class_name_decomposed]
+                        self.labels[attribute_index].append(label)
+        else:
+            for class_name_original in self.classes_original:
+                for file_name in os.listdir(os.path.join(root, class_name_original)):
+                    label_original = self.class_to_idx_original[class_name_original]
+
+                    self.file_paths.append(os.path.abspath(os.path.join(root, class_name_original, file_name)))
+                    self.labels_original.append(label_original)
+
+                    for (attribute_index, attribute) in enumerate(self.config["attributes"]):
+                        attribute_name = attribute["name"]
+                        class_name_decomposed = self.config["mappings"][class_name_original]["labels"][attribute_name]
+                        label = self.class_to_idx[attribute_name][class_name_decomposed]
+                        self.labels[attribute_index].append(label)
 
         return
 
