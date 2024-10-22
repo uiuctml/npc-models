@@ -31,7 +31,7 @@ class VISATDataset(torch.utils.data.Dataset):
 
         self.classes = utility.getLabelsAttribute(self.config)
 
-        if self.config["instance_wise"]:
+        if "instance_wise" in self.config and self.config["instance_wise"]:
             self.classes_original = utility.getLabelsOriginalInstanceWise(self.config)
         else:
             self.classes_original = utility.getLabelsOriginal(self.config)
@@ -42,7 +42,7 @@ class VISATDataset(torch.utils.data.Dataset):
         for _ in self.config["attributes"]:
             self.labels.append([])
 
-        if self.config["instance_wise"]:
+        if "instance_wise" in self.config and self.config["instance_wise"]:
             for class_name_original in os.listdir(root):
                 for file_name in os.listdir(os.path.join(root, class_name_original)):
                     image_name = os.path.join(class_name_original, file_name)

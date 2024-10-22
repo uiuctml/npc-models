@@ -63,7 +63,7 @@ def counterfactual_cccp(outputs_decomposed_original, spn_joint, spn_marginal, sp
 
     progress_bar.close()
 
-    return (outputs_decomposed, _, _, _, _)
+    return (outputs_decomposed, None, None, None, None)
 
 def counterfactual_gd(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
     batch_size = labels_original.nelement()
@@ -102,7 +102,7 @@ def counterfactual_gd(outputs_decomposed_original, spn_joint, spn_marginal, spn_
 
     progress_bar.close()
 
-    return (utility.applySoftmaxDecomposed(outputs_decomposed), _, _, _, _)
+    return (utility.applySoftmaxDecomposed(outputs_decomposed), None, None, None, None)
 
 def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
     batch_size = labels_original.nelement()
@@ -175,7 +175,7 @@ def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn
 
     progress_bar.close()
 
-    return (outputs_decomposed, _, _, _, _)
+    return (outputs_decomposed, None, None, None, None)
 
 # Concatenate outputs_decomposed, outputs_decomposed_original, and y into one vector
 # z = outputs_decomposed (x) - outputs_decomposed_original (x bar)
@@ -431,7 +431,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed_original)
 
         with torch.set_grad_enabled(True):
-            (outputs_decomposed_counterfactual, instance_count_batch_qp_epsilon_violated, instance_count_batch_qp_no_solution, instance_count_batch_total, value_count_batch_implausible) = counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device)
+            (outputs_decomposed_counterfactual, instance_count_batch_qp_epsilon_violated, instance_count_batch_qp_no_solution, instance_count_batch_total, value_count_batch_implausible) = counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device)
 
         if instance_count_batch_qp_epsilon_violated is not None:
             if instance_count_qp_epsilon_violated is None:
