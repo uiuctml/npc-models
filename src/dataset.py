@@ -30,12 +30,7 @@ class VISATDataset(torch.utils.data.Dataset):
         file_config_dataset.close()
 
         self.classes = utility.getLabelsAttribute(self.config)
-
-        if "instance_wise" in self.config and self.config["instance_wise"]:
-            self.classes_original = utility.getLabelsOriginalInstanceWise(self.config)
-        else:
-            self.classes_original = utility.getLabelsOriginal(self.config)
-
+        self.classes_original = utility.getLabelsOriginal(self.config)
         self.class_to_idx = utility.getIndicesFromLabelsAttribute(self.classes)
         self.class_to_idx_original = utility.getIndicesFromLabelsOriginal(self.classes_original)
 
