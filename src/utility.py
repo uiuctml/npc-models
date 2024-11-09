@@ -444,9 +444,9 @@ def saveCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_be
     except:
         pass
     else:
-        logger.log_info("Saved checkpoint \"" + file_name_checkpoint + "\" to Weights & Biases.")
+        logger.log_trace("Saved checkpoint \"" + file_name_checkpoint + "\" to Weights & Biases.")
 
-    logger.log_info("Saved checkpoint \"" + file_name_checkpoint + "\".")
+    logger.log_trace("Saved checkpoint \"" + file_name_checkpoint + "\".")
 
     return
 
@@ -471,9 +471,9 @@ def saveCheckpointSPN(spn, dir_checkpoints, file_name_checkpoint, log_likelihood
     except:
         pass
     else:
-        logger.log_info("Saved checkpoint \"" + file_name_checkpoint + "\" to Weights & Biases.")
+        logger.log_trace("Saved checkpoint \"" + file_name_checkpoint + "\" to Weights & Biases.")
 
-    logger.log_info("Saved checkpoint \"" + file_name_checkpoint + "\".")
+    logger.log_trace("Saved checkpoint \"" + file_name_checkpoint + "\".")
 
     return
 
