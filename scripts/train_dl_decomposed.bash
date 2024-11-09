@@ -2,4 +2,4 @@
 
 cd ../src
 
-./train_dl_mlp.py -m "mlp_set" -b 384 -e 100 -c 0 -s 42
+./train_dl_mtl.py -m "vit_b_32_mtl" -b 384 -e 100 -c 0 -s 42
