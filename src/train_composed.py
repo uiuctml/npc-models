@@ -225,7 +225,7 @@ def main():
     spn_marginal = spn.SPN(device)
     optimizer_decomposed = torch.optim.SGD(model_decomposed.parameters(), lr = header.config_decomposed["optimizer_learning_rate"], momentum = header.config_decomposed["optimizer_momentum"], weight_decay = header.config_decomposed["optimizer_weight_decay"])
     optimizer_spn = None
-    learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_decomposed, header.config_decomposed["learning_rate_scheduler_mode"], header.config_decomposed["learning_rate_scheduler_factor"], header.config_decomposed["learning_rate_scheduler_patience"], header.config_decomposed["learning_rate_scheduler_threshold"], header.config_decomposed["learning_rate_scheduler_threshold_mode"], header.config_decomposed["learning_rate_scheduler_cooldown"], header.config_decomposed["learning_rate_scheduler_min_learning_rate"], header.config_decomposed["learning_rate_scheduler_min_learning_rate_decay"], header.config_decomposed["learning_rate_scheduler_verbose"])
+    learning_rate_scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer_decomposed, T_0 = header.config_decomposed["learning_rate_scheduler_t_0"], T_mult = header.config_decomposed["learning_rate_scheduler_t_mult"], eta_min = header.config_decomposed["learning_rate_scheduler_min_learning_rate"], last_epoch = header.config_decomposed["learning_rate_scheduler_last_epoch"])
     learning_rate_scheduler_spn = None
 
     if header.config_spn["optimizer"] == type.OptimizerSPN.cccp_discriminative.name:
@@ -305,7 +305,7 @@ def main():
         batch_step_train = train(model_decomposed, spn_joint, spn_marginal, data_loader_train, criterion, optimizer_decomposed, optimizer_spn, device, batch_step_train, marginal_probabilities_counted)
         (accuracy_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_decomposed, spn_joint, spn_marginal, data_loader_validation, criterion, device, batch_step_validate, marginal_probabilities_counted)
 
-        learning_rate_scheduler.step(loss_validation_epoch)
+        learning_rate_scheduler.step()
         learning_rate_scheduler_spn.step(loss_validation_epoch)
 
         if accuracy_validation_epoch > accuracy_validation_best:
