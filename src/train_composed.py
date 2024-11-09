@@ -9,7 +9,7 @@ import model
 import spn
 import test_composed
 import torch
-import torchsummary
+import torchinfo
 import tqdm
 import type
 import utility
@@ -281,7 +281,7 @@ def main():
 
     if header.show_model_summary:
         model_input_size = (header.config_decomposed["model_input_channels"], header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])
-        torchsummary.summary(model_decomposed, input_size = model_input_size)
+        torchinfo.summary(model_decomposed, input_size = model_input_size)
 
         logger.log_info("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
         logger.log_info("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")

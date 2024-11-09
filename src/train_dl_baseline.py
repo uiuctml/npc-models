@@ -7,7 +7,7 @@ import logger
 import model
 import test_dl_baseline
 import torch
-import torchsummary
+import torchinfo
 import tqdm
 import utility
 import wandb
@@ -155,7 +155,7 @@ def main():
 
     if header.show_model_summary:
         model_input_size = (header.config_baseline["model_input_channels"], header.config_baseline["model_input_height"], header.config_baseline["model_input_width"])
-        torchsummary.summary(model_baseline, input_size = model_input_size)
+        torchinfo.summary(model_baseline, input_size = model_input_size)
 
     if epoch <= header.config_baseline["epochs"]:
         progress_bar = tqdm.tqdm(total = header.config_baseline["epochs"], position = 0)

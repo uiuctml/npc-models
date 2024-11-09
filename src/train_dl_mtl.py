@@ -8,7 +8,7 @@ import math
 import model
 import test_dl_decomposed
 import torch
-import torchsummary
+import torchinfo
 import tqdm
 import utility
 import wandb
@@ -218,7 +218,7 @@ def main():
 
     if header.show_model_summary:
         model_input_size = (header.config_decomposed["model_input_channels"], header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])
-        torchsummary.summary(model_decomposed, input_size = model_input_size)
+        torchinfo.summary(model_decomposed, input_size = model_input_size)
 
     if epoch <= header.config_decomposed["epochs"]:
         progress_bar = tqdm.tqdm(total = header.config_decomposed["epochs"], position = 0)
