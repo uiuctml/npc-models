@@ -236,6 +236,9 @@ def loadCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_be
             for (learning_rate_scheduler, learning_rate_scheduler_state_dict) in zip(learning_rate_schedulers, checkpoint["learning_rate_scheduler_state_dict_list"]):
                 learning_rate_scheduler.load_state_dict(learning_rate_scheduler_state_dict)
 
+                if (isinstance(learning_rate_scheduler, torch.optim.lr_scheduler.CosineAnnealingLR) or isinstance(learning_rate_scheduler, torch.optim.lr_scheduler.CosineAnnealingWarmRestarts)):
+                    learning_rate_scheduler.last_epoch = epoch
+
             for (optimizer, optimizer_state_dict) in zip(optimizers, checkpoint["optimizer_state_dict_list"]):
                 optimizer.load_state_dict(optimizer_state_dict)
 
