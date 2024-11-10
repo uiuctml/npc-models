@@ -479,7 +479,7 @@ class SPN:
                 logger.log_fatal("Empty tree. Quit.")
                 exit(-1)
 
-            if self.root_node is None or self.traversal_order_backward[0].id != self.root_node.id:
+            if self.root_node is None or self.traversal_order_backward[0][0].id != self.root_node.id:
                 logger.log_fatal("Missing root node. Quit.")
                 exit(-1)
 
@@ -493,12 +493,10 @@ class SPN:
             self.root_node.value_backward = torch.log(torch.ones(self.settings.shape[0]))
             self.root_node.value_backward = self.root_node.value_backward.to(self.device)
 
-            for node in self.traversal_order_backward:
-                # Skip root node
-                if node.id == self.root_node.id:
-                    continue
-
-                node.backward()
+            for level in self.traversal_order_backward[1:]:
+                # TODO Unroll the following loop
+                for node in level:
+                    node.backward()
 
         return
 
@@ -508,15 +506,17 @@ class SPN:
                 logger.log_fatal("Empty tree. Quit.")
                 exit(-1)
 
-            if self.root_node is None or self.traversal_order_forward[-1].id != self.root_node.id:
+            if self.root_node is None or self.traversal_order_forward[-1][0].id != self.root_node.id:
                 logger.log_fatal("Missing root node. Quit.")
                 exit(-1)
 
             self.reuse_backward = False
             self.reuse_forward = True
 
-            for node in self.traversal_order_forward:
-                node.forward()
+            for level in self.traversal_order_forward:
+                # TODO Unroll the following loop
+                for node in level:
+                    node.forward()
 
         return self.root_node.value_forward
 
@@ -677,15 +677,26 @@ class SPN:
 
         self.depth = self.traverse({0: root_nodes}, 0)
         self.root_node = root_nodes[0]
-        self.traversal_order_backward = self.topological_sort()
+        self.traversal_order_backward = self.topological_sort_backward()
         self.traversal_order_forward = self.traversal_order_backward.copy()
         self.traversal_order_forward.reverse()
 
-        if len(self.traversal_order_backward) != len(self.nodes):
+        def getLengthNestedList(nested_list):
+            length = 0
+
+            for item in nested_list:
+                if isinstance(item, list):
+                    length += getLengthNestedList(item)
+                else:
+                    length += 1
+
+            return length
+
+        if getLengthNestedList(self.traversal_order_backward) != len(self.nodes):
             logger.log_fatal("Invalid SPN backward traversal.")
             exit(-1)
 
-        if len(self.traversal_order_forward) != len(self.nodes):
+        if getLengthNestedList(self.traversal_order_forward) != len(self.nodes):
             logger.log_fatal("Invalid SPN forward traversal.")
             exit(-1)
 
@@ -777,10 +788,10 @@ class SPN:
 
         return
 
-    def topological_sort(self):
+    def topological_sort_backward(self):
+        levels = []
         parent_count = {}
         queue = []
-        topological_order = []
 
         for node in self.nodes:
             parent_count[node.id] = len(node.parents)
@@ -788,18 +799,22 @@ class SPN:
         queue.append(self.root_node)
 
         while len(queue) > 0:
-            node = queue[0]
-            topological_order.append(node)
+            level = []
+            queue_next_level = []
 
-            for child in node.children:
-                parent_count[child.id] -= 1
+            for node in queue:
+                level.append(node)
 
-                if parent_count[child.id] <= 0:
-                    queue.append(child)
+                for child in node.children:
+                    parent_count[child.id] -= 1
 
-            queue.pop(0)
+                    if parent_count[child.id] <= 0:
+                        queue_next_level.append(child)
 
-        return topological_order
+            levels.append(level)
+            queue = queue_next_level.copy()
+
+        return levels
 
     def traverse(self, layers, depth):
         if depth not in layers.keys():
