@@ -87,12 +87,13 @@ def initializeArgumentsTrainComposed():
     parser.add_argument("-ws", "--spn-pretrained-weights", type = str, default = "", help = "SPN model pretrained weights.")
     parser.add_argument("-fd", "--decomposed-fine-tune", type = int, default = 1, help = "Whether to perform decomposed fine-tuning.")
     parser.add_argument("-fs", "--spn-fine-tune", type = int, default = 1, help = "Whether to perform SPN fine-tuning.")
+    parser.add_argument("-is", "--spn-joint-inference-only", type = int, default = 1, help = "Whether to disable SPN training in joint training.")
     parser.add_argument("-m", "--model", type = str, default = "", help = "Model to train.")
     parser.add_argument("-o", "--optimizer", type = str, default = "", help = "SPN optimizer.")
     parser.add_argument("-b", "--batch-size", type = int, default = 512, help = "Batch size.")
     parser.add_argument("-e", "--epochs", type = int, default = 100, help = "Number of training epochs.")
     parser.add_argument("-c", "--use-covariance-loss", type = int, default = 0, help = "Whether to use covariance loss.")
-    parser.add_argument("-r", "--randomize-weights", type = int, default = 0, help = "Whether to randomize weights.")
+    parser.add_argument("-r", "--spn-randomize-weights", type = int, default = 0, help = "Whether to randomize SPN weights.")
     parser.add_argument("-s", "--seed", type = int, default = 42, help = "Randomization seed.")
 
     return parser.parse_args()
@@ -329,6 +330,11 @@ def processArgumentsTrainComposed():
     else:
         header.config_spn["fine_tuning"] = True
 
+    if arguments.spn_joint_inference_only == 0:
+        header.config_spn["joint_inference_only"] = False
+    else:
+        header.config_spn["joint_inference_only"] = True
+
     if arguments.model != "":
         header.config_decomposed["model"] = arguments.model
 
@@ -343,7 +349,7 @@ def processArgumentsTrainComposed():
     else:
         header.config_decomposed["use_covariance_loss"] = True
 
-    if arguments.randomize_weights == 0:
+    if arguments.spn_randomize_weights == 0:
         header.config_spn["randomize_weights"] = False
     else:
         header.config_spn["randomize_weights"] = True
@@ -373,6 +379,7 @@ def processArgumentsTrainComposed():
     logger.log_trace("SPN model pretrained weights: \"" + header.config_spn["model_pretrained_weights"] + "\".")
     logger.log_trace("Whether to perform decomposed fine-tuning: " + str(header.config_decomposed["fine_tuning"]) + ".")
     logger.log_trace("Whether to perform SPN fine-tuning: " + str(header.config_spn["fine_tuning"]) + ".")
+    logger.log_trace("Whether to disable SPN training in joint training: " + str(header.config_spn["joint_inference_only"]) + ".")
     logger.log_trace("Batch size: " + str(header.config_decomposed["data_loader_batch_size"]) + ".")
     logger.log_trace("Epochs: " + str(header.config_decomposed["epochs"]) + ".")
     logger.log_trace("Whether to use covariance loss: " + str(header.config_decomposed["use_covariance_loss"]) + ".")

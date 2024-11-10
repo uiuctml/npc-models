@@ -56,12 +56,13 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
             loss.backward()
             optimizer_decomposed.step()
 
-            spn_joint.backward()
+            if not header.config_spn["joint_inference_only"]:
+                spn_joint.backward()
 
-            if marginal_probabilities_counted is None:
-                spn_marginal.backward()
+                if marginal_probabilities_counted is None:
+                    spn_marginal.backward()
 
-            optimizer_spn.step(matrix_a.detach(), matrix_b.detach(), output_composed.detach(), labels_original)
+                optimizer_spn.step(matrix_a.detach(), matrix_b.detach(), output_composed.detach(), labels_original)
 
             corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
 
