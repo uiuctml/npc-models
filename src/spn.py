@@ -147,15 +147,19 @@ class CCCPGenerativeSPNOptimizer(SPNOptimizer):
         self.spn_joint.reuse_forward = False
         self.spn_marginal.reuse_forward = False
 
+        # TODO Optimization: unroll this for loop
         for sum_node in self.spn_joint.sum_nodes:
+            child_values_forward = []
             weight_normalization_sum_node = 0
 
-            # TODO Optimization: unroll this for loop (compute all weight updates at once)
-            for (i, child) in enumerate(sum_node.children):
-                # Compute weight updates in log space
-                weight_updates = torch.exp(sum_node.value_backward + child.value_forward - self.spn_joint.root_node.value_forward)
-                weight_updates = torch.sum(weight_updates, 0)
-                sum_node.weights[i] *= weight_updates
+            for child in sum_node.children:
+                child_values_forward.append(child.value_forward)
+
+            child_values_forward = torch.stack(child_values_forward)    # number of children x batch size
+            weight_updates = torch.exp(sum_node.value_backward + child_values_forward - self.spn_joint.root_node.value_forward) # number of children x batch size
+            weight_updates = torch.sum(weight_updates, 1)   # number of children
+            weight_updates = torch.unsqueeze(weight_updates, 1)    # number of children x 1
+            sum_node.weights *= weight_updates   # number of children x 1
 
             # Local weight normalization with Laplace smoothing
             for weight_sum_node in sum_node.weights:
