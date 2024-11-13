@@ -4,6 +4,7 @@ import logger
 import numpy
 import os
 import torch
+import tqdm
 
 class SPNLearningRateScheduler:
     def __init__(self, optimizer, factor = 0.8, patience = 2, threshold = 1e-4, cooldown = 2, min_learning_rate = 1e-6):
@@ -549,9 +550,18 @@ class SPN:
 
         with open(file_path_spn, "r") as file_spn:
             categorical_leaf_node_id = -1
+            counter_line = 0
+            lines = file_spn.readlines()
+            progress_bar = tqdm.tqdm(total = len(lines))
             reading_nodes = True
 
-            for line in file_spn.readlines():
+            progress_bar.set_description_str("[INFO]: Loading SPN")
+
+            for line in lines:
+                progress_bar.n = counter_line + 1
+                progress_bar.refresh()
+                counter_line += 1
+
                 line = line.strip()
 
                 if line[0] == "#":
@@ -664,6 +674,8 @@ class SPN:
                         elif isinstance(nodes[1], ProductNode):
                             nodes[1].children.append(nodes[0])
                             nodes[0].parents.append(nodes[1])
+
+            progress_bar.close()
 
         for sum_node in self.sum_nodes:
             sum_node.weights = torch.Tensor(sum_node.weights).reshape(-1, 1)

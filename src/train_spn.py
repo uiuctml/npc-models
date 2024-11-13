@@ -125,6 +125,7 @@ def main():
         logger.log_info("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
         logger.log_info("SPN depths: " + str(spn_joint.depth) + ".")
 
+    logger.log_info("Testing SPN...")
     test(spn_joint, dataset_test)
 
     if epoch <= header.config_spn["epochs"]:
