@@ -551,6 +551,7 @@ class SPN:
         with open(file_path_spn, "r") as file_spn:
             categorical_leaf_node_id = -1
             counter_line = 0
+            id_to_nodes = {}
             lines = file_spn.readlines()
             progress_bar = tqdm.tqdm(total = len(lines))
             reading_nodes = True
@@ -585,12 +586,14 @@ class SPN:
                         sum_node.device = self.device
                         sum_node.id = node_id
                         self.nodes.append(sum_node)
+                        id_to_nodes[sum_node.id] = sum_node
                         self.sum_nodes.append(sum_node)
                     elif node_type == "PRD":
                         product_node = ProductNode()
                         product_node.device = self.device
                         product_node.id = node_id
                         self.nodes.append(product_node)
+                        id_to_nodes[product_node.id] = product_node
                         self.product_nodes.append(product_node)
                     elif node_type == "CatNode" or node_type == "CATNODE":
                         categorical_leaf_node_list = []
@@ -614,6 +617,7 @@ class SPN:
                                 categorical_leaf_node_list.append(categorical_leaf_node)
                                 self.leaf_nodes.append(categorical_leaf_node)
                                 self.nodes.append(categorical_leaf_node)
+                                id_to_nodes[categorical_leaf_node.id] = categorical_leaf_node
 
                             self.leaf_nodes_dict[node_attribute_index] = categorical_leaf_node_list
 
@@ -624,6 +628,7 @@ class SPN:
                         sum_node.leaf = True
                         sum_node.weights = node_probabilities
                         self.nodes.append(sum_node)
+                        id_to_nodes[sum_node.id] = sum_node
                         self.sum_nodes.append(sum_node)
 
                         for (i, categorical_leaf_node) in enumerate(categorical_leaf_node_list):
@@ -641,14 +646,14 @@ class SPN:
 
                         self.leaf_nodes.append(categorical_leaf_node)
                         self.nodes.append(categorical_leaf_node)
+                        id_to_nodes[categorical_leaf_node.id] = categorical_leaf_node
                 else:
                     nodes = []
                     node_id_first = int(line_list[0])
                     node_id_second = int(line_list[1])
 
-                    for node in self.nodes:
-                        if node.id == node_id_first or node.id == node_id_second:
-                            nodes.append(node)
+                    nodes.append(id_to_nodes[node_id_first])
+                    nodes.append(id_to_nodes[node_id_second])
 
                     if len(nodes) != 2:
                         logger.log_fatal("Invalid edge.")
