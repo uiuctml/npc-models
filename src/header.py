@@ -134,10 +134,10 @@ config_decomposed = {
 config_spn = {
     "dir_checkpoints": "../checkpoints",
     "epochs": 50,
+    "dir_dataset_test": "../../../datasets/mnist-dataset/images/split/original/test",
+    "dir_dataset_train": "../../../datasets/mnist-dataset/images/split/original/train",
+    "dir_dataset_validation": "../../../datasets/mnist-dataset/images/split/original/validate",
     "file_path_spn": "../../learnspn/output/learnspn/mnist.spn.txt",
-    "file_path_spn_dataset_test": "../../../datasets/mnist-dataset/images/split/spn/test.txt",
-    "file_path_spn_dataset_train": "../../../datasets/mnist-dataset/images/split/spn/train.txt",
-    "file_path_spn_dataset_validation": "../../../datasets/mnist-dataset/images/split/spn/validate.txt",
     "file_name_checkpoint": run_name_spn + ".tar",
     "file_name_checkpoint_best": run_name_spn + ".best.tar",
     "fine_tuning": False,
