@@ -58,7 +58,31 @@ def loadDataset(dir_dataset, device):
             for _ in range(count_instances):
                 dataset[-1].append(binary_vector_original)
     else:
-        pass
+        for image_name in config_dataset["mappings"]:
+            class_name_original = image_name.split('/')[0]
+            attributes = config_dataset["mappings"][image_name]["labels"]
+
+            for (i, attribute_name) in enumerate(attributes.keys()):
+                category_names = attributes[attribute_name]
+                count_categories = len(indices_attribute[attribute_name])
+                binary_vector_category = torch.zeros(count_categories)
+
+                if isinstance(category_names, list):
+                    for category_name in category_names:
+                        index_category = indices_attribute[attribute_name][category_name]
+                        binary_vector_category[index_category] = 1
+                else:
+                    index_category = indices_attribute[attribute_name][category_names]
+                    binary_vector_category[index_category] = 1
+
+                dataset[i].append(binary_vector_category)
+
+            count_original = len(indices_original)
+            index_original = indices_original[class_name_original]
+            binary_vector_original = torch.zeros(count_original)
+            binary_vector_original[index_original] = 1
+
+            dataset[-1].append(binary_vector_original)
 
     for i in range(len(dataset)):
         dataset[i] = torch.stack(dataset[i], dim = 0)
