@@ -41,11 +41,17 @@ def loadDataset(dir_dataset, device):
             count_instances = len(os.listdir(os.path.join(dir_dataset, class_name_original)))
 
             for (i, attribute_name) in enumerate(attributes.keys()):
-                category_name = attributes[attribute_name]
+                category_names = attributes[attribute_name]
                 count_categories = len(indices_attribute[attribute_name])
-                index_category = indices_attribute[attribute_name][category_name]
                 binary_vector_category = torch.zeros(count_categories)
-                binary_vector_category[index_category] = 1
+
+                if isinstance(category_names, list):
+                    for category_name in category_names:
+                        index_category = indices_attribute[attribute_name][category_name]
+                        binary_vector_category[index_category] = 1
+                else:
+                    index_category = indices_attribute[attribute_name][category_names]
+                    binary_vector_category[index_category] = 1
 
                 for _ in range(count_instances):
                     dataset[i].append(binary_vector_category)
