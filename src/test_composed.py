@@ -23,12 +23,10 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
     accuracy_epoch_composed = 0
     accuracy_epoch_list_decomposed = []
     config_dataset = data_loader.dataset.config
-    ground_truths_epoch_composed = []
     mpes = {}
     output_list_composed = []
     output_list_decomposed = []
     output_list_decomposed_accuracy = []
-    predictions_epoch_composed = []
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
     spn_output_rows = len(data_loader.dataset.classes_original)
     spn_output_cols = 1
@@ -76,9 +74,6 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
 
             wandb.log({"testing/batch/accuracy": accuracy_batch_composed})
             wandb.log({"testing/batch/step": batch_step})
-
-            ground_truths_epoch_composed += labels_original.data.tolist()
-            predictions_epoch_composed += predictions_composed.tolist()
 
             batch_step += 1
 
