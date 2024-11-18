@@ -2,7 +2,9 @@
 
 import argument
 import header
+import json
 import logger
+import os
 import spn
 import torch
 import tqdm
@@ -10,23 +12,42 @@ import type
 import utility
 import wandb
 
-def loadDataset(file_path_dataset, device):
+def loadDataset(dir_dataset, device):
+    config_dataset = {}
     dataset = []
 
-    with open(file_path_dataset, "r") as file_dataset:
-        lines = file_dataset.readlines()
+    with open(header.file_path_dataset_config, "r") as file_config_dataset:
+        config_dataset = json.load(file_config_dataset)
 
-        for line in lines:
-            line = line.strip()
-            line_list = line.split(",")
+    labels_attribute = utility.getLabelsAttribute(config_dataset)
+    labels_original = utility.getLabelsOriginal(config_dataset)
+    indices_attribute = utility.getIndicesFromLabelsAttribute(labels_attribute)
+    indices_original = utility.getIndicesFromLabelsOriginal(labels_original)
 
-            for i in range(len(line_list)):
-                line_list[i] = int(line_list[i])
+    for _ in range(len(labels_attribute) + 1):
+        dataset.append([])
 
-            dataset.append(line_list)
+    if "instance_wise" not in config_dataset or config_dataset["instance_wise"] == False:
+        for class_name_original in labels_original:
+            attributes = config_dataset["mappings"][class_name_original]["labels"]
+            count_instances = len(os.listdir(os.path.join(dir_dataset, class_name_original)))
+            index_original = indices_original[class_name_original]
 
-    dataset = torch.Tensor(dataset)
-    dataset = dataset.to(device)
+            for (i, attribute_name) in enumerate(attributes.keys()):
+                category_name = attributes[attribute_name]
+                index_category = indices_attribute[attribute_name][category_name]
+
+                for _ in range(count_instances):
+                    dataset[i].append(index_category)
+
+            for _ in range(count_instances):
+                dataset[-1].append(index_original)
+    else:
+        pass
+
+    for i in range(len(dataset)):
+        dataset[i] = torch.Tensor(dataset[i])
+        dataset[i] = dataset[i].to(device)
 
     return dataset
 
@@ -74,9 +95,16 @@ def main():
     logger.log_info("Started run \"" + header.run_name_spn + "\".")
 
     device = torch.device("cuda")
-    dataset_test = loadDataset(header.config_spn["file_path_spn_dataset_test"], device)
-    dataset_train = loadDataset(header.config_spn["file_path_spn_dataset_train"], device)
-    dataset_validation = loadDataset(header.config_spn["file_path_spn_dataset_validation"], device)
+    dataset_test = loadDataset(header.config_spn["dir_dataset_test"], device)
+    dataset_train = loadDataset(header.config_spn["dir_dataset_train"], device)
+    dataset_validation = loadDataset(header.config_spn["dir_dataset_validation"], device)
+
+    # TODO test v
+    dataset_test = torch.stack(dataset_test, dim = 1)
+    dataset_train = torch.stack(dataset_train, dim = 1)
+    dataset_validation = torch.stack(dataset_validation, dim = 1)
+    # TODO test ^
+
     epoch = 1
     log_likelihood_best = float("-inf")
     log_likelihood_train = 0
