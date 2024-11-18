@@ -239,7 +239,7 @@ def main():
 
         accuracy_validation_epoch_mean = sum(accuracy_validation_epoch_list) / len(accuracy_validation_epoch_list)
 
-        logger.log_info("Current best validation accuracy: " + str(accuracy_validation_epoch_mean) + ".")
+        logger.log_info("Epoch validation accuracy: " + str(accuracy_validation_epoch_mean) + ".")
 
         if accuracy_validation_epoch_mean > accuracy_validation_best:
             accuracy_validation_best = accuracy_validation_epoch_mean

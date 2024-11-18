@@ -35,8 +35,10 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
     with torch.set_grad_enabled(True):
         for (batch_index, (input, labels_decomposed, labels_original, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
-            labels_decomposed = labels_decomposed.to(device, non_blocking = True)
             labels_original = labels_original.to(device, non_blocking = True)
+
+            for i in range(len(labels_decomposed)):
+                labels_decomposed[i] = labels_decomposed[i].to(device, non_blocking = True)
 
             optimizer_decomposed.zero_grad()
 
@@ -67,9 +69,7 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
             corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
 
             for (i, attribute) in enumerate(config_dataset["attributes"]):
-                (_, predictions_decomposed) = torch.max(outputs_decomposed[i], 1)
-
-                corrects_decomposed = torch.sum(predictions_decomposed == labels_decomposed[:, i].data).item()
+                corrects_decomposed = utility.computeCorrectsDecomposed(outputs_decomposed[i], labels_decomposed[i], device)
                 accuracy_batch_decomposed = corrects_decomposed / input.size(0)
                 accuracy_epoch_list_decomposed[i] += corrects_decomposed
 
@@ -124,8 +124,10 @@ def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, 
     with torch.set_grad_enabled(False):
         for (batch_index, (input, labels_decomposed, labels_original, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
-            labels_decomposed = labels_decomposed.to(device, non_blocking = True)
             labels_original = labels_original.to(device, non_blocking = True)
+
+            for i in range(len(labels_decomposed)):
+                labels_decomposed[i] = labels_decomposed[i].to(device, non_blocking = True)
 
             (outputs_decomposed, _) = model_decomposed(input)
 
@@ -143,9 +145,7 @@ def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, 
             corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
 
             for (i, attribute) in enumerate(config_dataset["attributes"]):
-                (_, predictions_decomposed) = torch.max(outputs_decomposed[i], 1)
-
-                corrects_decomposed = torch.sum(predictions_decomposed == labels_decomposed[:, i].data).item()
+                corrects_decomposed = utility.computeCorrectsDecomposed(outputs_decomposed[i], labels_decomposed[i], device)
                 accuracy_batch_decomposed = corrects_decomposed / input.size(0)
                 accuracy_epoch_list_decomposed[i] += corrects_decomposed
 
@@ -262,8 +262,8 @@ def main():
 
     logger.log_info("Setting SPN leaf nodes...")
 
-    spn_joint.set_leaf_nodes(spn_settings_joint)
-    spn_marginal.set_leaf_nodes(spn_settings_marginal)
+    spn_joint.set_leaf_nodes_categorical(spn_settings_joint)
+    spn_marginal.set_leaf_nodes_categorical(spn_settings_marginal)
 
     (accuracy_validation_best, batch_step_train, batch_step_validate, [criterion], epoch) = utility.loadCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, [criterion], epoch, [learning_rate_scheduler], model_decomposed, [optimizer_decomposed])
     utility.loadCheckpointSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], 0, 0, 0)
@@ -308,6 +308,8 @@ def main():
 
         learning_rate_scheduler.step()
         learning_rate_scheduler_spn.step(loss_validation_epoch)
+
+        logger.log_info("Epoch validation accuracy: " + str(accuracy_validation_epoch) + ".")
 
         if accuracy_validation_epoch > accuracy_validation_best:
             accuracy_validation_best = accuracy_validation_epoch
