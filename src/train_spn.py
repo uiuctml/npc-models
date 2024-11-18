@@ -12,6 +12,14 @@ import type
 import utility
 import wandb
 
+def generateMarginalSettings(dataset, device):
+    settings_marginal = []
+
+    for i in range(len(dataset)):
+        settings_marginal.append(torch.full(dataset[i].shape, -1).to(device))
+
+    return settings_marginal
+
 def loadDataset(dir_dataset, device):
     config_dataset = {}
     dataset = []
@@ -31,22 +39,29 @@ def loadDataset(dir_dataset, device):
         for class_name_original in labels_original:
             attributes = config_dataset["mappings"][class_name_original]["labels"]
             count_instances = len(os.listdir(os.path.join(dir_dataset, class_name_original)))
-            index_original = indices_original[class_name_original]
 
             for (i, attribute_name) in enumerate(attributes.keys()):
                 category_name = attributes[attribute_name]
+                count_categories = len(indices_attribute[attribute_name])
                 index_category = indices_attribute[attribute_name][category_name]
+                binary_vector_category = torch.zeros((1, count_categories))
+                binary_vector_category[0, index_category] = 1
 
                 for _ in range(count_instances):
-                    dataset[i].append(index_category)
+                    dataset[i].append(binary_vector_category)
+
+            count_original = len(indices_original)
+            index_original = indices_original[class_name_original]
+            binary_vector_original = torch.zeros((1, count_original))
+            binary_vector_original[0, index_original] = 1
 
             for _ in range(count_instances):
-                dataset[-1].append(index_original)
+                dataset[-1].append(binary_vector_original)
     else:
         pass
 
     for i in range(len(dataset)):
-        dataset[i] = torch.Tensor(dataset[i])
+        dataset[i] = torch.stack(dataset[i], dim = 0)
         dataset[i] = dataset[i].to(device)
 
     return dataset
@@ -98,20 +113,13 @@ def main():
     dataset_test = loadDataset(header.config_spn["dir_dataset_test"], device)
     dataset_train = loadDataset(header.config_spn["dir_dataset_train"], device)
     dataset_validation = loadDataset(header.config_spn["dir_dataset_validation"], device)
-
-    # TODO test v
-    dataset_test = torch.stack(dataset_test, dim = 1)
-    dataset_train = torch.stack(dataset_train, dim = 1)
-    dataset_validation = torch.stack(dataset_validation, dim = 1)
-    # TODO test ^
-
     epoch = 1
     log_likelihood_best = float("-inf")
     log_likelihood_train = 0
     log_likelihood_train_last = 0
     normalize = False
     use_probability = False
-    settings_marginal = torch.full((1, dataset_test.shape[1]), -1).to(device)
+    settings_marginal = generateMarginalSettings(dataset_test, device)
     spn_joint = spn.SPN(device)
     spn_marginal = spn.SPN(device)
     optimizer = None
