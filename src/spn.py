@@ -382,13 +382,30 @@ class CategoricalLeafNode(Node):
     def forward(self):
         return
 
-    def set(self, settings):
+    def set_binary(self, settings):
         if self.attribute_index < 0 or self.category_index < 0:
             logger.log_fatal("Invalid categorical leaf node. Quit.")
             exit(-1)
 
         categories = settings[self.attribute_index]
         self.value_forward = categories[:, self.category_index].float()
+        self.value_forward = self.value_forward.to(self.device)
+
+        # Compute forward values in log space
+        self.value_forward = torch.log(self.value_forward)
+
+        return
+
+    def set_categorical(self, settings):
+        if self.attribute_index < 0 or self.category_index < 0:
+            logger.log_fatal("Invalid categorical leaf node. Quit.")
+            exit(-1)
+
+        variables = settings[:, self.attribute_index]
+        settings = (variables == self.category_index)
+        settings_marginal = (variables < 0)
+
+        self.value_forward = torch.logical_or(settings, settings_marginal).float()
         self.value_forward = self.value_forward.to(self.device)
 
         # Compute forward values in log space
@@ -453,6 +470,7 @@ class SumNode(Node):
 
 class SPN:
     def __init__(self, device = torch.device("cuda")):
+        self.batch_size = -1
         self.depth = None
         self.device = device
         self.induced_trees = []
@@ -463,15 +481,17 @@ class SPN:
         self.reuse_backward = False
         self.reuse_forward = False
         self.root_node = None
-        self.settings = None
         self.sum_nodes = []
         self.traversal_order_backward = []
         self.traversal_order_forward = []
 
         return
 
-    def __call__(self, settings):
-        self.set_leaf_nodes(settings)
+    def __call__(self, settings, categorical = True):
+        if categorical:
+            self.set_leaf_nodes_categorical(settings)
+        else:
+            self.set_leaf_nodes_binary(settings)
 
         return self.forward()
 
@@ -492,7 +512,7 @@ class SPN:
             self.reuse_backward = True
 
             # Initialize root node backward value in log space
-            self.root_node.value_backward = torch.log(torch.ones(self.settings[0].shape[0]))
+            self.root_node.value_backward = torch.log(torch.ones(self.batch_size))
             self.root_node.value_backward = self.root_node.value_backward.to(self.device)
 
             for level in self.traversal_order_backward[1:]:
@@ -783,13 +803,23 @@ class SPN:
 
         return
 
-    def set_leaf_nodes(self, settings):
+    def set_leaf_nodes_binary(self, settings):
         self.reuse_backward = False
         self.reuse_forward = False
-        self.settings = settings
+        self.batch_size = settings[0].shape[0]
 
         for leaf_node in self.leaf_nodes:
-            leaf_node.set(self.settings)
+            leaf_node.set_binary(settings)
+
+        return
+
+    def set_leaf_nodes_categorical(self, settings):
+        self.reuse_backward = False
+        self.reuse_forward = False
+        self.batch_size = settings.shape[0]
+
+        for leaf_node in self.leaf_nodes:
+            leaf_node.set_categorical(settings)
 
         return
 

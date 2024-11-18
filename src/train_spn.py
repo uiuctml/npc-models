@@ -12,14 +12,6 @@ import type
 import utility
 import wandb
 
-def generateMarginalSettings(dataset, device):
-    settings_marginal = []
-
-    for i in range(len(dataset)):
-        settings_marginal.append(torch.full(dataset[i].shape, -1).to(device))
-
-    return settings_marginal
-
 def loadDataset(dir_dataset, device):
     config_dataset = {}
     dataset = []
@@ -97,7 +89,7 @@ def loadDataset(dir_dataset, device):
     return dataset
 
 def test(spn_joint, settings):
-    log_likelihoods = spn_joint(settings)
+    log_likelihoods = spn_joint(settings, False)
     log_likelihood_test = torch.mean(log_likelihoods).item()
 
     logger.log_info("Testing log likelihood: " + str(log_likelihood_test) + ".")
@@ -105,7 +97,7 @@ def test(spn_joint, settings):
     return
 
 def train(spn_joint, spn_marginal, settings_joint, settings_marginal, optimizer, use_probability):
-    log_likelihoods = spn_joint(settings_joint)
+    log_likelihoods = spn_joint(settings_joint, False)
     log_likelihoods_marginal = spn_marginal(settings_marginal)
 
     spn_joint.backward()
@@ -119,7 +111,7 @@ def train(spn_joint, spn_marginal, settings_joint, settings_marginal, optimizer,
     return torch.mean(log_likelihoods).item()
 
 def validate(spn_joint, spn_marginal, settings_joint, settings_marginal, use_probability):
-    log_likelihoods = spn_joint(settings_joint)
+    log_likelihoods = spn_joint(settings_joint, False)
     log_likelihoods_marginal = spn_marginal(settings_marginal)
 
     if use_probability:
@@ -149,7 +141,7 @@ def main():
     log_likelihood_train_last = 0
     normalize = False
     use_probability = False
-    settings_marginal = generateMarginalSettings(dataset_test, device)
+    settings_marginal = torch.full((1, len(dataset_test)), -1).to(device)
     spn_joint = spn.SPN(device)
     spn_marginal = spn.SPN(device)
     optimizer = None
