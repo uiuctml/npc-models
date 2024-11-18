@@ -33,23 +33,23 @@ def train(model_decomposed, data_loader, criterions, optimizer, device, batch_st
             loss_criterions = 0
 
             input = input.to(device, non_blocking = True)
-            labels = labels.to(device, non_blocking = True)
+
+            for i in range(len(labels)):
+                labels[i] = labels[i].to(device, non_blocking = True)
 
             optimizer.zero_grad()
 
             (outputs, outputs_head_hidden) = model_decomposed(input)
 
             for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
-                (_, predictions) = torch.max(outputs[i], 1)
-                loss = criterions[i](outputs[i], labels[:, i])
+                loss = criterions[i](outputs[i], labels[i])
 
                 if header.config_decomposed["use_l2_loss"]:
                     l2_norm = utility.computeL2Norm(model_decomposed.parameters())
                     loss_l2 = header.config_decomposed["l2_lambda"] * l2_norm
                     loss += loss_l2
 
-                corrects = torch.sum(predictions == labels[:, i].data).item()
-
+                corrects = utility.computeCorrectsDecomposed(outputs[i], labels[i], device)
                 accuracy_batch = corrects / input.size(0)
                 loss_batch = loss.item()
 
@@ -119,21 +119,21 @@ def validate(model_decomposed, data_loader, criterions, device, batch_step):
             loss_overall = 0
 
             input = input.to(device, non_blocking = True)
-            labels = labels.to(device, non_blocking = True)
+
+            for i in range(len(labels)):
+                labels[i] = labels[i].to(device, non_blocking = True)
 
             (outputs, outputs_head_hidden) = model_decomposed(input)
 
             for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
-                (_, predictions) = torch.max(outputs[i], 1)
-                loss = criterions[i](outputs[i], labels[:, i])
+                loss = criterions[i](outputs[i], labels[i])
 
                 if header.config_decomposed["use_l2_loss"]:
                     l2_norm = utility.computeL2Norm(model_decomposed.parameters())
                     loss_l2 = header.config_decomposed["l2_lambda"] * l2_norm
                     loss += loss_l2
 
-                corrects = torch.sum(predictions == labels[:, i].data).item()
-
+                corrects = utility.computeCorrectsDecomposed(outputs[i], labels[i], device)
                 accuracy_batch = corrects / input.size(0)
                 loss_batch = loss.item()
 
@@ -238,6 +238,8 @@ def main():
         learning_rate_scheduler.step(loss_overall_validation_epoch)
 
         accuracy_validation_epoch_mean = sum(accuracy_validation_epoch_list) / len(accuracy_validation_epoch_list)
+
+        logger.log_info("Current best validation accuracy: " + str(accuracy_validation_epoch_mean) + ".")
 
         if accuracy_validation_epoch_mean > accuracy_validation_best:
             accuracy_validation_best = accuracy_validation_epoch_mean

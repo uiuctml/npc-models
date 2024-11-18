@@ -21,6 +21,23 @@ def applySoftmaxDecomposed(outputs_decomposed):
 
     return outputs_decomposed_softmax
 
+def computeCorrectsDecomposed(outputs, labels, device):
+    masks_labels = (labels > 0)
+    counts_values = torch.sum(masks_labels, dim = 1)
+    masks_predictions = []
+
+    for (output, count_value) in zip(outputs, counts_values):
+        mask_prediction = torch.zeros(output.shape, dtype = torch.bool)
+        (_, prediction) = torch.topk(output, count_value)
+        mask_prediction[prediction] = True
+        masks_predictions.append(mask_prediction)
+
+    masks_predictions = torch.stack(masks_predictions, dim = 0).to(device)
+    corrects_rows = torch.all(masks_predictions == masks_labels, dim = 1)
+    corrects = torch.sum(corrects_rows).item()
+
+    return corrects
+
 def computeCovarianceRegularization(features):
     loss = 0
     features_centered = []

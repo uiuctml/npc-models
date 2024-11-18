@@ -48,8 +48,20 @@ class VISATDataset(torch.utils.data.Dataset):
 
                     for (attribute_index, attribute) in enumerate(self.config["attributes"]):
                         attribute_name = attribute["name"]
-                        class_name_decomposed = self.config["mappings"][image_name]["labels"][attribute_name]
-                        label = self.class_to_idx[attribute_name][class_name_decomposed]
+                        class_names_decomposed = self.config["mappings"][image_name]["labels"][attribute_name]
+                        count_categories = len(self.classes[attribute_name])
+                        label = [0 for _ in range(count_categories)]
+
+                        if isinstance(class_names_decomposed, list):
+                            probability = 1 / len(class_names_decomposed)
+
+                            for class_name_decomposed in class_names_decomposed:
+                                index_category = self.class_to_idx[attribute_name][class_name_decomposed]
+                                label[index_category] = probability
+                        else:
+                            index_category = self.class_to_idx[attribute_name][class_names_decomposed]
+                            label[index_category] = 1
+
                         self.labels[attribute_index].append(label)
         else:
             for class_name_original in self.classes_original:
@@ -61,8 +73,21 @@ class VISATDataset(torch.utils.data.Dataset):
 
                     for (attribute_index, attribute) in enumerate(self.config["attributes"]):
                         attribute_name = attribute["name"]
-                        class_name_decomposed = self.config["mappings"][class_name_original]["labels"][attribute_name]
-                        label = self.class_to_idx[attribute_name][class_name_decomposed]
+                        class_names_decomposed = self.config["mappings"][class_name_original]["labels"][attribute_name]
+
+                        count_categories = len(self.classes[attribute_name])
+                        label = [0 for _ in range(count_categories)]
+
+                        if isinstance(class_names_decomposed, list):
+                            probability = 1 / len(class_names_decomposed)
+
+                            for class_name_decomposed in class_names_decomposed:
+                                index_category = self.class_to_idx[attribute_name][class_name_decomposed]
+                                label[index_category] = probability
+                        else:
+                            index_category = self.class_to_idx[attribute_name][class_names_decomposed]
+                            label[index_category] = 1
+
                         self.labels[attribute_index].append(label)
 
         return
@@ -78,6 +103,6 @@ class VISATDataset(torch.utils.data.Dataset):
             image = self.transform(image)
 
         for label in self.labels:
-            labels.append(int(label[index]))
+            labels.append(torch.Tensor(label[index]))
 
-        return (image, torch.LongTensor(labels), self.labels_original[index], self.file_paths[index])
+        return (image, labels, self.labels_original[index], self.file_paths[index])
