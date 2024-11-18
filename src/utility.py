@@ -380,7 +380,7 @@ def logTestOutput(output, config, config_dataset, composed = False):
     with open(file_path_test_output, "a") as file_test_output:
         if file_empty:
             if config["type"] == "baseline":
-                file_test_output.write("# seed\tmodel\tattack\tcomposed\taccuracy\tprecision\trecall\n")
+                file_test_output.write("# seed\tmodel\tattack\tcomposed\taccuracy\n")
             elif config["type"] == "decomposed":
                 file_line_header = "# seed\tmodel\tattack\tcomposed"
 
