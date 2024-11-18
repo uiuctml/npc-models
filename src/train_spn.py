@@ -44,16 +44,16 @@ def loadDataset(dir_dataset, device):
                 category_name = attributes[attribute_name]
                 count_categories = len(indices_attribute[attribute_name])
                 index_category = indices_attribute[attribute_name][category_name]
-                binary_vector_category = torch.zeros((1, count_categories))
-                binary_vector_category[0, index_category] = 1
+                binary_vector_category = torch.zeros(count_categories)
+                binary_vector_category[index_category] = 1
 
                 for _ in range(count_instances):
                     dataset[i].append(binary_vector_category)
 
             count_original = len(indices_original)
             index_original = indices_original[class_name_original]
-            binary_vector_original = torch.zeros((1, count_original))
-            binary_vector_original[0, index_original] = 1
+            binary_vector_original = torch.zeros(count_original)
+            binary_vector_original[index_original] = 1
 
             for _ in range(count_instances):
                 dataset[-1].append(binary_vector_original)

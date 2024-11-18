@@ -387,11 +387,8 @@ class CategoricalLeafNode(Node):
             logger.log_fatal("Invalid categorical leaf node. Quit.")
             exit(-1)
 
-        variables = settings[:, self.attribute_index]
-        settings = (variables == self.category_index)
-        settings_marginal = (variables < 0)
-
-        self.value_forward = torch.logical_or(settings, settings_marginal).float()
+        categories = settings[self.attribute_index]
+        self.value_forward = categories[:, self.category_index].float()
         self.value_forward = self.value_forward.to(self.device)
 
         # Compute forward values in log space
@@ -495,7 +492,7 @@ class SPN:
             self.reuse_backward = True
 
             # Initialize root node backward value in log space
-            self.root_node.value_backward = torch.log(torch.ones(self.settings.shape[0]))
+            self.root_node.value_backward = torch.log(torch.ones(self.settings[0].shape[0]))
             self.root_node.value_backward = self.root_node.value_backward.to(self.device)
 
             for level in self.traversal_order_backward[1:]:
