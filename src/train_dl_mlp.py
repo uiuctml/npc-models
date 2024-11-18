@@ -28,7 +28,9 @@ def train(model_decomposed, data_loader, criterions, optimizers, device, batch_s
     with torch.set_grad_enabled(True):
         for (batch_index, (input, labels, _, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
-            labels = labels.to(device, non_blocking = True)
+
+            for i in range(len(labels)):
+                labels[i] = labels[i].to(device, non_blocking = True)
 
             (outputs, _) = model_decomposed(input)
             parameters = model_decomposed.module.get_parameters()
@@ -37,8 +39,7 @@ def train(model_decomposed, data_loader, criterions, optimizers, device, batch_s
                 optimizer = optimizers[i]
                 optimizer.zero_grad()
 
-                (_, predictions) = torch.max(outputs[i], 1)
-                loss = criterions[i](outputs[i], labels[:, i])
+                loss = criterions[i](outputs[i], labels[i])
 
                 if header.config_decomposed["use_l2_loss"]:
                     l2_norm = utility.computeL2Norm(parameters[i])
@@ -48,8 +49,7 @@ def train(model_decomposed, data_loader, criterions, optimizers, device, batch_s
                 loss.backward()
                 optimizer.step()
 
-                corrects = torch.sum(predictions == labels[:, i].data).item()
-
+                corrects = utility.computeCorrectsDecomposed(outputs[i], labels[i], device)
                 accuracy_batch = corrects / input.size(0)
                 loss_batch = loss.item()
 
@@ -92,22 +92,22 @@ def validate(model_decomposed, data_loader, criterions, device, batch_step):
     with torch.set_grad_enabled(False):
         for (batch_index, (input, labels, _, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
-            labels = labels.to(device, non_blocking = True)
+
+            for i in range(len(labels)):
+                labels[i] = labels[i].to(device, non_blocking = True)
 
             (outputs, _) = model_decomposed(input)
             parameters = model_decomposed.module.get_parameters()
 
             for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
-                (_, predictions) = torch.max(outputs[i], 1)
-                loss = criterions[i](outputs[i], labels[:, i])
+                loss = criterions[i](outputs[i], labels[i])
 
                 if header.config_decomposed["use_l2_loss"]:
                     l2_norm = utility.computeL2Norm(parameters[i])
                     loss_l2 = header.config_decomposed["l2_lambda"] * l2_norm
                     loss += loss_l2
 
-                corrects = torch.sum(predictions == labels[:, i].data).item()
-
+                corrects = utility.computeCorrectsDecomposed(outputs[i], labels[i], device)
                 accuracy_batch = corrects / input.size(0)
                 loss_batch = loss.item()
 
@@ -206,6 +206,8 @@ def main():
             learning_rate_scheduler.step(loss_validation_epoch)
 
         accuracy_validation_epoch_mean = sum(accuracy_validation_epoch_list) / len(accuracy_validation_epoch_list)
+
+        logger.log_info("Current best validation accuracy: " + str(accuracy_validation_epoch_mean) + ".")
 
         if accuracy_validation_epoch_mean > accuracy_validation_best:
             accuracy_validation_best = accuracy_validation_epoch_mean
