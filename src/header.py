@@ -10,16 +10,16 @@ counterfactual_qp_epsilon = 1
 counterfactual_qp_solver = "clarabel"
 counterfactual_steps = 50
 cuda_allow_tf32 = False
-dir_dataset_test_adversarial = "../../../datasets/cub-test-dataset/images/split/adversarial/test"
+dir_dataset_test_adversarial = "../../../datasets/cub-dataset/images/split/adversarial/test"
 dir_output_counterfactual = "../output/counterfactual"
 dir_output_mpe = "../output/mpe"
 dir_output_spn = "../output/spn"
 file_name_counterfactual = "counterfactual.json"
 file_name_mpe = "mpe.json"
 file_name_spn_manual = "manual.spn.txt"
-file_path_dataset_config = "../../visat-dataset-tools/configs/cub_test.json"
+file_path_dataset_config = "../../visat-dataset-tools/configs/cub.json"
 interpret_delimiter_label = "--"
-interpret_dir_dataset = "../../../datasets/cub-test-dataset/images/split/original/test"
+interpret_dir_dataset = "../../../datasets/cub-dataset/images/split/original/test"
 interpret_label_width_attribute = 200
 interpret_label_width_original = 350
 interpret_mpe = False
@@ -45,9 +45,9 @@ config_baseline = {
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dir_checkpoints": "../checkpoints",
-    "dir_dataset_test": "../../../datasets/cub-test-dataset/images/split/original/test",
-    "dir_dataset_train": "../../../datasets/cub-test-dataset/images/split/original/train",
-    "dir_dataset_validation": "../../../datasets/cub-test-dataset/images/split/original/validate",
+    "dir_dataset_test": "../../../datasets/cub-dataset/images/split/original/test",
+    "dir_dataset_train": "../../../datasets/cub-dataset/images/split/original/train",
+    "dir_dataset_validation": "../../../datasets/cub-dataset/images/split/original/validate",
     "dir_test_output": "../output/test",
     "epochs": 100,
     "file_name_checkpoint": run_name_baseline + ".tar",
@@ -89,9 +89,9 @@ config_decomposed = {
     "dataset_delimiter_label": "--",
     "dataset_label_undefined_keyword": "undefined",
     "dir_checkpoints": "../checkpoints",
-    "dir_dataset_test": "../../../datasets/cub-test-dataset/images/split/original/test",
-    "dir_dataset_train": "../../../datasets/cub-test-dataset/images/split/original/train",
-    "dir_dataset_validation": "../../../datasets/cub-test-dataset/images/split/original/validate",
+    "dir_dataset_test": "../../../datasets/cub-dataset/images/split/original/test",
+    "dir_dataset_train": "../../../datasets/cub-dataset/images/split/original/train",
+    "dir_dataset_validation": "../../../datasets/cub-dataset/images/split/original/validate",
     "dir_test_output": "../output/test",
     "epochs": 100,
     "factor_loss_covariance": 1e-8,
@@ -134,10 +134,10 @@ config_decomposed = {
 config_spn = {
     "dir_checkpoints": "../checkpoints",
     "epochs": 50,
-    "dir_dataset_test": "../../../datasets/cub-test-dataset/images/split/original/test",
-    "dir_dataset_train": "../../../datasets/cub-test-dataset/images/split/original/train",
-    "dir_dataset_validation": "../../../datasets/cub-test-dataset/images/split/original/validate",
-    "file_path_spn": "../../learnspn/output/learnspn/cub_test.spn.txt",
+    "dir_dataset_test": "../../../datasets/cub-dataset/images/split/original/test",
+    "dir_dataset_train": "../../../datasets/cub-dataset/images/split/original/train",
+    "dir_dataset_validation": "../../../datasets/cub-dataset/images/split/original/validate",
+    "file_path_spn": "../../learnspn/output/learnspn/cub.spn.txt",
     "file_name_checkpoint": run_name_spn + ".tar",
     "file_name_checkpoint_best": run_name_spn + ".best.tar",
     "fine_tuning": False,
