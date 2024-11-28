@@ -515,10 +515,26 @@ class SPN:
             self.root_node.value_backward = torch.log(torch.ones(self.batch_size))
             self.root_node.value_backward = self.root_node.value_backward.to(self.device)
 
-            for level in self.traversal_order_backward[1:]:
-                # TODO Unroll the following loop
-                for node in level:
-                    node.backward()
+            if self.device == torch.device("cpu"):
+                counter_node = 0
+                progress_bar = tqdm.tqdm(total = len(self.nodes), leave = False)
+                progress_bar.set_description_str("[INFO]: SPN backward")
+
+                for level in self.traversal_order_backward[1:]:
+                    # TODO Unroll the following loop
+                    for node in level:
+                        progress_bar.n = counter_node + 1
+                        progress_bar.refresh()
+                        counter_node += 1
+
+                        node.backward()
+
+                progress_bar.close()
+            else:
+                for level in self.traversal_order_backward[1:]:
+                    # TODO Unroll the following loop
+                    for node in level:
+                        node.backward()
 
         return
 
@@ -535,10 +551,26 @@ class SPN:
             self.reuse_backward = False
             self.reuse_forward = True
 
-            for level in self.traversal_order_forward:
-                # TODO Unroll the following loop
-                for node in level:
-                    node.forward()
+            if self.device == torch.device("cpu"):
+                counter_node = 0
+                progress_bar = tqdm.tqdm(total = len(self.nodes), leave = False)
+                progress_bar.set_description_str("[INFO]: SPN forward")
+
+                for level in self.traversal_order_forward:
+                    # TODO Unroll the following loop
+                    for node in level:
+                        progress_bar.n = counter_node + 1
+                        progress_bar.refresh()
+                        counter_node += 1
+
+                        node.forward()
+
+                progress_bar.close()
+            else:
+                for level in self.traversal_order_forward:
+                    # TODO Unroll the following loop
+                    for node in level:
+                        node.forward()
 
         return self.root_node.value_forward
 
@@ -832,7 +864,7 @@ class SPN:
         self.reuse_forward = False
 
         for (sum_node, sum_node_weights) in zip(self.sum_nodes, weights):
-            sum_node.weights = torch.clone(sum_node_weights)
+            sum_node.weights = torch.clone(sum_node_weights).to(self.device)
 
         return
 

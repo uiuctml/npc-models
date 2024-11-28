@@ -2,6 +2,8 @@ import multiprocessing
 import type
 
 attack_targeted_attribute = 0
+composed_find_mpe = False
+composed_spn_on_cpu = True
 counterfactual_implausibility_margin_range = 1e-3
 counterfactual_implausibility_margin_sum = 1e-6
 counterfactual_learning_rate = 1e-2

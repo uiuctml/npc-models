@@ -58,10 +58,10 @@ class Composition():
 
     @staticmethod
     def spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted = None):
-        log_likelihoods_joint = spn_joint.forward()
+        log_likelihoods_joint = spn_joint.forward().to(device)
 
         if marginal_probabilities_counted is None:
-            log_likelihoods_marginal = spn_marginal.forward()
+            log_likelihoods_marginal = spn_marginal.forward().to(device)
 
             # Compute matrix A and set entries with zero joint and marginal probabilities to zero
             mask_joint = (log_likelihoods_joint == -float("inf"))

@@ -66,8 +66,9 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
             accuracy_batch_composed = corrects_composed / input.size(0)
             accuracy_epoch_composed += corrects_composed
 
-            mpe_attributes = utility.findMPEs(matrix_a, matrix_b, spn_settings_joint, labels_original)
-            utility.saveMPEs(input_file_paths, mpes, mpe_attributes, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed)
+            if header.composed_find_mpe:
+                mpe_attributes = utility.findMPEs(matrix_a, matrix_b, spn_settings_joint, labels_original)
+                utility.saveMPEs(input_file_paths, mpes, mpe_attributes, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed)
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
@@ -82,8 +83,9 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
     if not os.path.isdir(header.dir_output_mpe):
         os.makedirs(header.dir_output_mpe, exist_ok = True)
 
-    with open(os.path.join(header.dir_output_mpe, header.file_name_mpe), "w") as file_mpe:
-        json.dump(mpes, file_mpe, indent = 4)
+    if header.composed_find_mpe:
+        with open(os.path.join(header.dir_output_mpe, header.file_name_mpe), "w") as file_mpe:
+            json.dump(mpes, file_mpe, indent = 4)
 
     for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
         accuracy_epoch_list_decomposed[i] /= len(data_loader.dataset)
@@ -140,6 +142,11 @@ def main():
     model_decomposed = model_decomposed.to(device)
     spn_joint = spn.SPN(device)
     spn_marginal = spn.SPN(device)
+
+    if header.composed_spn_on_cpu:
+        logger.log_info("Computing SPNs on CPU.")
+        spn_joint.device = torch.device("cpu")
+        spn_marginal.device = torch.device("cpu")
 
     if header.config_spn["optimizer"] == type.OptimizerSPN.cccp_discriminative.name:
         (marginal_probabilities_counted, _) = utility.countAttributeJointProbabilities(config_dataset, device)

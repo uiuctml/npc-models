@@ -229,6 +229,11 @@ def main():
     learning_rate_scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer_decomposed, T_0 = header.config_decomposed["learning_rate_scheduler_t_0"], T_mult = header.config_decomposed["learning_rate_scheduler_t_mult"], eta_min = header.config_decomposed["learning_rate_scheduler_min_learning_rate"], last_epoch = header.config_decomposed["learning_rate_scheduler_last_epoch"])
     learning_rate_scheduler_spn = None
 
+    if header.composed_spn_on_cpu:
+        logger.log_info("Computing SPNs on CPU.")
+        spn_joint.device = torch.device("cpu")
+        spn_marginal.device = torch.device("cpu")
+
     if header.config_spn["optimizer"] == type.OptimizerSPN.cccp_discriminative.name:
         (marginal_probabilities_counted, _) = utility.countAttributeJointProbabilities(config_dataset, device)
         optimizer_spn = spn.CCCPDiscriminativeSPNOptimizer(spn_joint, spn_marginal, device, marginal_probabilities_counted = marginal_probabilities_counted)
