@@ -602,7 +602,7 @@ class SPN:
             counter_line = 0
             id_to_nodes = {}
             lines = file_spn.readlines()
-            progress_bar = tqdm.tqdm(total = len(lines))
+            progress_bar = tqdm.tqdm(total = len(lines), leave = False)
             reading_nodes = True
 
             progress_bar.set_description_str("[INFO]: Loading SPN")
