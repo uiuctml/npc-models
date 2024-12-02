@@ -6,7 +6,7 @@ import header
 import logger
 import math
 import model
-import test_dl_decomposed
+import test_dl
 import torch
 import torchinfo
 import tqdm
@@ -257,7 +257,7 @@ def main():
     wandb.summary["validation/epoch/accuracy_best"] = accuracy_validation_best
 
     wandb.log({"testing/epoch/step": batch_step_test})
-    test_dl_decomposed.test(model_decomposed, data_loader_test, device, batch_step_test)
+    test_dl.test(model_decomposed, data_loader_test, device, batch_step_test)
 
     wandb.finish()
 
