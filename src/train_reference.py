@@ -10,8 +10,24 @@ import test_reference
 import torch
 import torchinfo
 import tqdm
+import type
 import utility
 import wandb
+
+def computeLoss(output_neck, output_head, labels_decomposed, labels_original):
+    if header.config_reference["model"] == type.ModelReference.cem.name:
+        loss_attribute = torch.nn.functional.binary_cross_entropy(output_neck, labels_decomposed)
+        loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_original)
+        return header.config_reference["concept_loss_weight"] * loss_attribute + loss_task
+    elif header.config_reference["model"] == type.ModelReference.dcr.name:
+        loss_attribute = torch.nn.functional.binary_cross_entropy(output_neck, labels_decomposed)
+        loss_task = torch.nn.functional.binary_cross_entropy(output_head, labels_original)
+        return header.config_reference["concept_loss_weight"] * loss_attribute + loss_task
+    else:
+        logger.log_fatal("Unknown reference network model \"" + header.config_baseline["model"] + "\".")
+        exit(-1)
+
+    return
 
 def train(model_reference, data_loader, optimizer, device, batch_step):
     accuracy_attribute_epoch = 0
@@ -32,9 +48,7 @@ def train(model_reference, data_loader, optimizer, device, batch_step):
 
             (output_neck, output_head) = model_reference(input)
 
-            loss_attribute = torch.nn.functional.binary_cross_entropy(output_neck, labels_decomposed)
-            loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_original)
-            loss = header.config_reference["cem_concept_loss_weight"] * loss_attribute + loss_task
+            loss = computeLoss(output_neck, output_head, labels_decomposed, labels_original)
 
             loss.backward()
             optimizer.step()
@@ -86,10 +100,7 @@ def validate(model_reference, data_loader, device, batch_step):
 
             (output_neck, output_head) = model_reference(input)
 
-            loss_attribute = torch.nn.functional.binary_cross_entropy(output_neck, labels_decomposed)
-            loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_original)
-            loss = header.config_reference["cem_concept_loss_weight"] * loss_attribute + loss_task
-
+            loss = computeLoss(output_neck, output_head, labels_decomposed, labels_original)
             accuracy_attribute_batch = sklearn.metrics.accuracy_score(labels_decomposed.cpu(), (output_neck > header.config_reference["threshold_attribute_accuracy"]).cpu())
             accuracy_task_batch = sklearn.metrics.accuracy_score(labels_original.cpu(), (output_head > 0).cpu())
             loss_batch = loss.item()
