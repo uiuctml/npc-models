@@ -118,7 +118,7 @@ def createTransform(config):
         torchvision.transforms.ToTensor()
     ])
 
-    if config["input_grayscale"]:
+    if "input_grayscale" in config and config["input_grayscale"]:
         dataset_transforms = torchvision.transforms.Compose([
         torchvision.transforms.Resize((config["model_input_height"], config["model_input_width"])),
         torchvision.transforms.Grayscale(3),
@@ -140,6 +140,17 @@ def findMPEs(matrix_a, matrix_b, spn_settings, labels_original):
         mpe_attributes.append(matrix_a_col_indices_to_attribute_indices[mpes_matrix_a_col_index])
 
     return mpe_attributes
+
+def getBinaryLabelsDecomposed(labels_decomposed, device):
+    for i in range(len(labels_decomposed)):
+        labels_decomposed[i] = labels_decomposed[i].to(device)
+        labels_decomposed[i] = (labels_decomposed[i] > 0).float()
+
+    return torch.cat(labels_decomposed, dim = 1)
+
+def getBinaryLabelsOriginal(labels_original, data_loader, device):
+    labels_original = labels_original.to(device)
+    return torch.nn.functional.one_hot(labels_original, num_classes = len(data_loader.dataset.classes_original)).float()
 
 def getLabelsAttribute(dataset_config):
     labels_attribute = {}

@@ -33,10 +33,12 @@ project_name = "visat-models"
 run_mode = "disabled"
 run_name_baseline_keyword = "baseline"
 run_name_decomposed_keyword = "decomposed"
+run_name_reference_keyword = "reference"
 run_name_relation_keyword = "relation"
 run_name_spn_keyword = "spn"
 run_name_baseline = ""
 run_name_decomposed = ""
+run_name_reference = ""
 run_name_relation = ""
 run_name_spn = ""
 seed = 42
@@ -131,6 +133,35 @@ config_decomposed = {
     "type": "decomposed",
     "use_l2_loss": False,
     "use_covariance_loss": False
+}
+
+config_reference = {
+    "cem_concept_loss_weight": 5,
+    "cem_model_embedding_size": 16,
+    "data_loader_batch_size": 128,
+    "data_loader_shuffle": True,
+    "data_loader_worker_count": multiprocessing.cpu_count(),
+    "dir_checkpoints": "../checkpoints",
+    "dir_dataset_test": "../../../datasets/awa2-dataset/images/split/original/test",
+    "dir_dataset_train": "../../../datasets/awa2-dataset/images/split/original/train",
+    "dir_dataset_validation": "../../../datasets/awa2-dataset/images/split/original/validate",
+    "epochs": 300,
+    "file_name_checkpoint": run_name_reference + ".tar",
+    "file_name_checkpoint_best": run_name_reference + ".best.tar",
+    "learning_rate_scheduler_mode": "min",
+    "learning_rate_scheduler_factor": 0.1,
+    "learning_rate_scheduler_patience": 10,
+    "model": "cem",
+    "model_input_height": 224,
+    "model_input_width": 224,
+    "model_input_channels": 3,
+    "optimizer_learning_rate": 1e-2,
+    "optimizer_momentum": 0.9,
+    "optimizer_weight_decay": 4e-5,
+    "run_name": run_name_reference,
+    "seed": seed,
+    "threshold_attribute_accuracy": 0.5,
+    "type": "reference",
 }
 
 config_spn = {

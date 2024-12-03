@@ -224,6 +224,8 @@ def main():
 
         learning_rate_scheduler.step(loss_validation_epoch)
 
+        logger.log_info("Epoch validation accuracy: " + str(accuracy_validation_epoch) + ".")
+
         if accuracy_validation_epoch > accuracy_validation_best:
             accuracy_validation_best = accuracy_validation_epoch
             wandb.log({"validation/epoch/accuracy_best": accuracy_validation_best})

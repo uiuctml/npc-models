@@ -3,8 +3,10 @@ import header
 import json
 import logger
 import torch
+import torch_explain
 import torchvision
 import type
+import utility
 
 class Model(torch.nn.Module):
     def __init__(self):
@@ -19,6 +21,32 @@ class Model(torch.nn.Module):
     @abc.abstractmethod
     def get_parameters(self):
         pass
+
+class CEM(Model):
+    def __init__(self, config_dataset, device):
+        super().__init__()
+
+        labels_attribute = utility.getLabelsAttribute(config_dataset)
+        labels_original = utility.getLabelsOriginal(config_dataset)
+        labels_categories = []
+
+        for attribute_name in labels_attribute.keys():
+            labels_categories += labels_attribute[attribute_name]
+
+        self.net = torchvision.models.resnet34(weights = "IMAGENET1K_V1")
+        self.net.fc = torch_explain.nn.ConceptEmbedding(self.net.fc.in_features, len(labels_categories), header.config_reference["cem_model_embedding_size"])
+        self.net.head = torch.nn.Linear(len(labels_categories) * header.config_reference["cem_model_embedding_size"], len(labels_original))
+
+        return
+
+    def forward(self, input):
+        (concept_embedding, output_neck) = self.net(input)
+        output_head = self.net.head(concept_embedding.reshape(len(concept_embedding), -1))
+
+        return (output_neck, output_head)
+
+    def get_parameters(self):
+        return self.net.parameters()
 
 class CNNMTL(Model):
     def __init__(self, config_dataset, device):
@@ -265,7 +293,7 @@ class ResNet152(Model):
             for parameter in self.net.parameters():
                 parameter.requires_grad = False
 
-        class_count = len(config_dataset["mappings"].keys())
+        class_count = len(utility.getLabelsOriginal(config_dataset))
         net_fc_in_features = self.net.fc.in_features
         self.net.fc = torch.nn.Linear(net_fc_in_features, class_count)
 
@@ -349,7 +377,7 @@ class ViTB32(Model):
         for parameter in self.net.heads.parameters():
             parameter.requires_grad = True
 
-        class_count = len(config_dataset["mappings"].keys())
+        class_count = len(utility.getLabelsOriginal(config_dataset))
         net_heads_head_in_features = self.net.heads.head.in_features
         self.net.heads.head = torch.nn.Linear(net_heads_head_in_features, class_count)
 
@@ -463,4 +491,15 @@ def createModelDecomposed(device):
         return ViTB32MTL(config_dataset, device)
     else:
         logger.log_fatal("Unknown decomposed network model \"" + header.config_decomposed["model"] + "\".")
+        exit(-1)
+
+def createModelReference(device):
+    file_config_dataset = open(header.file_path_dataset_config, "r")
+    config_dataset = json.load(file_config_dataset)
+    file_config_dataset.close()
+
+    if header.config_reference["model"] == type.ModelReference.cem.name:
+        return CEM(config_dataset, device)
+    else:
+        logger.log_fatal("Unknown reference network model \"" + header.config_baseline["model"] + "\".")
         exit(-1)

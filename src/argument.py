@@ -98,6 +98,16 @@ def initializeArgumentsTrainComposed():
 
     return parser.parse_args()
 
+def initializeArgumentsTrainReference():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-m", "--model", type = str, default = "", help = "Model to train.")
+    parser.add_argument("-b", "--batch-size", type = int, default = None, help = "Batch size.")
+    parser.add_argument("-e", "--epochs", type = int, default = None, help = "Number of training epochs.")
+    parser.add_argument("-s", "--seed", type = int, default = None, help = "Randomization seed.")
+
+    return parser.parse_args()
+
 def initializeArgumentsTrainSPN():
     parser = argparse.ArgumentParser()
 
@@ -147,6 +157,22 @@ def initializeRunNameDecomposed(run_name):
     header.config_decomposed["run_name"] = header.run_name_decomposed
 
     return resume
+
+def initializeRunNameReference(run_name = ""):
+    if run_name != "":
+        if run_name.split(".")[0] != header.run_name_reference_keyword:
+            logger.log_fatal("Invalid reference run name. Quit.")
+            exit(-1)
+
+        header.run_name_reference = run_name
+    else:
+        header.run_name_reference = generateRunName(header.run_name_reference_keyword, header.config_reference["model"], header.config_reference["seed"], True)
+
+    header.config_reference["file_name_checkpoint"] = header.run_name_reference + ".tar"
+    header.config_reference["file_name_checkpoint_best"] = header.run_name_reference + ".best.tar"
+    header.config_reference["run_name"] = header.run_name_reference
+
+    return
 
 def initializeRunNameSPN(run_name):
     resume = False
@@ -259,6 +285,29 @@ def processArgumentsTestDecomposed():
     logger.log_trace("Model: \"" + header.config_decomposed["model"] + "\".")
     logger.log_trace("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
     logger.log_trace("Directory of dataset testing split: \"" + header.config_decomposed["dir_dataset_test"] + "\".")
+
+    return
+
+def processArgumentsTestReference():
+    arguments = initializeArgumentsTest()
+
+    header.config_reference["seed"] = arguments.seed
+
+    if arguments.test_dataset_dir != "":
+        header.config_reference["dir_dataset_test"] = arguments.test_dataset_dir
+
+    initializeRunNameReference(arguments.run_name)
+
+    if header.run_name_reference == "":
+        logger.log_fatal("Run name missing. Quit.")
+        exit(-1)
+
+    header.config_reference["model"] = header.run_name_reference.split(".")[1]
+
+    logger.log_trace("Run name: \"" + header.run_name_reference + "\".")
+    logger.log_trace("Model: \"" + header.config_reference["model"] + "\".")
+    logger.log_trace("Randomization seed: " + str(header.config_reference["seed"]) + ".")
+    logger.log_trace("Directory of dataset testing split: \"" + header.config_reference["dir_dataset_test"] + "\".")
 
     return
 
@@ -426,6 +475,37 @@ def processArgumentsTrainDecomposed():
     logger.log_trace("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
 
     return resume
+
+def processArgumentsTrainReference():
+    arguments = initializeArgumentsTrainReference()
+
+    if arguments.model != "":
+        header.config_reference["model"] = arguments.model
+
+    if arguments.batch_size is not None:
+        header.config_reference["data_loader_batch_size"] = arguments.batch_size
+
+    if arguments.epochs is not None:
+        header.config_reference["epochs"] = arguments.epochs
+
+    if arguments.seed is not None:
+        header.config_reference["seed"] = arguments.seed
+
+    initializeRunNameReference()
+
+    if header.run_name_reference == "":
+        logger.log_fatal("Run name missing. Quit.")
+        exit(-1)
+
+    header.config_reference["model"] = header.run_name_reference.split(".")[1]
+
+    logger.log_trace("Run name: \"" + header.run_name_reference + "\".")
+    logger.log_trace("Model: \"" + header.config_reference["model"] + "\".")
+    logger.log_trace("Batch size: " + str(header.config_reference["data_loader_batch_size"]) + ".")
+    logger.log_trace("Epochs: " + str(header.config_reference["epochs"]) + ".")
+    logger.log_trace("Randomization seed: " + str(header.config_reference["seed"]) + ".")
+
+    return
 
 def processArgumentsTrainSPN():
     arguments = initializeArgumentsTrainSPN()

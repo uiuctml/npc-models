@@ -42,6 +42,11 @@ class ModelDecomposed(enum.Enum):
     resnet152_mtl = 4
     vit_b_32_mtl = 5
 
+class ModelReference(enum.Enum):
+    cem = 0
+    dcr = 1
+    len = 2
+
 class OptimizerSPN(enum.Enum):
     cccp_discriminative = 0
     cccp_generative = 1
