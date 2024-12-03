@@ -8,6 +8,7 @@ import model
 import sklearn.metrics
 import torch
 import tqdm
+import type
 import utility
 import wandb
 
@@ -17,6 +18,10 @@ def test(model_reference, data_loader, device, batch_step):
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
+    threshold_accuracy_task = 0.5
+
+    if header.config_reference["model"] == type.ModelReference.cem.name:
+        threshold_accuracy_task = 0
 
     model_reference.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")
@@ -29,8 +34,8 @@ def test(model_reference, data_loader, device, batch_step):
 
             (output_neck, output_head) = model_reference(input)
 
-            accuracy_attribute_batch = sklearn.metrics.accuracy_score(labels_decomposed.cpu(), (output_neck > header.config_reference["threshold_attribute_accuracy"]).cpu())
-            accuracy_task_batch = sklearn.metrics.accuracy_score(labels_original.cpu(), (output_head > 0).cpu())
+            accuracy_attribute_batch = sklearn.metrics.accuracy_score(labels_decomposed.cpu(), (output_neck > 0.5).cpu())
+            accuracy_task_batch = sklearn.metrics.accuracy_score(labels_original.cpu(), (output_head > threshold_accuracy_task).cpu())
 
             accuracy_attribute_epoch += accuracy_attribute_batch
             accuracy_task_epoch += accuracy_task_batch

@@ -160,7 +160,6 @@ config_reference = {
     "optimizer_weight_decay": 4e-5,
     "run_name": run_name_reference,
     "seed": seed,
-    "threshold_attribute_accuracy": 0.5,
     "type": "reference",
 }
 
