@@ -155,7 +155,7 @@ config_reference = {
     "model_input_height": 224,
     "model_input_width": 224,
     "model_input_channels": 3,
-    "optimizer_learning_rate": 5e-3,
+    "optimizer_learning_rate": 1e-2,
     "optimizer_momentum": 0.9,
     "optimizer_weight_decay": 4e-5,
     "run_name": run_name_reference,
