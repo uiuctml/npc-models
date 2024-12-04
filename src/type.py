@@ -43,9 +43,10 @@ class ModelDecomposed(enum.Enum):
     vit_b_32_mtl = 5
 
 class ModelReference(enum.Enum):
-    cem = 0
-    dcr = 1
-    len = 2
+    cbm = 0
+    cem = 1
+    dcr = 2
+    len = 3
 
 class OptimizerSPN(enum.Enum):
     cccp_discriminative = 0

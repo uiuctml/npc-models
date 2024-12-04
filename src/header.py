@@ -136,8 +136,8 @@ config_decomposed = {
 }
 
 config_reference = {
-    "concept_loss_weight": 1,
-    "data_loader_batch_size": 512,
+    "concept_loss_weight": 0.01,
+    "data_loader_batch_size": 128,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dir_checkpoints": "../checkpoints",
@@ -150,7 +150,7 @@ config_reference = {
     "learning_rate_scheduler_mode": "min",
     "learning_rate_scheduler_factor": 0.1,
     "learning_rate_scheduler_patience": 10,
-    "model": "dcr",
+    "model": "cbm",
     "model_embedding_size": 16,
     "model_input_height": 224,
     "model_input_width": 224,

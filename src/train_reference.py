@@ -15,7 +15,11 @@ import utility
 import wandb
 
 def computeLoss(output_neck, output_head, labels_decomposed, labels_original):
-    if header.config_reference["model"] == type.ModelReference.cem.name:
+    if header.config_reference["model"] == type.ModelReference.cbm.name:
+        loss_attribute = torch.nn.functional.binary_cross_entropy_with_logits(output_neck, labels_decomposed)
+        loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_original)
+        return header.config_reference["concept_loss_weight"] * loss_attribute + loss_task
+    elif header.config_reference["model"] == type.ModelReference.cem.name:
         loss_attribute = torch.nn.functional.binary_cross_entropy(output_neck, labels_decomposed)
         loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_original)
         return header.config_reference["concept_loss_weight"] * loss_attribute + loss_task
@@ -34,9 +38,13 @@ def train(model_reference, data_loader, optimizer, device, batch_step):
     accuracy_task_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
+    threshold_accuracy_attribute = 0.5
     threshold_accuracy_task = 0.5
 
-    if header.config_reference["model"] == type.ModelReference.cem.name:
+    if header.config_reference["model"] == type.ModelReference.cbm.name:
+        threshold_accuracy_attribute = 0
+        threshold_accuracy_task = 0
+    elif header.config_reference["model"] == type.ModelReference.cem.name:
         threshold_accuracy_task = 0
 
     model_reference.train()
@@ -57,7 +65,7 @@ def train(model_reference, data_loader, optimizer, device, batch_step):
             loss.backward()
             optimizer.step()
 
-            accuracy_attribute_batch = sklearn.metrics.accuracy_score(labels_decomposed.cpu(), (output_neck > 0.5).cpu())
+            accuracy_attribute_batch = sklearn.metrics.accuracy_score(labels_decomposed.cpu(), (output_neck > threshold_accuracy_attribute).cpu())
             accuracy_task_batch = sklearn.metrics.accuracy_score(labels_original.cpu(), (output_head > threshold_accuracy_task).cpu())
             loss_batch = loss.item()
 
@@ -92,9 +100,13 @@ def validate(model_reference, data_loader, device, batch_step):
     accuracy_task_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
+    threshold_accuracy_attribute = 0.5
     threshold_accuracy_task = 0.5
 
-    if header.config_reference["model"] == type.ModelReference.cem.name:
+    if header.config_reference["model"] == type.ModelReference.cbm.name:
+        threshold_accuracy_attribute = 0
+        threshold_accuracy_task = 0
+    elif header.config_reference["model"] == type.ModelReference.cem.name:
         threshold_accuracy_task = 0
 
     model_reference.eval()
@@ -109,7 +121,7 @@ def validate(model_reference, data_loader, device, batch_step):
             (output_neck, output_head) = model_reference(input)
 
             loss = computeLoss(output_neck, output_head, labels_decomposed, labels_original)
-            accuracy_attribute_batch = sklearn.metrics.accuracy_score(labels_decomposed.cpu(), (output_neck > 0.5).cpu())
+            accuracy_attribute_batch = sklearn.metrics.accuracy_score(labels_decomposed.cpu(), (output_neck > threshold_accuracy_attribute).cpu())
             accuracy_task_batch = sklearn.metrics.accuracy_score(labels_original.cpu(), (output_head > threshold_accuracy_task).cpu())
             loss_batch = loss.item()
 

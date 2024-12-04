@@ -22,6 +22,32 @@ class Model(torch.nn.Module):
     def get_parameters(self):
         pass
 
+class CBM(Model):
+    def __init__(self, config_dataset, device):
+        super().__init__()
+
+        labels_attribute = utility.getLabelsAttribute(config_dataset)
+        labels_original = utility.getLabelsOriginal(config_dataset)
+        labels_categories = []
+
+        for attribute_name in labels_attribute.keys():
+            labels_categories += labels_attribute[attribute_name]
+
+        self.net = torchvision.models.resnet34(weights = "IMAGENET1K_V1")
+        self.net.fc = torch.nn.Linear(self.net.fc.in_features, len(labels_categories))
+        self.net.head = torch.nn.Linear(len(labels_categories), len(labels_original))
+
+        return
+
+    def forward(self, input):
+        output_neck = self.net(input)
+        output_head = self.net.head(output_neck)
+
+        return (output_neck, output_head)
+
+    def get_parameters(self):
+        return self.net.parameters()
+
 class CEM(Model):
     def __init__(self, config_dataset, device):
         super().__init__()
@@ -524,7 +550,9 @@ def createModelReference(device):
     config_dataset = json.load(file_config_dataset)
     file_config_dataset.close()
 
-    if header.config_reference["model"] == type.ModelReference.cem.name:
+    if header.config_reference["model"] == type.ModelReference.cbm.name:
+        return CBM(config_dataset, device)
+    elif header.config_reference["model"] == type.ModelReference.cem.name:
         return CEM(config_dataset, device)
     elif header.config_reference["model"] == type.ModelReference.dcr.name:
         return DCR(config_dataset, device)
