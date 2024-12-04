@@ -136,7 +136,7 @@ config_decomposed = {
 }
 
 config_reference = {
-    "concept_loss_weight": 0.01,
+    "concept_loss_weight": 1,
     "data_loader_batch_size": 384,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
