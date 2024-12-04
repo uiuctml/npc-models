@@ -18,9 +18,13 @@ def test(model_reference, data_loader, device, batch_step):
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
+    threshold_accuracy_attribute = 0.5
     threshold_accuracy_task = 0.5
 
-    if header.config_reference["model"] == type.ModelReference.cem.name:
+    if header.config_reference["model"] == type.ModelReference.cbm.name:
+        threshold_accuracy_attribute = 0
+        threshold_accuracy_task = 0
+    elif header.config_reference["model"] == type.ModelReference.cem.name:
         threshold_accuracy_task = 0
 
     model_reference.eval()
@@ -34,7 +38,7 @@ def test(model_reference, data_loader, device, batch_step):
 
             (output_neck, output_head) = model_reference(input)
 
-            accuracy_attribute_batch = sklearn.metrics.accuracy_score(labels_decomposed.cpu(), (output_neck > 0.5).cpu())
+            accuracy_attribute_batch = sklearn.metrics.accuracy_score(labels_decomposed.cpu(), (output_neck > threshold_accuracy_attribute).cpu())
             accuracy_task_batch = sklearn.metrics.accuracy_score(labels_original.cpu(), (output_head > threshold_accuracy_task).cpu())
 
             accuracy_attribute_epoch += accuracy_attribute_batch
