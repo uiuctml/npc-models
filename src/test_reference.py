@@ -72,8 +72,8 @@ def test(model_reference, data_loader, device, batch_step):
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
 
-            wandb.log({"testing/batch/attribute/accuracy": accuracy_attribute_batch})
-            wandb.log({"testing/batch/accuracy": accuracy_task_batch})
+            wandb.log({"testing/batch/accuracy_attribute": accuracy_attribute_batch})
+            wandb.log({"testing/batch/accuracy_task": accuracy_task_batch})
             wandb.log({"testing/batch/step": batch_step})
 
             batch_step += 1
@@ -83,14 +83,14 @@ def test(model_reference, data_loader, device, batch_step):
     accuracy_attribute_epoch /= len(data_loader)
     accuracy_task_epoch /= len(data_loader)
 
-    wandb.log({"testing/epoch/attribute/accuracy": accuracy_attribute_epoch})
-    wandb.log({"testing/epoch/accuracy": accuracy_task_epoch})
+    wandb.log({"testing/epoch/accuracy_attribute": accuracy_attribute_epoch})
+    wandb.log({"testing/epoch/accuracy_task": accuracy_task_epoch})
 
-    wandb.summary["testing/epoch/attribute/accuracy"] = accuracy_attribute_epoch
-    wandb.summary["testing/epoch/accuracy"] = accuracy_task_epoch
+    wandb.summary["testing/epoch/accuracy_attribute"] = accuracy_attribute_epoch
+    wandb.summary["testing/epoch/accuracy_task"] = accuracy_task_epoch
 
     logger.log_info("Testing attribute accuracy: " + str(accuracy_attribute_epoch) + ".")
-    logger.log_info("Testing accuracy: " + str(accuracy_task_epoch) + ".")
+    logger.log_info("Testing task accuracy: " + str(accuracy_task_epoch) + ".")
 
     return batch_step
 
