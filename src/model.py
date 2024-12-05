@@ -528,8 +528,6 @@ def createModelDecomposed(device):
         return CNNSet(config_dataset, device)
     elif header.config_decomposed["model"] == type.ModelDecomposed.mlp_set.name:
         return MLPSet(config_dataset, device)
-    elif header.config_decomposed["model"] == type.ModelDecomposed.mlp_set_3.name:
-        return MLPSet3(config_dataset, device)
     elif header.config_decomposed["model"] == type.ModelDecomposed.resnet152_mtl.name:
         header.config_decomposed["model_pretrained_weights"] = "IMAGENET1K_V2"
         logger.log_trace("Model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")

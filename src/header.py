@@ -45,7 +45,7 @@ seed = 42
 show_model_summary = False
 
 config_baseline = {
-    "data_loader_batch_size": 384,
+    "data_loader_batch_size": 256,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dir_checkpoints": "../checkpoints",
@@ -86,7 +86,7 @@ config_baseline = {
 }
 
 config_decomposed = {
-    "data_loader_batch_size": 384,
+    "data_loader_batch_size": 256,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dataset_delimiter_file_name": "---",
@@ -137,7 +137,7 @@ config_decomposed = {
 
 config_reference = {
     "concept_loss_weight": 1,
-    "data_loader_batch_size": 384,
+    "data_loader_batch_size": 256,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dir_checkpoints": "../checkpoints",
