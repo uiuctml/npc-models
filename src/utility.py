@@ -141,15 +141,13 @@ def findMPEs(matrix_a, matrix_b, spn_settings, labels_original):
 
     return mpe_attributes
 
-def getBinaryLabelsDecomposed(labels_decomposed, device):
+def getBinaryLabelsDecomposed(labels_decomposed):
     for i in range(len(labels_decomposed)):
-        labels_decomposed[i] = labels_decomposed[i].to(device)
         labels_decomposed[i] = (labels_decomposed[i] > 0).float()
 
     return torch.cat(labels_decomposed, dim = 1)
 
-def getBinaryLabelsOriginal(labels_original, data_loader, device):
-    labels_original = labels_original.to(device)
+def getBinaryLabelsOriginal(labels_original, data_loader):
     return torch.nn.functional.one_hot(labels_original, num_classes = len(data_loader.dataset.classes_original)).float()
 
 def getLabelsAttribute(dataset_config):

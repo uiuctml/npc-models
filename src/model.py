@@ -48,6 +48,31 @@ class CBM(Model):
     def get_parameters(self):
         return self.net.parameters()
 
+class CBMCat(Model):
+    def __init__(self, config_dataset, device):
+        super().__init__()
+
+        labels_attribute = utility.getLabelsAttribute(config_dataset)
+        labels_original = utility.getLabelsOriginal(config_dataset)
+        labels_categories = []
+
+        for attribute_name in labels_attribute.keys():
+            labels_categories += labels_attribute[attribute_name]
+
+        self.net = ResNet34MTL(config_dataset, device)
+        self.net.head = torch.nn.Linear(len(labels_categories), len(labels_original))
+
+        return
+
+    def forward(self, input):
+        (output_neck, _) = self.net(input)
+        output_head = self.net.head(torch.cat(output_neck, dim = 1))
+
+        return (output_neck, output_head)
+
+    def get_parameters(self):
+        return self.net.parameters()
+
 class CEM(Model):
     def __init__(self, config_dataset, device):
         super().__init__()
@@ -234,49 +259,6 @@ class MLPSet(Model):
                 torch.nn.Flatten(),
                 torch.nn.Linear(input_size, hidden_size),
                 torch.nn.ReLU(),
-                torch.nn.Linear(hidden_size, output_size)
-            )
-
-            self.model_list.append(model)
-
-        self.model_list = torch.nn.ModuleList(self.model_list)
-
-        return
-
-    def forward(self, input):
-        outputs = []
-
-        for model in self.model_list:
-            outputs.append(model(input))
-
-        return (outputs, None)
-
-    def get_parameters(self):
-        parameters = []
-
-        for model in self.model_list:
-            parameters.append(model.parameters())
-
-        return parameters
-
-class MLPSet3(Model):
-    def __init__(self, config_dataset, device):
-        super().__init__()
-
-        self.model_list = []
-
-        for attribute in config_dataset["attributes"]:
-            attribute_labels = attribute["labels"]
-            attribute_labels.remove("")
-
-            input_size = header.config_decomposed["model_input_height"] * header.config_decomposed["model_input_width"] * header.config_decomposed["model_input_channels"]
-            hidden_size = header.config_decomposed["head_hidden_size"]
-            output_size = len(attribute_labels)
-
-            model = torch.nn.Sequential(
-                torch.nn.Flatten(),
-                torch.nn.Linear(input_size, hidden_size),
-                torch.nn.ReLU(),
                 torch.nn.Linear(hidden_size, hidden_size),
                 torch.nn.ReLU(),
                 torch.nn.Linear(hidden_size, output_size)
@@ -304,36 +286,51 @@ class MLPSet3(Model):
 
         return parameters
 
-class RelationNN(Model):
+class ResNet34MTL(Model):
     def __init__(self, config_dataset, device):
         super().__init__()
 
-        input_size = 0
-        head_hidden_size = header.config_decomposed["head_hidden_size"]
-        output_size = len(config_dataset["mappings"])
+        layer_list = []
+        self.net = torchvision.models.resnet34(weights = "IMAGENET1K_V1")
 
         for attribute in config_dataset["attributes"]:
+            attribute_name = attribute["name"]
             attribute_labels = attribute["labels"]
 
             if "" in attribute_labels:
                 attribute_labels.remove("")
 
-            input_size += len(attribute_labels)
+            layers_hidden = torch.nn.Sequential(torch.nn.Linear(self.net.fc.in_features, header.config_decomposed["head_hidden_size"]), torch.nn.ReLU())
+            layer_final = torch.nn.Linear(header.config_decomposed["head_hidden_size"], len(attribute_labels))
 
-        self.model = torch.nn.Sequential(
-            torch.nn.Flatten(),
-            torch.nn.Linear(input_size, head_hidden_size),
-            torch.nn.ReLU(),
-            torch.nn.Linear(head_hidden_size, output_size)
-        )
+            layer_dict = torch.nn.ModuleDict({"hidden": layers_hidden, "final": layer_final})
+            layer_dict_task = torch.nn.ModuleDict({attribute_name: layer_dict})
+
+            layer_list.append(layer_dict_task)
+
+        self.net.fc = torch.nn.Identity()
+        self.net.heads_mtl = torch.nn.ModuleList(layer_list)
 
         return
 
-    def forward(self, inputs):
-        return self.model(torch.cat(inputs, 1))
+    def forward(self, input):
+        outputs_head = []
+        outputs_head_hidden = []
+        output_neck = self.net(input)
+
+        for head in self.net.heads_mtl:
+            head_layer_dict = list(head.values())[0]
+
+            output_head_hidden = head_layer_dict["hidden"](output_neck)
+            output_head = head_layer_dict["final"](output_head_hidden)
+
+            outputs_head.append(output_head)
+            outputs_head_hidden.append(output_head_hidden)
+
+        return (outputs_head, outputs_head_hidden)
 
     def get_parameters(self):
-        return self.model.parameters()
+        return self.net.parameters()
 
 class ResNet152(Model):
     def __init__(self, config_dataset, device):
@@ -552,10 +549,12 @@ def createModelReference(device):
 
     if header.config_reference["model"] == type.ModelReference.cbm.name:
         return CBM(config_dataset, device)
+    elif header.config_reference["model"] == type.ModelReference.cbm_cat.name:
+        return CBMCat(config_dataset, device)
     elif header.config_reference["model"] == type.ModelReference.cem.name:
         return CEM(config_dataset, device)
     elif header.config_reference["model"] == type.ModelReference.dcr.name:
         return DCR(config_dataset, device)
     else:
-        logger.log_fatal("Unknown reference network model \"" + header.config_baseline["model"] + "\".")
+        logger.log_fatal("Unknown reference network model \"" + header.config_reference["model"] + "\".")
         exit(-1)

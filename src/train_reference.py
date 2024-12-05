@@ -4,6 +4,7 @@ import argument
 import dataset
 import header
 import logger
+import math
 import model
 import sklearn.metrics
 import test_reference
@@ -16,19 +17,32 @@ import wandb
 
 def computeLoss(output_neck, output_head, labels_decomposed, labels_original):
     if header.config_reference["model"] == type.ModelReference.cbm.name:
+        labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed)
         loss_attribute = torch.nn.functional.binary_cross_entropy_with_logits(output_neck, labels_decomposed)
         loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_original)
         return header.config_reference["concept_loss_weight"] * loss_attribute + loss_task
+    elif header.config_reference["model"] == type.ModelReference.cbm_cat.name:
+        loss_attribute = 0
+
+        for i in range(len(output_neck)):
+            loss = torch.nn.functional.cross_entropy(output_neck[i], labels_decomposed[i])
+            loss_attribute += loss / math.log(output_neck[i].size(1))
+
+        loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_original)
+
+        return header.config_reference["concept_loss_weight"] * loss_attribute + loss_task
     elif header.config_reference["model"] == type.ModelReference.cem.name:
+        labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed)
         loss_attribute = torch.nn.functional.binary_cross_entropy(output_neck, labels_decomposed)
         loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_original)
         return header.config_reference["concept_loss_weight"] * loss_attribute + loss_task
     elif header.config_reference["model"] == type.ModelReference.dcr.name:
+        labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed)
         loss_attribute = torch.nn.functional.binary_cross_entropy(output_neck, labels_decomposed)
         loss_task = torch.nn.functional.binary_cross_entropy(output_head, labels_original)
         return header.config_reference["concept_loss_weight"] * loss_attribute + loss_task
     else:
-        logger.log_fatal("Unknown reference network model \"" + header.config_baseline["model"] + "\".")
+        logger.log_fatal("Unknown reference network model \"" + header.config_reference["model"] + "\".")
         exit(-1)
 
     return
@@ -38,14 +52,6 @@ def train(model_reference, data_loader, optimizer, device, batch_step):
     accuracy_task_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
-    threshold_accuracy_attribute = 0.5
-    threshold_accuracy_task = 0.5
-
-    if header.config_reference["model"] == type.ModelReference.cbm.name:
-        threshold_accuracy_attribute = 0
-        threshold_accuracy_task = 0
-    elif header.config_reference["model"] == type.ModelReference.cem.name:
-        threshold_accuracy_task = 0
 
     model_reference.train()
     progress_bar.set_description_str("[INFO]: Training progress")
@@ -53,8 +59,11 @@ def train(model_reference, data_loader, optimizer, device, batch_step):
     with torch.set_grad_enabled(True):
         for (batch_index, (input, labels_decomposed, labels_original, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
-            labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed, device)
-            labels_original = utility.getBinaryLabelsOriginal(labels_original, data_loader, device)
+            labels_original = labels_original.to(device, non_blocking = True)
+            labels_original = utility.getBinaryLabelsOriginal(labels_original, data_loader)
+
+            for i in range(len(labels_decomposed)):
+                labels_decomposed[i] = labels_decomposed[i].to(device)
 
             optimizer.zero_grad()
 
@@ -65,8 +74,7 @@ def train(model_reference, data_loader, optimizer, device, batch_step):
             loss.backward()
             optimizer.step()
 
-            accuracy_attribute_batch = sklearn.metrics.accuracy_score(labels_decomposed.cpu(), (output_neck > threshold_accuracy_attribute).cpu())
-            accuracy_task_batch = sklearn.metrics.accuracy_score(labels_original.cpu(), (output_head > threshold_accuracy_task).cpu())
+            (accuracy_attribute_batch, accuracy_task_batch) = test_reference.computeAccuracy(output_neck, output_head, labels_decomposed, labels_original, device)
             loss_batch = loss.item()
 
             accuracy_attribute_epoch += accuracy_attribute_batch
@@ -100,14 +108,6 @@ def validate(model_reference, data_loader, device, batch_step):
     accuracy_task_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
-    threshold_accuracy_attribute = 0.5
-    threshold_accuracy_task = 0.5
-
-    if header.config_reference["model"] == type.ModelReference.cbm.name:
-        threshold_accuracy_attribute = 0
-        threshold_accuracy_task = 0
-    elif header.config_reference["model"] == type.ModelReference.cem.name:
-        threshold_accuracy_task = 0
 
     model_reference.eval()
     progress_bar.set_description_str("[INFO]: Validation progress")
@@ -115,14 +115,16 @@ def validate(model_reference, data_loader, device, batch_step):
     with torch.set_grad_enabled(False):
         for (batch_index, (input, labels_decomposed, labels_original, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
-            labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed, device)
-            labels_original = utility.getBinaryLabelsOriginal(labels_original, data_loader, device)
+            labels_original = labels_original.to(device, non_blocking = True)
+            labels_original = utility.getBinaryLabelsOriginal(labels_original, data_loader)
+
+            for i in range(len(labels_decomposed)):
+                labels_decomposed[i] = labels_decomposed[i].to(device)
 
             (output_neck, output_head) = model_reference(input)
 
             loss = computeLoss(output_neck, output_head, labels_decomposed, labels_original)
-            accuracy_attribute_batch = sklearn.metrics.accuracy_score(labels_decomposed.cpu(), (output_neck > threshold_accuracy_attribute).cpu())
-            accuracy_task_batch = sklearn.metrics.accuracy_score(labels_original.cpu(), (output_head > threshold_accuracy_task).cpu())
+            (accuracy_attribute_batch, accuracy_task_batch) = test_reference.computeAccuracy(output_neck, output_head, labels_decomposed, labels_original, device)
             loss_batch = loss.item()
 
             accuracy_attribute_epoch += accuracy_attribute_batch
@@ -203,7 +205,7 @@ def main():
 
         logger.log_info("Epoch validation accuracy: " + str(accuracy_validation_epoch) + ".")
 
-        if accuracy_validation_epoch > accuracy_validation_best:
+        if accuracy_validation_epoch > accuracy_validation_best or epoch == 1:
             accuracy_validation_best = accuracy_validation_epoch
             wandb.log({"validation/epoch/accuracy_best": accuracy_validation_best})
             utility.saveCheckpoint(header.config_reference["dir_checkpoints"], header.config_reference["file_name_checkpoint_best"], accuracy_validation_best, 0, 0, [], epoch, [], model_reference, [])

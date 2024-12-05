@@ -12,20 +12,43 @@ import type
 import utility
 import wandb
 
-def test(model_reference, data_loader, device, batch_step):
-    utility.loadCheckpointBest(header.config_reference["dir_checkpoints"], header.config_reference["file_name_checkpoint_best"], model_reference)
-
-    accuracy_attribute_epoch = 0
-    accuracy_task_epoch = 0
-    progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
+def computeAccuracy(output_neck, output_head, labels_decomposed, labels_original, device):
+    accuracy_attribute_batch = None
+    accuracy_task_batch = None
     threshold_accuracy_attribute = 0.5
     threshold_accuracy_task = 0.5
 
     if header.config_reference["model"] == type.ModelReference.cbm.name:
         threshold_accuracy_attribute = 0
         threshold_accuracy_task = 0
-    elif header.config_reference["model"] == type.ModelReference.cem.name:
+    elif header.config_reference["model"] == type.ModelReference.cbm_cat.name or header.config_reference["model"] == type.ModelReference.cem.name:
         threshold_accuracy_task = 0
+
+    if header.config_reference["model"] == type.ModelReference.cbm_cat.name:
+        accuracy_attribute_sum = 0
+        batch_size = labels_original.size(0)
+        count_attribute = len(output_neck)
+
+        for i in range(count_attribute):
+            corrects = utility.computeCorrectsDecomposed(output_neck[i], labels_decomposed[i], device)
+            accuracy_attribute = corrects / batch_size
+            accuracy_attribute_sum += accuracy_attribute
+
+        accuracy_attribute_batch = accuracy_attribute_sum / count_attribute
+    else:
+        labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed)
+        accuracy_attribute_batch = sklearn.metrics.accuracy_score(labels_decomposed.cpu(), (output_neck > threshold_accuracy_attribute).cpu())
+
+    accuracy_task_batch = sklearn.metrics.accuracy_score(labels_original.cpu(), (output_head > threshold_accuracy_task).cpu())
+
+    return (accuracy_attribute_batch, accuracy_task_batch)
+
+def test(model_reference, data_loader, device, batch_step):
+    utility.loadCheckpointBest(header.config_reference["dir_checkpoints"], header.config_reference["file_name_checkpoint_best"], model_reference)
+
+    accuracy_attribute_epoch = 0
+    accuracy_task_epoch = 0
+    progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
 
     model_reference.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")
@@ -33,13 +56,15 @@ def test(model_reference, data_loader, device, batch_step):
     with torch.set_grad_enabled(False):
         for (batch_index, (input, labels_decomposed, labels_original, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
-            labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed, device)
-            labels_original = utility.getBinaryLabelsOriginal(labels_original, data_loader, device)
+            labels_original = labels_original.to(device, non_blocking = True)
+            labels_original = utility.getBinaryLabelsOriginal(labels_original, data_loader)
+
+            for i in range(len(labels_decomposed)):
+                labels_decomposed[i] = labels_decomposed[i].to(device)
 
             (output_neck, output_head) = model_reference(input)
 
-            accuracy_attribute_batch = sklearn.metrics.accuracy_score(labels_decomposed.cpu(), (output_neck > threshold_accuracy_attribute).cpu())
-            accuracy_task_batch = sklearn.metrics.accuracy_score(labels_original.cpu(), (output_head > threshold_accuracy_task).cpu())
+            (accuracy_attribute_batch, accuracy_task_batch) = computeAccuracy(output_neck, output_head, labels_decomposed, labels_original, device)
 
             accuracy_attribute_epoch += accuracy_attribute_batch
             accuracy_task_epoch += accuracy_task_batch
