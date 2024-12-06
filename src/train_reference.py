@@ -21,12 +21,14 @@ def computeLoss(output_neck, output_head, labels_decomposed, labels_original):
         loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_original)
         return header.config_reference["concept_loss_weight"] * loss_attribute + loss_task
     elif header.config_reference["model"] == type.ModelReference.cbm_cat.name:
+        count_attributes = len(output_neck)
         loss_attribute = 0
 
-        for i in range(len(output_neck)):
+        for i in range(count_attributes):
             loss = torch.nn.functional.cross_entropy(output_neck[i], labels_decomposed[i])
             loss_attribute += loss / math.log(output_neck[i].size(1))
 
+        loss_attribute /= count_attributes
         loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_original)
 
         return header.config_reference["concept_loss_weight"] * loss_attribute + loss_task
