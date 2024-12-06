@@ -119,13 +119,6 @@ def createTransform(config):
         torchvision.transforms.ToTensor()
     ])
 
-    if "input_grayscale" in config and config["input_grayscale"]:
-        dataset_transforms = torchvision.transforms.Compose([
-        torchvision.transforms.Resize((config["model_input_height"], config["model_input_width"])),
-        torchvision.transforms.Grayscale(3),
-        torchvision.transforms.ToTensor()
-    ])
-
     return dataset_transforms
 
 def findMPEs(matrix_a, matrix_b, spn_settings, labels_original):
