@@ -33,18 +33,12 @@ def train(model_decomposed, data_loader, criterions, optimizers, device, batch_s
                 labels[i] = labels[i].to(device, non_blocking = True)
 
             (outputs, _) = model_decomposed(input)
-            parameters = model_decomposed.module.get_parameters()
 
             for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
                 optimizer = optimizers[i]
                 optimizer.zero_grad()
 
                 loss = criterions[i](outputs[i], labels[i])
-
-                if header.config_decomposed["use_l2_loss"]:
-                    l2_norm = utility.computeL2Norm(parameters[i])
-                    loss_l2 = header.config_decomposed["l2_lambda"] * l2_norm
-                    loss += loss_l2
 
                 loss.backward()
                 optimizer.step()
@@ -97,15 +91,9 @@ def validate(model_decomposed, data_loader, criterions, device, batch_step):
                 labels[i] = labels[i].to(device, non_blocking = True)
 
             (outputs, _) = model_decomposed(input)
-            parameters = model_decomposed.module.get_parameters()
 
             for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
                 loss = criterions[i](outputs[i], labels[i])
-
-                if header.config_decomposed["use_l2_loss"]:
-                    l2_norm = utility.computeL2Norm(parameters[i])
-                    loss_l2 = header.config_decomposed["l2_lambda"] * l2_norm
-                    loss += loss_l2
 
                 corrects = utility.computeCorrectsDecomposed(outputs[i], labels[i], device)
                 accuracy_batch = corrects / input.size(0)

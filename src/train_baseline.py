@@ -31,11 +31,6 @@ def train(model_baseline, data_loader, criterion, optimizer, device, batch_step)
             (_, predictions) = torch.max(output, 1)
             loss = criterion(output, labels)
 
-            if header.config_baseline["use_l2_loss"]:
-                l2_norm = utility.computeL2Norm(model_baseline.parameters())
-                loss_l2 = header.config_baseline["l2_lambda"] * l2_norm
-                loss += loss_l2
-
             loss.backward()
             optimizer.step()
 
@@ -83,13 +78,7 @@ def validate(model_baseline, data_loader, criterion, device, batch_step):
             (_, predictions) = torch.max(output, 1)
             loss = criterion(output, labels)
 
-            if header.config_baseline["use_l2_loss"]:
-                l2_norm = utility.computeL2Norm(model_baseline.parameters())
-                loss_l2 = header.config_baseline["l2_lambda"] * l2_norm
-                loss += loss_l2
-
             corrects = torch.sum(predictions == labels.data).item()
-
             accuracy_batch = corrects / input.size(0)
             loss_batch = loss.item()
 

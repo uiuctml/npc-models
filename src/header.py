@@ -70,7 +70,6 @@ config_baseline = {
     "learning_rate_scheduler_min_learning_rate_decay": 1e-8,
     "learning_rate_scheduler_verbose": True,
     "log_test_output": False,
-    "l2_lambda": 1e-3,
     "model": "vit_b_32",
     "model_input_height": 224,
     "model_input_width": 224,
@@ -82,7 +81,6 @@ config_baseline = {
     "run_name": run_name_baseline,
     "seed": seed,
     "type": "baseline",
-    "use_l2_loss": False
 }
 
 config_decomposed = {
@@ -119,7 +117,6 @@ config_decomposed = {
     "learning_rate_scheduler_verbose": True,
     "learning_rate_scheduler_last_epoch": -1,
     "log_test_output": False,
-    "l2_lambda": 1e-3,
     "model": "vit_b_32_mtl",
     "model_input_height": 224,
     "model_input_width": 224,
@@ -131,7 +128,6 @@ config_decomposed = {
     "run_name": run_name_decomposed,
     "seed": seed,
     "type": "decomposed",
-    "use_l2_loss": False,
     "use_covariance_loss": False
 }
 
@@ -191,5 +187,4 @@ config_spn = {
     "seed": seed,
     "stopping_criterion": 1e-4,
     "type": "spn",
-    "use_l2_loss": False
 }

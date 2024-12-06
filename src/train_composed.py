@@ -50,11 +50,6 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
             (_, predictions_composed) = torch.max(output_composed, 1)
             loss = criterion(output_composed, labels_original)
 
-            if header.config_decomposed["use_l2_loss"]:
-                l2_norm = utility.computeL2Norm(model_decomposed.parameters())
-                loss_l2 = header.config_decomposed["l2_lambda"] * l2_norm
-                loss += loss_l2
-
             loss.backward()
             optimizer_decomposed.step()
 
@@ -136,11 +131,6 @@ def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, 
 
             (_, predictions_composed) = torch.max(output_composed, 1)
             loss = criterion(output_composed, labels_original)
-
-            if header.config_decomposed["use_l2_loss"]:
-                l2_norm = utility.computeL2Norm(model_decomposed.parameters())
-                loss_l2 = header.config_decomposed["l2_lambda"] * l2_norm
-                loss += loss_l2
 
             corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
 
