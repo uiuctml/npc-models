@@ -66,8 +66,6 @@ def test(model_baseline, data_loader, device, batch_step):
     logger.log_trace("Testing precision: " + str(precision_epoch) + ".")
     logger.log_trace("Testing recall: " + str(recall_epoch) + ".")
 
-    utility.logTestOutput(output_list, header.config_baseline, config_dataset)
-
     return batch_step
 
 def main():

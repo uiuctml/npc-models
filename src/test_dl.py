@@ -62,8 +62,6 @@ def test(model_decomposed, data_loader, device, batch_step):
 
     output_list += output_list_accuracy
 
-    utility.logTestOutput(output_list, header.config_decomposed, config_dataset)
-
     return batch_step
 
 def main():

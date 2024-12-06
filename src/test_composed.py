@@ -107,9 +107,6 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
 
     logger.log_info("Composed testing accuracy: " + str(accuracy_epoch_composed) + ".")
 
-    utility.logTestOutput(output_list_composed, header.config_baseline, config_dataset, True)
-    utility.logTestOutput(output_list_decomposed, header.config_decomposed, config_dataset)
-
     return
 
 def main():
