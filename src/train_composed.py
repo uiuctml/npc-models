@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import argument
-import composition
 import dataset
 import header
 import logger
@@ -45,7 +44,7 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
             (outputs_decomposed, _) = model_decomposed(input)
 
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
-            (matrix_a, matrix_b, output_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted)
+            (matrix_a, matrix_b, output_composed) = utility.compose(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
             loss = criterion(output_composed, labels_original)
@@ -127,7 +126,7 @@ def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, 
             (outputs_decomposed, _) = model_decomposed(input)
 
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
-            (_, _, output_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted)
+            (_, _, output_composed) = utility.compose(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
             loss = criterion(output_composed, labels_original)

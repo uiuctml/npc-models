@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import argument
-import composition
 import dataset
 import header
 import json
@@ -58,7 +57,7 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
 
                 wandb.log({"testing/batch/" + dataset_entry["name"] + "/accuracy": accuracy_batch_decomposed})
 
-            (matrix_a, matrix_b, outputs_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted)
+            (matrix_a, matrix_b, outputs_composed) = utility.compose(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted)
             (_, predictions_composed) = torch.max(outputs_composed, 1)
 
             corrects_composed = torch.sum(predictions_composed == labels_original.data).item()

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import argument
-import composition
 import dataset
 import header
 import json
@@ -36,7 +35,7 @@ def counterfactual_cccp(outputs_decomposed_original, spn_joint, spn_marginal, sp
         outputs_decomposed.append(outputs_decomposed_original[i].detach().clone().requires_grad_(True))
 
     for _ in range(header.counterfactual_steps):
-        (_, _, outputs_composed_original) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+        (_, _, outputs_composed_original) = utility.compose(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
         outputs_composed_mpe = torch.max(outputs_composed_original, 1)[1]
         outputs_composed_indices = torch.where(outputs_composed_mpe != labels_original)[0]
 
@@ -76,7 +75,7 @@ def counterfactual_gd(outputs_decomposed_original, spn_joint, spn_marginal, spn_
 
     for _ in range(header.counterfactual_steps):
         outputs_decomposed_softmax = utility.applySoftmaxDecomposed(outputs_decomposed)
-        (_, _, outputs_composed_original) = composition.Composition.spn(outputs_decomposed_softmax, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+        (_, _, outputs_composed_original) = utility.compose(outputs_decomposed_softmax, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
 
         outputs_composed_mpe = torch.max(outputs_composed_original, 1)[1]
         outputs_composed_indices = torch.where(outputs_composed_mpe != labels_original)[0]
@@ -115,7 +114,7 @@ def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn
         outputs_decomposed.append(outputs_decomposed_original[i].detach().clone().requires_grad_(True))
 
     for _ in range(header.counterfactual_steps):
-        (_, _, outputs_composed_original) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+        (_, _, outputs_composed_original) = utility.compose(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
         outputs_composed_mpe = torch.max(outputs_composed_original, 1)[1]
         outputs_composed_indices = torch.where(outputs_composed_mpe != labels_original)[0]
 
@@ -258,7 +257,7 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
     # Enter optimization loop
     for _ in range(header.counterfactual_steps):
         # Compute composed output
-        (_, _, outputs_composed_original) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+        (_, _, outputs_composed_original) = utility.compose(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
 
         # Obtain indices of output in the batch with unsatisfied validity and update progress bar
         outputs_composed_mpe = torch.max(outputs_composed_original, 1)[1]
@@ -451,8 +450,8 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
 
             value_count_implausible += value_count_batch_implausible
 
-        (_, _, outputs_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
-        (_, _, outputs_composed_counterfactual) = composition.Composition.spn(outputs_decomposed_counterfactual, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+        (_, _, outputs_composed) = utility.compose(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+        (_, _, outputs_composed_counterfactual) = utility.compose(outputs_decomposed_counterfactual, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
 
         utility.saveCounterfactuals(input_file_paths, counterfactuals, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_counterfactual, outputs_composed, outputs_composed_counterfactual)
 

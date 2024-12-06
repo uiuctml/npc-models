@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import argument
-import composition
 import dataset
 import header
 import json
@@ -151,7 +150,7 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, spn_sett
             (outputs_decomposed_original, _) = model_decomposed(input)
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed_original)
 
-        (_, _, outputs_composed) = composition.Composition.spn(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+        (_, _, outputs_composed) = utility.compose(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
         (_, predictions_composed) = torch.max(outputs_composed, 1)
 
         progress_bar_structure = tqdm.tqdm(total = batch_size, position = 1, leave = False)
@@ -172,7 +171,7 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, spn_sett
                 spn_joint_counterfactual.set_leaf_nodes(spn_settings_joint)
                 spn_marginal_counterfactual.set_leaf_nodes(spn_settings_marginal)
 
-                (_, _, output_composed_counterfactual) = composition.Composition.spn_single(batch, outputs_decomposed, spn_joint_counterfactual, spn_marginal_counterfactual, spn_output_rows, spn_output_cols, device)
+                (_, _, output_composed_counterfactual) = utility.composeSingle(batch, outputs_decomposed, spn_joint_counterfactual, spn_marginal_counterfactual, spn_output_rows, spn_output_cols, device)
 
             outputs_composed_counterfactual.append(output_composed_counterfactual)
 
