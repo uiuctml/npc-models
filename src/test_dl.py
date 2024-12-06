@@ -13,14 +13,8 @@ import wandb
 def test(model_decomposed, data_loader, device, batch_step):
     utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
 
-    accuracy_epoch_list = []
-    config_dataset = data_loader.dataset.config
-    output_list = []
-    output_list_accuracy = []
+    accuracy_attribute_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
-
-    for _ in config_dataset["attributes"]:
-        accuracy_epoch_list.append(0)
 
     model_decomposed.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")
@@ -32,35 +26,29 @@ def test(model_decomposed, data_loader, device, batch_step):
             for i in range(len(labels)):
                 labels[i] = labels[i].to(device, non_blocking = True)
 
-            (outputs, _) = model_decomposed(input)
+            (output, _) = model_decomposed(input)
 
-            for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
-                corrects = utility.computeCorrectsDecomposed(outputs[i], labels[i], device)
-                accuracy_batch = corrects / input.size(0)
-                accuracy_epoch_list[i] += corrects
+            accuracy_attribute_batch = utility.computeAccuracyDecomposed(output, labels, device)
 
-                wandb.log({"testing/batch/" + dataset_entry["name"] + "/accuracy": accuracy_batch})
+            accuracy_attribute_epoch += accuracy_attribute_batch
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
 
+            wandb.log({"testing/batch/accuracy_attribute": accuracy_attribute_batch})
             wandb.log({"testing/batch/step": batch_step})
 
             batch_step += 1
 
     progress_bar.close()
 
-    for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
-        accuracy_epoch_list[i] /= len(data_loader.dataset)
+    accuracy_attribute_epoch /= len(data_loader)
 
-        output_list_accuracy.append(accuracy_epoch_list[i])
+    wandb.log({"testing/epoch/accuracy_attribute": accuracy_attribute_epoch})
 
-        wandb.log({"testing/epoch/" + dataset_entry["name"] + "/accuracy": accuracy_epoch_list[i]})
-        wandb.summary["testing/epoch/" + dataset_entry["name"] + "/accuracy"] = accuracy_epoch_list[i]
+    wandb.summary["testing/epoch/accuracy_attribute"] = accuracy_attribute_epoch
 
-        logger.log_info("Testing accuracy for \"" + dataset_entry["name"] + "\": " + str(accuracy_epoch_list[i]) + ".")
-
-    output_list += output_list_accuracy
+    logger.log_info("Testing attribute accuracy: " + str(accuracy_attribute_epoch) + ".")
 
     return batch_step
 

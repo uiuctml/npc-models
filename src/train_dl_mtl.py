@@ -13,24 +13,28 @@ import tqdm
 import utility
 import wandb
 
-def train(model_decomposed, data_loader, criterions, optimizer, device, batch_step):
-    accuracy_epoch_list = []
-    config_dataset = data_loader.dataset.config
-    loss_epoch_list = []
-    loss_overall_epoch = 0
-    progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
+def computeLoss(output, labels, criterions):
+    count_attributes = len(output)
+    loss_attribute = 0
 
-    for _ in config_dataset["attributes"]:
-        accuracy_epoch_list.append(0)
-        loss_epoch_list.append(0)
+    for i in range(count_attributes):
+        loss = criterions[i](output[i], labels[i])
+        loss_attribute += loss / math.log(output[i].size(1))
+
+    loss_attribute /= count_attributes
+
+    return loss_attribute
+
+def train(model_decomposed, data_loader, criterions, optimizer, device, batch_step):
+    accuracy_attribute_epoch = 0
+    loss_epoch = 0
+    progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
 
     model_decomposed.train()
     progress_bar.set_description_str("[INFO]: Training progress")
 
     with torch.set_grad_enabled(True):
         for (batch_index, (input, labels, _, _)) in enumerate(data_loader):
-            loss_overall = 0
-
             input = input.to(device, non_blocking = True)
 
             for i in range(len(labels)):
@@ -38,117 +42,80 @@ def train(model_decomposed, data_loader, criterions, optimizer, device, batch_st
 
             optimizer.zero_grad()
 
-            (outputs, _) = model_decomposed(input)
+            (output, _) = model_decomposed(input)
 
-            for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
-                loss = criterions[i](outputs[i], labels[i])
+            loss = computeLoss(output, labels, criterions)
 
-                corrects = utility.computeCorrectsDecomposed(outputs[i], labels[i], device)
-                accuracy_batch = corrects / input.size(0)
-                loss_batch = loss.item()
-
-                accuracy_epoch_list[i] += corrects
-                loss_epoch_list[i] += loss_batch
-                loss_overall += loss / math.log(outputs[i].size(1))
-
-                wandb.log({"training/batch/" + dataset_entry["name"] + "/accuracy": accuracy_batch})
-                wandb.log({"training/batch/" + dataset_entry["name"] + "/loss": loss_batch})
-
-            loss_overall /= len(outputs)
-
-            loss_overall.backward()
+            loss.backward()
             optimizer.step()
 
-            loss_overall_batch = loss_overall.item()
-            loss_overall_epoch += loss_overall_batch
+            accuracy_attribute_batch = utility.computeAccuracyDecomposed(output, labels, device)
+            loss_batch = loss.item()
+
+            accuracy_attribute_epoch += accuracy_attribute_batch
+            loss_epoch += loss_batch
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
 
+            wandb.log({"training/batch/accuracy_attribute": accuracy_attribute_batch})
             wandb.log({"training/batch/step": batch_step})
-            wandb.log({"training/batch/loss": loss_overall_batch})
+            wandb.log({"training/batch/loss": loss_batch})
 
             batch_step += 1
 
     progress_bar.close()
 
-    for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
-        accuracy_epoch_list[i] /= len(data_loader.dataset)
-        loss_epoch_list[i] /= len(data_loader)
-        wandb.log({"training/epoch/" + dataset_entry["name"] + "/accuracy": accuracy_epoch_list[i]})
-        wandb.log({"training/epoch/" + dataset_entry["name"] + "/loss": loss_epoch_list[i]})
+    accuracy_attribute_epoch /= len(data_loader)
+    loss_epoch /= len(data_loader)
 
-    loss_overall_epoch /= len(data_loader)
-
-    wandb.log({"training/epoch/loss": loss_overall_epoch})
+    wandb.log({"training/epoch/accuracy_attribute": accuracy_attribute_epoch})
+    wandb.log({"training/epoch/loss": loss_epoch})
 
     return batch_step
 
 def validate(model_decomposed, data_loader, criterions, device, batch_step):
-    accuracy_epoch_list = []
-    config_dataset = data_loader.dataset.config
-    loss_epoch_list = []
-    loss_overall_epoch = 0
+    accuracy_attribute_epoch = 0
+    loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
-
-    for _ in config_dataset["attributes"]:
-        accuracy_epoch_list.append(0)
-        loss_epoch_list.append(0)
 
     model_decomposed.eval()
     progress_bar.set_description_str("[INFO]: Validation progress")
 
     with torch.set_grad_enabled(False):
         for (batch_index, (input, labels, _, _)) in enumerate(data_loader):
-            loss_overall = 0
-
             input = input.to(device, non_blocking = True)
 
             for i in range(len(labels)):
                 labels[i] = labels[i].to(device, non_blocking = True)
 
-            (outputs, _) = model_decomposed(input)
+            (output, _) = model_decomposed(input)
 
-            for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
-                loss = criterions[i](outputs[i], labels[i])
+            loss = computeLoss(output, labels, criterions)
+            accuracy_attribute_batch = utility.computeAccuracyDecomposed(output, labels, device)
+            loss_batch = loss.item()
 
-                corrects = utility.computeCorrectsDecomposed(outputs[i], labels[i], device)
-                accuracy_batch = corrects / input.size(0)
-                loss_batch = loss.item()
-
-                accuracy_epoch_list[i] += corrects
-                loss_epoch_list[i] += loss_batch
-                loss_overall += loss / math.log(outputs[i].size(1))
-
-                wandb.log({"validation/batch/" + dataset_entry["name"] + "/accuracy": accuracy_batch})
-                wandb.log({"validation/batch/" + dataset_entry["name"] + "/loss": loss_batch})
-
-            loss_overall /= len(outputs)
-
-            loss_overall_batch = loss_overall.item()
-            loss_overall_epoch += loss_overall_batch
+            accuracy_attribute_epoch += accuracy_attribute_batch
+            loss_epoch += loss_batch
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
 
+            wandb.log({"validation/batch/accuracy_attribute": accuracy_attribute_batch})
             wandb.log({"validation/batch/step": batch_step})
-            wandb.log({"validation/batch/loss": loss_overall_batch})
+            wandb.log({"validation/batch/loss": loss_batch})
 
             batch_step += 1
 
     progress_bar.close()
 
-    for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
-        accuracy_epoch_list[i] /= len(data_loader.dataset)
-        loss_epoch_list[i] /= len(data_loader)
-        wandb.log({"validation/epoch/" + dataset_entry["name"] + "/accuracy": accuracy_epoch_list[i]})
-        wandb.log({"validation/epoch/" + dataset_entry["name"] + "/loss": loss_epoch_list[i]})
+    accuracy_attribute_epoch /= len(data_loader)
+    loss_epoch /= len(data_loader)
 
-    loss_overall_epoch /= len(data_loader)
+    wandb.log({"validation/epoch/accuracy_attribute": accuracy_attribute_epoch})
+    wandb.log({"validation/epoch/loss": loss_epoch})
 
-    wandb.log({"validation/epoch/loss": loss_overall_epoch})
-
-    return (accuracy_epoch_list, loss_overall_epoch, batch_step)
+    return (accuracy_attribute_epoch, loss_epoch, batch_step)
 
 def main():
     resume = argument.processArgumentsTrainDecomposed()
@@ -160,12 +127,10 @@ def main():
         wandb.login()
 
     wandb.init(project = header.project_name, name = header.run_name_decomposed, config = header.config_decomposed, resume = resume, mode = header.run_mode)
-
     utility.wAndBDefineMetrics()
-
     logger.log_info("Started run \"" + header.run_name_decomposed + "\".")
 
-    accuracy_validation_best = 0
+    accuracy_attribute_validation_best = 0
     batch_step_test = 1
     batch_step_train = 1
     batch_step_validate = 1
@@ -190,7 +155,7 @@ def main():
     for _ in config_dataset["attributes"]:
         criterions.append(torch.nn.CrossEntropyLoss())
 
-    (accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch) = utility.loadCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch, [learning_rate_scheduler], model_decomposed, [optimizer])
+    (accuracy_attribute_validation_best, batch_step_train, batch_step_validate, criterions, epoch) = utility.loadCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_attribute_validation_best, batch_step_train, batch_step_validate, criterions, epoch, [learning_rate_scheduler], model_decomposed, [optimizer])
 
     if header.show_model_summary:
         model_input_size = (header.config_decomposed["model_input_channels"], header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])
@@ -209,28 +174,26 @@ def main():
         wandb.log({"validation/epoch/step": epoch})
 
         batch_step_train = train(model_decomposed, data_loader_train, criterions, optimizer, device, batch_step_train)
-        (accuracy_validation_epoch_list, loss_overall_validation_epoch, batch_step_validate) = validate(model_decomposed, data_loader_validation, criterions, device, batch_step_validate)
+        (accuracy_attribute_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_decomposed, data_loader_validation, criterions, device, batch_step_validate)
 
-        learning_rate_scheduler.step(loss_overall_validation_epoch)
+        learning_rate_scheduler.step(loss_validation_epoch)
 
-        accuracy_validation_epoch_mean = sum(accuracy_validation_epoch_list) / len(accuracy_validation_epoch_list)
+        logger.log_info("Epoch validation attribute accuracy: " + str(accuracy_attribute_validation_epoch) + ".")
 
-        logger.log_info("Epoch validation accuracy: " + str(accuracy_validation_epoch_mean) + ".")
+        if accuracy_attribute_validation_epoch > accuracy_attribute_validation_best or epoch == 1:
+            accuracy_attribute_validation_best = accuracy_attribute_validation_epoch
+            wandb.log({"validation/epoch/accuracy_attribute_best": accuracy_attribute_validation_best})
+            utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], accuracy_attribute_validation_best, batch_step_train, batch_step_validate, criterions, epoch, [learning_rate_scheduler], model_decomposed, [optimizer])
 
-        if accuracy_validation_epoch_mean > accuracy_validation_best:
-            accuracy_validation_best = accuracy_validation_epoch_mean
-            wandb.log({"validation/epoch/accuracy_best": accuracy_validation_best})
-            utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch, [learning_rate_scheduler], model_decomposed, [optimizer])
-
-        utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch, [learning_rate_scheduler], model_decomposed, [optimizer])
+        utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_attribute_validation_best, batch_step_train, batch_step_validate, criterions, epoch, [learning_rate_scheduler], model_decomposed, [optimizer])
 
         epoch += 1
 
     if progress_bar is not None:
         progress_bar.close()
 
-    logger.log_info("Best validation accuracy: " + str(accuracy_validation_best) + ".")
-    wandb.summary["validation/epoch/accuracy_best"] = accuracy_validation_best
+    logger.log_info("Best validation attribute accuracy: " + str(accuracy_attribute_validation_best) + ".")
+    wandb.summary["validation/epoch/accuracy_attribute_best"] = accuracy_attribute_validation_best
 
     wandb.log({"testing/epoch/step": batch_step_test})
     test_dl.test(model_decomposed, data_loader_test, device, batch_step_test)
