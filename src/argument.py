@@ -28,16 +28,6 @@ def generateRunName(model, type, seed, fine_tuning):
 
     return run_name
 
-def initializeArgumentsAttack():
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.", required = True)
-    parser.add_argument("-s", "--seed", type = int, default = 42, help = "Randomization seed.")
-    parser.add_argument("-d", "--test-dataset-dir", type = str, default = "", help = "Directory of dataset testing split.")
-    parser.add_argument("-a", "--attribute", type = int, default = 0, help = "Targeted attribute.")
-
-    return parser.parse_args()
-
 def initializeArgumentsTest():
     parser = argparse.ArgumentParser()
 
@@ -192,30 +182,6 @@ def initializeRunNameSPN(run_name):
     header.config_spn["run_name"] = header.run_name_spn
 
     return resume
-
-def processArgumentsAttack():
-    arguments = initializeArgumentsAttack()
-
-    header.config_decomposed["seed"] = arguments.seed
-
-    if arguments.test_dataset_dir != "":
-        header.config_decomposed["dir_dataset_test"] = arguments.test_dataset_dir
-
-    if not initializeRunNameDecomposed(arguments.run_name) or header.run_name_decomposed == "":
-        logger.log_fatal("Run name missing. Quit.")
-        exit(-1)
-
-    header.config_decomposed["model"] = header.run_name_decomposed.split(".")[1]
-
-    header.attack_targeted_attribute = arguments.attribute
-
-    logger.log_trace("Run name: \"" + header.run_name_decomposed + "\".")
-    logger.log_trace("Model: \"" + header.config_decomposed["model"] + "\".")
-    logger.log_trace("Randomization seed: " + str(header.config_decomposed["seed"]) + ".")
-    logger.log_trace("Directory of dataset testing split: \"" + header.config_decomposed["dir_dataset_test"] + "\".")
-    logger.log_trace("Targeted attribute: \"" + str(header.attack_targeted_attribute) + "\".")
-
-    return
 
 def processArgumentsTestBaseline():
     arguments = initializeArgumentsTest()
