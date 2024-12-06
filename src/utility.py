@@ -104,30 +104,6 @@ def computeAccuracyDecomposed(outputs, labels, device):
 
     return accuracy
 
-def computeCovarianceRegularization(features):
-    loss = 0
-    features_centered = []
-
-    # Mean-center all attribute feature tensors across rows
-    for feature in features:
-        means_col = torch.mean(feature, axis = 0)
-        features_centered.append(feature.detach().clone() - means_col)
-
-    # Obtain unique pairs of attribute feature tensors
-    feature_pairs = list(itertools.combinations(features_centered, 2))
-
-    for feature_pair in feature_pairs:
-        # Compute pair-wise covariance matrix
-        convariance = torch.matmul(feature_pair[0].t(), feature_pair[1])
-
-        # Add Frobenius norm to total loss
-        loss += torch.sum(torch.square(convariance))
-
-    # Multiply total loss with tunable regularization factor
-    loss *= header.config_decomposed["factor_loss_covariance"]
-
-    return loss
-
 def countAttributeJointProbabilities(config_dataset, device):
     attribute_ranges = []
     label_probabilities = {}

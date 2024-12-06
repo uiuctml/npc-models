@@ -29,8 +29,7 @@ def train(model_decomposed, data_loader, criterions, optimizer, device, batch_st
 
     with torch.set_grad_enabled(True):
         for (batch_index, (input, labels, _, _)) in enumerate(data_loader):
-            loss_covariance = 0
-            loss_criterions = 0
+            loss_overall = 0
 
             input = input.to(device, non_blocking = True)
 
@@ -39,7 +38,7 @@ def train(model_decomposed, data_loader, criterions, optimizer, device, batch_st
 
             optimizer.zero_grad()
 
-            (outputs, outputs_head_hidden) = model_decomposed(input)
+            (outputs, _) = model_decomposed(input)
 
             for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
                 loss = criterions[i](outputs[i], labels[i])
@@ -50,24 +49,16 @@ def train(model_decomposed, data_loader, criterions, optimizer, device, batch_st
 
                 accuracy_epoch_list[i] += corrects
                 loss_epoch_list[i] += loss_batch
-                loss_criterions += loss / math.log(outputs[i].size(1))
+                loss_overall += loss / math.log(outputs[i].size(1))
 
                 wandb.log({"training/batch/" + dataset_entry["name"] + "/accuracy": accuracy_batch})
                 wandb.log({"training/batch/" + dataset_entry["name"] + "/loss": loss_batch})
 
-            loss_criterions /= len(outputs)
-            loss_covariance = utility.computeCovarianceRegularization(outputs_head_hidden)
-
-            if header.config_decomposed["use_covariance_loss"]:
-                loss_overall = loss_criterions + loss_covariance
-            else:
-                loss_overall = loss_criterions
+            loss_overall /= len(outputs)
 
             loss_overall.backward()
             optimizer.step()
 
-            loss_covariance_batch = loss_covariance.item()
-            loss_criterions_batch = loss_criterions.item()
             loss_overall_batch = loss_overall.item()
             loss_overall_epoch += loss_overall_batch
 
@@ -76,8 +67,6 @@ def train(model_decomposed, data_loader, criterions, optimizer, device, batch_st
 
             wandb.log({"training/batch/step": batch_step})
             wandb.log({"training/batch/loss": loss_overall_batch})
-            wandb.log({"training/batch/loss_covariance": loss_covariance_batch})
-            wandb.log({"training/batch/loss_criterions": loss_criterions_batch})
 
             batch_step += 1
 
@@ -118,7 +107,7 @@ def validate(model_decomposed, data_loader, criterions, device, batch_step):
             for i in range(len(labels)):
                 labels[i] = labels[i].to(device, non_blocking = True)
 
-            (outputs, outputs_head_hidden) = model_decomposed(input)
+            (outputs, _) = model_decomposed(input)
 
             for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
                 loss = criterions[i](outputs[i], labels[i])
@@ -135,9 +124,6 @@ def validate(model_decomposed, data_loader, criterions, device, batch_step):
                 wandb.log({"validation/batch/" + dataset_entry["name"] + "/loss": loss_batch})
 
             loss_overall /= len(outputs)
-
-            if header.config_decomposed["use_covariance_loss"]:
-                loss_overall += utility.computeCovarianceRegularization(outputs_head_hidden)
 
             loss_overall_batch = loss_overall.item()
             loss_overall_epoch += loss_overall_batch

@@ -112,7 +112,6 @@ config_decomposed = {
     "run_name": run_name_decomposed,
     "seed": seed,
     "type": "decomposed",
-    "use_covariance_loss": False
 }
 
 config_reference = {
