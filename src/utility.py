@@ -71,14 +71,6 @@ def computeCovarianceRegularization(features):
 
     return loss
 
-def computeL2Norm(parameters):
-    parameters_list = []
-
-    for parameter in parameters:
-        parameters_list.append(parameter.view(-1))
-
-    return torch.square(torch.cat(parameters_list)).sum().item()
-
 def countAttributeJointProbabilities(config_dataset, device):
     attribute_ranges = []
     label_probabilities = {}
