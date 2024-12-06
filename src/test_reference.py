@@ -25,16 +25,7 @@ def computeAccuracy(output_neck, output_head, labels_decomposed, labels_original
         threshold_accuracy_task = 0
 
     if header.config_reference["model"] == type.ModelReference.cbm_cat.name:
-        accuracy_attribute_sum = 0
-        batch_size = labels_original.size(0)
-        count_attribute = len(output_neck)
-
-        for i in range(count_attribute):
-            corrects = utility.computeCorrectsDecomposed(output_neck[i], labels_decomposed[i], device)
-            accuracy_attribute = corrects / batch_size
-            accuracy_attribute_sum += accuracy_attribute
-
-        accuracy_attribute_batch = accuracy_attribute_sum / count_attribute
+        accuracy_attribute_batch = utility.computeAccuracyDecomposed(output_neck, labels_decomposed, device)
     else:
         labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed)
         accuracy_attribute_batch = sklearn.metrics.accuracy_score(labels_decomposed.cpu(), (output_neck > threshold_accuracy_attribute).cpu())

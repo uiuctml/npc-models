@@ -21,22 +21,31 @@ def applySoftmaxDecomposed(outputs_decomposed):
 
     return outputs_decomposed_softmax
 
-def computeCorrectsDecomposed(outputs, labels, device):
-    masks_labels = (labels > 0)
-    counts_values = torch.sum(masks_labels, dim = 1)
-    masks_predictions = []
+def computeAccuracyDecomposed(outputs, labels, device):
+    count_attributes = len(outputs)
+    corrects = []
 
-    for (output, count_value) in zip(outputs, counts_values):
-        mask_prediction = torch.zeros(output.shape, dtype = torch.bool)
-        (_, prediction) = torch.topk(output, count_value)
-        mask_prediction[prediction] = True
-        masks_predictions.append(mask_prediction)
+    for i in range(count_attributes):
+        masks_labels = (labels[i] > 0)
+        counts_values = torch.sum(masks_labels, dim = 1)
+        masks_predictions = []
 
-    masks_predictions = torch.stack(masks_predictions, dim = 0).to(device)
-    corrects_rows = torch.all(masks_predictions == masks_labels, dim = 1)
-    corrects = torch.sum(corrects_rows).item()
+        for (output_batch, count_value_batch) in zip(outputs[i], counts_values):
+            mask_prediction_batch = torch.zeros(output_batch.shape, dtype = torch.bool)
+            (_, prediction_batch) = torch.topk(output_batch, count_value_batch)
+            mask_prediction_batch[prediction_batch] = True
+            masks_predictions.append(mask_prediction_batch)
 
-    return corrects
+        masks_predictions = torch.stack(masks_predictions, dim = 0).to(device)
+        corrects_attribute = torch.all(masks_predictions == masks_labels, dim = 1)
+
+        corrects.append(corrects_attribute)
+
+    corrects = torch.stack(corrects, dim = 1)
+    corrects = torch.all(corrects, dim = 1)
+    accuracy = (torch.sum(corrects) / corrects.size(0)).item()
+
+    return accuracy
 
 def computeCovarianceRegularization(features):
     loss = 0
