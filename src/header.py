@@ -101,7 +101,7 @@ config_decomposed = {
     "learning_rate_scheduler_min_learning_rate": 1e-6,
     "learning_rate_scheduler_min_learning_rate_decay": 1e-8,
     "learning_rate_scheduler_last_epoch": -1,
-    "model": "vit_b_32_mtl",
+    "model": "resnet34_mtl",
     "model_input_height": 224,
     "model_input_width": 224,
     "model_input_channels": 3,
