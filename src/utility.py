@@ -1,6 +1,5 @@
 import cv2
 import header
-import itertools
 import logger
 import natsort
 import numpy
@@ -13,15 +12,15 @@ import wandb
 def applySoftmax(output):
     return torch.nn.functional.softmax(output, dim = 1)
 
-def applySoftmaxDecomposed(outputs_decomposed):
-    outputs_decomposed_softmax = []
+def applySoftmaxDecomposed(output_decomposed):
+    output_decomposed_softmax = []
 
-    for i in range(len(outputs_decomposed)):
-        outputs_decomposed_softmax.append(applySoftmax(outputs_decomposed[i]))
+    for i in range(len(output_decomposed)):
+        output_decomposed_softmax.append(applySoftmax(output_decomposed[i]))
 
-    return outputs_decomposed_softmax
+    return output_decomposed_softmax
 
-def compose(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted = None):
+def compose(output_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted = None):
     log_likelihoods_joint = spn_joint.forward().to(device)
 
     if marginal_probabilities_counted is None:
@@ -38,14 +37,14 @@ def compose(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_ou
 
     matrix_a = matrix_a.reshape(spn_output_rows, spn_output_cols)
 
-    batch_size = outputs_decomposed[0].shape[0]
+    batch_size = output_decomposed[0].shape[0]
     matrix_b_list = []
 
     for batch in range(batch_size):
-        matrix_b_batch = outputs_decomposed[0][batch]
+        matrix_b_batch = output_decomposed[0][batch]
 
-        for task_index in range(1, len(outputs_decomposed)):
-            matrix_b_batch = torch.outer(matrix_b_batch, outputs_decomposed[task_index][batch]).flatten()
+        for task_index in range(1, len(output_decomposed)):
+            matrix_b_batch = torch.outer(matrix_b_batch, output_decomposed[task_index][batch]).flatten()
 
         matrix_b_list.append(matrix_b_batch)
 
@@ -56,7 +55,7 @@ def compose(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_ou
 
     return (matrix_a, matrix_b, matrix_c)
 
-def composeSingle(batch, outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device):
+def composeSingle(batch, output_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device):
     log_likelihoods_joint = spn_joint.forward()
     log_likelihoods_marginal = spn_marginal.forward()
 
@@ -68,10 +67,10 @@ def composeSingle(batch, outputs_decomposed, spn_joint, spn_marginal, spn_output
     matrix_a[mask_matrix_a] = 0
     matrix_a = matrix_a.reshape(spn_output_rows, spn_output_cols)
 
-    matrix_b_batch = outputs_decomposed[0][batch]
+    matrix_b_batch = output_decomposed[0][batch]
 
-    for task_index in range(1, len(outputs_decomposed)):
-        matrix_b_batch = torch.outer(matrix_b_batch, outputs_decomposed[task_index][batch]).flatten()
+    for task_index in range(1, len(output_decomposed)):
+        matrix_b_batch = torch.outer(matrix_b_batch, output_decomposed[task_index][batch]).flatten()
 
     matrix_b_batch = matrix_b_batch.unsqueeze(0).to(device).t()
     matrix_c = torch.matmul(matrix_a, matrix_b_batch).t().squeeze(0)

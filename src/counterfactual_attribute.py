@@ -458,9 +458,9 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
         (_, predictions_composed) = torch.max(outputs_composed, 1)
         (_, predictions_composed_counterfactual) = torch.max(outputs_composed_counterfactual, 1)
 
-        corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
-        corrects_composed_counterfactual = torch.sum(predictions_composed_counterfactual == labels_original.data).item()
-        incorrects_composed = torch.sum(predictions_composed != labels_original.data).item()
+        corrects_composed = torch.sum(predictions_composed == labels_original).item()
+        corrects_composed_counterfactual = torch.sum(predictions_composed_counterfactual == labels_original).item()
+        incorrects_composed = torch.sum(predictions_composed != labels_original).item()
 
         instance_count_corrected += corrects_composed_counterfactual - corrects_composed
         instance_count_incorrect += incorrects_composed

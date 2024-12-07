@@ -19,21 +19,16 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
     utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
     utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
 
-    accuracy_epoch_composed = 0
-    accuracy_epoch_list_decomposed = []
-    config_dataset = data_loader.dataset.config
+    accuracy_attribute_epoch = 0
+    accuracy_task_epoch = 0
     mpes = {}
-    output_list_composed = []
-    output_list_decomposed = []
-    output_list_decomposed_accuracy = []
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
     spn_output_rows = len(data_loader.dataset.classes_original)
     spn_output_cols = 1
 
-    for attribute in config_dataset["attributes"]:
+    for attribute in data_loader.dataset.config["attributes"]:
         attribute_labels = attribute["labels"]
         spn_output_cols *= len(attribute_labels)
-        accuracy_epoch_list_decomposed.append(0)
 
     model_decomposed.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")
@@ -46,65 +41,53 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
             for i in range(len(labels_decomposed)):
                 labels_decomposed[i] = labels_decomposed[i].to(device, non_blocking = True)
 
-            (outputs_decomposed, _) = model_decomposed(input)
+            (output_decomposed, _) = model_decomposed(input)
 
-            outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
+            output_decomposed = utility.applySoftmaxDecomposed(output_decomposed)
+            (matrix_a, matrix_b, output_composed) = utility.compose(output_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted)
+            (_, predictions_composed) = torch.max(output_composed, 1)
 
-            for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
-                corrects_decomposed = utility.computeCorrectsDecomposed(outputs_decomposed[i], labels_decomposed[i], device)
-                accuracy_batch_decomposed = corrects_decomposed / input.size(0)
-                accuracy_epoch_list_decomposed[i] += corrects_decomposed
+            corrects_composed = torch.sum(predictions_composed == labels_original).item()
 
-                wandb.log({"testing/batch/" + dataset_entry["name"] + "/accuracy": accuracy_batch_decomposed})
+            accuracy_attribute_batch = utility.computeAccuracyDecomposed(output_decomposed, labels_decomposed, device)
+            accuracy_task_batch = corrects_composed / input.size(0)
 
-            (matrix_a, matrix_b, outputs_composed) = utility.compose(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted)
-            (_, predictions_composed) = torch.max(outputs_composed, 1)
-
-            corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
-
-            accuracy_batch_composed = corrects_composed / input.size(0)
-            accuracy_epoch_composed += corrects_composed
+            accuracy_attribute_epoch += accuracy_attribute_batch
+            accuracy_task_epoch += corrects_composed
 
             if header.composed_find_mpe:
                 mpe_attributes = utility.findMPEs(matrix_a, matrix_b, spn_settings_joint, labels_original)
-                utility.saveMPEs(input_file_paths, mpes, mpe_attributes, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed)
+                utility.saveMPEs(input_file_paths, mpes, mpe_attributes, data_loader.dataset, labels_decomposed, labels_original, output_decomposed, output_composed)
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
 
-            wandb.log({"testing/batch/accuracy": accuracy_batch_composed})
+            wandb.log({"testing/batch/accuracy_attribute": accuracy_attribute_batch})
+            wandb.log({"testing/batch/accuracy_task": accuracy_task_batch})
             wandb.log({"testing/batch/step": batch_step})
 
             batch_step += 1
 
     progress_bar.close()
 
-    if not os.path.isdir(header.dir_output_mpe):
-        os.makedirs(header.dir_output_mpe, exist_ok = True)
-
     if header.composed_find_mpe:
+        if not os.path.isdir(header.dir_output_mpe):
+            os.makedirs(header.dir_output_mpe, exist_ok = True)
+
         with open(os.path.join(header.dir_output_mpe, header.file_name_mpe), "w") as file_mpe:
             json.dump(mpes, file_mpe, indent = 4)
 
-    for (i, dataset_entry) in enumerate(config_dataset["attributes"]):
-        accuracy_epoch_list_decomposed[i] /= len(data_loader.dataset)
+    accuracy_attribute_epoch /= len(data_loader)
+    accuracy_task_epoch /= len(data_loader.dataset)
 
-        output_list_decomposed_accuracy.append(accuracy_epoch_list_decomposed[i])
+    wandb.log({"testing/epoch/accuracy_attribute": accuracy_attribute_epoch})
+    wandb.log({"testing/epoch/accuracy_task": accuracy_task_epoch})
 
-        wandb.log({"testing/epoch/" + dataset_entry["name"] + "/accuracy": accuracy_epoch_list_decomposed[i]})
-        wandb.summary["testing/epoch/" + dataset_entry["name"] + "/accuracy"] = accuracy_epoch_list_decomposed[i]
+    wandb.summary["testing/epoch/accuracy_attribute"] = accuracy_attribute_epoch
+    wandb.summary["testing/epoch/accuracy_task"] = accuracy_task_epoch
 
-        logger.log_info("Decomposed testing accuracy for \"" + dataset_entry["name"] + "\": " + str(accuracy_epoch_list_decomposed[i]) + ".")
-
-    accuracy_epoch_composed /= len(data_loader.dataset)
-
-    output_list_composed += [accuracy_epoch_composed]
-    output_list_decomposed += output_list_decomposed_accuracy
-
-    wandb.log({"testing/epoch/accuracy": accuracy_epoch_composed})
-    wandb.summary["testing/epoch/accuracy"] = accuracy_epoch_composed
-
-    logger.log_info("Composed testing accuracy: " + str(accuracy_epoch_composed) + ".")
+    logger.log_info("Testing attribute accuracy: " + str(accuracy_attribute_epoch) + ".")
+    logger.log_info("Testing task accuracy: " + str(accuracy_task_epoch) + ".")
 
     return
 

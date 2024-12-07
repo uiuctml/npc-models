@@ -185,8 +185,8 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, spn_sett
 
         utility.saveCounterfactuals(input_file_paths, counterfactuals, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed, outputs_composed, outputs_composed_counterfactual)
 
-        corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
-        corrects_composed_counterfactual = torch.sum(predictions_composed_counterfactual == labels_original.data).item()
+        corrects_composed = torch.sum(predictions_composed == labels_original).item()
+        corrects_composed_counterfactual = torch.sum(predictions_composed_counterfactual == labels_original).item()
         instance_count_corrected += corrects_composed_counterfactual - corrects_composed
 
         accuracy_epoch_composed += corrects_composed

@@ -34,7 +34,7 @@ def train(model_baseline, data_loader, criterion, optimizer, device, batch_step)
             loss.backward()
             optimizer.step()
 
-            corrects = torch.sum(predictions == labels.data).item()
+            corrects = torch.sum(predictions == labels).item()
 
             accuracy_batch = corrects / input.size(0)
             loss_batch = loss.item()
@@ -78,7 +78,7 @@ def validate(model_baseline, data_loader, criterion, device, batch_step):
             (_, predictions) = torch.max(output, 1)
             loss = criterion(output, labels)
 
-            corrects = torch.sum(predictions == labels.data).item()
+            corrects = torch.sum(predictions == labels).item()
             accuracy_batch = corrects / input.size(0)
             loss_batch = loss.item()
 

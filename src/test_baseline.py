@@ -32,7 +32,7 @@ def test(model_baseline, data_loader, device, batch_step):
             output = model_baseline(input)
             (_, predictions) = torch.max(output, 1)
 
-            corrects = torch.sum(predictions == labels.data).item()
+            corrects = torch.sum(predictions == labels).item()
 
             accuracy_batch = corrects / input.size(0)
             accuracy_epoch += corrects

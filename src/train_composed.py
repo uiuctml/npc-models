@@ -15,18 +15,16 @@ import utility
 import wandb
 
 def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, optimizer_decomposed, optimizer_spn, device, batch_step, marginal_probabilities_counted = None):
-    accuracy_epoch_composed = 0
-    accuracy_epoch_list_decomposed = []
+    accuracy_attribute_epoch = 0
+    accuracy_task_epoch = 0
     loss_epoch = 0
-    config_dataset = data_loader.dataset.config
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
     spn_output_rows = len(data_loader.dataset.classes_original)
     spn_output_cols = 1
 
-    for attribute in config_dataset["attributes"]:
+    for attribute in data_loader.dataset.config["attributes"]:
         attribute_labels = attribute["labels"]
         spn_output_cols *= len(attribute_labels)
-        accuracy_epoch_list_decomposed.append(0)
 
     model_decomposed.train()
     progress_bar.set_description_str("[INFO]: Training progress")
@@ -41,10 +39,10 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
 
             optimizer_decomposed.zero_grad()
 
-            (outputs_decomposed, _) = model_decomposed(input)
+            (output_decomposed, _) = model_decomposed(input)
 
-            outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
-            (matrix_a, matrix_b, output_composed) = utility.compose(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted)
+            output_decomposed = utility.applySoftmaxDecomposed(output_decomposed)
+            (matrix_a, matrix_b, output_composed) = utility.compose(output_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
             loss = criterion(output_composed, labels_original)
@@ -60,25 +58,21 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
 
                 optimizer_spn.step(matrix_a.detach(), matrix_b.detach(), output_composed.detach(), labels_original)
 
-            corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
+            corrects_composed = torch.sum(predictions_composed == labels_original).item()
 
-            for (i, attribute) in enumerate(config_dataset["attributes"]):
-                corrects_decomposed = utility.computeCorrectsDecomposed(outputs_decomposed[i], labels_decomposed[i], device)
-                accuracy_batch_decomposed = corrects_decomposed / input.size(0)
-                accuracy_epoch_list_decomposed[i] += corrects_decomposed
-
-                wandb.log({"training/batch/" + attribute["name"] + "/accuracy": accuracy_batch_decomposed})
-
-            accuracy_batch_composed = corrects_composed / input.size(0)
+            accuracy_attribute_batch = utility.computeAccuracyDecomposed(output_decomposed, labels_decomposed, device)
+            accuracy_task_batch = corrects_composed / input.size(0)
             loss_batch = loss.item()
 
-            accuracy_epoch_composed += corrects_composed
+            accuracy_attribute_epoch += accuracy_attribute_batch
+            accuracy_task_epoch += corrects_composed
             loss_epoch += loss_batch
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
 
-            wandb.log({"training/batch/accuracy": accuracy_batch_composed})
+            wandb.log({"training/batch/accuracy_attribute": accuracy_attribute_batch})
+            wandb.log({"training/batch/accuracy_task": accuracy_task_batch})
             wandb.log({"training/batch/step": batch_step})
             wandb.log({"training/batch/loss": loss_batch})
 
@@ -86,31 +80,27 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
 
     progress_bar.close()
 
-    for (i, attribute) in enumerate(config_dataset["attributes"]):
-        accuracy_epoch_list_decomposed[i] /= len(data_loader.dataset)
-        wandb.log({"training/epoch/" + attribute["name"] + "/accuracy": accuracy_epoch_list_decomposed[i]})
-
-    accuracy_epoch_composed /= len(data_loader.dataset)
+    accuracy_attribute_epoch /= len(data_loader)
+    accuracy_task_epoch /= len(data_loader.dataset)
     loss_epoch /= len(data_loader)
 
-    wandb.log({"training/epoch/accuracy": accuracy_epoch_composed})
+    wandb.log({"training/epoch/accuracy_attribute": accuracy_attribute_epoch})
+    wandb.log({"training/epoch/accuracy_task": accuracy_task_epoch})
     wandb.log({"training/epoch/loss": loss_epoch})
 
     return batch_step
 
 def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, device, batch_step, marginal_probabilities_counted = None):
-    accuracy_epoch_composed = 0
-    accuracy_epoch_list_decomposed = []
+    accuracy_attribute_epoch = 0
+    accuracy_task_epoch = 0
     loss_epoch = 0
-    config_dataset = data_loader.dataset.config
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
     spn_output_rows = len(data_loader.dataset.classes_original)
     spn_output_cols = 1
 
-    for attribute in config_dataset["attributes"]:
+    for attribute in data_loader.dataset.config["attributes"]:
         attribute_labels = attribute["labels"]
         spn_output_cols *= len(attribute_labels)
-        accuracy_epoch_list_decomposed.append(0)
 
     model_decomposed.eval()
     progress_bar.set_description_str("[INFO]: Validation progress")
@@ -123,33 +113,29 @@ def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, 
             for i in range(len(labels_decomposed)):
                 labels_decomposed[i] = labels_decomposed[i].to(device, non_blocking = True)
 
-            (outputs_decomposed, _) = model_decomposed(input)
+            (output_decomposed, _) = model_decomposed(input)
 
-            outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
-            (_, _, output_composed) = utility.compose(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted)
+            output_decomposed = utility.applySoftmaxDecomposed(output_decomposed)
+            (_, _, output_composed) = utility.compose(output_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
             loss = criterion(output_composed, labels_original)
 
-            corrects_composed = torch.sum(predictions_composed == labels_original.data).item()
+            corrects_composed = torch.sum(predictions_composed == labels_original).item()
 
-            for (i, attribute) in enumerate(config_dataset["attributes"]):
-                corrects_decomposed = utility.computeCorrectsDecomposed(outputs_decomposed[i], labels_decomposed[i], device)
-                accuracy_batch_decomposed = corrects_decomposed / input.size(0)
-                accuracy_epoch_list_decomposed[i] += corrects_decomposed
-
-                wandb.log({"validation/batch/" + attribute["name"] + "/accuracy": accuracy_batch_decomposed})
-
-            accuracy_batch_composed = corrects_composed / input.size(0)
+            accuracy_attribute_batch = utility.computeAccuracyDecomposed(output_decomposed, labels_decomposed, device)
+            accuracy_task_batch = corrects_composed / input.size(0)
             loss_batch = loss.item()
 
-            accuracy_epoch_composed += corrects_composed
+            accuracy_attribute_epoch += accuracy_attribute_batch
+            accuracy_task_epoch += corrects_composed
             loss_epoch += loss_batch
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
 
-            wandb.log({"validation/batch/accuracy": accuracy_batch_composed})
+            wandb.log({"validation/batch/accuracy_attribute": accuracy_attribute_batch})
+            wandb.log({"validation/batch/accuracy_task": accuracy_task_batch})
             wandb.log({"validation/batch/step": batch_step})
             wandb.log({"validation/batch/loss": loss_batch})
 
@@ -157,17 +143,15 @@ def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, 
 
     progress_bar.close()
 
-    for (i, attribute) in enumerate(config_dataset["attributes"]):
-        accuracy_epoch_list_decomposed[i] /= len(data_loader.dataset)
-        wandb.log({"validation/epoch/" + attribute["name"] + "/accuracy": accuracy_epoch_list_decomposed[i]})
-
-    accuracy_epoch_composed /= len(data_loader.dataset)
+    accuracy_attribute_epoch /= len(data_loader)
+    accuracy_task_epoch /= len(data_loader.dataset)
     loss_epoch /= len(data_loader)
 
-    wandb.log({"validation/epoch/accuracy": accuracy_epoch_composed})
+    wandb.log({"training/epoch/accuracy_attribute": accuracy_attribute_epoch})
+    wandb.log({"training/epoch/accuracy_task": accuracy_task_epoch})
     wandb.log({"validation/epoch/loss": loss_epoch})
 
-    return (accuracy_epoch_composed, loss_epoch, batch_step)
+    return (accuracy_task_epoch, loss_epoch, batch_step)
 
 def main():
     resume = argument.processArgumentsTrainComposed()
@@ -185,12 +169,10 @@ def main():
     }
 
     wandb.init(project = header.project_name, name = header.run_name_decomposed, config = config, resume = resume, mode = header.run_mode)
-
     utility.wAndBDefineMetrics()
-
     logger.log_info("Started run \"" + header.run_name_decomposed + "\" and " + header.run_name_spn + ".")
 
-    accuracy_validation_best = 0
+    accuracy_task_validation_best = 0
     batch_step_test = 1
     batch_step_train = 1
     batch_step_validate = 1
@@ -259,7 +241,7 @@ def main():
     spn_joint.set_leaf_nodes_categorical(spn_settings_joint)
     spn_marginal.set_leaf_nodes_categorical(spn_settings_marginal)
 
-    (accuracy_validation_best, batch_step_train, batch_step_validate, [criterion], epoch) = utility.loadCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, [criterion], epoch, [learning_rate_scheduler], model_decomposed, [optimizer_decomposed])
+    (accuracy_task_validation_best, batch_step_train, batch_step_validate, [criterion], epoch) = utility.loadCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_task_validation_best, batch_step_train, batch_step_validate, [criterion], epoch, [learning_rate_scheduler], model_decomposed, [optimizer_decomposed])
     utility.loadCheckpointSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], 0, 0, 0)
     utility.loadCheckpointSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], 0, 0, 0)
 
@@ -298,20 +280,20 @@ def main():
         wandb.log({"validation/epoch/step": epoch})
 
         batch_step_train = train(model_decomposed, spn_joint, spn_marginal, data_loader_train, criterion, optimizer_decomposed, optimizer_spn, device, batch_step_train, marginal_probabilities_counted)
-        (accuracy_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_decomposed, spn_joint, spn_marginal, data_loader_validation, criterion, device, batch_step_validate, marginal_probabilities_counted)
+        (accuracy_task_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_decomposed, spn_joint, spn_marginal, data_loader_validation, criterion, device, batch_step_validate, marginal_probabilities_counted)
 
         learning_rate_scheduler.step()
         learning_rate_scheduler_spn.step(loss_validation_epoch)
 
-        logger.log_info("Epoch validation accuracy: " + str(accuracy_validation_epoch) + ".")
+        logger.log_info("Epoch validation task accuracy: " + str(accuracy_task_validation_epoch) + ".")
 
-        if accuracy_validation_epoch > accuracy_validation_best:
-            accuracy_validation_best = accuracy_validation_epoch
-            wandb.log({"validation/epoch/accuracy_best": accuracy_validation_best})
-            utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], accuracy_validation_best, batch_step_train, batch_step_validate, [criterion], epoch, [learning_rate_scheduler], model_decomposed, [optimizer_decomposed])
+        if accuracy_task_validation_epoch > accuracy_task_validation_best or epoch == 1:
+            accuracy_task_validation_best = accuracy_task_validation_epoch
+            wandb.log({"validation/epoch/accuracy_task_best": accuracy_task_validation_best})
+            utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], accuracy_task_validation_best, batch_step_train, batch_step_validate, [criterion], epoch, [learning_rate_scheduler], model_decomposed, [optimizer_decomposed])
             utility.saveCheckpointSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"], 0, 0, 0)
 
-        utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_validation_best, batch_step_train, batch_step_validate, [criterion], epoch, [learning_rate_scheduler], model_decomposed, [optimizer_decomposed])
+        utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_task_validation_best, batch_step_train, batch_step_validate, [criterion], epoch, [learning_rate_scheduler], model_decomposed, [optimizer_decomposed])
         utility.saveCheckpointSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], 0, 0, 0)
 
         epoch += 1
@@ -319,8 +301,8 @@ def main():
     if progress_bar is not None:
         progress_bar.close()
 
-    logger.log_info("Best validation accuracy: " + str(accuracy_validation_best) + ".")
-    wandb.summary["validation/epoch/accuracy_best"] = accuracy_validation_best
+    logger.log_info("Best validation task accuracy: " + str(accuracy_task_validation_best) + ".")
+    wandb.summary["validation/epoch/accuracy_task_best"] = accuracy_task_validation_best
 
     if normalize:
         settings_marginal = torch.full((1, spn_settings_joint.shape[1]), -1).to(device)
