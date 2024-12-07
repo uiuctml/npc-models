@@ -11,7 +11,6 @@ counterfactual_qp_epsilon = 1
 counterfactual_qp_solver = "clarabel"
 counterfactual_steps = 50
 cuda_allow_tf32 = False
-dir_dataset_test_adversarial = "../../../datasets/awa2-dataset/images/split/adversarial/test"
 dir_output_counterfactual = "../output/counterfactual"
 dir_output_mpe = "../output/mpe"
 dir_output_spn = "../output/spn"
