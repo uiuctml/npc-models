@@ -126,12 +126,11 @@ class CNNMTL(Model):
         for dataset_entry in config_dataset["attributes"]:
             dataset_name = dataset_entry["name"]
             dataset_labels = dataset_entry["labels"]
-            head_hidden_size = header.config_decomposed["head_hidden_size"]
 
             dataset_labels.remove("")
 
-            layers_hidden = torch.nn.Sequential(torch.nn.Linear(linear_input_size, head_hidden_size), torch.nn.ReLU())
-            layer_final = torch.nn.Linear(head_hidden_size, len(dataset_labels))
+            layers_hidden = torch.nn.Sequential(torch.nn.Linear(linear_input_size, header.model_head_hidden_size), torch.nn.ReLU())
+            layer_final = torch.nn.Linear(header.model_head_hidden_size, len(dataset_labels))
 
             layer_dict = torch.nn.ModuleDict({"hidden": layers_hidden, "final": layer_final})
             layer_dict_task = torch.nn.ModuleDict({dataset_name: layer_dict})
@@ -179,7 +178,6 @@ class CNNSet(Model):
             max_pool_size = 2
             input_size = header.config_decomposed["model_input_height"]
             conv_output_size = (input_size - (conv_filter_size - 1) - (conv_filter_size - 1)) // max_pool_size
-            head_hidden_size = header.config_decomposed["head_hidden_size"]
             linear_input_size = conv_output_size * conv_output_size * conv_channel_size
             output_size = len(attribute_labels)
 
@@ -188,9 +186,9 @@ class CNNSet(Model):
                 torch.nn.Conv2d(conv_channel_size, conv_channel_size, conv_filter_size),
                 torch.nn.MaxPool2d(max_pool_size),
                 torch.nn.Flatten(),
-                torch.nn.Linear(linear_input_size, head_hidden_size),
+                torch.nn.Linear(linear_input_size, header.model_head_hidden_size),
                 torch.nn.ReLU(),
-                torch.nn.Linear(head_hidden_size, output_size)
+                torch.nn.Linear(header.model_head_hidden_size, output_size)
             )
 
             self.model_list.append(model)
@@ -252,16 +250,15 @@ class MLPSet(Model):
             attribute_labels.remove("")
 
             input_size = header.config_decomposed["model_input_height"] * header.config_decomposed["model_input_width"] * header.config_decomposed["model_input_channels"]
-            hidden_size = header.config_decomposed["head_hidden_size"]
             output_size = len(attribute_labels)
 
             model = torch.nn.Sequential(
                 torch.nn.Flatten(),
-                torch.nn.Linear(input_size, hidden_size),
+                torch.nn.Linear(input_size, header.model_head_hidden_size),
                 torch.nn.ReLU(),
-                torch.nn.Linear(hidden_size, hidden_size),
+                torch.nn.Linear(header.model_head_hidden_size, header.model_head_hidden_size),
                 torch.nn.ReLU(),
-                torch.nn.Linear(hidden_size, output_size)
+                torch.nn.Linear(header.model_head_hidden_size, output_size)
             )
 
             self.model_list.append(model)
@@ -300,8 +297,8 @@ class ResNet34MTL(Model):
             if "" in attribute_labels:
                 attribute_labels.remove("")
 
-            layers_hidden = torch.nn.Sequential(torch.nn.Linear(self.net.fc.in_features, header.config_decomposed["head_hidden_size"]), torch.nn.ReLU())
-            layer_final = torch.nn.Linear(header.config_decomposed["head_hidden_size"], len(attribute_labels))
+            layers_hidden = torch.nn.Sequential(torch.nn.Linear(self.net.fc.in_features, header.model_head_hidden_size), torch.nn.ReLU())
+            layer_final = torch.nn.Linear(header.model_head_hidden_size, len(attribute_labels))
 
             layer_dict = torch.nn.ModuleDict({"hidden": layers_hidden, "final": layer_final})
             layer_dict_task = torch.nn.ModuleDict({attribute_name: layer_dict})
@@ -375,12 +372,11 @@ class ResNet152MTL(Model):
         for dataset_entry in config_dataset["attributes"]:
             dataset_name = dataset_entry["name"]
             dataset_labels = dataset_entry["labels"]
-            head_hidden_size = header.config_decomposed["head_hidden_size"]
 
             dataset_labels.remove("")
 
-            layers_hidden = torch.nn.Sequential(torch.nn.Linear(net_fc_in_features, head_hidden_size), torch.nn.ReLU())
-            layer_final = torch.nn.Linear(head_hidden_size, len(dataset_labels))
+            layers_hidden = torch.nn.Sequential(torch.nn.Linear(net_fc_in_features, header.model_head_hidden_size), torch.nn.ReLU())
+            layer_final = torch.nn.Linear(header.model_head_hidden_size, len(dataset_labels))
 
             layer_dict = torch.nn.ModuleDict({"hidden": layers_hidden, "final": layer_final})
             layer_dict_task = torch.nn.ModuleDict({dataset_name: layer_dict})
@@ -462,12 +458,11 @@ class ViTB32MTL(Model):
         for dataset_entry in config_dataset["attributes"]:
             dataset_name = dataset_entry["name"]
             dataset_labels = dataset_entry["labels"]
-            head_hidden_size = header.config_decomposed["head_hidden_size"]
 
             dataset_labels.remove("")
 
-            layers_hidden = torch.nn.Sequential(torch.nn.Linear(net_heads_head_in_features, head_hidden_size), torch.nn.ReLU())
-            layer_final = torch.nn.Linear(head_hidden_size, len(dataset_labels))
+            layers_hidden = torch.nn.Sequential(torch.nn.Linear(net_heads_head_in_features, header.model_head_hidden_size), torch.nn.ReLU())
+            layer_final = torch.nn.Linear(header.model_head_hidden_size, len(dataset_labels))
 
             layer_dict = torch.nn.ModuleDict({"hidden": layers_hidden, "final": layer_final})
             layer_dict_task = torch.nn.ModuleDict({dataset_name: layer_dict})

@@ -26,6 +26,7 @@ interpret_threshold_probability = 0.1
 interpret_viewer_height = 300
 interpret_viewer_width = 300
 log_level = type.LogLevel.debug
+model_head_hidden_size = 128
 project_name = "visat-models"
 run_mode = "disabled"
 run_name_baseline_keyword = "baseline"
@@ -87,7 +88,6 @@ config_decomposed = {
     "file_name_checkpoint": run_name_decomposed + ".tar",
     "file_name_checkpoint_best": run_name_decomposed + ".best.tar",
     "fine_tuning": True,
-    "head_hidden_size": 128,
     "learning_rate_scheduler_mode": "min",
     "learning_rate_scheduler_factor": 0.5,
     "learning_rate_scheduler_patience": 2,
