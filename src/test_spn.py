@@ -42,18 +42,9 @@ def main():
     config_dataset = json.load(file_config_dataset)
     file_config_dataset.close()
 
-    attribute_sizes = []
     device = torch.device("cuda")
     spn_joint = spn.SPN()
     spn_marginal = spn.SPN()
-    spn_output_rows = len(config_dataset["mappings"])
-    spn_output_cols = 1
-
-    for attribute in config_dataset["attributes"]:
-        attribute["labels"].remove("")
-        attribute_labels = attribute["labels"]
-        spn_output_cols *= len(attribute_labels)
-        attribute_sizes.append(len(attribute_labels))
 
     logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
 
@@ -87,22 +78,6 @@ def main():
 
     logger.log_trace("Testing joint log likelihoods: " + str(log_likelihoods_joint) + ".")
     logger.log_trace("Testing marginal log likelihoods: " + str(log_likelihoods_marginal) + ".")
-
-    (_, label_probabilities) = utility.countAttributeJointProbabilities(config_dataset, device)
-    matrix_a_joint_spn = torch.exp(log_likelihoods_joint.reshape(spn_output_rows, spn_output_cols))
-    matrix_a_joint_counted = torch.zeros(matrix_a_joint_spn.shape).to(device)
-    (_, attribute_indices_to_matrix_a_col_indices) = utility.getMatrixAColIndicesAttributeIndicesMaps(spn_output_cols, spn_settings_joint)
-
-    for (index_row, label_original) in enumerate(label_probabilities.keys()):
-        indices_attribute = label_probabilities[label_original][0]
-        joint_probability_counted = label_probabilities[label_original][1]
-        index_col = attribute_indices_to_matrix_a_col_indices[indices_attribute]
-        matrix_a_joint_counted[index_row][index_col] = joint_probability_counted
-
-    error = torch.sum(torch.abs(matrix_a_joint_spn - matrix_a_joint_counted)).item() / 2
-    accuracy = 1 - error
-
-    logger.log_info("Testing accuracy: " + str(accuracy) + ".")
 
     return
 

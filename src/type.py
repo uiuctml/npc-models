@@ -50,8 +50,7 @@ class ModelReference(enum.Enum):
     len = 4
 
 class OptimizerSPN(enum.Enum):
-    cccp_discriminative = 0
-    cccp_generative = 1
-    ebw_discriminative = 2
-    pgd_discriminative = 3
-    pgd_generative = 4
+    cccp_generative = 0
+    ebw_discriminative = 1
+    pgd_discriminative = 2
+    pgd_generative = 3

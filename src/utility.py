@@ -20,21 +20,16 @@ def applySoftmaxDecomposed(output_decomposed):
 
     return output_decomposed_softmax
 
-def compose(output_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device, marginal_probabilities_counted = None):
+def compose(output_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device):
     log_likelihoods_joint = spn_joint.forward().to(device)
+    log_likelihoods_marginal = spn_marginal.forward().to(device)
 
-    if marginal_probabilities_counted is None:
-        log_likelihoods_marginal = spn_marginal.forward().to(device)
-
-        # Compute matrix A and set entries with zero joint and marginal probabilities to zero
-        mask_joint = (log_likelihoods_joint == -float("inf"))
-        mask_marginal = (log_likelihoods_joint == -float("inf"))
-        mask_matrix_a = mask_joint & mask_marginal
-        matrix_a = torch.exp(log_likelihoods_joint - log_likelihoods_marginal)
-        matrix_a[mask_matrix_a] = 0
-    else:
-        matrix_a = torch.exp(log_likelihoods_joint - torch.log(marginal_probabilities_counted))
-
+    # Compute matrix A and set entries with zero joint and marginal probabilities to zero
+    mask_joint = (log_likelihoods_joint == -float("inf"))
+    mask_marginal = (log_likelihoods_joint == -float("inf"))
+    mask_matrix_a = mask_joint & mask_marginal
+    matrix_a = torch.exp(log_likelihoods_joint - log_likelihoods_marginal)
+    matrix_a[mask_matrix_a] = 0
     matrix_a = matrix_a.reshape(spn_output_rows, spn_output_cols)
 
     batch_size = output_decomposed[0].shape[0]
@@ -102,48 +97,6 @@ def computeAccuracyDecomposed(outputs, labels, device):
     accuracy = (torch.sum(corrects) / corrects.size(0)).item()
 
     return accuracy
-
-def countAttributeJointProbabilities(config_dataset, device):
-    attribute_ranges = []
-    label_probabilities = {}
-    labels_attribute = getLabelsAttribute(config_dataset)
-    labels_attribute_indices = getIndicesFromLabelsAttribute(labels_attribute)
-    dataset_size = 0
-
-    for attribute in labels_attribute.keys():
-        attribute_count = len(labels_attribute[attribute])
-        attribute_range = torch.Tensor(range(attribute_count))
-        attribute_ranges.append(attribute_range)
-
-    attributes_indices = torch.cartesian_prod(*attribute_ranges)
-    joint_probabilities = torch.zeros(attributes_indices.shape[0], 1)
-    joint_probabilities_indices = {}
-
-    for (i, attribute_indices) in enumerate(attributes_indices.tolist()):
-        joint_probabilities_indices[tuple(attribute_indices)] = i
-
-    for (class_label, class_attributes) in config_dataset["mappings"].items():
-        attribute_indices = []
-        # Convert attribute strings to corresponding tensor indices
-        for (attribute_name, attribute_label) in class_attributes["labels"].items():
-            attribute_indices.append(labels_attribute_indices[attribute_name][attribute_label])
-
-        attribute_indices = tuple(attribute_indices)
-        class_size = len(os.listdir(os.path.join(header.config_decomposed["dir_dataset_train"], class_label)))
-        label_probabilities[class_label] = (attribute_indices, class_size)
-        dataset_size += class_size
-
-    for (class_label, _) in config_dataset["mappings"].items():
-        label_probabilities[class_label] = (label_probabilities[class_label][0], label_probabilities[class_label][1] / dataset_size)
-
-    for (attribute_indices, probabilities) in label_probabilities.values():
-        index = joint_probabilities_indices[attribute_indices]
-        joint_probabilities[index] = probabilities
-
-    joint_probabilities = joint_probabilities.repeat(len(config_dataset["mappings"]), 1)
-    joint_probabilities = joint_probabilities.squeeze()
-
-    return (joint_probabilities.to(device), label_probabilities)
 
 def createTransform(config):
     dataset_transforms = torchvision.transforms.Compose([
