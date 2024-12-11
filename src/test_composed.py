@@ -15,8 +15,10 @@ import wandb
 
 def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loader, device, batch_step):
     utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
-    utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
-    utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
+
+    if header.config_spn["run_name"] != "":
+        utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
+        utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
 
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0

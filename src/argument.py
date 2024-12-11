@@ -41,7 +41,7 @@ def initializeArgumentsTestComposed():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-rd", "--decomposed-run-name", type = str, default = "", help = "Decomposed run name.", required = True)
-    parser.add_argument("-rs", "--spn-run-name", type = str, default = "", help = "SPN run name.", required = True)
+    parser.add_argument("-rs", "--spn-run-name", type = str, default = "", help = "SPN run name.")
     parser.add_argument("-s", "--seed", type = int, default = 42, help = "Randomization seed.")
     parser.add_argument("-d", "--test-dataset-dir", type = str, default = "", help = "Directory of dataset testing split.")
 
@@ -215,12 +215,16 @@ def processArgumentsTestComposed():
         logger.log_fatal("Decomposed run name missing. Quit.")
         exit(-1)
 
-    if not initializeRunNameSPN(arguments.spn_run_name) or header.run_name_spn == "":
-        logger.log_fatal("SPN run name missing. Quit.")
-        exit(-1)
+    if not initializeRunNameSPN(arguments.spn_run_name):
+        logger.log_info("Proceeding without SPN run name.")
+        header.run_name_spn == ""
+        header.config_spn["file_name_checkpoint"] = ""
+        header.config_spn["file_name_checkpoint_best"] = ""
+        header.config_spn["run_name"] = ""
+    else:
+        header.config_spn["optimizer"] = header.run_name_spn.split(".")[1]
 
     header.config_decomposed["model"] = header.run_name_decomposed.split(".")[1]
-    header.config_spn["optimizer"] = header.run_name_spn.split(".")[1]
 
     logger.log_trace("Decomposed run name: \"" + header.run_name_decomposed + "\".")
     logger.log_trace("SPN run name: \"" + header.run_name_spn + "\".")
