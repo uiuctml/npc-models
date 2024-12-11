@@ -7,6 +7,7 @@ import logger
 import os
 import spn
 import torch
+import type
 import utility
 import wandb
 
@@ -86,11 +87,23 @@ def loadDataset(dir_dataset, device):
 
     return dataset
 
-def test(spn_joint, settings):
-    log_likelihoods = spn_joint(settings, False)
-    log_likelihood_test = torch.mean(log_likelihoods).item()
+def test(spn_joint, spn_marginal, settings_joint, settings_marginal, use_probability):
+    log_likelihoods = spn_joint(settings_joint, False)
 
-    logger.log_info("Testing log likelihood: " + str(log_likelihood_test) + ".")
+    if use_probability:
+        log_likelihoods_marginal = spn_marginal(settings_marginal)
+        log_likelihoods -= log_likelihoods_marginal
+
+    log_likelihood = torch.mean(log_likelihoods).item()
+
+    if use_probability:
+        wandb.log({"testing/epoch/log_probability": log_likelihood})
+        wandb.summary["testing/epoch/log_probability"] = log_likelihood
+        logger.log_info("Testing log probability: " + str(log_likelihood) + ".")
+    else:
+        wandb.log({"testing/epoch/log_likelihood": log_likelihood})
+        wandb.summary["testing/epoch/log_likelihood"] = log_likelihood
+        logger.log_info("Testing log likelihood: " + str(log_likelihood) + ".")
 
     return
 
@@ -104,7 +117,13 @@ def main():
 
     device = torch.device("cuda")
     dataset_test = loadDataset(header.config_spn["dir_dataset_test"], device)
+    settings_marginal = torch.full((1, len(dataset_test)), -1).to(device)
     spn_joint = spn.SPN(device)
+    spn_marginal = spn.SPN(device)
+    use_probability = False
+
+    if header.config_spn["optimizer"] == type.OptimizerSPN.pgd_generative.name:
+        use_probability = True
 
     logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
 
@@ -118,7 +137,7 @@ def main():
         logger.log_info("SPN depths: " + str(spn_joint.depth) + ".")
 
     utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
-    test(spn_joint, dataset_test)
+    test(spn_joint, spn_marginal, dataset_test, settings_marginal, use_probability)
 
     return
 
