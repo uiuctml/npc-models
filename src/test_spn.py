@@ -134,7 +134,7 @@ def main():
         logger.log_info("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
         logger.log_info("Number of product nodes: " + str(len(spn_joint.product_nodes)) + ".")
         logger.log_info("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
-        logger.log_info("SPN depths: " + str(spn_joint.depth) + ".")
+        logger.log_info("SPN depth: " + str(spn_joint.depth) + ".")
 
     utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
     test(spn_joint, spn_marginal, dataset_test, settings_marginal, use_probability)
