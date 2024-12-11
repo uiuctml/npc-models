@@ -94,8 +94,6 @@ config_decomposed = {
     "learning_rate_scheduler_threshold": 1e-4,
     "learning_rate_scheduler_threshold_mode": "rel",
     "learning_rate_scheduler_cooldown": 0,
-    "learning_rate_scheduler_t_0": 10,
-    "learning_rate_scheduler_t_mult": 1,
     "learning_rate_scheduler_min_learning_rate": 0,
     "learning_rate_scheduler_min_learning_rate_decay": 1e-8,
     "learning_rate_scheduler_last_epoch": -1,
