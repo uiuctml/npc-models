@@ -84,7 +84,6 @@ config_decomposed = {
     "dir_dataset_train": "../../../datasets/" + dataset_prefix + "-dataset/images/split/original/train",
     "dir_dataset_validation": "../../../datasets/" + dataset_prefix + "-dataset/images/split/original/validate",
     "epochs": 150,
-    "factor_loss_covariance": 1e-8,
     "file_name_checkpoint": run_name_decomposed + ".tar",
     "file_name_checkpoint_best": run_name_decomposed + ".best.tar",
     "fine_tuning": True,
