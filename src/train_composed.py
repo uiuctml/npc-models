@@ -276,7 +276,7 @@ def main():
         batch_step_train = train(model_decomposed, spn_joint, spn_marginal, data_loader_train, criterion, optimizer_decomposed, optimizer_spn, device, batch_step_train)
         (accuracy_task_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_decomposed, spn_joint, spn_marginal, data_loader_validation, criterion, device, batch_step_validate)
 
-        learning_rate_scheduler.step()
+        learning_rate_scheduler.step(loss_validation_epoch)
         learning_rate_scheduler_spn.step(loss_validation_epoch)
 
         logger.log_info("Epoch validation task accuracy: " + str(accuracy_task_validation_epoch) + ".")
