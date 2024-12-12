@@ -283,12 +283,40 @@ class MLPSet(Model):
 
         return parameters
 
+class ResNet34(Model):
+    def __init__(self, config_dataset, device):
+        super().__init__()
+
+        self.net = torchvision.models.resnet34(weights = "IMAGENET1K_V1")
+
+        if not header.config_baseline["fine_tuning"]:
+            for parameter in self.net.parameters():
+                parameter.requires_grad = False
+
+        class_count = len(utility.getLabelsOriginal(config_dataset))
+        self.net.fc = torch.nn.Linear(self.net.fc.in_features, class_count)
+
+        return
+
+    def forward(self, input):
+        return self.net(input)
+
+    def get_parameters(self):
+        if header.config_baseline["fine_tuning"]:
+            return self.net.parameters()
+        else:
+            return self.net.fc.parameters()
+
 class ResNet34MTL(Model):
     def __init__(self, config_dataset, device):
         super().__init__()
 
         layer_list = []
         self.net = torchvision.models.resnet34(weights = "IMAGENET1K_V1")
+
+        if not header.config_decomposed["fine_tuning"]:
+            for parameter in self.net.parameters():
+                parameter.requires_grad = False
 
         for attribute in config_dataset["attributes"]:
             attribute_name = attribute["name"]
@@ -327,7 +355,10 @@ class ResNet34MTL(Model):
         return (outputs_head, outputs_head_hidden)
 
     def get_parameters(self):
-        return self.net.parameters()
+        if header.config_decomposed["fine_tuning"]:
+            return self.net.parameters()
+        else:
+            return self.net.heads_mtl.parameters()
 
 class ResNet152(Model):
     def __init__(self, config_dataset, device):
