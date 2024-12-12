@@ -31,8 +31,9 @@ class LogLevel(enum.Enum):
         return NotImplemented
 
 class ModelBaseline(enum.Enum):
-    resnet152 = 0
-    vit_b_32 = 1
+    resnet34 = 0
+    resnet152 = 1
+    vit_b_32 = 2
 
 class ModelDecomposed(enum.Enum):
     cnn_mtl = 0
