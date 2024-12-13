@@ -298,7 +298,7 @@ def main():
     logger.log_info("Best validation task accuracy: " + str(accuracy_task_validation_best) + ".")
     wandb.summary["validation/epoch/accuracy_task_best"] = accuracy_task_validation_best
 
-    if normalize:
+    if normalize and not header.config_spn["joint_inference_only"]:
         settings_marginal = torch.full((1, spn_settings_joint.shape[1]), -1).to(device)
         logger.log_info("Normalizing SPN weights...")
 
