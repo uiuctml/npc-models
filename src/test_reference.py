@@ -34,12 +34,44 @@ def computeAccuracy(output_neck, output_head, labels_decomposed, labels_original
 
     return (accuracy_attribute_batch, accuracy_task_batch)
 
+def computeTVDistance(output_neck, labels_decomposed, tv_distances_epoch, data_loader):
+    counts_categories = []
+    output = output_neck
+
+    for attribute in data_loader.dataset.config["attributes"]:
+        counts_categories.append(len(attribute["labels"]))
+
+    if header.config_reference["model"] == type.ModelReference.cbm.name:
+        output = torch.split(output_neck, counts_categories, dim = 1)
+        output = utility.applySoftmaxDecomposed(output)
+    elif header.config_reference["model"] == type.ModelReference.cbm_cat.name:
+        output = utility.applySoftmaxDecomposed(output_neck)
+    elif header.config_reference["model"] == type.ModelReference.cem.name or header.config_reference["model"] == type.ModelReference.dcr.name:
+        output = list(torch.split(output_neck, counts_categories, dim = 1))
+
+        for i in range(len(output)):
+            sum = torch.sum(output[i], dim = 1, keepdim = True)
+            output[i] /= sum
+    else:
+        return
+
+    for i in range(len(data_loader.dataset.config["attributes"])):
+        tv_distance_batch = 0.5 * torch.sum(torch.abs(output[i] - labels_decomposed[i]), dim = 1)
+        tv_distances_epoch[i] += torch.sum(tv_distance_batch).item()
+
+    return
+
 def test(model_reference, data_loader, device, batch_step):
     utility.loadCheckpointBest(header.config_reference["dir_checkpoints"], header.config_reference["file_name_checkpoint_best"], model_reference)
 
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
+    tv_distance_epoch = 0
+    tv_distances_epoch = []
+
+    for _ in data_loader.dataset.config["attributes"]:
+        tv_distances_epoch.append(0)
 
     model_reference.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")
@@ -60,6 +92,8 @@ def test(model_reference, data_loader, device, batch_step):
             accuracy_attribute_epoch += accuracy_attribute_batch
             accuracy_task_epoch += accuracy_task_batch
 
+            computeTVDistance(output_neck, labels_decomposed, tv_distances_epoch, data_loader)
+
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
 
@@ -74,12 +108,20 @@ def test(model_reference, data_loader, device, batch_step):
     accuracy_attribute_epoch /= len(data_loader)
     accuracy_task_epoch /= len(data_loader)
 
+    for i in range(len(data_loader.dataset.config["attributes"])):
+        tv_distances_epoch[i] /= len(data_loader.dataset)
+
+    tv_distance_epoch = sum(tv_distances_epoch) / len(tv_distances_epoch)
+
     wandb.log({"testing/epoch/accuracy_attribute": accuracy_attribute_epoch})
     wandb.log({"testing/epoch/accuracy_task": accuracy_task_epoch})
+    wandb.log({"testing/epoch/tv_distance_attribute": tv_distance_epoch})
 
     wandb.summary["testing/epoch/accuracy_attribute"] = accuracy_attribute_epoch
     wandb.summary["testing/epoch/accuracy_task"] = accuracy_task_epoch
+    wandb.summary["testing/epoch/tv_distance_attribute"] = tv_distance_epoch
 
+    logger.log_info("Testing attribute TV distance: " + str(tv_distance_epoch) + ".")
     logger.log_info("Testing attribute accuracy: " + str(accuracy_attribute_epoch) + ".")
     logger.log_info("Testing task accuracy: " + str(accuracy_task_epoch) + ".")
 

@@ -48,7 +48,6 @@ class ModelReference(enum.Enum):
     cbm_cat = 1
     cem = 2
     dcr = 3
-    len = 4
 
 class OptimizerSPN(enum.Enum):
     cccp_generative = 0
