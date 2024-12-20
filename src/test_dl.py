@@ -15,6 +15,11 @@ def test(model_decomposed, data_loader, device, batch_step):
 
     accuracy_attribute_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
+    tv_distance_epoch = 0
+    tv_distances_epoch = []
+
+    for _ in data_loader.dataset.config["attributes"]:
+        tv_distances_epoch.append(0)
 
     model_decomposed.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")
@@ -28,9 +33,14 @@ def test(model_decomposed, data_loader, device, batch_step):
 
             (output, _) = model_decomposed(input)
 
+            output = utility.applySoftmaxDecomposed(output)
             accuracy_attribute_batch = utility.computeAccuracyDecomposed(output, labels, device)
 
             accuracy_attribute_epoch += accuracy_attribute_batch
+
+            for i in range(len(data_loader.dataset.config["attributes"])):
+                tv_distance_batch = 0.5 * torch.sum(torch.abs(output[i] - labels[i]), dim = 1)
+                tv_distances_epoch[i] += torch.sum(tv_distance_batch).item()
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
@@ -44,10 +54,18 @@ def test(model_decomposed, data_loader, device, batch_step):
 
     accuracy_attribute_epoch /= len(data_loader)
 
+    for i in range(len(data_loader.dataset.config["attributes"])):
+        tv_distances_epoch[i] /= len(data_loader.dataset)
+
+    tv_distance_epoch = sum(tv_distances_epoch) / len(tv_distances_epoch)
+
     wandb.log({"testing/epoch/accuracy_attribute": accuracy_attribute_epoch})
+    wandb.log({"testing/epoch/tv_distance_attribute": tv_distance_epoch})
 
     wandb.summary["testing/epoch/accuracy_attribute"] = accuracy_attribute_epoch
+    wandb.summary["testing/epoch/tv_distance_attribute"] = tv_distance_epoch
 
+    logger.log_info("Testing attribute TV distance: " + str(tv_distance_epoch) + ".")
     logger.log_info("Testing attribute accuracy: " + str(accuracy_attribute_epoch) + ".")
 
     return batch_step

@@ -72,8 +72,8 @@ def composeSingle(batch, output_decomposed, spn_joint, spn_marginal, spn_output_
 
     return (matrix_a, matrix_b_batch, matrix_c)
 
-def computeAccuracyDecomposed(outputs, labels, device):
-    count_attributes = len(outputs)
+def computeAccuracyDecomposed(output, labels, device):
+    count_attributes = len(output)
     corrects = []
 
     for i in range(count_attributes):
@@ -81,7 +81,7 @@ def computeAccuracyDecomposed(outputs, labels, device):
         counts_values = torch.sum(masks_labels, dim = 1)
         masks_predictions = []
 
-        for (output_batch, count_value_batch) in zip(outputs[i], counts_values):
+        for (output_batch, count_value_batch) in zip(output[i], counts_values):
             mask_prediction_batch = torch.zeros(output_batch.shape, dtype = torch.bool)
             (_, prediction_batch) = torch.topk(output_batch, count_value_batch)
             mask_prediction_batch[prediction_batch] = True
