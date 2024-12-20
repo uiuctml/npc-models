@@ -116,16 +116,17 @@ def main():
     config_dataset = dataset_test.config
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
-    model_decomposed = model.createModelDecomposed(device)
-    model_decomposed = torch.nn.DataParallel(model_decomposed)
-    model_decomposed = model_decomposed.to(device)
-    spn_joint = spn.SPN(device)
-    spn_marginal = spn.SPN(device)
+    device_spn = torch.device("cuda")
 
     if header.composed_spn_on_cpu:
         logger.log_info("Computing SPNs on CPU.")
-        spn_joint.device = torch.device("cpu")
-        spn_marginal.device = torch.device("cpu")
+        device_spn = torch.device("cpu")
+
+    model_decomposed = model.createModelDecomposed(device)
+    model_decomposed = torch.nn.DataParallel(model_decomposed)
+    model_decomposed = model_decomposed.to(device)
+    spn_joint = spn.SPN(device_spn)
+    spn_marginal = spn.SPN(device_spn)
 
     logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
 

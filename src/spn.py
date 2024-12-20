@@ -185,9 +185,24 @@ class PGDDiscriminativeSPNOptimizer(SPNOptimizer):
         self.spn_joint.reuse_forward = False
         self.spn_marginal.reuse_forward = False
 
+        counter_sum_node = 0
+        matrix_a = matrix_a.to(self.device)
+        matrix_b = matrix_b.to(self.device)
         matrix_c_transposed = matrix_c.t()  # number of original labels x batch size
+        matrix_c_transposed = matrix_c_transposed.to(self.device)
+        labels_original = labels_original.to(self.device)
+        progress_bar = None
+
+        if self.device == torch.device("cpu"):
+            progress_bar = tqdm.tqdm(total = len(self.spn_joint.sum_nodes), leave = False)
+            progress_bar.set_description_str("[INFO]: SPN optimization")
 
         for (sum_node_joint, sum_node_marginal, weights_prior) in zip(self.spn_joint.sum_nodes, self.spn_marginal.sum_nodes, self.weights_prior):
+            if progress_bar is not None:
+                progress_bar.n = counter_sum_node + 1
+                progress_bar.refresh()
+                counter_sum_node += 1
+
             # TODO Optimization: unroll this for loop (compute all weight updates at once)
             for (i, (child_joint, child_marginal)) in enumerate(zip(sum_node_joint.children, sum_node_marginal.children)):
                 # Compute weight updates in log space
@@ -223,6 +238,9 @@ class PGDDiscriminativeSPNOptimizer(SPNOptimizer):
 
                 if sum_node_joint.weights[i] <= 0:
                     sum_node_joint.weights[i] = self.projection_epsilon
+
+        if progress_bar is not None:
+            progress_bar.close()
 
         self.spn_marginal.set_weights(self.spn_joint.get_weights())
 

@@ -184,33 +184,34 @@ def main():
     data_loader_train = torch.utils.data.DataLoader(dataset_train, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
+    device_spn = torch.device("cuda")
+
+    if header.composed_spn_on_cpu:
+        logger.log_info("Computing SPNs on CPU.")
+        device_spn = torch.device("cpu")
+
     epoch = 1
     model_decomposed = model.createModelDecomposed(device)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
     normalize = False
     progress_bar = None
-    spn_joint = spn.SPN(device)
-    spn_marginal = spn.SPN(device)
+    spn_joint = spn.SPN(device_spn)
+    spn_marginal = spn.SPN(device_spn)
     optimizer_decomposed = torch.optim.SGD(model_decomposed.parameters(), lr = header.config_decomposed["optimizer_learning_rate"], momentum = header.config_decomposed["optimizer_momentum"], weight_decay = header.config_decomposed["optimizer_weight_decay"])
     optimizer_spn = None
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_decomposed, header.config_decomposed["learning_rate_scheduler_mode"], header.config_decomposed["learning_rate_scheduler_factor"], header.config_decomposed["learning_rate_scheduler_patience"], header.config_decomposed["learning_rate_scheduler_threshold"], header.config_decomposed["learning_rate_scheduler_threshold_mode"], header.config_decomposed["learning_rate_scheduler_cooldown"], header.config_decomposed["learning_rate_scheduler_min_learning_rate"], header.config_decomposed["learning_rate_scheduler_min_learning_rate_decay"])
     learning_rate_scheduler_spn = None
 
-    if header.composed_spn_on_cpu:
-        logger.log_info("Computing SPNs on CPU.")
-        spn_joint.device = torch.device("cpu")
-        spn_marginal.device = torch.device("cpu")
-
     if header.config_spn["optimizer"] == type.OptimizerSPN.cccp_generative.name:
-        optimizer_spn = spn.CCCPGenerativeSPNOptimizer(spn_joint, spn_marginal, device)
+        optimizer_spn = spn.CCCPGenerativeSPNOptimizer(spn_joint, spn_marginal, device_spn)
     elif header.config_spn["optimizer"] == type.OptimizerSPN.ebw_discriminative.name:
-        optimizer_spn = spn.EBWDiscriminativeSPNOptimizer(spn_joint, spn_marginal, device, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"], header.config_spn["growth_threshold"])
+        optimizer_spn = spn.EBWDiscriminativeSPNOptimizer(spn_joint, spn_marginal, device_spn, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"], header.config_spn["growth_threshold"])
     elif header.config_spn["optimizer"] == type.OptimizerSPN.pgd_discriminative.name:
-        optimizer_spn = spn.PGDDiscriminativeSPNOptimizer(spn_joint, spn_marginal, device, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
+        optimizer_spn = spn.PGDDiscriminativeSPNOptimizer(spn_joint, spn_marginal, device_spn, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
         normalize = True
     elif header.config_spn["optimizer"] == type.OptimizerSPN.pgd_generative.name:
-        optimizer_spn = spn.PGDGenerativeSPNOptimizer(spn_joint, spn_marginal, device, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
+        optimizer_spn = spn.PGDGenerativeSPNOptimizer(spn_joint, spn_marginal, device_spn, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
         normalize = True
     else:
         logger.log_fatal("Unknown SPN optimizer \"" + header.config_spn["optimizer"] + "\".")
