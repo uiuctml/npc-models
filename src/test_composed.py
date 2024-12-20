@@ -26,10 +26,13 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
     spn_output_rows = len(data_loader.dataset.classes_original)
     spn_output_cols = 1
+    tv_distance_epoch = 0
+    tv_distances_epoch = []
 
     for attribute in data_loader.dataset.config["attributes"]:
         attribute_labels = attribute["labels"]
         spn_output_cols *= len(attribute_labels)
+        tv_distances_epoch.append(0)
 
     model_decomposed.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")
@@ -56,6 +59,10 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
             accuracy_attribute_epoch += accuracy_attribute_batch
             accuracy_task_epoch += corrects_composed
 
+            for i in range(len(data_loader.dataset.config["attributes"])):
+                tv_distance_batch = 0.5 * torch.sum(torch.abs(output_decomposed[i] - labels_decomposed[i]), dim = 1)
+                tv_distances_epoch[i] += torch.sum(tv_distance_batch).item()
+
             if header.composed_find_mpe:
                 mpe_attributes = utility.findMPEs(matrix_a, matrix_b, spn_settings_joint, labels_original)
                 utility.saveMPEs(input_file_paths, mpes, mpe_attributes, data_loader.dataset, labels_decomposed, labels_original, output_decomposed, output_composed)
@@ -81,12 +88,20 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
     accuracy_attribute_epoch /= len(data_loader)
     accuracy_task_epoch /= len(data_loader.dataset)
 
+    for i in range(len(data_loader.dataset.config["attributes"])):
+        tv_distances_epoch[i] /= len(data_loader.dataset)
+
+    tv_distance_epoch = sum(tv_distances_epoch) / len(tv_distances_epoch)
+
     wandb.log({"testing/epoch/accuracy_attribute": accuracy_attribute_epoch})
     wandb.log({"testing/epoch/accuracy_task": accuracy_task_epoch})
+    wandb.log({"testing/epoch/tv_distance_attribute": tv_distance_epoch})
 
     wandb.summary["testing/epoch/accuracy_attribute"] = accuracy_attribute_epoch
     wandb.summary["testing/epoch/accuracy_task"] = accuracy_task_epoch
+    wandb.summary["testing/epoch/tv_distance_attribute"] = tv_distance_epoch
 
+    logger.log_info("Testing attribute TV distance: " + str(tv_distance_epoch) + ".")
     logger.log_info("Testing attribute accuracy: " + str(accuracy_attribute_epoch) + ".")
     logger.log_info("Testing task accuracy: " + str(accuracy_task_epoch) + ".")
 
