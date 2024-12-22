@@ -42,8 +42,12 @@ def computeTVDistance(output_neck, labels_decomposed, tv_distances_epoch, data_l
         counts_categories.append(len(attribute["labels"]))
 
     if header.config_reference["model"] == type.ModelReference.cbm.name:
-        output = torch.split(output_neck, counts_categories, dim = 1)
-        output = utility.applySoftmaxDecomposed(output)
+        output = torch.nn.functional.sigmoid(output_neck)
+        output = list(torch.split(output, counts_categories, dim = 1))
+
+        for i in range(len(output)):
+            sum = torch.sum(output[i], dim = 1, keepdim = True)
+            output[i] /= sum
     elif header.config_reference["model"] == type.ModelReference.cbm_cat.name:
         output = utility.applySoftmaxDecomposed(output_neck)
     elif header.config_reference["model"] == type.ModelReference.cem.name or header.config_reference["model"] == type.ModelReference.dcr.name:
