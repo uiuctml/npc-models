@@ -1,5 +1,4 @@
 import cv2
-import header
 import logger
 import natsort
 import numpy
@@ -121,10 +120,12 @@ def findMPEs(matrix_a, matrix_b, spn_settings, labels_original):
     return mpe_attributes
 
 def getBinaryLabelsDecomposed(labels_decomposed):
-    for i in range(len(labels_decomposed)):
-        labels_decomposed[i] = (labels_decomposed[i] > 0).float()
+    labels_decomposed_binary = []
 
-    return torch.cat(labels_decomposed, dim = 1)
+    for label_decomposed in labels_decomposed:
+        labels_decomposed_binary.append((label_decomposed > 0).float())
+
+    return torch.cat(labels_decomposed_binary, dim = 1)
 
 def getBinaryLabelsOriginal(labels_original, data_loader):
     return torch.nn.functional.one_hot(labels_original, num_classes = len(data_loader.dataset.classes_original)).float()
