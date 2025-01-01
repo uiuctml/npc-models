@@ -422,8 +422,10 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
 
     for (batch_index, (input, labels_decomposed, labels_original, input_file_paths)) in enumerate(data_loader):
         input = input.to(device, non_blocking = True)
-        labels_decomposed = labels_decomposed.to(device, non_blocking = True)
         labels_original = labels_original.to(device, non_blocking = True)
+
+        for i in range(len(labels_decomposed)):
+            labels_decomposed[i] = labels_decomposed[i].to(device, non_blocking = True)
 
         with torch.set_grad_enabled(False):
             (outputs_decomposed_original, _) = model_decomposed(input)
@@ -537,8 +539,8 @@ def main():
 
     logger.log_info("Setting SPN leaf nodes...")
 
-    spn_joint.set_leaf_nodes(spn_settings_joint)
-    spn_marginal.set_leaf_nodes(spn_settings_marginal)
+    spn_joint.set_leaf_nodes_categorical(spn_settings_joint)
+    spn_marginal.set_leaf_nodes_categorical(spn_settings_marginal)
 
     if header.show_model_summary:
         logger.log_info("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
