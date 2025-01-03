@@ -136,7 +136,9 @@ def main():
         logger.log_info("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
         logger.log_info("SPN depth: " + str(spn_joint.depth) + ".")
 
-    utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
+    if header.config_spn["run_name"] != "":
+        utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
+
     test(spn_joint, spn_marginal, dataset_test, settings_marginal, use_probability)
 
     return

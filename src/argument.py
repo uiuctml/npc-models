@@ -50,7 +50,7 @@ def initializeArgumentsTestComposed():
 def initializeArgumentsTestSPN():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.", required = True)
+    parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.")
     parser.add_argument("-s", "--seed", type = int, default = 42, help = "Randomization seed.")
 
     return parser.parse_args()
@@ -284,16 +284,19 @@ def processArgumentsTestSPN():
 
     header.config_spn["seed"] = arguments.seed
 
-    resume = initializeRunNameSPN(arguments.run_name)
-
-    if header.run_name_spn == "":
-        logger.log_fatal("Run name missing. Quit.")
-        exit(-1)
+    if not initializeRunNameSPN(arguments.run_name):
+        logger.log_info("Proceeding without SPN run name.")
+        header.run_name_spn == ""
+        header.config_spn["file_name_checkpoint"] = ""
+        header.config_spn["file_name_checkpoint_best"] = ""
+        header.config_spn["run_name"] = ""
+    else:
+        header.config_spn["optimizer"] = header.run_name_spn.split(".")[1]
 
     logger.log_trace("Run name: \"" + header.run_name_spn + "\".")
     logger.log_trace("Randomization seed: " + str(header.config_spn["seed"]) + ".")
 
-    return resume
+    return
 
 def processArgumentsTrainBaseline():
     arguments = initializeArgumentsTrain()
