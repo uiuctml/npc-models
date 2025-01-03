@@ -97,6 +97,21 @@ def computeAccuracyDecomposed(output, labels, device):
 
     return accuracy
 
+def computeMPECorrectness(mpe_attributes, labels_decomposed):
+    mpe_correctness = []
+
+    for batch_index in range(len(mpe_attributes)):
+        correct = True
+
+        for (attribute_index, category_index) in enumerate(mpe_attributes[batch_index]):
+            if labels_decomposed[attribute_index][batch_index][category_index] <= 0:
+                correct = False
+                break
+
+        mpe_correctness.append(correct)
+
+    return mpe_correctness
+
 def createTransform(config):
     dataset_transforms = torchvision.transforms.Compose([
         torchvision.transforms.Resize((config["model_input_height"], config["model_input_width"])),
@@ -449,7 +464,7 @@ def saveCounterfactuals(input_file_paths, counterfactuals, dataset, labels_decom
 
     return
 
-def saveMPEs(input_file_paths, mpes, mpe_attributes, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed):
+def saveMPEs(input_file_paths, mpes, mpe_attributes, mpe_correctness, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed):
     batch_size = labels_original.nelement()
     config_dataset = dataset.config
 
@@ -485,7 +500,7 @@ def saveMPEs(input_file_paths, mpes, mpe_attributes, dataset, labels_decomposed,
 
         (outputs_composed_mpe_probability, outputs_composed_mpe_label) = torch.max(outputs_composed[batch_index], 0)
 
-        mpes[input_file_path]["mpe"]["original"] = "N/A"
+        mpes[input_file_path]["mpe"]["correct"] = mpe_correctness[batch_index]
         mpes[input_file_path]["ground_truth"]["original"] = dataset.classes_original[labels_original[batch_index]]
         mpes[input_file_path]["prediction"]["original"] = (dataset.classes_original[outputs_composed_mpe_label], outputs_composed_mpe_probability.item())
 

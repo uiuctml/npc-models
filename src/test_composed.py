@@ -22,6 +22,7 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
 
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
+    mpe_correctness_epoch = []
     mpes = {}
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
     spn_output_rows = len(data_loader.dataset.classes_original)
@@ -65,7 +66,11 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
 
             if header.composed_find_mpe:
                 mpe_attributes = utility.findMPEs(matrix_a, matrix_b, predictions_composed, spn_settings_joint)
-                utility.saveMPEs(input_file_paths, mpes, mpe_attributes, data_loader.dataset, labels_decomposed, labels_original, output_decomposed, output_composed)
+                mpe_correctness = utility.computeMPECorrectness(mpe_attributes, labels_decomposed)
+
+                utility.saveMPEs(input_file_paths, mpes, mpe_attributes, mpe_correctness, data_loader.dataset, labels_decomposed, labels_original, output_decomposed, output_composed)
+
+                mpe_correctness_epoch += mpe_correctness
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
@@ -104,6 +109,10 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
     logger.log_info("Testing attribute TV distance: " + str(tv_distance_epoch) + ".")
     logger.log_info("Testing attribute accuracy: " + str(accuracy_attribute_epoch) + ".")
     logger.log_info("Testing task accuracy: " + str(accuracy_task_epoch) + ".")
+
+    if header.composed_find_mpe:
+        mpe_correctness_epoch = sum(mpe_correctness_epoch) / len(mpe_correctness_epoch)
+        logger.log_info("MPE correctness: " + str(mpe_correctness_epoch) + ".")
 
     return
 
