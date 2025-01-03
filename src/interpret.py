@@ -537,7 +537,6 @@ def main():
     if header.interpret_mpe:
         with open(os.path.join(header.dir_output_mpe, header.file_name_mpe), "r") as file_mpe:
             explanations = json.load(file_mpe)
-            preprocessMPEs()
     else:
         with open(os.path.join(header.dir_output_counterfactual, header.file_name_counterfactual), "r") as file_counterfactual:
             explanations = json.load(file_counterfactual)
