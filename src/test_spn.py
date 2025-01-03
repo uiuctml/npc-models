@@ -56,6 +56,9 @@ def loadDataset(dir_dataset, device):
                 dataset[-1].append(binary_vector_original)
     else:
         for image_name in config_dataset["mappings"]:
+            if not os.path.exists(os.path.join(dir_dataset, image_name)):
+                continue
+
             class_name_original = image_name.split('/')[0]
             attributes = config_dataset["mappings"][image_name]["labels"]
 
