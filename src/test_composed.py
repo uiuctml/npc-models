@@ -23,6 +23,8 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
     mpe_correctness_epoch = []
+    mpe_correctness_prediction_correct_epoch = []
+    mpe_correctness_prediction_incorrect_epoch = []
     mpes = {}
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
     spn_output_rows = len(data_loader.dataset.classes_original)
@@ -52,7 +54,8 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
             (matrix_a, matrix_b, output_composed) = utility.compose(output_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
             (_, predictions_composed) = torch.max(output_composed, 1)
 
-            corrects_composed = torch.sum(predictions_composed == labels_original).item()
+            prediction_correctness = (predictions_composed == labels_original)
+            corrects_composed = torch.sum(prediction_correctness).item()
 
             accuracy_attribute_batch = utility.computeAccuracyDecomposed(output_decomposed, labels_decomposed, device)
             accuracy_task_batch = corrects_composed / input.size(0)
@@ -70,7 +73,10 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
 
                 utility.saveMPEs(input_file_paths, mpes, mpe_attributes, mpe_correctness, data_loader.dataset, labels_decomposed, labels_original, output_decomposed, output_composed)
 
-                mpe_correctness_epoch += mpe_correctness
+                mpe_correctness = torch.tensor(mpe_correctness).to(device)
+                mpe_correctness_epoch += mpe_correctness.tolist()
+                mpe_correctness_prediction_correct_epoch += mpe_correctness[prediction_correctness].tolist()
+                mpe_correctness_prediction_incorrect_epoch += mpe_correctness[~prediction_correctness].tolist()
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
@@ -112,7 +118,12 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
 
     if header.composed_find_mpe:
         mpe_correctness_epoch = sum(mpe_correctness_epoch) / len(mpe_correctness_epoch)
-        logger.log_info("MPE correctness: " + str(mpe_correctness_epoch) + ".")
+        mpe_correctness_prediction_correct_epoch = sum(mpe_correctness_prediction_correct_epoch) / len(mpe_correctness_prediction_correct_epoch)
+        mpe_correctness_prediction_incorrect_epoch = sum(mpe_correctness_prediction_incorrect_epoch) / len(mpe_correctness_prediction_incorrect_epoch)
+
+        logger.log_info("MPE correctness on all predictions: " + str(mpe_correctness_epoch) + ".")
+        logger.log_info("MPE correctness on correct predictions: " + str(mpe_correctness_prediction_correct_epoch) + ".")
+        logger.log_info("MPE correctness on incorrect predictions: " + str(mpe_correctness_prediction_incorrect_epoch) + ".")
 
     return
 
