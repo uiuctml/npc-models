@@ -17,6 +17,17 @@ layout_ground_truth = PyQt5.QtWidgets.QHBoxLayout()
 layout_prediction = PyQt5.QtWidgets.QHBoxLayout()
 layout_summary = PyQt5.QtWidgets.QHBoxLayout()
 
+def deleteLayoutChildren(layout):
+     if layout is not None:
+         while layout.count():
+             item = layout.takeAt(0)
+             widget = item.widget()
+
+             if widget is not None:
+                 widget.setParent(None)
+             else:
+                 deleteLayoutChildren(item.layout())
+
 def generateSummaryLabel(attribute_labels):
     initialized = False
     summary = "The final prediction would have been correct if "
@@ -89,9 +100,18 @@ def updateInterpretationWidget():
 
     if header.interpret_mpe:
         for (i, attribute_name) in enumerate(explanations[file_name]["mpe"].keys()):
-            attribute_label = explanations[file_name]["mpe"][attribute_name]
-            label = layout_explanation.itemAt(i).widget()
-            label.setText(attribute_label)
+            if attribute_name != "correct":
+                attribute_label = explanations[file_name]["mpe"][attribute_name]
+                label = layout_explanation.itemAt(i).widget()
+                label.setText(attribute_label)
+            else:
+                correct = explanations[file_name]["mpe"][attribute_name]
+                label = layout_explanation.itemAt(i).widget()
+
+                if correct:
+                    label.setText("Correct")
+                else:
+                    label.setText("Incorrect")
     else:
         for (i, attribute_name) in enumerate(explanations[file_name]["counterfactual"].keys()):
             attribute_label = explanations[file_name]["counterfactual"][attribute_name][0]
@@ -110,25 +130,69 @@ def updateInterpretationWidget():
                 label.setStyleSheet("")
 
     for (i, attribute_name) in enumerate(explanations[file_name]["ground_truth"].keys()):
-        attribute_label = explanations[file_name]["ground_truth"][attribute_name]
-        attribute_label_prediction = explanations[file_name]["prediction"][attribute_name][0]
-        label = layout_ground_truth.itemAt(i).widget()
-        label.setText(attribute_label)
+        layout_labels = PyQt5.QtWidgets.QVBoxLayout()
+        spacer_bottom = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
+        spacer_top = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
+
+        deleteLayoutChildren(layout_ground_truth.itemAt(0))
+        layout_ground_truth.removeItem(layout_ground_truth.itemAt(0))
+
+        layout_ground_truth.addLayout(layout_labels)
+        layout_labels.addItem(spacer_top)
+
+        if attribute_name == "original":
+            attribute_label = explanations[file_name]["ground_truth"][attribute_name]
+            label = PyQt5.QtWidgets.QLabel()
+            label.setText(attribute_label)
+            label.setFixedWidth(header.interpret_label_width_original)
+            layout_labels.addWidget(label)
+        else:
+            for attribute_label in explanations[file_name]["ground_truth"][attribute_name]:
+                label = PyQt5.QtWidgets.QLabel()
+                label.setText(attribute_label)
+                label.setFixedWidth(header.interpret_label_width_attribute)
+                layout_labels.addWidget(label)
+
+        layout_labels.addItem(spacer_bottom)
 
     for (i, attribute_name) in enumerate(explanations[file_name]["prediction"].keys()):
-        attribute_label = explanations[file_name]["prediction"][attribute_name][0]
-
         if header.interpret_mpe:
-            attribute_label_explanation = explanations[file_name]["mpe"][attribute_name]
+            layout_labels = PyQt5.QtWidgets.QVBoxLayout()
+            spacer_bottom = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
+            spacer_top = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
+
+            deleteLayoutChildren(layout_prediction.itemAt(0))
+            layout_prediction.removeItem(layout_prediction.itemAt(0))
+
+            layout_prediction.addLayout(layout_labels)
+            layout_labels.addItem(spacer_top)
+
+            if attribute_name == "original":
+                attribute_label = explanations[file_name]["prediction"][attribute_name][0]
+                attribute_probability = "{:.1f}".format(explanations[file_name]["prediction"][attribute_name][1] * 100)
+                text = attribute_label + ": " + attribute_probability + "%"
+                label = PyQt5.QtWidgets.QLabel()
+                label.setText(text)
+                label.setFixedWidth(header.interpret_label_width_original)
+                layout_labels.addWidget(label)
+            else:
+                for attribute_label in explanations[file_name]["prediction"][attribute_name].keys():
+                    attribute_probability = "{:.1f}".format(explanations[file_name]["prediction"][attribute_name][attribute_label] * 100)
+                    text = attribute_label + ": " + attribute_probability + "%"
+                    label = PyQt5.QtWidgets.QLabel()
+                    label.setText(text)
+                    label.setFixedWidth(header.interpret_label_width_attribute)
+                    layout_labels.addWidget(label)
+
+            layout_labels.addItem(spacer_bottom)
         else:
+            attribute_label = explanations[file_name]["prediction"][attribute_name][0]
             attribute_label_explanation = explanations[file_name]["counterfactual"][attribute_name][0]
+            attribute_probability = "{:.1f}".format(explanations[file_name]["prediction"][attribute_name][1] * 100)
+            label = layout_prediction.itemAt(i).widget()
+            text = attribute_label + ": " + attribute_probability + "%"
+            label.setText(text)
 
-        attribute_probability = "{:.1f}".format(explanations[file_name]["prediction"][attribute_name][1] * 100)
-        label = layout_prediction.itemAt(i).widget()
-        text = attribute_label + ": " + attribute_probability + "%"
-        label.setText(text)
-
-        if not header.interpret_mpe:
             if attribute_label != attribute_label_explanation:
                 label.setStyleSheet("color: red;")
             else:
@@ -259,15 +323,23 @@ def createInterpretationWidget():
 
     if header.interpret_mpe:
         for attribute_name in explanations[file_name]["mpe"].keys():
-            attribute_label = explanations[file_name]["mpe"][attribute_name]
-            label = PyQt5.QtWidgets.QLabel()
-            label.setText(attribute_label)
-            layout_explanation.addWidget(label)
+            if attribute_name == "correct":
+                correct = explanations[file_name]["mpe"][attribute_name]
+                label = PyQt5.QtWidgets.QLabel()
 
-            if attribute_name == "original":
+                if correct:
+                    label.setText("Correct")
+                else:
+                    label.setText("Incorrect")
+
                 label.setFixedWidth(header.interpret_label_width_original)
+                layout_explanation.addWidget(label)
             else:
+                attribute_label = explanations[file_name]["mpe"][attribute_name]
+                label = PyQt5.QtWidgets.QLabel()
+                label.setText(attribute_label)
                 label.setFixedWidth(header.interpret_label_width_attribute)
+                layout_explanation.addWidget(label)
     else:
         for attribute_name in explanations[file_name]["counterfactual"].keys():
             attribute_label = explanations[file_name]["counterfactual"][attribute_name][0]
