@@ -64,7 +64,7 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
                 tv_distances_epoch[i] += torch.sum(tv_distance_batch).item()
 
             if header.composed_find_mpe:
-                mpe_attributes = utility.findMPEs(matrix_a, matrix_b, spn_settings_joint, labels_original)
+                mpe_attributes = utility.findMPEs(matrix_a, matrix_b, predictions_composed, spn_settings_joint)
                 utility.saveMPEs(input_file_paths, mpes, mpe_attributes, data_loader.dataset, labels_decomposed, labels_original, output_decomposed, output_composed)
 
             progress_bar.n = batch_index + 1

@@ -105,12 +105,12 @@ def createTransform(config):
 
     return dataset_transforms
 
-def findMPEs(matrix_a, matrix_b, spn_settings, labels_original):
+def findMPEs(matrix_a, matrix_b, predictions_composed, spn_settings):
     (matrix_a_col_indices_to_attribute_indices, _) = getMatrixAColIndicesAttributeIndicesMaps(matrix_a.shape[1], spn_settings)
     mpe_attributes = []
 
     matrix_a = matrix_a.t() # product of category size of all attributes x number of original labels
-    matrix_a = torch.index_select(matrix_a, 1, labels_original)   # product of category size of all attributes x batch size
+    matrix_a = torch.index_select(matrix_a, 1, predictions_composed)   # product of category size of all attributes x batch size
     matrix_c = matrix_a * matrix_b  # product of category size of all attributes x batch size
     mpes_matrix_a_col_indices = torch.argmax(matrix_c, 0)   # 0 x batch size
 
@@ -463,11 +463,25 @@ def saveMPEs(input_file_paths, mpes, mpe_attributes, dataset, labels_decomposed,
 
         for (attribute_index, attribute) in enumerate(config_dataset["attributes"]):
             attribute_name = attribute["name"]
-            (outputs_decomposed_mpe_probability, outputs_decomposed_mpe_label) = torch.max(outputs_decomposed[attribute_index][batch_index], 0)
+            masks_positive_labels_decomposed = (labels_decomposed[attribute_index] > 0)
+            counts_positive_labels_decomposed = torch.sum(masks_positive_labels_decomposed, dim = 1)
+            count_positive_labels_decomposed = counts_positive_labels_decomposed[batch_index]
+
+            (outputs_decomposed_mpe_probability, outputs_decomposed_mpe_label) = torch.topk(outputs_decomposed[attribute_index][batch_index], count_positive_labels_decomposed)
 
             mpes[input_file_path]["mpe"][attribute_name] = dataset.classes[attribute_name][mpe_attributes[batch_index][attribute_index]]
-            mpes[input_file_path]["ground_truth"][attribute_name] = dataset.classes[attribute_name][labels_decomposed[batch_index][attribute_index]]
-            mpes[input_file_path]["prediction"][attribute_name] = (dataset.classes[attribute_name][outputs_decomposed_mpe_label], outputs_decomposed_mpe_probability.item())
+            mpes[input_file_path]["ground_truth"][attribute_name] = []
+            mpes[input_file_path]["prediction"][attribute_name] = {}
+
+            for (label_decomposed_index, label_decomposed) in enumerate(labels_decomposed[attribute_index][batch_index]):
+                if label_decomposed > 0:
+                    mpes[input_file_path]["ground_truth"][attribute_name].append(dataset.classes[attribute_name][label_decomposed_index])
+
+            for (output_decomposed_mpe_probability, output_decomposed_mpe_label) in zip(outputs_decomposed_mpe_probability, outputs_decomposed_mpe_label):
+                mpes[input_file_path]["prediction"][attribute_name][dataset.classes[attribute_name][output_decomposed_mpe_label.item()]] = output_decomposed_mpe_probability.item()
+
+            mpes[input_file_path]["ground_truth"][attribute_name] = sorted(mpes[input_file_path]["ground_truth"][attribute_name])
+            mpes[input_file_path]["prediction"][attribute_name] = dict(sorted(mpes[input_file_path]["prediction"][attribute_name].items()))
 
         (outputs_composed_mpe_probability, outputs_composed_mpe_label) = torch.max(outputs_composed[batch_index], 0)
 

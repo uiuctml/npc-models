@@ -260,7 +260,6 @@ def createInterpretationWidget():
     if header.interpret_mpe:
         for attribute_name in explanations[file_name]["mpe"].keys():
             attribute_label = explanations[file_name]["mpe"][attribute_name]
-            attribute_label_prediction = explanations[file_name]["prediction"][attribute_name][0]
             label = PyQt5.QtWidgets.QLabel()
             label.setText(attribute_label)
             layout_explanation.addWidget(label)
@@ -291,36 +290,70 @@ def createInterpretationWidget():
                 label.setStyleSheet("color: blue;")
 
     for attribute_name in explanations[file_name]["ground_truth"].keys():
-        attribute_label = explanations[file_name]["ground_truth"][attribute_name]
-        label = PyQt5.QtWidgets.QLabel()
-        label.setText(attribute_label)
-        layout_ground_truth.addWidget(label)
+        layout_labels = PyQt5.QtWidgets.QVBoxLayout()
+        spacer_bottom = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
+        spacer_top = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
+
+        layout_ground_truth.addLayout(layout_labels)
+        layout_labels.addItem(spacer_top)
 
         if attribute_name == "original":
+            attribute_label = explanations[file_name]["ground_truth"][attribute_name]
+            label = PyQt5.QtWidgets.QLabel()
+            label.setText(attribute_label)
             label.setFixedWidth(header.interpret_label_width_original)
+            layout_labels.addWidget(label)
         else:
-            label.setFixedWidth(header.interpret_label_width_attribute)
+            for attribute_label in explanations[file_name]["ground_truth"][attribute_name]:
+                label = PyQt5.QtWidgets.QLabel()
+                label.setText(attribute_label)
+                label.setFixedWidth(header.interpret_label_width_attribute)
+                layout_labels.addWidget(label)
+
+        layout_labels.addItem(spacer_bottom)
 
     for attribute_name in explanations[file_name]["prediction"].keys():
-        attribute_label = explanations[file_name]["prediction"][attribute_name][0]
-
         if header.interpret_mpe:
-            attribute_label_explanation = explanations[file_name]["mpe"][attribute_name]
+            layout_labels = PyQt5.QtWidgets.QVBoxLayout()
+            spacer_bottom = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
+            spacer_top = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
+
+            layout_prediction.addLayout(layout_labels)
+            layout_labels.addItem(spacer_top)
+
+            if attribute_name == "original":
+                attribute_label = explanations[file_name]["prediction"][attribute_name][0]
+                attribute_probability = "{:.1f}".format(explanations[file_name]["prediction"][attribute_name][1] * 100)
+                text = attribute_label + ": " + attribute_probability + "%"
+                label = PyQt5.QtWidgets.QLabel()
+                label.setText(text)
+                label.setFixedWidth(header.interpret_label_width_original)
+                layout_labels.addWidget(label)
+            else:
+                for attribute_label in explanations[file_name]["prediction"][attribute_name].keys():
+                    attribute_probability = "{:.1f}".format(explanations[file_name]["prediction"][attribute_name][attribute_label] * 100)
+                    text = attribute_label + ": " + attribute_probability + "%"
+                    label = PyQt5.QtWidgets.QLabel()
+                    label.setText(text)
+                    label.setFixedWidth(header.interpret_label_width_attribute)
+                    layout_labels.addWidget(label)
+
+            layout_labels.addItem(spacer_bottom)
         else:
+            attribute_label = explanations[file_name]["prediction"][attribute_name][0]
             attribute_label_explanation = explanations[file_name]["counterfactual"][attribute_name][0]
 
-        attribute_probability = "{:.1f}".format(explanations[file_name]["prediction"][attribute_name][1] * 100)
-        text = attribute_label + ": " + attribute_probability + "%"
-        label = PyQt5.QtWidgets.QLabel()
-        label.setText(text)
-        layout_prediction.addWidget(label)
+            attribute_probability = "{:.1f}".format(explanations[file_name]["prediction"][attribute_name][1] * 100)
+            text = attribute_label + ": " + attribute_probability + "%"
+            label = PyQt5.QtWidgets.QLabel()
+            label.setText(text)
+            layout_prediction.addWidget(label)
 
-        if attribute_name == "original":
-            label.setFixedWidth(header.interpret_label_width_original)
-        else:
-            label.setFixedWidth(header.interpret_label_width_attribute)
+            if attribute_name == "original":
+                label.setFixedWidth(header.interpret_label_width_original)
+            else:
+                label.setFixedWidth(header.interpret_label_width_attribute)
 
-        if not header.interpret_mpe:
             if attribute_label != attribute_label_explanation:
                 label.setStyleSheet("color: red;")
 
