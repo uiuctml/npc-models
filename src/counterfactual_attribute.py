@@ -399,8 +399,8 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
     utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
     utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
 
-    accuracy_epoch_composed = 0
-    accuracy_epoch_composed_counterfactual = 0
+    accuracy_task_epoch = 0
+    accuracy_task_counterfactual_epoch = 0
     instance_count_corrected = 0
     instance_count_incorrect = 0
     instance_count_qp_epsilon_violated = None
@@ -467,19 +467,19 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
         instance_count_corrected += corrects_composed_counterfactual - corrects_composed
         instance_count_incorrect += incorrects_composed
 
-        accuracy_epoch_composed += corrects_composed
-        accuracy_epoch_composed_counterfactual += corrects_composed_counterfactual
+        accuracy_task_epoch += corrects_composed
+        accuracy_task_counterfactual_epoch += corrects_composed_counterfactual
 
         progress_bar.n = batch_index + 1
         progress_bar.refresh()
 
     progress_bar.close()
 
-    accuracy_epoch_composed /= len(data_loader.dataset)
-    accuracy_epoch_composed_counterfactual /= len(data_loader.dataset)
+    accuracy_task_epoch /= len(data_loader.dataset)
+    accuracy_task_counterfactual_epoch /= len(data_loader.dataset)
 
-    logger.log_info("Composed testing accuracy: " + str(accuracy_epoch_composed) + ".")
-    logger.log_info("Composed counterfactual accuracy: " + str(accuracy_epoch_composed_counterfactual) + ".")
+    logger.log_info("Testing task accuracy: " + str(accuracy_task_epoch) + ".")
+    logger.log_info("Counterfactual task accuracy: " + str(accuracy_task_counterfactual_epoch) + ".")
 
     if instance_count_incorrect != 0:
         logger.log_info("Correction rate: " + str(instance_count_corrected / instance_count_incorrect) + ".")
