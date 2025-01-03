@@ -117,9 +117,20 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
     logger.log_info("Testing task accuracy: " + str(accuracy_task_epoch) + ".")
 
     if header.composed_find_mpe:
-        mpe_correctness_epoch = sum(mpe_correctness_epoch) / len(mpe_correctness_epoch)
-        mpe_correctness_prediction_correct_epoch = sum(mpe_correctness_prediction_correct_epoch) / len(mpe_correctness_prediction_correct_epoch)
-        mpe_correctness_prediction_incorrect_epoch = sum(mpe_correctness_prediction_incorrect_epoch) / len(mpe_correctness_prediction_incorrect_epoch)
+        if len(mpe_correctness_epoch) == 0:
+            mpe_correctness_epoch = "N/A"
+        else:
+            mpe_correctness_epoch = sum(mpe_correctness_epoch) / len(mpe_correctness_epoch)
+
+        if len(mpe_correctness_prediction_correct_epoch) == 0:
+            mpe_correctness_prediction_correct_epoch = "N/A"
+        else:
+            mpe_correctness_prediction_correct_epoch = sum(mpe_correctness_prediction_correct_epoch) / len(mpe_correctness_prediction_correct_epoch)
+
+        if len(mpe_correctness_prediction_incorrect_epoch) == 0:
+            mpe_correctness_prediction_incorrect_epoch = "N/A"
+        else:
+            mpe_correctness_prediction_incorrect_epoch = sum(mpe_correctness_prediction_incorrect_epoch) / len(mpe_correctness_prediction_incorrect_epoch)
 
         logger.log_info("MPE correctness on all predictions: " + str(mpe_correctness_epoch) + ".")
         logger.log_info("MPE correctness on correct predictions: " + str(mpe_correctness_prediction_correct_epoch) + ".")
