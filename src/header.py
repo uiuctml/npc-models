@@ -2,6 +2,7 @@ import multiprocessing
 import type
 
 composed_find_mpe = False
+composed_save_mpe = True
 composed_spn_on_cpu = True
 counterfactual_implausibility_margin_range = 1e-3
 counterfactual_implausibility_margin_sum = 1e-6
@@ -9,6 +10,7 @@ counterfactual_learning_rate = 1e-2
 counterfactual_moving_epsilon = 0.1
 counterfactual_qp_epsilon = 1
 counterfactual_qp_solver = "clarabel"
+counterfactual_save = True
 counterfactual_steps = 50
 cuda_allow_tf32 = False
 dataset_prefix = "awa2"

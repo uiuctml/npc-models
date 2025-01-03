@@ -399,13 +399,17 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
     utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
     utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
 
+    accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
-    accuracy_task_counterfactual_epoch = 0
+    correctness_attribute_epoch = 0
+    correctness_task_epoch = 0
     instance_count_corrected = 0
     instance_count_incorrect = 0
     instance_count_qp_epsilon_violated = None
     instance_count_qp_no_solution = 0
     instance_count_total = 0
+    tv_distance_epoch = 0
+    tv_distances_epoch = []
     value_count_implausible = None
 
     config_dataset = data_loader.dataset.config
@@ -416,6 +420,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
 
     for attribute in config_dataset["attributes"]:
         spn_output_cols *= len(attribute["labels"])
+        tv_distances_epoch.append(0)
 
     model_decomposed.eval()
     progress_bar.set_description_str("[INFO]: Counterfactual progress")
@@ -455,7 +460,8 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
         (_, _, outputs_composed) = utility.compose(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
         (_, _, outputs_composed_counterfactual) = utility.compose(outputs_decomposed_counterfactual, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
 
-        utility.saveCounterfactuals(input_file_paths, counterfactuals, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_counterfactual, outputs_composed, outputs_composed_counterfactual)
+        if header.counterfactual_save:
+            utility.saveCounterfactuals(input_file_paths, counterfactuals, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_counterfactual, outputs_composed, outputs_composed_counterfactual)
 
         (_, predictions_composed) = torch.max(outputs_composed, 1)
         (_, predictions_composed_counterfactual) = torch.max(outputs_composed_counterfactual, 1)
@@ -467,19 +473,29 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
         instance_count_corrected += corrects_composed_counterfactual - corrects_composed
         instance_count_incorrect += incorrects_composed
 
+        accuracy_attribute_epoch += utility.computeAccuracyDecomposed(outputs_decomposed_original, labels_decomposed, device)
         accuracy_task_epoch += corrects_composed
-        accuracy_task_counterfactual_epoch += corrects_composed_counterfactual
+        correctness_attribute_epoch += utility.computeAccuracyDecomposed(outputs_decomposed_counterfactual, labels_decomposed, device)
+        correctness_task_epoch += corrects_composed_counterfactual
+
+        for i in range(len(data_loader.dataset.config["attributes"])):
+            tv_distance_batch = 0.5 * torch.sum(torch.abs(outputs_decomposed_counterfactual[i] - outputs_decomposed[i]), dim = 1)
+            tv_distances_epoch[i] += torch.sum(tv_distance_batch).item()
 
         progress_bar.n = batch_index + 1
         progress_bar.refresh()
 
     progress_bar.close()
 
+    accuracy_attribute_epoch /= len(data_loader)
     accuracy_task_epoch /= len(data_loader.dataset)
-    accuracy_task_counterfactual_epoch /= len(data_loader.dataset)
+    correctness_attribute_epoch /= len(data_loader)
+    correctness_task_epoch /= len(data_loader.dataset)
 
-    logger.log_info("Testing task accuracy: " + str(accuracy_task_epoch) + ".")
-    logger.log_info("Counterfactual task accuracy: " + str(accuracy_task_counterfactual_epoch) + ".")
+    for i in range(len(data_loader.dataset.config["attributes"])):
+        tv_distances_epoch[i] /= len(data_loader.dataset)
+
+    tv_distance_epoch = sum(tv_distances_epoch) / len(tv_distances_epoch)
 
     if instance_count_incorrect != 0:
         logger.log_info("Correction rate: " + str(instance_count_corrected / instance_count_incorrect) + ".")
@@ -494,6 +510,12 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
 
     if value_count_implausible is not None:
         logger.log_info("Number of implausible values: " + str(value_count_implausible) + ".")
+
+    logger.log_info("Testing attribute accuracy: " + str(accuracy_attribute_epoch) + ".")
+    logger.log_info("Testing task accuracy: " + str(accuracy_task_epoch) + ".")
+    logger.log_info("Counterfactual attribute TV distance: " + str(tv_distance_epoch) + ".")
+    logger.log_info("Counterfactual attribute correctness: " + str(correctness_task_epoch) + ".")
+    logger.log_info("Counterfactual task correctness: " + str(correctness_task_epoch) + ".")
 
     if not os.path.isdir(header.dir_output_counterfactual):
         os.makedirs(header.dir_output_counterfactual, exist_ok = True)

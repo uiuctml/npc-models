@@ -71,7 +71,8 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
                 mpe_attributes = utility.findMPEs(matrix_a, matrix_b, predictions_composed, spn_settings_joint)
                 mpe_correctness = utility.computeMPECorrectness(mpe_attributes, labels_decomposed)
 
-                utility.saveMPEs(input_file_paths, mpes, mpe_attributes, mpe_correctness, data_loader.dataset, labels_decomposed, labels_original, output_decomposed, output_composed)
+                if header.composed_save_mpe:
+                    utility.saveMPEs(input_file_paths, mpes, mpe_attributes, mpe_correctness, data_loader.dataset, labels_decomposed, labels_original, output_decomposed, output_composed)
 
                 mpe_correctness = torch.tensor(mpe_correctness).to(device)
                 mpe_correctness_epoch += mpe_correctness.tolist()
