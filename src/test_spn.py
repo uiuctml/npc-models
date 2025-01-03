@@ -97,7 +97,7 @@ def test(spn_joint, spn_marginal, settings_joint, settings_marginal, use_probabi
         log_likelihoods_marginal = spn_marginal(settings_marginal)
         log_likelihoods -= log_likelihoods_marginal
 
-    log_likelihood = torch.mean(log_likelihoods).item()
+    log_likelihood = torch.log(torch.mean(torch.exp(log_likelihoods))).item()
 
     if use_probability:
         wandb.log({"testing/epoch/log_probability": log_likelihood})
