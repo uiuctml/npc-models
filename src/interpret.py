@@ -491,11 +491,13 @@ def createViewerWidget():
 
 def createWindowLayout():
     layout_window = PyQt5.QtWidgets.QVBoxLayout()
+    spacer_top = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
     splitter = PyQt5.QtWidgets.QSplitter()
     widget_application_control = createApplicationControlWidget()
     widget_interpretation = createInterpretationWidget()
     widget_viewer = createViewerWidget()
 
+    layout_window.addItem(spacer_top)
     layout_window.addWidget(splitter)
     layout_window.addWidget(widget_application_control)
 
