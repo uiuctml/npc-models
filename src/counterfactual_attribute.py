@@ -497,6 +497,9 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
 
     tv_distance_epoch = sum(tv_distances_epoch) / len(tv_distances_epoch)
 
+    logger.log_info("Testing attribute accuracy: " + str(accuracy_attribute_epoch) + ".")
+    logger.log_info("Testing task accuracy: " + str(accuracy_task_epoch) + ".")
+
     if instance_count_incorrect != 0:
         logger.log_info("Correction rate: " + str(instance_count_corrected / instance_count_incorrect) + ".")
     else:
@@ -511,8 +514,6 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
     if value_count_implausible is not None:
         logger.log_info("Number of implausible values: " + str(value_count_implausible) + ".")
 
-    logger.log_info("Testing attribute accuracy: " + str(accuracy_attribute_epoch) + ".")
-    logger.log_info("Testing task accuracy: " + str(accuracy_task_epoch) + ".")
     logger.log_info("Counterfactual attribute TV distance: " + str(tv_distance_epoch) + ".")
     logger.log_info("Counterfactual attribute correctness: " + str(correctness_task_epoch) + ".")
     logger.log_info("Counterfactual task correctness: " + str(correctness_task_epoch) + ".")
