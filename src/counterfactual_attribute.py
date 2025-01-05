@@ -173,6 +173,10 @@ def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn
                     rows_nan = torch.isnan(outputs_decomposed[i]).any(dim = 1)
                     outputs_decomposed[i][rows_nan] = outputs_decomposed_original[i][rows_nan]
 
+                if torch.sum(torch.isinf(outputs_decomposed[i])) > 0:
+                    rows_nan = torch.isinf(outputs_decomposed[i]).any(dim = 1)
+                    outputs_decomposed[i][rows_nan] = outputs_decomposed_original[i][rows_nan]
+
         for i in range(len(outputs_decomposed)):
             outputs_decomposed[i] = outputs_decomposed[i].detach().clone().requires_grad_(True)
 
