@@ -146,6 +146,7 @@ config_spn = {
     "dir_dataset_train": "../../../datasets/" + dataset_prefix + "-dataset/images/split/original/train",
     "dir_dataset_validation": "../../../datasets/" + dataset_prefix + "-dataset/images/split/original/validate",
     "file_path_spn": "../../learnspn/output/learnspn/" + dataset_prefix + ".spn.txt",
+    "file_path_dataset_test_txt": "../../../datasets/" + dataset_prefix + "-dataset/images/split/spn/test.txt",
     "file_name_checkpoint": run_name_spn + ".tar",
     "file_name_checkpoint_best": run_name_spn + ".best.tar",
     "fine_tuning": False,
@@ -166,5 +167,6 @@ config_spn = {
     "run_name": run_name_spn,
     "seed": seed,
     "stopping_criterion": 1e-4,
+    "test_on_txt": True,
     "type": "spn",
 }

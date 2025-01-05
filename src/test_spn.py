@@ -90,8 +90,28 @@ def loadDataset(dir_dataset, device):
 
     return dataset
 
+def loadDatasetTXT(file_path_dataset, device):
+    dataset = []
+
+    with open(file_path_dataset, "r") as file_dataset:
+        lines = file_dataset.readlines()
+
+        for line in lines:
+            line = line.strip()
+            line_list = line.split(",")
+
+            for i in range(len(line_list)):
+                line_list[i] = int(line_list[i])
+
+            dataset.append(line_list)
+
+    dataset = torch.Tensor(dataset)
+    dataset = dataset.to(device)
+
+    return dataset
+
 def test(spn_joint, spn_marginal, settings_joint, settings_marginal, use_probability):
-    log_likelihoods = spn_joint(settings_joint, False)
+    log_likelihoods = spn_joint(settings_joint, header.config_spn["test_on_txt"])
 
     if use_probability:
         log_likelihoods_marginal = spn_marginal(settings_marginal)
@@ -119,7 +139,13 @@ def main():
     wandb.init(config = header.config_spn, mode = "disabled")
 
     device = torch.device("cuda")
-    dataset_test = loadDataset(header.config_spn["dir_dataset_test"], device)
+    dataset_test = None
+
+    if header.config_spn["test_on_txt"]:
+        dataset_test = loadDatasetTXT(header.config_spn["file_path_dataset_test_txt"], device)
+    else:
+        dataset_test = loadDataset(header.config_spn["dir_dataset_test"], device)
+
     settings_marginal = torch.full((1, len(dataset_test)), -1).to(device)
     spn_joint = spn.SPN(device)
     spn_marginal = spn.SPN(device)
