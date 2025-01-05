@@ -513,7 +513,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
     if instance_count_incorrect != 0:
         logger.log_info("Correction rate: " + str(instance_count_corrected / instance_count_incorrect) + ".")
     else:
-        logger.log_info("Correction rate: 0.")
+        logger.log_info("Correction rate: N/A.")
 
     if instance_count_total != 0:
         logger.log_info("QP solution rate: " + str((instance_count_total - instance_count_qp_no_solution) / instance_count_total) + ".")
