@@ -169,6 +169,10 @@ def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn
             for i in range(len(outputs_decomposed)):
                 outputs_decomposed[i] = torch.clamp(outputs_decomposed[i] + lambdas[i], min = 0)
 
+                if torch.sum(torch.isnan(outputs_decomposed[i])) > 0:
+                    rows_nan = torch.isnan(outputs_decomposed[i]).any(dim = 1)
+                    outputs_decomposed[i][rows_nan] = outputs_decomposed_original[i][rows_nan]
+
         for i in range(len(outputs_decomposed)):
             outputs_decomposed[i] = outputs_decomposed[i].detach().clone().requires_grad_(True)
 
@@ -396,8 +400,10 @@ def counterfactual_pgd_qp(outputs_decomposed_original, spn_joint, spn_marginal, 
 
 def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_step):
     utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
-    utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
-    utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
+
+    if header.config_spn["run_name"] != "":
+        utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
+        utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
 
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
