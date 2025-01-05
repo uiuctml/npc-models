@@ -521,7 +521,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
         logger.log_info("Number of implausible values: " + str(value_count_implausible) + ".")
 
     logger.log_info("Counterfactual attribute TV distance: " + str(tv_distance_epoch) + ".")
-    logger.log_info("Counterfactual attribute correctness: " + str(correctness_task_epoch) + ".")
+    logger.log_info("Counterfactual attribute correctness: " + str(correctness_attribute_epoch) + ".")
     logger.log_info("Counterfactual task correctness: " + str(correctness_task_epoch) + ".")
 
     if not os.path.isdir(header.dir_output_counterfactual):
