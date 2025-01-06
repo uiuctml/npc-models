@@ -24,6 +24,7 @@ interpret_dir_dataset = "../../../datasets/" + dataset_prefix + "-dataset/images
 interpret_label_width_attribute = 200
 interpret_label_width_original = 350
 interpret_mpe = False
+interpret_preprocess = False
 interpret_threshold_probability = 0.1
 interpret_viewer_height = 300
 interpret_viewer_width = 300

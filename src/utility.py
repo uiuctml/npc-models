@@ -475,9 +475,9 @@ def saveCounterfactuals(input_file_paths, counterfactuals, dataset, labels_decom
         (outputs_composed_counterfactual_mpe_probability, outputs_composed_counterfactual_mpe_label) = torch.max(outputs_composed_counterfactual[batch_index], 0)
         (outputs_composed_mpe_probability, outputs_composed_mpe_label) = torch.max(outputs_composed[batch_index], 0)
 
-        counterfactuals[input_file_path]["counterfactual"]["original"] = (dataset.classes_original[outputs_composed_counterfactual_mpe_label], outputs_composed_counterfactual_mpe_probability.item())
+        counterfactuals[input_file_path]["counterfactual"]["original"] = {dataset.classes_original[outputs_composed_counterfactual_mpe_label]: outputs_composed_counterfactual_mpe_probability.item()}
         counterfactuals[input_file_path]["ground_truth"]["original"] = dataset.classes_original[labels_original[batch_index]]
-        counterfactuals[input_file_path]["prediction"]["original"] = (dataset.classes_original[outputs_composed_mpe_label], outputs_composed_mpe_probability.item())
+        counterfactuals[input_file_path]["prediction"]["original"] = {dataset.classes_original[outputs_composed_mpe_label]: outputs_composed_mpe_probability.item()}
 
     return
 
