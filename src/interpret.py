@@ -452,7 +452,7 @@ def preprocessCounterfactuals():
     file_names_correct = []
 
     for file_name in explanations.keys():
-        if explanations[file_name]["prediction"]["original"][0] == explanations[file_name]["ground_truth"]["original"]:
+        if list(explanations[file_name]["prediction"]["original"].keys())[0] == explanations[file_name]["ground_truth"]["original"]:
             file_names_correct.append(file_name)
 
     for file_name_correct in file_names_correct:
