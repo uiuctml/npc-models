@@ -447,13 +447,30 @@ def saveCounterfactuals(input_file_paths, counterfactuals, dataset, labels_decom
 
         for (attribute_index, attribute) in enumerate(config_dataset["attributes"]):
             attribute_name = attribute["name"]
+            masks_positive_labels_decomposed = (labels_decomposed[attribute_index] > 0)
+            counts_positive_labels_decomposed = torch.sum(masks_positive_labels_decomposed, dim = 1)
+            count_positive_labels_decomposed = counts_positive_labels_decomposed[batch_index]
 
-            (outputs_decomposed_counterfactual_mpe_probability, outputs_decomposed_counterfactual_mpe_label) = torch.max(outputs_decomposed_counterfactual[attribute_index][batch_index], 0)
-            (outputs_decomposed_mpe_probability, outputs_decomposed_mpe_label) = torch.max(outputs_decomposed[attribute_index][batch_index], 0)
+            (outputs_decomposed_counterfactual_mpe_probability, outputs_decomposed_counterfactual_mpe_label) = torch.topk(outputs_decomposed_counterfactual[attribute_index][batch_index], count_positive_labels_decomposed)
+            (outputs_decomposed_mpe_probability, outputs_decomposed_mpe_label) = torch.topk(outputs_decomposed[attribute_index][batch_index], count_positive_labels_decomposed)
 
-            counterfactuals[input_file_path]["counterfactual"][attribute_name] = (dataset.classes[attribute_name][outputs_decomposed_counterfactual_mpe_label], outputs_decomposed_counterfactual_mpe_probability.item())
-            counterfactuals[input_file_path]["ground_truth"][attribute_name] = dataset.classes[attribute_name][labels_decomposed[batch_index][attribute_index]]
-            counterfactuals[input_file_path]["prediction"][attribute_name] = (dataset.classes[attribute_name][outputs_decomposed_mpe_label], outputs_decomposed_mpe_probability.item())
+            counterfactuals[input_file_path]["counterfactual"][attribute_name] = {}
+            counterfactuals[input_file_path]["ground_truth"][attribute_name] = []
+            counterfactuals[input_file_path]["prediction"][attribute_name] = {}
+
+            for (output_decomposed_counterfactual_mpe_probability, output_decomposed_counterfactual_mpe_label) in zip(outputs_decomposed_counterfactual_mpe_probability, outputs_decomposed_counterfactual_mpe_label):
+                counterfactuals[input_file_path]["counterfactual"][attribute_name][dataset.classes[attribute_name][output_decomposed_counterfactual_mpe_label.item()]] = output_decomposed_counterfactual_mpe_probability.item()
+
+            for (label_decomposed_index, label_decomposed) in enumerate(labels_decomposed[attribute_index][batch_index]):
+                if label_decomposed > 0:
+                    counterfactuals[input_file_path]["ground_truth"][attribute_name].append(dataset.classes[attribute_name][label_decomposed_index])
+
+            for (output_decomposed_mpe_probability, output_decomposed_mpe_label) in zip(outputs_decomposed_mpe_probability, outputs_decomposed_mpe_label):
+                counterfactuals[input_file_path]["prediction"][attribute_name][dataset.classes[attribute_name][output_decomposed_mpe_label.item()]] = output_decomposed_mpe_probability.item()
+
+            counterfactuals[input_file_path]["counterfactual"][attribute_name] = dict(sorted(counterfactuals[input_file_path]["counterfactual"][attribute_name].items()))
+            counterfactuals[input_file_path]["ground_truth"][attribute_name] = sorted(counterfactuals[input_file_path]["ground_truth"][attribute_name])
+            counterfactuals[input_file_path]["prediction"][attribute_name] = dict(sorted(counterfactuals[input_file_path]["prediction"][attribute_name].items()))
 
         (outputs_composed_counterfactual_mpe_probability, outputs_composed_counterfactual_mpe_label) = torch.max(outputs_composed_counterfactual[batch_index], 0)
         (outputs_composed_mpe_probability, outputs_composed_mpe_label) = torch.max(outputs_composed[batch_index], 0)
