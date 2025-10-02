@@ -1,9 +1,6 @@
-checkpoints
-output
-*.png
-*.pth
-.idea/
+# Directories
 .vscode/
-checkpoints/
-wandb/
 __pycache__/
+checkpoints/
+output/
+wandb/
