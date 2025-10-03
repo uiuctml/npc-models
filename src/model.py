@@ -147,10 +147,6 @@ class ResNet34MTL(Model):
         layer_list = []
         self.net = torchvision.models.resnet34(weights = "IMAGENET1K_V1")
 
-        if not header.config_decomposed["fine_tuning"]:
-            for parameter in self.net.parameters():
-                parameter.requires_grad = False
-
         for attribute in config_dataset["attributes"]:
             attribute_name = attribute["name"]
             attribute_labels = attribute["labels"]
@@ -188,10 +184,7 @@ class ResNet34MTL(Model):
         return (outputs_head, outputs_head_hidden)
 
     def get_parameters(self):
-        if header.config_decomposed["fine_tuning"]:
-            return self.net.parameters()
-        else:
-            return self.net.heads_mtl.parameters()
+        return self.net.parameters()
 
 def createModelReference(config_dataset, device):
     if header.config_reference["model"] == type.ModelReference.cbm.name:
