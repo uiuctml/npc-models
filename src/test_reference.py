@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import argument
+import argparse
 import dataset
 import header
 import logger
@@ -11,6 +11,42 @@ import tqdm
 import type
 import utility
 import wandb
+
+def initializeRunName(run_name = ""):
+    if run_name != "":
+        if run_name.split(".")[1] != header.run_name_reference_keyword:
+            logger.log_fatal("Invalid run name. Quit.")
+            exit(-1)
+
+        header.run_name_reference = run_name
+    else:
+        header.run_name_reference = utility.generateRunName(header.run_name_reference_keyword, header.config_reference["model"], header.config_reference["seed"])
+
+    if header.run_name_reference == "":
+        logger.log_fatal("Missing run name. Quit.")
+        exit(-1)
+
+    header.config_reference["file_name_checkpoint"] = header.run_name_reference + ".tar"
+    header.config_reference["file_name_checkpoint_best"] = header.run_name_reference + ".best.tar"
+    header.config_reference["run_name"] = header.run_name_reference
+
+    return
+
+def processArguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.", required = True)
+    parser.add_argument("-s", "--seed", type = int, default = 42, help = "Random seed.")
+    arguments = parser.parse_args()
+
+    initializeRunName(arguments.run_name)
+    header.config_reference["model"] = header.run_name_reference.split(".")[2]
+    header.config_reference["seed"] = arguments.seed
+
+    logger.log_trace("Run name: \"" + header.run_name_reference + "\".")
+    logger.log_trace("Model: \"" + header.config_reference["model"] + "\".")
+    logger.log_trace("Random seed: " + str(header.config_reference["seed"]) + ".")
+
+    return
 
 def computeAccuracy(output_neck, output_head, labels_decomposed, labels_original, device):
     accuracy_attribute_batch = None
@@ -132,7 +168,7 @@ def test(model_reference, data_loader, device, batch_step):
     return batch_step
 
 def main():
-    argument.processArgumentsTestReference()
+    processArguments()
 
     utility.setSeed(header.config_reference["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32

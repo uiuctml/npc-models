@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import argument
+import argparse
 import dataset
 import header
 import logger
@@ -13,6 +13,36 @@ import tqdm
 import type
 import utility
 import wandb
+
+def processArguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-m", "--model", type = str, default = "", help = "Model.")
+    parser.add_argument("-b", "--batch-size", type = int, default = None, help = "Batch size.")
+    parser.add_argument("-e", "--epochs", type = int, default = None, help = "Epochs.")
+    parser.add_argument("-s", "--seed", type = int, default = None, help = "Random seed.")
+    arguments = parser.parse_args()
+
+    if arguments.model != "":
+        header.config_reference["model"] = arguments.model
+
+    if arguments.batch_size is not None:
+        header.config_reference["data_loader_batch_size"] = arguments.batch_size
+
+    if arguments.epochs is not None:
+        header.config_reference["epochs"] = arguments.epochs
+
+    if arguments.seed is not None:
+        header.config_reference["seed"] = arguments.seed
+
+    test_reference.initializeRunName()
+
+    logger.log_trace("Run name: \"" + header.run_name_reference + "\".")
+    logger.log_trace("Model: \"" + header.config_reference["model"] + "\".")
+    logger.log_trace("Batch size: " + str(header.config_reference["data_loader_batch_size"]) + ".")
+    logger.log_trace("Epochs: " + str(header.config_reference["epochs"]) + ".")
+    logger.log_trace("Random seed: " + str(header.config_reference["seed"]) + ".")
+
+    return
 
 def computeLoss(output_neck, output_head, labels_decomposed, labels_original):
     if header.config_reference["model"] == type.ModelReference.cbm.name:
@@ -155,7 +185,8 @@ def validate(model_reference, data_loader, device, batch_step):
     return (accuracy_task_epoch, loss_epoch, batch_step)
 
 def main():
-    argument.processArgumentsTrainReference()
+    processArguments()
+
     utility.setSeed(header.config_reference["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
 

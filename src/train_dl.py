@@ -28,7 +28,7 @@ def computeLoss(output, labels, criterions):
 def processArguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-b", "--batch-size", type = int, default = 512, help = "Batch size.")
-    parser.add_argument("-e", "--epochs", type = int, default = 100, help = "Number of training epochs.")
+    parser.add_argument("-e", "--epochs", type = int, default = 100, help = "Epochs.")
     parser.add_argument("-s", "--seed", type = int, default = 42, help = "Random seed.")
     arguments = parser.parse_args()
 

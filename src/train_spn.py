@@ -12,7 +12,7 @@ import wandb
 
 def processArguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--epochs", type = int, default = 50, help = "Number of training epochs.")
+    parser.add_argument("-e", "--epochs", type = int, default = 50, help = "Epochs.")
     parser.add_argument("-s", "--seed", type = int, default = 42, help = "Random seed.")
     arguments = parser.parse_args()
 
