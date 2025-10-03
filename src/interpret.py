@@ -28,55 +28,6 @@ def deleteLayoutChildren(layout):
              else:
                  deleteLayoutChildren(item.layout())
 
-def generateSummaryLabel(attribute_labels):
-    initialized = False
-    summary = "The final prediction would have been correct if "
-
-    for i in range(len(attribute_labels)):
-        if not initialized:
-            initialized = True
-        elif i < 2 and i >= len(attribute_labels) - 1:
-            summary += " and "
-        elif i >= len(attribute_labels) - 1:
-            summary += ", and "
-        else:
-            summary += ", "
-
-        attribute_label_counterfactual = attribute_labels[i][1].split(header.interpret_delimiter_label)[1]
-        attribute_label_prediction = attribute_labels[i][0].split(header.interpret_delimiter_label)[1]
-        attribute_name = attribute_labels[i][0].split(header.interpret_delimiter_label)[0]
-
-        summary += "<b>" + attribute_name + "</b> was predicted as <span style='color: blue;'><b>" + attribute_label_counterfactual + "</b></span> instead of <span style='color: red;'><b>" + attribute_label_prediction + "</b></span>"
-
-    summary += "."
-
-    return summary
-
-def generateSummaryProbability(attribute_probabilities):
-    initialized = False
-    summary = "The final prediction would have been correct if "
-
-    for i in range(len(attribute_probabilities)):
-        if not initialized:
-            initialized = True
-        elif i < 2 and i >= len(attribute_probabilities) - 1:
-            summary += " and "
-        elif i >= len(attribute_probabilities) - 1:
-            summary += ", and "
-        else:
-            summary += ", "
-
-        attribute_probability_counterfactual = "{:.1f}%".format(attribute_probabilities[i][2] * 100)
-        attribute_probability_prediction = "{:.1f}%".format(attribute_probabilities[i][1] * 100)
-        attribute_label = attribute_probabilities[i][0].split(header.interpret_delimiter_label)[1]
-        attribute_name = attribute_probabilities[i][0].split(header.interpret_delimiter_label)[0]
-
-        summary += "<b>" + attribute_name + "</b> was predicted as <b>" + attribute_label + "</b> with a probability of <span style='color: blue;'><b>" + attribute_probability_counterfactual + "</b></span> instead of <span style='color: red;'><b>" + attribute_probability_prediction + "</b></span>"
-
-    summary += "."
-
-    return summary
-
 def pushButtonLastSlot():
     if combo_box_application_control.currentIndex() <= 0:
         return
@@ -491,7 +442,7 @@ def main():
     window = PyQt5.QtWidgets.QWidget()
 
     window.setLayout(createWindowLayout())
-    window.setWindowTitle("VISAT Interpretation Tool")
+    window.setWindowTitle("NPC Interpretation Utility")
 
     window.show()
     window.setFixedSize(window.size())
