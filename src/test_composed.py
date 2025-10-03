@@ -13,6 +13,88 @@ import tqdm
 import utility
 import wandb
 
+def computeMPECorrectness(mpe_attributes, labels_decomposed):
+    mpe_correctness = []
+
+    for batch_index in range(len(mpe_attributes)):
+        correct = True
+
+        for (attribute_index, category_index) in enumerate(mpe_attributes[batch_index]):
+            if labels_decomposed[attribute_index][batch_index][category_index] <= 0:
+                correct = False
+                break
+
+        mpe_correctness.append(correct)
+
+    return mpe_correctness
+
+def getMatrixAColIndicesAttributeIndicesMaps(matrix_a_cols, spn_settings):
+    attribute_indices_list = spn_settings[:matrix_a_cols, :-1].cpu().int().tolist()
+    matrix_a_col_indices_to_attribute_indices = {}
+    attribute_indices_to_matrix_a_col_indices = {}
+
+    for (matrix_a_row_index, attribute_indices) in enumerate(attribute_indices_list):
+        matrix_a_col_indices_to_attribute_indices[matrix_a_row_index] = tuple(attribute_indices)
+        attribute_indices_to_matrix_a_col_indices[tuple(attribute_indices)] = matrix_a_row_index
+
+    return (matrix_a_col_indices_to_attribute_indices, attribute_indices_to_matrix_a_col_indices)
+
+def findMPEs(matrix_a, matrix_b, predictions_composed, spn_settings):
+    (matrix_a_col_indices_to_attribute_indices, _) = getMatrixAColIndicesAttributeIndicesMaps(matrix_a.shape[1], spn_settings)
+    mpe_attributes = []
+
+    matrix_a = matrix_a.t() # product of category size of all attributes x number of original labels
+    matrix_a = torch.index_select(matrix_a, 1, predictions_composed)   # product of category size of all attributes x batch size
+    matrix_c = matrix_a * matrix_b  # product of category size of all attributes x batch size
+    mpes_matrix_a_col_indices = torch.argmax(matrix_c, 0)   # 0 x batch size
+
+    for mpes_matrix_a_col_index in mpes_matrix_a_col_indices.cpu().tolist():
+        mpe_attributes.append(matrix_a_col_indices_to_attribute_indices[mpes_matrix_a_col_index])
+
+    return mpe_attributes
+
+def saveMPEs(input_file_paths, mpes, mpe_attributes, mpe_correctness, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed):
+    batch_size = labels_original.nelement()
+    config_dataset = dataset.config
+
+    for batch_index in range(batch_size):
+        input_file_path = os.path.basename(input_file_paths[batch_index])
+
+        mpes[input_file_path] = {}
+        mpes[input_file_path]["mpe"] = {}
+        mpes[input_file_path]["ground_truth"] = {}
+        mpes[input_file_path]["prediction"] = {}
+
+        for (attribute_index, attribute) in enumerate(config_dataset["attributes"]):
+            attribute_name = attribute["name"]
+            masks_positive_labels_decomposed = (labels_decomposed[attribute_index] > 0)
+            counts_positive_labels_decomposed = torch.sum(masks_positive_labels_decomposed, dim = 1)
+            count_positive_labels_decomposed = counts_positive_labels_decomposed[batch_index]
+
+            (outputs_decomposed_mpe_probability, outputs_decomposed_mpe_label) = torch.topk(outputs_decomposed[attribute_index][batch_index], count_positive_labels_decomposed)
+
+            mpes[input_file_path]["mpe"][attribute_name] = dataset.classes[attribute_name][mpe_attributes[batch_index][attribute_index]]
+            mpes[input_file_path]["ground_truth"][attribute_name] = []
+            mpes[input_file_path]["prediction"][attribute_name] = {}
+
+            for (label_decomposed_index, label_decomposed) in enumerate(labels_decomposed[attribute_index][batch_index]):
+                if label_decomposed > 0:
+                    mpes[input_file_path]["ground_truth"][attribute_name].append(dataset.classes[attribute_name][label_decomposed_index])
+
+            for (output_decomposed_mpe_probability, output_decomposed_mpe_label) in zip(outputs_decomposed_mpe_probability, outputs_decomposed_mpe_label):
+                mpes[input_file_path]["prediction"][attribute_name][dataset.classes[attribute_name][output_decomposed_mpe_label.item()]] = output_decomposed_mpe_probability.item()
+
+            mpes[input_file_path]["ground_truth"][attribute_name] = sorted(mpes[input_file_path]["ground_truth"][attribute_name])
+            mpes[input_file_path]["prediction"][attribute_name] = dict(sorted(mpes[input_file_path]["prediction"][attribute_name].items()))
+
+        (outputs_composed_mpe_probability, outputs_composed_mpe_label) = torch.max(outputs_composed[batch_index], 0)
+
+        mpes[input_file_path]["mpe"]["correct"] = mpe_correctness[batch_index]
+        mpes[input_file_path]["ground_truth"]["original"] = dataset.classes_original[labels_original[batch_index]]
+        mpes[input_file_path]["prediction"]["original"] = (dataset.classes_original[outputs_composed_mpe_label], outputs_composed_mpe_probability.item())
+
+    return
+
 def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loader, device, batch_step):
     utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
 
@@ -68,11 +150,11 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
                 tv_distances_epoch[i] += torch.sum(tv_distance_batch).item()
 
             if header.composed_find_mpe:
-                mpe_attributes = utility.findMPEs(matrix_a, matrix_b, predictions_composed, spn_settings_joint)
-                mpe_correctness = utility.computeMPECorrectness(mpe_attributes, labels_decomposed)
+                mpe_attributes = findMPEs(matrix_a, matrix_b, predictions_composed, spn_settings_joint)
+                mpe_correctness = computeMPECorrectness(mpe_attributes, labels_decomposed)
 
                 if header.composed_save_mpe:
-                    utility.saveMPEs(input_file_paths, mpes, mpe_attributes, mpe_correctness, data_loader.dataset, labels_decomposed, labels_original, output_decomposed, output_composed)
+                    saveMPEs(input_file_paths, mpes, mpe_attributes, mpe_correctness, data_loader.dataset, labels_decomposed, labels_original, output_decomposed, output_composed)
 
                 mpe_correctness = torch.tensor(mpe_correctness).to(device)
                 mpe_correctness_epoch += mpe_correctness.tolist()
