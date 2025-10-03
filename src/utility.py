@@ -210,6 +210,13 @@ def loadCheckpointBestSPN(spn, dir_checkpoints, file_name_checkpoint):
 
     return
 
+def lossNegativeLogLikelihood(output, label):
+    label = label.reshape(-1, 1)
+    output = torch.gather(output, 1, label)
+    negative_log_likelihood = -1 * torch.log(output)
+
+    return negative_log_likelihood.mean()
+
 def saveCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch, learning_rate_schedulers, model, optimizers):
     if not os.path.isdir(dir_checkpoints):
         os.makedirs(dir_checkpoints, exist_ok = True)
