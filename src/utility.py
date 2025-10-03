@@ -1,8 +1,10 @@
+import datetime
 import logger
 import natsort
 import numpy
 import os
 import random
+import socket
 import torch
 import torchvision
 import wandb
@@ -81,6 +83,23 @@ def createTransform(config):
     ])
 
     return dataset_transforms
+
+def generateRunName(type, model, seed):
+    date_time_list = list(datetime.datetime.now().timetuple())[:-4]
+    run_name = str(seed)
+    run_name += "."
+    run_name += type
+    run_name += "."
+    run_name += model
+
+    for entry in date_time_list:
+        run_name += "."
+        run_name += str(entry)
+
+    run_name += "."
+    run_name += socket.gethostname()
+
+    return run_name
 
 def getBinaryLabelsDecomposed(labels_decomposed):
     labels_decomposed_binary = []

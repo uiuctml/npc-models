@@ -2,4 +2,4 @@
 
 cd ../src
 
-./train_baseline.py -m "resnet34" -b 256 -e 150 -s 42
+./train_baseline.py -b 256 -e 150 -s 42

@@ -129,11 +129,6 @@ class ResNet34(Model):
         super().__init__()
 
         self.net = torchvision.models.resnet34(weights = "IMAGENET1K_V1")
-
-        if not header.config_baseline["fine_tuning"]:
-            for parameter in self.net.parameters():
-                parameter.requires_grad = False
-
         class_count = len(utility.getLabelsOriginal(config_dataset))
         self.net.fc = torch.nn.Linear(self.net.fc.in_features, class_count)
 
@@ -143,10 +138,7 @@ class ResNet34(Model):
         return self.net(input)
 
     def get_parameters(self):
-        if header.config_baseline["fine_tuning"]:
-            return self.net.parameters()
-        else:
-            return self.net.fc.parameters()
+        return self.net.parameters()
 
 class ResNet34MTL(Model):
     def __init__(self, config_dataset, device):

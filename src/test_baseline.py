@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import argument
+import argparse
 import dataset
 import header
 import logger
@@ -9,6 +9,40 @@ import torch
 import tqdm
 import utility
 import wandb
+
+def initializeRunName(run_name = ""):
+    if run_name != "":
+        if run_name.split(".")[1] != header.run_name_baseline_keyword:
+            logger.log_fatal("Invalid run name. Quit.")
+            exit(-1)
+
+        header.run_name_baseline = run_name
+    else:
+        header.run_name_baseline = utility.generateRunName(header.run_name_baseline_keyword, "resnet34", header.config_baseline["seed"])
+
+    if header.run_name_baseline == "":
+        logger.log_fatal("Missing run name. Quit.")
+        exit(-1)
+
+    header.config_baseline["file_name_checkpoint"] = header.run_name_baseline + ".tar"
+    header.config_baseline["file_name_checkpoint_best"] = header.run_name_baseline + ".best.tar"
+    header.config_baseline["run_name"] = header.run_name_baseline
+
+    return
+
+def processArguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.", required = True)
+    parser.add_argument("-s", "--seed", type = int, default = 42, help = "Random seed.")
+    arguments = parser.parse_args()
+
+    initializeRunName(arguments.run_name)
+    header.config_baseline["seed"] = arguments.seed
+
+    logger.log_trace("Run name: \"" + header.run_name_baseline + "\".")
+    logger.log_trace("Random seed: " + str(header.config_baseline["seed"]) + ".")
+
+    return
 
 def test(model_baseline, data_loader, device, batch_step):
     utility.loadCheckpointBest(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint_best"], model_baseline)
@@ -52,7 +86,7 @@ def test(model_baseline, data_loader, device, batch_step):
     return batch_step
 
 def main():
-    argument.processArgumentsTestBaseline()
+    processArguments()
 
     utility.setSeed(header.config_baseline["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
