@@ -6,7 +6,7 @@ composed_save_mpe = True
 composed_spn_on_cpu = True
 counterfactual_implausibility_margin_range = 1e-3
 counterfactual_implausibility_margin_sum = 1e-6
-counterfactual_learning_rate = 1e-2
+counterfactual_learning_rate = 5e-2
 counterfactual_qp_epsilon = 1
 counterfactual_qp_solver = "clarabel"
 counterfactual_save = True
@@ -17,9 +17,9 @@ dir_output_counterfactual = "../output/counterfactual"
 dir_output_mpe = "../output/mpe"
 file_name_counterfactual = "counterfactual.json"
 file_name_mpe = "mpe.json"
-file_path_dataset_config = "../../visat-dataset-tools/configs/" + dataset_prefix + ".json"
+file_path_dataset_config = "../../npc-dataset-utils/configs/npc-dataset-utils/" + dataset_prefix + ".json"
 interpret_delimiter_label = "--"
-interpret_dir_dataset = "../../../datasets/" + dataset_prefix + "-dataset/images/split/original/test"
+interpret_dir_dataset = "../../datasets/" + dataset_prefix + "/splits/instance/test"
 interpret_label_width_attribute = 200
 interpret_label_width_original = 350
 interpret_mpe = False
@@ -29,17 +29,15 @@ interpret_viewer_height = 300
 interpret_viewer_width = 300
 log_level = type.LogLevel.debug
 model_head_hidden_size = 128
-project_name = "visat-models"
+project_name = "npc-models"
 run_mode = "disabled"
 run_name_baseline_keyword = "baseline"
 run_name_decomposed_keyword = "decomposed"
 run_name_reference_keyword = "reference"
-run_name_relation_keyword = "relation"
 run_name_spn_keyword = "spn"
 run_name_baseline = ""
 run_name_decomposed = ""
 run_name_reference = ""
-run_name_relation = ""
 run_name_spn = ""
 seed = 42
 show_model_summary = False
@@ -49,9 +47,9 @@ config_baseline = {
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dir_checkpoints": "../checkpoints",
-    "dir_dataset_test": "../../../datasets/" + dataset_prefix + "-dataset/images/split/original/test",
-    "dir_dataset_train": "../../../datasets/" + dataset_prefix + "-dataset/images/split/original/train",
-    "dir_dataset_validation": "../../../datasets/" + dataset_prefix + "-dataset/images/split/original/validate",
+    "dir_dataset_test": "../../datasets/" + dataset_prefix + "/splits/instances/test",
+    "dir_dataset_train": ".../../datasets/" + dataset_prefix + "/splits/instances/train",
+    "dir_dataset_validation": "../../datasets/" + dataset_prefix + "/splits/instances/validate",
     "epochs": 150,
     "file_name_checkpoint": run_name_baseline + ".tar",
     "file_name_checkpoint_best": run_name_baseline + ".best.tar",
@@ -82,9 +80,9 @@ config_decomposed = {
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dir_checkpoints": "../checkpoints",
-    "dir_dataset_test": "../../../datasets/" + dataset_prefix + "-dataset/images/split/original/test",
-    "dir_dataset_train": "../../../datasets/" + dataset_prefix + "-dataset/images/split/original/train",
-    "dir_dataset_validation": "../../../datasets/" + dataset_prefix + "-dataset/images/split/original/validate",
+    "dir_dataset_test": "../../datasets/" + dataset_prefix + "/splits/instances/test",
+    "dir_dataset_train": "../../datasets/" + dataset_prefix + "/splits/instances/train",
+    "dir_dataset_validation": "../../datasets/" + dataset_prefix + "/splits/instances/validate",
     "epochs": 150,
     "file_name_checkpoint": run_name_decomposed + ".tar",
     "file_name_checkpoint_best": run_name_decomposed + ".best.tar",
@@ -117,9 +115,9 @@ config_reference = {
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dir_checkpoints": "../checkpoints",
-    "dir_dataset_test": "../../../datasets/" + dataset_prefix + "-dataset/images/split/original/test",
-    "dir_dataset_train": "../../../datasets/" + dataset_prefix + "-dataset/images/split/original/train",
-    "dir_dataset_validation": "../../../datasets/" + dataset_prefix + "-dataset/images/split/original/validate",
+    "dir_dataset_test": "../../datasets/" + dataset_prefix + "/splits/instances/test",
+    "dir_dataset_train": "../../datasets/" + dataset_prefix + "/splits/instances/train",
+    "dir_dataset_validation": "../../datasets/" + dataset_prefix + "/splits/instances/validate",
     "epochs": 150,
     "file_name_checkpoint": run_name_reference + ".tar",
     "file_name_checkpoint_best": run_name_reference + ".best.tar",
@@ -142,11 +140,11 @@ config_reference = {
 config_spn = {
     "dir_checkpoints": "../checkpoints",
     "epochs": 50,
-    "dir_dataset_test": "../../../datasets/" + dataset_prefix + "-dataset/images/split/original/test",
-    "dir_dataset_train": "../../../datasets/" + dataset_prefix + "-dataset/images/split/original/train",
-    "dir_dataset_validation": "../../../datasets/" + dataset_prefix + "-dataset/images/split/original/validate",
+    "dir_dataset_test": "../../datasets/" + dataset_prefix + "/splits/instances/test",
+    "dir_dataset_train": "../../datasets/" + dataset_prefix + "/splits/instances/train",
+    "dir_dataset_validation": "../../datasets/" + dataset_prefix + "/splits/instances/validate",
     "file_path_spn": "../../learnspn/output/learnspn/" + dataset_prefix + ".spn.txt",
-    "file_path_dataset_test_txt": "../../../datasets/" + dataset_prefix + "-dataset/images/split/spn/test.txt",
+    "file_path_dataset_test_txt": "../../datasets/" + dataset_prefix + "/splits/pc/test.txt",
     "file_name_checkpoint": run_name_spn + ".tar",
     "file_name_checkpoint_best": run_name_spn + ".best.tar",
     "fine_tuning": False,
