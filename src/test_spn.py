@@ -1,12 +1,54 @@
 #!/usr/bin/env python3
 
-import argument
+import argparse
 import header
 import logger
 import spn
 import torch
 import utility
 import wandb
+
+def initializeRunName(run_name = ""):
+    if run_name != "":
+        if run_name.split(".")[1] != header.run_name_spn_keyword:
+            logger.log_fatal("Invalid run name. Quit.")
+            exit(-1)
+
+        header.run_name_spn = run_name
+    else:
+        header.run_name_spn = utility.generateRunName(header.run_name_spn_keyword, "cccp", header.config_spn["seed"])
+
+    if header.run_name_spn == "":
+        logger.log_fatal("Missing run name. Quit.")
+        exit(-1)
+
+    header.config_spn["file_name_checkpoint"] = header.run_name_spn + ".tar"
+    header.config_spn["file_name_checkpoint_best"] = header.run_name_spn + ".best.tar"
+    header.config_spn["run_name"] = header.run_name_spn
+
+    return
+
+def processArguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.")
+    parser.add_argument("-s", "--seed", type = int, default = 42, help = "Random seed.")
+    arguments = parser.parse_args()
+
+    if arguments.run_name == "":
+        logger.log_info("Proceeding without run name.")
+        header.run_name_spn == ""
+        header.config_spn["file_name_checkpoint"] = ""
+        header.config_spn["file_name_checkpoint_best"] = ""
+        header.config_spn["run_name"] = ""
+    else:
+        initializeRunName(arguments.run_name)
+
+    header.config_spn["seed"] = arguments.seed
+
+    logger.log_trace("Run name: \"" + header.run_name_spn + "\".")
+    logger.log_trace("Random seed: " + str(header.config_spn["seed"]) + ".")
+
+    return
 
 def loadDataset(file_path_dataset, device):
     dataset = []
@@ -39,7 +81,7 @@ def test(spn_joint, settings_joint):
     return
 
 def main():
-    argument.processArgumentsTestSPN()
+    processArguments()
 
     utility.setSeed(header.config_spn["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32

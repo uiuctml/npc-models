@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import argument
+import argparse
 import header
 import logger
 import spn
@@ -9,6 +9,23 @@ import torch
 import tqdm
 import utility
 import wandb
+
+def processArguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-e", "--epochs", type = int, default = 50, help = "Number of training epochs.")
+    parser.add_argument("-s", "--seed", type = int, default = 42, help = "Random seed.")
+    arguments = parser.parse_args()
+
+    header.config_spn["epochs"] = arguments.epochs
+    header.config_spn["seed"] = arguments.seed
+
+    test_spn.initializeRunName()
+
+    logger.log_trace("Run name: \"" + header.run_name_spn + "\".")
+    logger.log_trace("Epochs: " + str(header.config_spn["epochs"]) + ".")
+    logger.log_trace("Random seed: " + str(header.config_spn["seed"]) + ".")
+
+    return
 
 def train(spn_joint, settings_joint, optimizer):
     log_likelihoods = spn_joint(settings_joint)
@@ -31,7 +48,7 @@ def validate(spn_joint, settings_joint):
     return log_likelihood
 
 def main():
-    argument.processArgumentsTrainSPN()
+    processArguments()
 
     utility.setSeed(header.config_spn["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
@@ -62,10 +79,7 @@ def main():
     spn_marginal.load(header.config_spn["file_path_spn"])
     optimizer.set_weights_prior(spn_joint.get_weights())
 
-    if header.config_spn["fine_tuning"]:
-        utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["model_pretrained_weights"])
-        utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["model_pretrained_weights"])
-    elif header.config_spn["randomize_weights"]:
+    if header.config_spn["randomize_weights"]:
         logger.log_info("Randomizing SPN weights...")
         spn_joint.randomize_weights()
         spn_marginal.set_weights(spn_joint.get_weights())
