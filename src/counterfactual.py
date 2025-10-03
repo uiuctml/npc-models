@@ -219,7 +219,7 @@ def main():
         logger.log_info("Computing SPNs on CPU.")
         device_spn = torch.device("cpu")
 
-    model_decomposed = model.createModelDecomposed(device)
+    model_decomposed = model.ResNet34MTL(dataset_test.config, device)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
     spn_joint = spn.SPN(device_spn)

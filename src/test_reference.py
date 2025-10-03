@@ -143,7 +143,7 @@ def main():
     dataset_test = dataset.NPCDataset(header.config_reference["dir_dataset_test"], dataset_transforms)
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_reference["data_loader_batch_size"], shuffle = False, num_workers = header.config_reference["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
-    model_reference = model.createModelReference(device)
+    model_reference = model.createModelReference(dataset_test.config, device)
     model_reference = torch.nn.DataParallel(model_reference)
     model_reference = model_reference.to(device)
 

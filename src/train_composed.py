@@ -191,7 +191,7 @@ def main():
         device_spn = torch.device("cpu")
 
     epoch = 1
-    model_decomposed = model.createModelDecomposed(device)
+    model_decomposed = model.ResNet34MTL(dataset_test.config, device)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
     progress_bar = None
