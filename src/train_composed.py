@@ -194,29 +194,12 @@ def main():
     model_decomposed = model.createModelDecomposed(device)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
-    normalize = False
     progress_bar = None
     spn_joint = spn.SPN(device_spn)
     spn_marginal = spn.SPN(device_spn)
     optimizer_decomposed = torch.optim.SGD(model_decomposed.parameters(), lr = header.config_decomposed["optimizer_learning_rate"], momentum = header.config_decomposed["optimizer_momentum"], weight_decay = header.config_decomposed["optimizer_weight_decay"])
-    optimizer_spn = None
+    optimizer_spn = optimizer_spn = spn.PGDDiscriminativeSPNOptimizer(spn_joint, spn_marginal, device_spn, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_decomposed, header.config_decomposed["learning_rate_scheduler_mode"], header.config_decomposed["learning_rate_scheduler_factor"], header.config_decomposed["learning_rate_scheduler_patience"], header.config_decomposed["learning_rate_scheduler_threshold"], header.config_decomposed["learning_rate_scheduler_threshold_mode"], header.config_decomposed["learning_rate_scheduler_cooldown"], header.config_decomposed["learning_rate_scheduler_min_learning_rate"], header.config_decomposed["learning_rate_scheduler_min_learning_rate_decay"])
-    learning_rate_scheduler_spn = None
-
-    if header.config_spn["optimizer"] == type.OptimizerSPN.cccp_generative.name:
-        optimizer_spn = spn.CCCPGenerativeSPNOptimizer(spn_joint, spn_marginal, device_spn)
-    elif header.config_spn["optimizer"] == type.OptimizerSPN.ebw_discriminative.name:
-        optimizer_spn = spn.EBWDiscriminativeSPNOptimizer(spn_joint, spn_marginal, device_spn, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"], header.config_spn["growth_threshold"])
-    elif header.config_spn["optimizer"] == type.OptimizerSPN.pgd_discriminative.name:
-        optimizer_spn = spn.PGDDiscriminativeSPNOptimizer(spn_joint, spn_marginal, device_spn, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
-        normalize = True
-    elif header.config_spn["optimizer"] == type.OptimizerSPN.pgd_generative.name:
-        optimizer_spn = spn.PGDGenerativeSPNOptimizer(spn_joint, spn_marginal, device_spn, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
-        normalize = True
-    else:
-        logger.log_fatal("Unknown SPN optimizer \"" + header.config_spn["optimizer"] + "\".")
-        exit(-1)
-
     learning_rate_scheduler_spn = spn.LossSPNLearningRateScheduler(optimizer_spn, header.config_spn["learning_rate_scheduler_factor"], header.config_spn["learning_rate_scheduler_patience"], header.config_spn["learning_rate_scheduler_threshold"], header.config_spn["learning_rate_scheduler_cooldown"], header.config_spn["learning_rate_scheduler_min_learning_rate"])
 
     logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
@@ -299,7 +282,7 @@ def main():
     logger.log_info("Best validation task accuracy: " + str(accuracy_task_validation_best) + ".")
     wandb.summary["validation/epoch/accuracy_task_best"] = accuracy_task_validation_best
 
-    if normalize and not header.config_spn["joint_inference_only"]:
+    if not header.config_spn["joint_inference_only"]:
         settings_marginal = torch.full((1, spn_settings_joint.shape[1]), -1).to(device)
         logger.log_info("Normalizing SPN weights...")
 
