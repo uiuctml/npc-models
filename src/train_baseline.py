@@ -105,7 +105,7 @@ def validate(model_baseline, data_loader, criterion, device, batch_step):
     return (accuracy_task_epoch, loss_epoch, batch_step)
 
 def main():
-    resume = argument.processArgumentsTrainBaseline()
+    argument.processArgumentsTrainBaseline()
 
     utility.setSeed(header.config_baseline["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
@@ -113,7 +113,7 @@ def main():
     if header.run_mode == "online":
         wandb.login()
 
-    wandb.init(project = header.project_name, name = header.run_name_baseline, config = header.config_baseline, resume = resume, mode = header.run_mode)
+    wandb.init(project = header.project_name, name = header.run_name_baseline, config = header.config_baseline, mode = header.run_mode)
 
     utility.wAndBDefineMetrics()
 
@@ -139,8 +139,6 @@ def main():
     optimizer = torch.optim.SGD(model_baseline.module.get_parameters(), lr = header.config_baseline["optimizer_learning_rate"], momentum = header.config_baseline["optimizer_momentum"], weight_decay = header.config_baseline["optimizer_weight_decay"])
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.config_baseline["learning_rate_scheduler_mode"], header.config_baseline["learning_rate_scheduler_factor"], header.config_baseline["learning_rate_scheduler_patience"], header.config_baseline["learning_rate_scheduler_threshold"], header.config_baseline["learning_rate_scheduler_threshold_mode"], header.config_baseline["learning_rate_scheduler_cooldown"], header.config_baseline["learning_rate_scheduler_min_learning_rate"], header.config_baseline["learning_rate_scheduler_min_learning_rate_decay"])
     progress_bar = None
-
-    (accuracy_task_validation_best, batch_step_train, batch_step_validate, [criterion], epoch) = utility.loadCheckpoint(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint"], accuracy_task_validation_best, batch_step_train, batch_step_validate, [criterion], epoch, [learning_rate_scheduler], model_baseline, [optimizer])
 
     if header.show_model_summary:
         model_input_size = (header.config_baseline["model_input_channels"], header.config_baseline["model_input_height"], header.config_baseline["model_input_width"])

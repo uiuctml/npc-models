@@ -162,7 +162,7 @@ def main():
     if header.run_mode == "online":
         wandb.login()
 
-    wandb.init(project = header.project_name, name = header.run_name_reference, config = header.config_reference, resume = False, mode = header.run_mode)
+    wandb.init(project = header.project_name, name = header.run_name_reference, config = header.config_reference, mode = header.run_mode)
     utility.wAndBDefineMetrics()
     logger.log_info("Started run \"" + header.run_name_reference + "\".")
 

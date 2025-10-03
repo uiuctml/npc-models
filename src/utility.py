@@ -168,45 +168,6 @@ def generateSPNSettings(config_dataset, device):
 
     return spn_settings
 
-def loadCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch, learning_rate_schedulers, model, optimizers):
-    if wandb.run.resumed:
-        if not os.path.isdir(dir_checkpoints):
-            os.makedirs(dir_checkpoints, exist_ok = True)
-
-        try:
-            wandb.restore(file_name_checkpoint, root = dir_checkpoints)
-        except:
-            pass
-        else:
-            logger.log_info("Restored checkpoint \"" + file_name_checkpoint + "\" from Weights & Biases.")
-
-        file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
-
-        if os.path.isfile(file_path_checkpoint):
-            checkpoint = torch.load(file_path_checkpoint)
-            accuracy_validation_best = checkpoint["accuracy_validation_best"]
-            batch_step_train = checkpoint["batch_step_train"]
-            batch_step_validate = checkpoint["batch_step_validate"]
-            criterions = checkpoint["criterions"]
-            epoch = checkpoint["epoch"]
-            model.load_state_dict(checkpoint["model_state_dict"])
-
-            for (learning_rate_scheduler, learning_rate_scheduler_state_dict) in zip(learning_rate_schedulers, checkpoint["learning_rate_scheduler_state_dict_list"]):
-                learning_rate_scheduler.load_state_dict(learning_rate_scheduler_state_dict)
-
-                if (isinstance(learning_rate_scheduler, torch.optim.lr_scheduler.CosineAnnealingLR) or isinstance(learning_rate_scheduler, torch.optim.lr_scheduler.CosineAnnealingWarmRestarts)):
-                    learning_rate_scheduler.last_epoch = epoch
-
-            for (optimizer, optimizer_state_dict) in zip(optimizers, checkpoint["optimizer_state_dict_list"]):
-                optimizer.load_state_dict(optimizer_state_dict)
-
-            logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
-        else:
-            logger.log_fatal("Checkpoint file \"" + file_name_checkpoint + "\" missing.")
-            exit(-1)
-
-    return (accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch)
-
 def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
     if not os.path.isdir(dir_checkpoints):
         os.makedirs(dir_checkpoints, exist_ok = True)
@@ -248,35 +209,6 @@ def loadCheckpointBestSPN(spn, dir_checkpoints, file_name_checkpoint):
         exit(-1)
 
     return
-
-def loadCheckpointSPN(spn, dir_checkpoints, file_name_checkpoint, log_likelihood_best, log_likelihood_train_last, epoch):
-    if wandb.run.resumed:
-        if not os.path.isdir(dir_checkpoints):
-            logger.log_fatal("Checkpoint directory \"" + dir_checkpoints + "\" missing.")
-            exit(-1)
-
-        try:
-            wandb.restore(file_name_checkpoint, root = dir_checkpoints)
-        except:
-            pass
-        else:
-            logger.log_info("Restored checkpoint \"" + file_name_checkpoint + "\" from Weights & Biases.")
-
-        file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
-
-        if os.path.isfile(file_path_checkpoint):
-            checkpoint = torch.load(file_path_checkpoint)
-            epoch = checkpoint["epoch"]
-            log_likelihood_best = checkpoint["log_likelihood_best"]
-            log_likelihood_train_last = checkpoint["log_likelihood_train_last"]
-            spn.set_weights(checkpoint["weights"])
-
-            logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
-        else:
-            logger.log_fatal("Checkpoint file \"" + file_name_checkpoint + "\" missing.")
-            exit(-1)
-
-    return (log_likelihood_best, log_likelihood_train_last, epoch)
 
 def saveCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch, learning_rate_schedulers, model, optimizers):
     if not os.path.isdir(dir_checkpoints):

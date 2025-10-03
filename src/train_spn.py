@@ -31,12 +31,12 @@ def validate(spn_joint, settings_joint):
     return log_likelihood
 
 def main():
-    resume = argument.processArgumentsTrainSPN()
+    argument.processArgumentsTrainSPN()
 
     utility.setSeed(header.config_spn["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
 
-    wandb.init(project = header.project_name, name = header.run_name_spn, config = header.config_spn, resume = resume, mode = header.run_mode)
+    wandb.init(project = header.project_name, name = header.run_name_spn, config = header.config_spn, mode = header.run_mode)
 
     utility.wAndBDefineMetrics()
 
@@ -61,9 +61,6 @@ def main():
     spn_joint.load(header.config_spn["file_path_spn"])
     spn_marginal.load(header.config_spn["file_path_spn"])
     optimizer.set_weights_prior(spn_joint.get_weights())
-
-    (log_likelihood_validation_best, log_likelihood_train_epoch_last, epoch) = utility.loadCheckpointSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], log_likelihood_validation_best, log_likelihood_train_epoch_last, epoch)
-    log_likelihood_train_epoch = log_likelihood_train_epoch_last
 
     if header.config_spn["fine_tuning"]:
         utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["model_pretrained_weights"])

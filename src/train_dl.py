@@ -118,7 +118,7 @@ def validate(model_decomposed, data_loader, criterions, device, batch_step):
     return (accuracy_attribute_epoch, loss_epoch, batch_step)
 
 def main():
-    resume = argument.processArgumentsTrainDecomposed()
+    argument.processArgumentsTrainDecomposed()
 
     utility.setSeed(header.config_decomposed["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
@@ -126,7 +126,7 @@ def main():
     if header.run_mode == "online":
         wandb.login()
 
-    wandb.init(project = header.project_name, name = header.run_name_decomposed, config = header.config_decomposed, resume = resume, mode = header.run_mode)
+    wandb.init(project = header.project_name, name = header.run_name_decomposed, config = header.config_decomposed, mode = header.run_mode)
     utility.wAndBDefineMetrics()
     logger.log_info("Started run \"" + header.run_name_decomposed + "\".")
 
@@ -154,8 +154,6 @@ def main():
 
     for _ in config_dataset["attributes"]:
         criterions.append(torch.nn.CrossEntropyLoss())
-
-    (accuracy_attribute_validation_best, batch_step_train, batch_step_validate, criterions, epoch) = utility.loadCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_attribute_validation_best, batch_step_train, batch_step_validate, criterions, epoch, [learning_rate_scheduler], model_decomposed, [optimizer])
 
     if header.show_model_summary:
         model_input_size = (header.config_decomposed["model_input_channels"], header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])
