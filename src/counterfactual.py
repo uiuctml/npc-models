@@ -12,7 +12,7 @@ import torch
 import tqdm
 import utility
 
-def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
+def computeCounterfactualPGD(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
     batch_size = labels_original.nelement()
     outputs_decomposed = []
     outputs_decomposed_original = utility.applySoftmaxDecomposed(outputs_decomposed_original)
@@ -91,7 +91,7 @@ def counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn
 
     progress_bar.close()
 
-    return (outputs_decomposed, None, None, None, None)
+    return outputs_decomposed
 
 def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_step):
     utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
@@ -106,12 +106,8 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
     correctness_task_epoch = 0
     instance_count_corrected = 0
     instance_count_incorrect = 0
-    instance_count_qp_epsilon_violated = None
-    instance_count_qp_no_solution = 0
-    instance_count_total = 0
     tv_distance_epoch = 0
     tv_distances_epoch = []
-    value_count_implausible = None
 
     config_dataset = data_loader.dataset.config
     counterfactuals = {}
@@ -138,25 +134,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed_original)
 
         with torch.set_grad_enabled(True):
-            (outputs_decomposed_counterfactual, instance_count_batch_qp_epsilon_violated, instance_count_batch_qp_no_solution, instance_count_batch_total, value_count_batch_implausible) = counterfactual_pgd(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device)
-
-        if instance_count_batch_qp_epsilon_violated is not None:
-            if instance_count_qp_epsilon_violated is None:
-                instance_count_qp_epsilon_violated = 0
-
-            instance_count_qp_epsilon_violated += instance_count_batch_qp_epsilon_violated
-
-        if instance_count_batch_qp_no_solution is not None:
-            instance_count_qp_no_solution += instance_count_batch_qp_no_solution
-
-        if instance_count_batch_total is not None:
-            instance_count_total += instance_count_batch_total
-
-        if value_count_batch_implausible is not None:
-            if value_count_implausible is None:
-                value_count_implausible = 0
-
-            value_count_implausible += value_count_batch_implausible
+            outputs_decomposed_counterfactual = computeCounterfactualPGD(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device)
 
         (_, _, outputs_composed) = utility.compose(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
         (_, _, outputs_composed_counterfactual) = utility.compose(outputs_decomposed_counterfactual, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
@@ -205,15 +183,6 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
         logger.log_info("Correction rate: " + str(instance_count_corrected / instance_count_incorrect) + ".")
     else:
         logger.log_info("Correction rate: N/A.")
-
-    if instance_count_total != 0:
-        logger.log_info("QP solution rate: " + str((instance_count_total - instance_count_qp_no_solution) / instance_count_total) + ".")
-
-    if instance_count_qp_epsilon_violated is not None:
-        logger.log_info("Number of epsilon violations: " + str(instance_count_qp_epsilon_violated) + ".")
-
-    if value_count_implausible is not None:
-        logger.log_info("Number of implausible values: " + str(value_count_implausible) + ".")
 
     logger.log_info("Counterfactual attribute TV distance: " + str(tv_distance_epoch) + ".")
     logger.log_info("Counterfactual attribute correctness: " + str(correctness_attribute_epoch) + ".")
