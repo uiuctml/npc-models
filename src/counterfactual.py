@@ -209,7 +209,7 @@ def main():
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
 
     dataset_transforms = utility.createTransform(header.config_decomposed)
-    dataset_test = dataset.VISATDataset(header.config_decomposed["dir_dataset_test"], dataset_transforms)
+    dataset_test = dataset.NPCDataset(header.config_decomposed["dir_dataset_test"], dataset_transforms)
     config_dataset = dataset_test.config
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")

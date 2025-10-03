@@ -6,7 +6,7 @@ import PIL.Image
 import torch
 import utility
 
-class VISATDataset(torch.utils.data.Dataset):
+class NPCDataset(torch.utils.data.Dataset):
     def __init__(self, root, transform = None):
         self.class_to_idx = []
         self.class_to_idx_original = {}
