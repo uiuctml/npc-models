@@ -2,4 +2,4 @@
 
 cd ../src
 
-./test_composed.py -rd "decomposed.vit_b_32_mtl.ft.42.2024.10.24.19.12.newton" -rs "spn.cccp_generative.nft.42.2024.10.24.18.12.Aurora-R11" -s 42
+./test_composed.py -rd "decomposed.resnet34_mtl.ft.42.2024.12.13.16.41.Aurora-R11" -rs "spn.pgd_discriminative.ft.42.2024.12.13.16.41.Aurora-R11" -s 42

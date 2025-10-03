@@ -48,7 +48,7 @@ config_baseline = {
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dir_checkpoints": "../checkpoints",
     "dir_dataset_test": "../../datasets/" + dataset_prefix + "/splits/instances/test",
-    "dir_dataset_train": ".../../datasets/" + dataset_prefix + "/splits/instances/train",
+    "dir_dataset_train": "../../datasets/" + dataset_prefix + "/splits/instances/train",
     "dir_dataset_validation": "../../datasets/" + dataset_prefix + "/splits/instances/validate",
     "epochs": 150,
     "file_name_checkpoint": run_name_baseline + ".tar",

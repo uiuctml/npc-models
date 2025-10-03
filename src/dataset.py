@@ -20,7 +20,7 @@ class NPCDataset(torch.utils.data.Dataset):
         self.transform = transform
 
         if not os.path.isdir(root):
-            logger.log_error("Invalid dataset directory.")
+            logger.log_error("Invalid dataset directory \"" + root + "\".")
             exit(-1)
 
         logger.log_info("Loading dataset \"" + root + "\"...")

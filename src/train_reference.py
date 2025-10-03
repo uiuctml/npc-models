@@ -179,7 +179,7 @@ def main():
     data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_reference["data_loader_batch_size"], shuffle = header.config_reference["data_loader_shuffle"], num_workers = header.config_reference["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     epoch = 1
-    model_reference = model.createModelReference(device)
+    model_reference = model.createModelReference(dataset_test.config, device)
     model_reference = torch.nn.DataParallel(model_reference)
     model_reference = model_reference.to(device)
     optimizer = torch.optim.SGD(model_reference.module.get_parameters(), lr = header.config_reference["optimizer_learning_rate"], momentum = header.config_reference["optimizer_momentum"], weight_decay = header.config_reference["optimizer_weight_decay"])
