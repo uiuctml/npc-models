@@ -31,7 +31,7 @@ def initializeRunName(run_name = ""):
 def processArguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.")
-    parser.add_argument("-s", "--seed", type = int, default = 42, help = "Random seed.")
+    parser.add_argument("-s", "--seed", type = int, default = None, help = "Random seed.")
     arguments = parser.parse_args()
 
     if arguments.run_name == "":
@@ -43,7 +43,8 @@ def processArguments():
     else:
         initializeRunName(arguments.run_name)
 
-    header.config_spn["seed"] = arguments.seed
+    if arguments.seed is not None:
+        header.config_spn["seed"] = arguments.seed
 
     logger.log_trace("Run name: \"" + header.run_name_spn + "\".")
     logger.log_trace("Random seed: " + str(header.config_spn["seed"]) + ".")

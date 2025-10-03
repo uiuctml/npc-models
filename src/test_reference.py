@@ -35,12 +35,14 @@ def initializeRunName(run_name = ""):
 def processArguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.", required = True)
-    parser.add_argument("-s", "--seed", type = int, default = 42, help = "Random seed.")
+    parser.add_argument("-s", "--seed", type = int, default = None, help = "Random seed.")
     arguments = parser.parse_args()
 
     initializeRunName(arguments.run_name)
     header.config_reference["model"] = header.run_name_reference.split(".")[2]
-    header.config_reference["seed"] = arguments.seed
+
+    if arguments.seed is not None:
+        header.config_reference["seed"] = arguments.seed
 
     logger.log_trace("Run name: \"" + header.run_name_reference + "\".")
     logger.log_trace("Model: \"" + header.config_reference["model"] + "\".")

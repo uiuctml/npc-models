@@ -12,12 +12,15 @@ import wandb
 
 def processArguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--epochs", type = int, default = 50, help = "Epochs.")
-    parser.add_argument("-s", "--seed", type = int, default = 42, help = "Random seed.")
+    parser.add_argument("-e", "--epochs", type = int, default = None, help = "Epochs.")
+    parser.add_argument("-s", "--seed", type = int, default = None, help = "Random seed.")
     arguments = parser.parse_args()
 
-    header.config_spn["epochs"] = arguments.epochs
-    header.config_spn["seed"] = arguments.seed
+    if arguments.epochs is not None:
+        header.config_spn["epochs"] = arguments.epochs
+
+    if arguments.seed is not None:
+        header.config_spn["seed"] = arguments.seed
 
     test_spn.initializeRunName()
 

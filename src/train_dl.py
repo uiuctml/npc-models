@@ -27,14 +27,19 @@ def computeLoss(output, labels, criterions):
 
 def processArguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-b", "--batch-size", type = int, default = 512, help = "Batch size.")
-    parser.add_argument("-e", "--epochs", type = int, default = 100, help = "Epochs.")
-    parser.add_argument("-s", "--seed", type = int, default = 42, help = "Random seed.")
+    parser.add_argument("-b", "--batch-size", type = int, default = None, help = "Batch size.")
+    parser.add_argument("-e", "--epochs", type = int, default = None, help = "Epochs.")
+    parser.add_argument("-s", "--seed", type = int, default = None, help = "Random seed.")
     arguments = parser.parse_args()
 
-    header.config_decomposed["data_loader_batch_size"] = arguments.batch_size
-    header.config_decomposed["epochs"] = arguments.epochs
-    header.config_decomposed["seed"] = arguments.seed
+    if arguments.batch_size is not None:
+        header.config_decomposed["data_loader_batch_size"] = arguments.batch_size
+
+    if arguments.epochs is not None:
+        header.config_decomposed["epochs"] = arguments.epochs
+
+    if arguments.seed is not None:
+        header.config_decomposed["seed"] = arguments.seed
 
     test_dl.initializeRunName()
 
