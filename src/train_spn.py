@@ -11,7 +11,7 @@ import utility
 import wandb
 
 def train(spn_joint, settings_joint, optimizer):
-    log_likelihoods = spn_joint(settings_joint, False)
+    log_likelihoods = spn_joint(settings_joint)
 
     spn_joint.backward()
     optimizer.step()
@@ -23,7 +23,7 @@ def train(spn_joint, settings_joint, optimizer):
     return log_likelihood
 
 def validate(spn_joint, settings_joint):
-    log_likelihoods = spn_joint(settings_joint, False)
+    log_likelihoods = spn_joint(settings_joint)
     log_likelihood = torch.log(torch.mean(torch.exp(log_likelihoods))).item()
 
     wandb.log({"validation/epoch/log_likelihood": log_likelihood})
@@ -43,7 +43,7 @@ def main():
     logger.log_info("Started run \"" + header.run_name_spn + "\".")
 
     device = torch.device("cuda")
-    dataset_test = test_spn.loadDatasetTXT(header.config_spn["file_path_dataset_test_txt"], device)
+    dataset_test = test_spn.loadDataset(header.config_spn["dir_dataset_test"], device)
     dataset_train = test_spn.loadDataset(header.config_spn["dir_dataset_train"], device)
     dataset_validation = test_spn.loadDataset(header.config_spn["dir_dataset_validation"], device)
     epoch = 1

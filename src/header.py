@@ -140,11 +140,10 @@ config_reference = {
 config_spn = {
     "dir_checkpoints": "../checkpoints",
     "epochs": 50,
-    "dir_dataset_test": "../../datasets/" + dataset_prefix + "/splits/instances/test",
-    "dir_dataset_train": "../../datasets/" + dataset_prefix + "/splits/instances/train",
-    "dir_dataset_validation": "../../datasets/" + dataset_prefix + "/splits/instances/validate",
+    "dir_dataset_test": "../../datasets/" + dataset_prefix + "/splits/pc/test.txt",
+    "dir_dataset_train": "../../datasets/" + dataset_prefix + "/splits/pc/train.txt",
+    "dir_dataset_validation": "../../datasets/" + dataset_prefix + "/splits/pc/validate.txt",
     "file_path_spn": "../../learnspn/output/learnspn/" + dataset_prefix + ".spn.txt",
-    "file_path_dataset_test_txt": "../../datasets/" + dataset_prefix + "/splits/pc/test.txt",
     "file_name_checkpoint": run_name_spn + ".tar",
     "file_name_checkpoint_best": run_name_spn + ".best.tar",
     "fine_tuning": False,
@@ -165,6 +164,5 @@ config_spn = {
     "run_name": run_name_spn,
     "seed": seed,
     "stopping_criterion": 1e-4,
-    "test_on_txt": True,
     "type": "spn",
 }
