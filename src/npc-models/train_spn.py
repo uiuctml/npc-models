@@ -72,7 +72,7 @@ def main():
     log_likelihood_train_epoch_last = 0
     spn_joint = spn.SPN(device)
     spn_marginal = spn.SPN(device)
-    optimizer = spn.CCCPGenerativeSPNOptimizer(spn_joint, spn_marginal, device)
+    optimizer = spn.CCCPSPNOptimizer(spn_joint, spn_marginal, device)
     progress_bar = None
     learning_rate_scheduler = spn.LikelihoodSPNLearningRateScheduler(optimizer, header.config_spn["learning_rate_scheduler_factor"])
 

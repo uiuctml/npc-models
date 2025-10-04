@@ -104,7 +104,7 @@ class SPNOptimizer:
     def step(self, matrix_a = None, matrix_b = None, matrix_c = None, labels_original = None):
         pass
 
-class CCCPGenerativeSPNOptimizer(SPNOptimizer):
+class CCCPSPNOptimizer(SPNOptimizer):
     def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
         super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold)
 
@@ -137,7 +137,7 @@ class CCCPGenerativeSPNOptimizer(SPNOptimizer):
 
         return
 
-class PGDDiscriminativeSPNOptimizer(SPNOptimizer):
+class PGDSPNOptimizer(SPNOptimizer):
     def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
         super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold)
 
