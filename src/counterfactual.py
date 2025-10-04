@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import argument
 import dataset
 import header
 import json
@@ -8,6 +7,7 @@ import logger
 import model
 import os
 import spn
+import test_composed
 import torch
 import tqdm
 import utility
@@ -245,13 +245,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
     return
 
 def main():
-    argument.processArgumentsTestComposed()
-
-    header.run_name_baseline = header.config_decomposed["run_name"]
-    header.config_baseline["dir_dataset_test"] = header.config_decomposed["dir_dataset_test"]
-    header.config_baseline["file_name_checkpoint"] = header.run_name_decomposed + ".tar"
-    header.config_baseline["file_name_checkpoint_best"] = header.run_name_decomposed + ".best.tar"
-    header.config_baseline["run_name"] = header.run_name_decomposed
+    test_composed.processArguments()
 
     utility.setSeed(header.seed)
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
