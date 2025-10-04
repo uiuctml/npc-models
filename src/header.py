@@ -8,7 +8,6 @@ checkpoint_postfix_best = ".best.zip"
 dataset_prefix = "awa2"
 dataset_config_file_path = "../../npc-dataset-utils/configs/npc-dataset-utils/" + dataset_prefix + ".json"
 log_level = type.LogLevel.debug
-model_head_hidden_size = 128
 project_name = "npc-models"
 run_mode = "disabled"
 
@@ -80,6 +79,7 @@ config_decomposed = {
     "learning_rate_scheduler_min_learning_rate": 0,
     "learning_rate_scheduler_min_learning_rate_decay": 1e-8,
     "learning_rate_scheduler_last_epoch": -1,
+    "model_head_hidden_size": 128,
     "model_input_height": 224,
     "model_input_width": 224,
     "model_input_channels": 3,

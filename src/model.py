@@ -154,8 +154,8 @@ class ResNet34MTL(Model):
             if "" in attribute_labels:
                 attribute_labels.remove("")
 
-            layers_hidden = torch.nn.Sequential(torch.nn.Linear(self.net.fc.in_features, header.model_head_hidden_size), torch.nn.ReLU())
-            layer_final = torch.nn.Linear(header.model_head_hidden_size, len(attribute_labels))
+            layers_hidden = torch.nn.Sequential(torch.nn.Linear(self.net.fc.in_features, header.config_decomposed["model_head_hidden_size"]), torch.nn.ReLU())
+            layer_final = torch.nn.Linear(header.config_decomposed["model_head_hidden_size"], len(attribute_labels))
 
             layer_dict = torch.nn.ModuleDict({"hidden": layers_hidden, "final": layer_final})
             layer_dict_task = torch.nn.ModuleDict({attribute_name: layer_dict})
