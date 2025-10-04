@@ -7,7 +7,7 @@ import logger
 import model
 import os
 import pc
-import test_composed
+import test_npc
 import torch
 import tqdm
 import utility
@@ -247,7 +247,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
     return
 
 def main():
-    test_composed.processArguments()
+    test_npc.processArguments()
 
     utility.setSeed(header.config_decomposed["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32

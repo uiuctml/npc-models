@@ -6,8 +6,8 @@ import header
 import logger
 import model
 import pc
-import test_composed
 import test_neural
+import test_npc
 import test_pc
 import torch
 import tqdm
@@ -327,7 +327,7 @@ def main():
         spn_marginal.set_leaf_nodes_categorical(spn_settings_marginal)
 
     wandb.log({"testing/epoch/step": batch_step_test})
-    test_composed.test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loader_test, device, batch_step_test)
+    test_npc.test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loader_test, device, batch_step_test)
 
     wandb.finish()
 
