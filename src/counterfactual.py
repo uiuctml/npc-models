@@ -247,7 +247,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
 def main():
     test_composed.processArguments()
 
-    utility.setSeed(header.seed)
+    utility.setSeed(header.config_decomposed["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
 
     dataset_transforms = utility.createTransform(header.config_decomposed)

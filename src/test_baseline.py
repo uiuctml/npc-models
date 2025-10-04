@@ -16,17 +16,16 @@ def initializeRunName(run_name = ""):
             logger.log_fatal("Invalid baseline run name. Quit.")
             exit(-1)
 
-        header.run_name_baseline = run_name
+        header.config_baseline["run_name"] = run_name
     else:
-        header.run_name_baseline = utility.generateRunName(header.config_baseline["type"], "resnet34", header.config_baseline["seed"])
+        header.config_baseline["run_name"] = utility.generateRunName(header.config_baseline["type"], "resnet34", header.config_baseline["seed"])
 
-    if header.run_name_baseline == "":
+    if header.config_baseline["run_name"] == "":
         logger.log_fatal("Missing baseline run name. Quit.")
         exit(-1)
 
-    header.config_baseline["file_name_checkpoint"] = header.run_name_baseline + ".tar"
-    header.config_baseline["file_name_checkpoint_best"] = header.run_name_baseline + ".best.tar"
-    header.config_baseline["run_name"] = header.run_name_baseline
+    header.config_baseline["file_name_checkpoint"] = header.config_baseline["run_name"] + header.checkpoint_postfix
+    header.config_baseline["file_name_checkpoint_best"] = header.config_baseline["run_name"] + header.checkpoint_postfix_best
 
     return
 
@@ -41,7 +40,7 @@ def processArguments():
     if arguments.seed is not None:
         header.config_baseline["seed"] = arguments.seed
 
-    logger.log_trace("Run name: \"" + header.run_name_baseline + "\".")
+    logger.log_trace("Run name: \"" + header.config_baseline["run_name"] + "\".")
     logger.log_trace("Random seed: " + str(header.config_baseline["seed"]) + ".")
 
     return

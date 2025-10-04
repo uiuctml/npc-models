@@ -29,7 +29,7 @@ def processArguments():
 
     test_baseline.initializeRunName()
 
-    logger.log_trace("Run name: \"" + header.run_name_baseline + "\".")
+    logger.log_trace("Run name: \"" + header.config_baseline["run_name"] + "\".")
     logger.log_trace("Batch size: " + str(header.config_baseline["batch_size"]) + ".")
     logger.log_trace("Epochs: " + str(header.config_baseline["epochs"]) + ".")
     logger.log_trace("Random seed: " + str(header.config_baseline["seed"]) + ".")
@@ -137,11 +137,11 @@ def main():
     if header.run_mode == "online":
         wandb.login()
 
-    wandb.init(project = header.project_name, name = header.run_name_baseline, config = header.config_baseline, mode = header.run_mode)
+    wandb.init(project = header.project_name, name = header.config_baseline["run_name"], config = header.config_baseline, mode = header.run_mode)
 
     utility.defineMetrics()
 
-    logger.log_info("Started run \"" + header.run_name_baseline + "\".")
+    logger.log_info("Started run \"" + header.config_baseline["run_name"] + "\".")
 
     accuracy_task_validation_best = 0
     batch_step_test = 1

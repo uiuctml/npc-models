@@ -18,17 +18,16 @@ def initializeRunName(run_name = ""):
             logger.log_fatal("Invalid reference run name. Quit.")
             exit(-1)
 
-        header.run_name_reference = run_name
+        header.config_reference["run_name"] = run_name
     else:
-        header.run_name_reference = utility.generateRunName(header.config_reference["type"], header.config_reference["model"], header.config_reference["seed"])
+        header.config_reference["run_name"] = utility.generateRunName(header.config_reference["type"], header.config_reference["model"], header.config_reference["seed"])
 
-    if header.run_name_reference == "":
+    if header.config_reference["run_name"] == "":
         logger.log_fatal("Missing reference run name. Quit.")
         exit(-1)
 
-    header.config_reference["file_name_checkpoint"] = header.run_name_reference + ".tar"
-    header.config_reference["file_name_checkpoint_best"] = header.run_name_reference + ".best.tar"
-    header.config_reference["run_name"] = header.run_name_reference
+    header.config_reference["file_name_checkpoint"] = header.config_reference["run_name"] + header.checkpoint_postfix
+    header.config_reference["file_name_checkpoint_best"] = header.config_reference["run_name"] + header.checkpoint_postfix_best
 
     return
 
@@ -39,12 +38,12 @@ def processArguments():
     arguments = parser.parse_args()
 
     initializeRunName(arguments.run_name)
-    header.config_reference["model"] = header.run_name_reference.split(".")[2]
+    header.config_reference["model"] = header.config_reference["run_name"].split(".")[2]
 
     if arguments.seed is not None:
         header.config_reference["seed"] = arguments.seed
 
-    logger.log_trace("Run name: \"" + header.run_name_reference + "\".")
+    logger.log_trace("Run name: \"" + header.config_reference["run_name"] + "\".")
     logger.log_trace("Model: \"" + header.config_reference["model"] + "\".")
     logger.log_trace("Random seed: " + str(header.config_reference["seed"]) + ".")
 

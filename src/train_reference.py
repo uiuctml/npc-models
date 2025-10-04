@@ -35,7 +35,7 @@ def processArguments():
 
     test_reference.initializeRunName()
 
-    logger.log_trace("Run name: \"" + header.run_name_reference + "\".")
+    logger.log_trace("Run name: \"" + header.config_reference["run_name"] + "\".")
     logger.log_trace("Model: \"" + header.config_reference["model"] + "\".")
     logger.log_trace("Batch size: " + str(header.config_reference["batch_size"]) + ".")
     logger.log_trace("Epochs: " + str(header.config_reference["epochs"]) + ".")
@@ -192,9 +192,9 @@ def main():
     if header.run_mode == "online":
         wandb.login()
 
-    wandb.init(project = header.project_name, name = header.run_name_reference, config = header.config_reference, mode = header.run_mode)
+    wandb.init(project = header.project_name, name = header.config_reference["run_name"], config = header.config_reference, mode = header.run_mode)
     utility.defineMetrics()
-    logger.log_info("Started run \"" + header.run_name_reference + "\".")
+    logger.log_info("Started run \"" + header.config_reference["run_name"] + "\".")
 
     accuracy_task_validation_best = 0
     batch_step_test = 1

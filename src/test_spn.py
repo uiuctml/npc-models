@@ -14,17 +14,16 @@ def initializeRunName(run_name = "", optimizer = "cccp"):
             logger.log_fatal("Invalid PC run name. Quit.")
             exit(-1)
 
-        header.run_name_spn = run_name
+        header.config_spn["run_name"] = run_name
     else:
-        header.run_name_spn = utility.generateRunName(header.config_spn["type"], optimizer, header.config_spn["seed"])
+        header.config_spn["run_name"] = utility.generateRunName(header.config_spn["type"], optimizer, header.config_spn["seed"])
 
-    if header.run_name_spn == "":
+    if header.config_spn["run_name"] == "":
         logger.log_fatal("Missing PC run name. Quit.")
         exit(-1)
 
-    header.config_spn["file_name_checkpoint"] = header.run_name_spn + ".tar"
-    header.config_spn["file_name_checkpoint_best"] = header.run_name_spn + ".best.tar"
-    header.config_spn["run_name"] = header.run_name_spn
+    header.config_spn["file_name_checkpoint"] = header.config_spn["run_name"] + header.checkpoint_postfix
+    header.config_spn["file_name_checkpoint_best"] = header.config_spn["run_name"] + header.checkpoint_postfix_best
 
     return
 
@@ -36,7 +35,6 @@ def processArguments():
 
     if arguments.run_name == "":
         logger.log_info("Proceeding without run name.")
-        header.run_name_spn == ""
         header.config_spn["file_name_checkpoint"] = ""
         header.config_spn["file_name_checkpoint_best"] = ""
         header.config_spn["run_name"] = ""
@@ -46,7 +44,7 @@ def processArguments():
     if arguments.seed is not None:
         header.config_spn["seed"] = arguments.seed
 
-    logger.log_trace("Run name: \"" + header.run_name_spn + "\".")
+    logger.log_trace("Run name: \"" + header.config_spn["run_name"] + "\".")
     logger.log_trace("Random seed: " + str(header.config_spn["seed"]) + ".")
 
     return

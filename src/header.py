@@ -2,16 +2,15 @@ import multiprocessing
 import type
 
 cuda_allow_tf32 = False
+checkpoint_dir = "../checkpoints"
+checkpoint_postfix = ".zip"
+checkpoint_postfix_best = ".best.zip"
 dataset_prefix = "awa2"
 dataset_config_file_path = "../../npc-dataset-utils/configs/npc-dataset-utils/" + dataset_prefix + ".json"
 log_level = type.LogLevel.debug
 model_head_hidden_size = 128
 project_name = "npc-models"
-seed = 42
-
-checkpoint_dir = "../checkpoints"
-checkpoint_postfix = ".zip"
-checkpoint_postfix_best = ".best.zip"
+run_mode = "disabled"
 
 composed_mpe_dir_output = "../output/mpe"
 composed_mpe_file_name = "mpe.json"
@@ -33,12 +32,6 @@ interpret_preprocess = False
 interpret_viewer_height = 300
 interpret_viewer_width = 300
 
-run_mode = "disabled"
-run_name_baseline = ""
-run_name_decomposed = ""
-run_name_reference = ""
-run_name_spn = ""
-
 config_baseline = {
     "batch_size": 256,
     "data_loader_shuffle": True,
@@ -47,8 +40,8 @@ config_baseline = {
     "dir_dataset_train": "../../datasets/" + dataset_prefix + "/splits/instances/train",
     "dir_dataset_validation": "../../datasets/" + dataset_prefix + "/splits/instances/validate",
     "epochs": 150,
-    "file_name_checkpoint": run_name_baseline + ".tar",
-    "file_name_checkpoint_best": run_name_baseline + ".best.tar",
+    "file_name_checkpoint": "",
+    "file_name_checkpoint_best": "",
     "learning_rate_scheduler_mode": "min",
     "learning_rate_scheduler_factor": 0.1,
     "learning_rate_scheduler_patience": 10,
@@ -63,8 +56,8 @@ config_baseline = {
     "optimizer_learning_rate": 1e-2,
     "optimizer_momentum": 0.9,
     "optimizer_weight_decay": 4e-5,
-    "run_name": run_name_baseline,
-    "seed": seed,
+    "run_name": "",
+    "seed": 42,
     "type": "baseline",
 }
 
@@ -76,8 +69,8 @@ config_decomposed = {
     "dir_dataset_train": "../../datasets/" + dataset_prefix + "/splits/instances/train",
     "dir_dataset_validation": "../../datasets/" + dataset_prefix + "/splits/instances/validate",
     "epochs": 150,
-    "file_name_checkpoint": run_name_decomposed + ".tar",
-    "file_name_checkpoint_best": run_name_decomposed + ".best.tar",
+    "file_name_checkpoint": "",
+    "file_name_checkpoint_best": "",
     "learning_rate_scheduler_mode": "min",
     "learning_rate_scheduler_factor": 0.1,
     "learning_rate_scheduler_patience": 10,
@@ -94,8 +87,8 @@ config_decomposed = {
     "optimizer_learning_rate": 1e-2,
     "optimizer_momentum": 0.9,
     "optimizer_weight_decay": 4e-5,
-    "run_name": run_name_decomposed,
-    "seed": seed,
+    "run_name": "",
+    "seed": 42,
     "type": "decomposed",
 }
 
@@ -108,8 +101,8 @@ config_reference = {
     "dir_dataset_train": "../../datasets/" + dataset_prefix + "/splits/instances/train",
     "dir_dataset_validation": "../../datasets/" + dataset_prefix + "/splits/instances/validate",
     "epochs": 150,
-    "file_name_checkpoint": run_name_reference + ".tar",
-    "file_name_checkpoint_best": run_name_reference + ".best.tar",
+    "file_name_checkpoint": "",
+    "file_name_checkpoint_best": "",
     "learning_rate_scheduler_mode": "min",
     "learning_rate_scheduler_factor": 0.1,
     "learning_rate_scheduler_patience": 10,
@@ -121,8 +114,8 @@ config_reference = {
     "optimizer_learning_rate": 1e-2,
     "optimizer_momentum": 0.9,
     "optimizer_weight_decay": 4e-5,
-    "run_name": run_name_reference,
-    "seed": seed,
+    "run_name": "",
+    "seed": 42,
     "type": "reference",
 }
 
@@ -132,8 +125,8 @@ config_spn = {
     "dir_dataset_validation": "../../datasets/" + dataset_prefix + "/splits/pc/validate.txt",
     "epochs": 50,
     "file_path_spn": "../../learnspn/output/learnspn/" + dataset_prefix + ".spn.txt",
-    "file_name_checkpoint": run_name_spn + ".tar",
-    "file_name_checkpoint_best": run_name_spn + ".best.tar",
+    "file_name_checkpoint": "",
+    "file_name_checkpoint_best": "",
     "epsilon_projection": 1e-2,
     "epsilon_smoothing": 1e-3,
     "growth_threshold": 100,
@@ -147,8 +140,8 @@ config_spn = {
     "optimizer_learning_rate": 1e-1,
     "optimizer_prior_factor": 1e2,
     "randomize_weights": False,
-    "run_name": run_name_spn,
-    "seed": seed,
+    "run_name": "",
+    "seed": 42,
     "stopping_criterion": 1e-4,
     "type": "spn",
 }

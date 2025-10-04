@@ -24,7 +24,7 @@ def processArguments():
 
     test_spn.initializeRunName()
 
-    logger.log_trace("Run name: \"" + header.run_name_spn + "\".")
+    logger.log_trace("Run name: \"" + header.config_spn["run_name"] + "\".")
     logger.log_trace("Epochs: " + str(header.config_spn["epochs"]) + ".")
     logger.log_trace("Random seed: " + str(header.config_spn["seed"]) + ".")
 
@@ -56,11 +56,11 @@ def main():
     utility.setSeed(header.config_spn["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
 
-    wandb.init(project = header.project_name, name = header.run_name_spn, config = header.config_spn, mode = header.run_mode)
+    wandb.init(project = header.project_name, name = header.config_spn["run_name"], config = header.config_spn, mode = header.run_mode)
 
     utility.defineMetrics()
 
-    logger.log_info("Started run \"" + header.run_name_spn + "\".")
+    logger.log_info("Started run \"" + header.config_spn["run_name"] + "\".")
 
     device = torch.device("cuda")
     dataset_test = test_spn.loadDataset(header.config_spn["dir_dataset_test"], device)

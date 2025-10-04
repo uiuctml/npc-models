@@ -66,7 +66,6 @@ def processArguments():
 
     if arguments.run_name_pc == "":
         logger.log_info("Proceeding without PC run name.")
-        header.run_name_spn == ""
         header.config_spn["file_name_checkpoint"] = ""
         header.config_spn["file_name_checkpoint_best"] = ""
         header.config_spn["run_name"] = ""
@@ -77,8 +76,8 @@ def processArguments():
         header.config_decomposed["seed"] = arguments.seed
         header.config_spn["seed"] = arguments.seed
 
-    logger.log_trace("Attribute run name: \"" + header.run_name_decomposed + "\".")
-    logger.log_trace("PC run name: \"" + header.run_name_spn + "\".")
+    logger.log_trace("Attribute run name: \"" + header.config_decomposed["run_name"] + "\".")
+    logger.log_trace("PC run name: \"" + header.config_spn["run_name"] + "\".")
     logger.log_trace("Random seed: " + str(header.config_decomposed["seed"]) + ".")
 
     return
@@ -254,7 +253,7 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
 def main():
     processArguments()
 
-    utility.setSeed(header.seed)
+    utility.setSeed(header.config_decomposed["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
 
     config = {

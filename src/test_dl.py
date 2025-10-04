@@ -16,17 +16,16 @@ def initializeRunName(run_name = ""):
             logger.log_fatal("Invalid attribute run name. Quit.")
             exit(-1)
 
-        header.run_name_decomposed = run_name
+        header.config_decomposed["run_name"] = run_name
     else:
-        header.run_name_decomposed = utility.generateRunName(header.config_decomposed["type"], "resnet34_mtl", header.config_decomposed["seed"])
+        header.config_decomposed["run_name"] = utility.generateRunName(header.config_decomposed["type"], "resnet34_mtl", header.config_decomposed["seed"])
 
-    if header.run_name_decomposed == "":
+    if header.config_decomposed["run_name"] == "":
         logger.log_fatal("Missing attribute run name. Quit.")
         exit(-1)
 
-    header.config_decomposed["file_name_checkpoint"] = header.run_name_decomposed + ".tar"
-    header.config_decomposed["file_name_checkpoint_best"] = header.run_name_decomposed + ".best.tar"
-    header.config_decomposed["run_name"] = header.run_name_decomposed
+    header.config_decomposed["file_name_checkpoint"] = header.config_decomposed["run_name"] + header.checkpoint_postfix
+    header.config_decomposed["file_name_checkpoint_best"] = header.config_decomposed["run_name"] + header.checkpoint_postfix_best
 
     return
 
@@ -41,7 +40,7 @@ def processArguments():
     if arguments.seed is not None:
         header.config_decomposed["seed"] = arguments.seed
 
-    logger.log_trace("Run name: \"" + header.run_name_decomposed + "\".")
+    logger.log_trace("Run name: \"" + header.config_decomposed["run_name"] + "\".")
     logger.log_trace("Random seed: " + str(header.config_decomposed["seed"]) + ".")
 
     return
