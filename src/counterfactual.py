@@ -236,10 +236,10 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
     logger.log_info("Counterfactual attribute correctness: " + str(correctness_attribute_epoch) + ".")
     logger.log_info("Counterfactual task correctness: " + str(correctness_task_epoch) + ".")
 
-    if not os.path.isdir(header.counterfactual_dir_output):
-        os.makedirs(header.counterfactual_dir_output, exist_ok = True)
+    if not os.path.isdir(header.counterfactual_dir_outputs):
+        os.makedirs(header.counterfactual_dir_outputs, exist_ok = True)
 
-    with open(os.path.join(header.counterfactual_dir_output, header.counterfactual_file_name), "w") as file_counterfactual:
+    with open(os.path.join(header.counterfactual_dir_outputs, header.counterfactual_file_name), "w") as file_counterfactual:
         json.dump(counterfactuals, file_counterfactual, indent = 4)
 
     return

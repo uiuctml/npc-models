@@ -202,10 +202,10 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
     progress_bar.close()
 
     if header.composed_mpe_find:
-        if not os.path.isdir(header.composed_mpe_dir_output):
-            os.makedirs(header.composed_mpe_dir_output, exist_ok = True)
+        if not os.path.isdir(header.composed_mpe_dir_outputs):
+            os.makedirs(header.composed_mpe_dir_outputs, exist_ok = True)
 
-        with open(os.path.join(header.composed_mpe_dir_output, header.composed_mpe_file_name), "w") as file_mpe:
+        with open(os.path.join(header.composed_mpe_dir_outputs, header.composed_mpe_file_name), "w") as file_mpe:
             json.dump(mpes, file_mpe, indent = 4)
 
     accuracy_attribute_epoch /= len(data_loader)

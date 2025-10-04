@@ -14,13 +14,13 @@ dataset_dir = os.path.join("../../datasets", dataset_prefix)
 log_level = type.LogLevel.info
 run_mode = "disabled"
 
-composed_mpe_dir_output = os.path.join(dir_outputs, "mpe")
+composed_mpe_dir_outputs = os.path.join(dir_outputs, "mpe")
 composed_mpe_file_name = "mpe.json"
 composed_mpe_find = False
 composed_mpe_save = True
 composed_spn_on_cpu = True
 
-counterfactual_dir_output = os.path.join(dir_outputs, "counterfactual")
+counterfactual_dir_outputs = os.path.join(dir_outputs, "counterfactual")
 counterfactual_file_name = "counterfactual.json"
 counterfactual_learning_rate = 5e-2
 counterfactual_save = True
@@ -125,7 +125,7 @@ config_spn = {
     "file_path_dataset_test": os.path.join(dataset_dir, "splits/pc/test.txt"),
     "file_path_dataset_train": os.path.join(dataset_dir, "splits/pc/train.txt"),
     "file_path_dataset_validation": os.path.join(dataset_dir, "splits/pc/validate.txt"),
-    "file_path_spn": "../../learnspn/output/learnspn/" + dataset_prefix + ".spn.txt",
+    "file_path_spn": "../../learnspn/outputs/learnspn/" + dataset_prefix + ".spn.txt",
     "epsilon_projection": 1e-2,
     "epsilon_smoothing": 1e-3,
     "inference_only": True,
