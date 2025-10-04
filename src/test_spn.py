@@ -88,7 +88,7 @@ def main():
     wandb.init(config = header.config_spn, mode = "disabled")
 
     device = torch.device("cuda")
-    dataset_test = loadDataset(header.config_spn["dir_dataset_test"], device)
+    dataset_test = loadDataset(header.config_spn["file_path_dataset_test"], device)
 
     spn_joint = spn.SPN(device)
 

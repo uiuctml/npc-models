@@ -1,6 +1,8 @@
 # Directories
 .vscode/
 __pycache__/
-checkpoints/
-output/
+outputs/
 wandb/
+
+# Files
+.DS_Store

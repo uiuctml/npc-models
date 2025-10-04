@@ -1,29 +1,32 @@
 import multiprocessing
+import os
 import type
 
-checkpoint_dir = "../checkpoints"
+project_name = "npc-models"
+dir_outputs = os.path.join("../outputs", project_name)
+checkpoint_dir = os.path.join(dir_outputs, "checkpoints")
 checkpoint_postfix = ".zip"
 checkpoint_postfix_best = ".best.zip"
 cuda_allow_tf32 = False
 dataset_prefix = "awa2"
-dataset_config_file_path = "../../npc-dataset-utils/configs/npc-dataset-utils/" + dataset_prefix + ".json"
+dataset_config_file_path = os.path.join("../../npc-dataset-utils/configs/npc-dataset-utils", dataset_prefix + ".json")
+dataset_dir = os.path.join("../../datasets", dataset_prefix)
 log_level = type.LogLevel.info
-project_name = "npc-models"
 run_mode = "disabled"
 
-composed_mpe_dir_output = "../output/mpe"
+composed_mpe_dir_output = os.path.join(dir_outputs, "mpe")
 composed_mpe_file_name = "mpe.json"
 composed_mpe_find = False
 composed_mpe_save = True
 composed_spn_on_cpu = True
 
-counterfactual_dir_output = "../output/counterfactual"
+counterfactual_dir_output = os.path.join(dir_outputs, "counterfactual")
 counterfactual_file_name = "counterfactual.json"
 counterfactual_learning_rate = 5e-2
 counterfactual_save = True
 counterfactual_steps = 100
 
-interpret_dir_dataset = "../../datasets/" + dataset_prefix + "/splits/instances/test"
+interpret_dir_dataset = os.path.join(dataset_dir, "splits/instances/test")
 interpret_label_width_attribute = 200
 interpret_label_width_original = 350
 interpret_mpe = False
@@ -35,9 +38,9 @@ config_baseline = {
     "batch_size": 256,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
-    "dir_dataset_test": "../../datasets/" + dataset_prefix + "/splits/instances/test",
-    "dir_dataset_train": "../../datasets/" + dataset_prefix + "/splits/instances/train",
-    "dir_dataset_validation": "../../datasets/" + dataset_prefix + "/splits/instances/validate",
+    "dir_dataset_test": os.path.join(dataset_dir, "splits/instances/test"),
+    "dir_dataset_train": os.path.join(dataset_dir, "splits/instances/train"),
+    "dir_dataset_validation": os.path.join(dataset_dir, "splits/instances/validate"),
     "epochs": 150,
     "file_name_checkpoint": "",
     "file_name_checkpoint_best": "",
@@ -63,9 +66,9 @@ config_decomposed = {
     "batch_size": 256,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
-    "dir_dataset_test": "../../datasets/" + dataset_prefix + "/splits/instances/test",
-    "dir_dataset_train": "../../datasets/" + dataset_prefix + "/splits/instances/train",
-    "dir_dataset_validation": "../../datasets/" + dataset_prefix + "/splits/instances/validate",
+    "dir_dataset_test": os.path.join(dataset_dir, "splits/instances/test"),
+    "dir_dataset_train": os.path.join(dataset_dir, "splits/instances/train"),
+    "dir_dataset_validation": os.path.join(dataset_dir, "splits/instances/validate"),
     "epochs": 150,
     "file_name_checkpoint": "",
     "file_name_checkpoint_best": "",
@@ -94,9 +97,9 @@ config_reference = {
     "concept_loss_weight": 1,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
-    "dir_dataset_test": "../../datasets/" + dataset_prefix + "/splits/instances/test",
-    "dir_dataset_train": "../../datasets/" + dataset_prefix + "/splits/instances/train",
-    "dir_dataset_validation": "../../datasets/" + dataset_prefix + "/splits/instances/validate",
+    "dir_dataset_test": os.path.join(dataset_dir, "splits/instances/test"),
+    "dir_dataset_train": os.path.join(dataset_dir, "splits/instances/train"),
+    "dir_dataset_validation": os.path.join(dataset_dir, "splits/instances/validate"),
     "epochs": 150,
     "file_name_checkpoint": "",
     "file_name_checkpoint_best": "",
@@ -116,12 +119,12 @@ config_reference = {
 }
 
 config_spn = {
-    "dir_dataset_test": "../../datasets/" + dataset_prefix + "/splits/pc/test.txt",
-    "dir_dataset_train": "../../datasets/" + dataset_prefix + "/splits/pc/train.txt",
-    "dir_dataset_validation": "../../datasets/" + dataset_prefix + "/splits/pc/validate.txt",
     "epochs": 50,
     "file_name_checkpoint": "",
     "file_name_checkpoint_best": "",
+    "file_path_dataset_test": os.path.join(dataset_dir, "splits/pc/test.txt"),
+    "file_path_dataset_train": os.path.join(dataset_dir, "splits/pc/train.txt"),
+    "file_path_dataset_validation": os.path.join(dataset_dir, "splits/pc/validate.txt"),
     "file_path_spn": "../../learnspn/output/learnspn/" + dataset_prefix + ".spn.txt",
     "epsilon_projection": 1e-2,
     "epsilon_smoothing": 1e-3,

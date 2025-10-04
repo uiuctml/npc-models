@@ -63,9 +63,9 @@ def main():
     logger.log_info("Started run \"" + header.config_spn["run_name"] + "\".")
 
     device = torch.device("cuda")
-    dataset_test = test_spn.loadDataset(header.config_spn["dir_dataset_test"], device)
-    dataset_train = test_spn.loadDataset(header.config_spn["dir_dataset_train"], device)
-    dataset_validation = test_spn.loadDataset(header.config_spn["dir_dataset_validation"], device)
+    dataset_test = test_spn.loadDataset(header.config_spn["file_path_dataset_test"], device)
+    dataset_train = test_spn.loadDataset(header.config_spn["file_path_dataset_train"], device)
+    dataset_validation = test_spn.loadDataset(header.config_spn["file_path_dataset_validation"], device)
     epoch = 1
     log_likelihood_validation_best = float("-inf")
     log_likelihood_train_epoch = 0
