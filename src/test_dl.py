@@ -13,7 +13,7 @@ import wandb
 def initializeRunName(run_name = ""):
     if run_name != "":
         if run_name.split(".")[1] != header.run_name_decomposed_keyword:
-            logger.log_fatal("Invalid run name. Quit.")
+            logger.log_fatal("Invalid attribute run name. Quit.")
             exit(-1)
 
         header.run_name_decomposed = run_name
@@ -21,7 +21,7 @@ def initializeRunName(run_name = ""):
         header.run_name_decomposed = utility.generateRunName(header.run_name_decomposed_keyword, "resnet34_mtl", header.config_decomposed["seed"])
 
     if header.run_name_decomposed == "":
-        logger.log_fatal("Missing run name. Quit.")
+        logger.log_fatal("Missing attribute run name. Quit.")
         exit(-1)
 
     header.config_decomposed["file_name_checkpoint"] = header.run_name_decomposed + ".tar"

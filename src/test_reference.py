@@ -15,7 +15,7 @@ import wandb
 def initializeRunName(run_name = ""):
     if run_name != "":
         if run_name.split(".")[1] != header.run_name_reference_keyword:
-            logger.log_fatal("Invalid run name. Quit.")
+            logger.log_fatal("Invalid reference run name. Quit.")
             exit(-1)
 
         header.run_name_reference = run_name
@@ -23,7 +23,7 @@ def initializeRunName(run_name = ""):
         header.run_name_reference = utility.generateRunName(header.run_name_reference_keyword, header.config_reference["model"], header.config_reference["seed"])
 
     if header.run_name_reference == "":
-        logger.log_fatal("Missing run name. Quit.")
+        logger.log_fatal("Missing reference run name. Quit.")
         exit(-1)
 
     header.config_reference["file_name_checkpoint"] = header.run_name_reference + ".tar"

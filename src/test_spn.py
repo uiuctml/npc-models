@@ -8,18 +8,18 @@ import torch
 import utility
 import wandb
 
-def initializeRunName(run_name = ""):
+def initializeRunName(run_name = "", optimizer = "cccp"):
     if run_name != "":
         if run_name.split(".")[1] != header.run_name_spn_keyword:
-            logger.log_fatal("Invalid run name. Quit.")
+            logger.log_fatal("Invalid PC run name. Quit.")
             exit(-1)
 
         header.run_name_spn = run_name
     else:
-        header.run_name_spn = utility.generateRunName(header.run_name_spn_keyword, "cccp", header.config_spn["seed"])
+        header.run_name_spn = utility.generateRunName(header.run_name_spn_keyword, optimizer, header.config_spn["seed"])
 
     if header.run_name_spn == "":
-        logger.log_fatal("Missing run name. Quit.")
+        logger.log_fatal("Missing PC run name. Quit.")
         exit(-1)
 
     header.config_spn["file_name_checkpoint"] = header.run_name_spn + ".tar"

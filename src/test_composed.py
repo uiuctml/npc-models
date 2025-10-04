@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import argument
+import argparse
 import dataset
 import header
 import json
@@ -8,6 +8,8 @@ import logger
 import model
 import os
 import spn
+import test_dl
+import test_spn
 import torch
 import tqdm
 import utility
@@ -52,6 +54,34 @@ def findMPEs(matrix_a, matrix_b, predictions_composed, spn_settings):
         mpe_attributes.append(matrix_a_col_indices_to_attribute_indices[mpes_matrix_a_col_index])
 
     return mpe_attributes
+
+def processArguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-r", "--run-name-attribute", type = str, default = "", help = "Attribute run name.", required = True)
+    parser.add_argument("-p", "--run-name-pc", type = str, default = "", help = "PC run name.")
+    parser.add_argument("-s", "--seed", type = int, default = None, help = "Random seed.")
+    arguments = parser.parse_args()
+
+    test_dl.initializeRunName(arguments.run_name_attribute)
+
+    if arguments.run_name_pc == "":
+        logger.log_info("Proceeding without PC run name.")
+        header.run_name_spn == ""
+        header.config_spn["file_name_checkpoint"] = ""
+        header.config_spn["file_name_checkpoint_best"] = ""
+        header.config_spn["run_name"] = ""
+    else:
+        test_spn.initializeRunName(arguments.run_name_pc, "pgd")
+
+    if arguments.seed is not None:
+        header.config_decomposed["seed"] = arguments.seed
+        header.config_spn["seed"] = arguments.seed
+
+    logger.log_trace("Attribute run name: \"" + header.run_name_decomposed + "\".")
+    logger.log_trace("PC run name: \"" + header.run_name_spn + "\".")
+    logger.log_trace("Random seed: " + str(header.config_decomposed["seed"]) + ".")
+
+    return
 
 def saveMPEs(input_file_paths, mpes, mpe_attributes, mpe_correctness, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed):
     batch_size = labels_original.nelement()
@@ -222,13 +252,7 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
     return
 
 def main():
-    argument.processArgumentsTestComposed()
-
-    header.run_name_baseline = header.config_decomposed["run_name"]
-    header.config_baseline["dir_dataset_test"] = header.config_decomposed["dir_dataset_test"]
-    header.config_baseline["file_name_checkpoint"] = header.run_name_decomposed + ".tar"
-    header.config_baseline["file_name_checkpoint_best"] = header.run_name_decomposed + ".best.tar"
-    header.config_baseline["run_name"] = header.run_name_decomposed
+    processArguments()
 
     utility.setSeed(header.seed)
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32

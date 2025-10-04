@@ -1,17 +1,56 @@
 #!/usr/bin/env python3
 
-import argument
+import argparse
 import dataset
 import header
 import logger
 import model
 import spn
 import test_composed
+import test_dl
+import test_spn
 import torch
 import torchinfo
 import tqdm
 import utility
 import wandb
+
+def processArguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-w", "--weights-attribute", type = str, default = "", help = "Attribute model pretrained weights.")
+    parser.add_argument("-c", "--weights-pc", type = str, default = "", help = "PC model pretrained weights.")
+    parser.add_argument("-b", "--batch-size", type = int, default = None, help = "Batch size.")
+    parser.add_argument("-e", "--epochs", type = int, default = None, help = "Epochs.")
+    parser.add_argument("-s", "--seed", type = int, default = None, help = "Random seed.")
+    arguments = parser.parse_args()
+
+    test_dl.initializeRunName()
+    test_spn.initializeRunName("", "pgd")
+
+    if arguments.weights_attribute != "":
+        header.config_decomposed["model_pretrained_weights"] = arguments.weights_attribute
+
+    if arguments.weights_pc != "":
+        header.config_spn["model_pretrained_weights"] = arguments.weights_pc
+
+    if arguments.batch_size is not None:
+        header.config_decomposed["data_loader_batch_size"] = arguments.batch_size
+
+    if arguments.epochs is not None:
+        header.config_decomposed["epochs"] = arguments.epochs
+
+    if arguments.seed is not None:
+        header.config_decomposed["seed"] = arguments.seed
+
+    logger.log_trace("Attribute run name: \"" + header.run_name_decomposed + "\".")
+    logger.log_trace("PC run name: \"" + header.run_name_spn + "\".")
+    logger.log_trace("Attribute model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
+    logger.log_trace("PC model pretrained weights: \"" + header.config_spn["model_pretrained_weights"] + "\".")
+    logger.log_trace("Batch size: " + str(header.config_decomposed["data_loader_batch_size"]) + ".")
+    logger.log_trace("Epochs: " + str(header.config_decomposed["epochs"]) + ".")
+    logger.log_trace("Random seed: " + str(header.config_decomposed["seed"]) + ".")
+
+    return
 
 def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, optimizer_decomposed, optimizer_spn, device, batch_step):
     accuracy_attribute_epoch = 0
@@ -151,8 +190,7 @@ def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, 
     return (accuracy_task_epoch, loss_epoch, batch_step)
 
 def main():
-    argument.processArgumentsTrainComposed()
-    model_pretrained_weights = header.config_decomposed["model_pretrained_weights"]
+    processArguments()
 
     utility.setSeed(header.seed)
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
@@ -218,10 +256,10 @@ def main():
     spn_joint.set_leaf_nodes_categorical(spn_settings_joint)
     spn_marginal.set_leaf_nodes_categorical(spn_settings_marginal)
 
-    if header.config_decomposed["fine_tuning"]:
-        utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], model_pretrained_weights, model_decomposed)
+    if header.config_decomposed["model_pretrained_weights"] != "":
+        utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["model_pretrained_weights"], model_decomposed)
 
-    if header.config_spn["fine_tuning"]:
+    if header.config_spn["model_pretrained_weights"] != "":
         utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["model_pretrained_weights"])
         utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["model_pretrained_weights"])
     elif header.config_spn["randomize_weights"]:
