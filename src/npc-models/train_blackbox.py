@@ -5,7 +5,7 @@ import dataset
 import header
 import logger
 import model
-import test_baseline
+import test_blackbox
 import torch
 import tqdm
 import utility
@@ -27,7 +27,7 @@ def processArguments():
     if arguments.seed is not None:
         header.config_baseline["seed"] = arguments.seed
 
-    test_baseline.initializeRunName()
+    test_blackbox.initializeRunName()
 
     logger.log_trace("Run name: \"" + header.config_baseline["run_name"] + "\".")
     logger.log_trace("Batch size: " + str(header.config_baseline["batch_size"]) + ".")
@@ -199,7 +199,7 @@ def main():
     wandb.summary["validation/epoch/accuracy_task_best"] = accuracy_task_validation_best
 
     wandb.log({"testing/epoch/step": batch_step_test})
-    test_baseline.test(model_baseline, data_loader_test, device, batch_step_test)
+    test_blackbox.test(model_baseline, data_loader_test, device, batch_step_test)
 
     wandb.finish()
 

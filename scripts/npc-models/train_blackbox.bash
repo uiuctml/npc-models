@@ -2,4 +2,4 @@
 
 cd "../../src/npc-models"
 
-./train_baseline.py -b 256 -e 150 -s 42
+./train_blackbox.py -b 256 -e 150 -s 42
