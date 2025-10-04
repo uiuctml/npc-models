@@ -3,14 +3,14 @@ import os
 import type
 
 project_name = "npc-models"
-dir_outputs = os.path.join("../outputs", project_name)
+dir_outputs = os.path.join("../../outputs", project_name)
 checkpoint_dir = os.path.join(dir_outputs, "checkpoints")
 checkpoint_postfix = ".zip"
 checkpoint_postfix_best = ".best.zip"
 cuda_allow_tf32 = False
 dataset_prefix = "awa2"
-dataset_config_file_path = os.path.join("../../npc-dataset-utils/configs/npc-dataset-utils", dataset_prefix + ".json")
-dataset_dir = os.path.join("../../datasets", dataset_prefix)
+dataset_config_file_path = os.path.join("../../../npc-dataset-utils/configs/npc-dataset-utils", dataset_prefix + ".json")
+dataset_dir = os.path.join("../../../datasets", dataset_prefix)
 log_level = type.LogLevel.info
 run_mode = "disabled"
 
@@ -125,7 +125,7 @@ config_spn = {
     "file_path_dataset_test": os.path.join(dataset_dir, "splits/pc/test.txt"),
     "file_path_dataset_train": os.path.join(dataset_dir, "splits/pc/train.txt"),
     "file_path_dataset_validation": os.path.join(dataset_dir, "splits/pc/validate.txt"),
-    "file_path_spn": "../../learnspn/outputs/learnspn/" + dataset_prefix + ".spn.txt",
+    "file_path_spn": "../../../learnspn/outputs/learnspn/" + dataset_prefix + ".spn.txt",
     "epsilon_projection": 1e-2,
     "epsilon_smoothing": 1e-3,
     "inference_only": True,
