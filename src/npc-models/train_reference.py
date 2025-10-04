@@ -44,12 +44,7 @@ def processArguments():
     return
 
 def computeLoss(output_neck, output_head, labels_decomposed, labels_original):
-    if header.config_reference["model"] == type.ModelReference.cbm.name:
-        labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed)
-        loss_attribute = torch.nn.functional.binary_cross_entropy_with_logits(output_neck, labels_decomposed)
-        loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_original)
-        return header.config_reference["concept_loss_weight"] * loss_attribute + loss_task
-    elif header.config_reference["model"] == type.ModelReference.cbm_cat.name:
+    if header.config_reference["model"] == type.ModelReference.abm.name:
         count_attributes = len(output_neck)
         loss_attribute = 0
 
@@ -60,6 +55,11 @@ def computeLoss(output_neck, output_head, labels_decomposed, labels_original):
         loss_attribute /= count_attributes
         loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_original)
 
+        return header.config_reference["concept_loss_weight"] * loss_attribute + loss_task
+    elif header.config_reference["model"] == type.ModelReference.cbm.name:
+        labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed)
+        loss_attribute = torch.nn.functional.binary_cross_entropy_with_logits(output_neck, labels_decomposed)
+        loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_original)
         return header.config_reference["concept_loss_weight"] * loss_attribute + loss_task
     elif header.config_reference["model"] == type.ModelReference.cem.name:
         labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed)
@@ -72,7 +72,7 @@ def computeLoss(output_neck, output_head, labels_decomposed, labels_original):
         loss_task = torch.nn.functional.binary_cross_entropy(output_head, labels_original)
         return header.config_reference["concept_loss_weight"] * loss_attribute + loss_task
     else:
-        logger.log_fatal("Unknown reference network model \"" + header.config_reference["model"] + "\".")
+        logger.log_fatal("Unknown reference model \"" + header.config_reference["model"] + "\".")
         exit(-1)
 
     return

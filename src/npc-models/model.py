@@ -21,6 +21,31 @@ class Model(torch.nn.Module):
     def get_parameters(self):
         pass
 
+class ABM(Model):
+    def __init__(self, config_dataset, device):
+        super().__init__()
+
+        labels_attribute = utility.getLabelsAttribute(config_dataset)
+        labels_original = utility.getLabelsOriginal(config_dataset)
+        labels_categories = []
+
+        for attribute_name in labels_attribute.keys():
+            labels_categories += labels_attribute[attribute_name]
+
+        self.net = ResNet34MTL(config_dataset, device)
+        self.net.head = torch.nn.Linear(len(labels_categories), len(labels_original))
+
+        return
+
+    def forward(self, input):
+        (output_neck, _) = self.net(input)
+        output_head = self.net.head(torch.cat(output_neck, dim = 1))
+
+        return (output_neck, output_head)
+
+    def get_parameters(self):
+        return self.net.parameters()
+
 class CBM(Model):
     def __init__(self, config_dataset, device):
         super().__init__()
@@ -41,31 +66,6 @@ class CBM(Model):
     def forward(self, input):
         output_neck = self.net(input)
         output_head = self.net.head(output_neck)
-
-        return (output_neck, output_head)
-
-    def get_parameters(self):
-        return self.net.parameters()
-
-class CBMCat(Model):
-    def __init__(self, config_dataset, device):
-        super().__init__()
-
-        labels_attribute = utility.getLabelsAttribute(config_dataset)
-        labels_original = utility.getLabelsOriginal(config_dataset)
-        labels_categories = []
-
-        for attribute_name in labels_attribute.keys():
-            labels_categories += labels_attribute[attribute_name]
-
-        self.net = ResNet34MTL(config_dataset, device)
-        self.net.head = torch.nn.Linear(len(labels_categories), len(labels_original))
-
-        return
-
-    def forward(self, input):
-        (output_neck, _) = self.net(input)
-        output_head = self.net.head(torch.cat(output_neck, dim = 1))
 
         return (output_neck, output_head)
 
@@ -187,14 +187,14 @@ class ResNet34MTL(Model):
         return self.net.parameters()
 
 def createModelReference(config_dataset, device):
-    if header.config_reference["model"] == type.ModelReference.cbm.name:
+    if header.config_reference["model"] == type.ModelReference.abm.name:
+        return ABM(config_dataset, device)
+    elif header.config_reference["model"] == type.ModelReference.cbm.name:
         return CBM(config_dataset, device)
-    elif header.config_reference["model"] == type.ModelReference.cbm_cat.name:
-        return CBMCat(config_dataset, device)
     elif header.config_reference["model"] == type.ModelReference.cem.name:
         return CEM(config_dataset, device)
     elif header.config_reference["model"] == type.ModelReference.dcr.name:
         return DCR(config_dataset, device)
     else:
-        logger.log_fatal("Unknown reference network model \"" + header.config_reference["model"] + "\".")
+        logger.log_fatal("Unknown reference model \"" + header.config_reference["model"] + "\".")
         exit(-1)

@@ -31,7 +31,7 @@ class LogLevel(enum.Enum):
         return NotImplemented
 
 class ModelReference(enum.Enum):
-    cbm = 0
-    cbm_cat = 1
+    abm = 0
+    cbm = 1
     cem = 2
     dcr = 3
