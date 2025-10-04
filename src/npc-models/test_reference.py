@@ -20,7 +20,7 @@ def initializeRunName(run_name = ""):
 
         header.config_reference["run_name"] = run_name
     else:
-        header.config_reference["run_name"] = utility.generateRunName(header.config_reference["type"], header.config_reference["model"], header.config_reference["seed"])
+        header.config_reference["run_name"] = utility.generateRunName(header.config_reference["seed"], header.config_reference["type"], header.config_reference["model"])
 
     if header.config_reference["run_name"] == "":
         logger.log_fatal("Missing reference run name. Quit.")

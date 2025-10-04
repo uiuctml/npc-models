@@ -102,13 +102,13 @@ def defineMetrics():
 
     return
 
-def generateRunName(type, model, seed):
+def generateRunName(seed, type, method):
     date_time_list = list(datetime.datetime.now().timetuple())[:-4]
     run_name = str(seed)
     run_name += "."
     run_name += type
     run_name += "."
-    run_name += model
+    run_name += method
 
     for entry in date_time_list:
         run_name += "."

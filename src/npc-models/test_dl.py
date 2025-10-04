@@ -18,7 +18,7 @@ def initializeRunName(run_name = ""):
 
         header.config_decomposed["run_name"] = run_name
     else:
-        header.config_decomposed["run_name"] = utility.generateRunName(header.config_decomposed["type"], "resnet34_mtl", header.config_decomposed["seed"])
+        header.config_decomposed["run_name"] = utility.generateRunName(header.config_decomposed["seed"], header.config_decomposed["type"], "resnet34_mtl")
 
     if header.config_decomposed["run_name"] == "":
         logger.log_fatal("Missing attribute run name. Quit.")

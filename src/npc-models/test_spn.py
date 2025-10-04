@@ -16,7 +16,7 @@ def initializeRunName(run_name = "", optimizer = "cccp"):
 
         header.config_spn["run_name"] = run_name
     else:
-        header.config_spn["run_name"] = utility.generateRunName(header.config_spn["type"], optimizer, header.config_spn["seed"])
+        header.config_spn["run_name"] = utility.generateRunName(header.config_spn["seed"], header.config_spn["type"], optimizer)
 
     if header.config_spn["run_name"] == "":
         logger.log_fatal("Missing PC run name. Quit.")

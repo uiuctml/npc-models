@@ -18,7 +18,7 @@ def initializeRunName(run_name = ""):
 
         header.config_baseline["run_name"] = run_name
     else:
-        header.config_baseline["run_name"] = utility.generateRunName(header.config_baseline["type"], "resnet34", header.config_baseline["seed"])
+        header.config_baseline["run_name"] = utility.generateRunName(header.config_baseline["seed"], header.config_baseline["type"], "resnet34")
 
     if header.config_baseline["run_name"] == "":
         logger.log_fatal("Missing baseline run name. Quit.")
