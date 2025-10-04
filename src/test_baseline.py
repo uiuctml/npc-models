@@ -12,13 +12,13 @@ import wandb
 
 def initializeRunName(run_name = ""):
     if run_name != "":
-        if run_name.split(".")[1] != header.run_name_baseline_keyword:
+        if run_name.split(".")[1] != header.run_name_keyword_baseline:
             logger.log_fatal("Invalid baseline run name. Quit.")
             exit(-1)
 
         header.run_name_baseline = run_name
     else:
-        header.run_name_baseline = utility.generateRunName(header.run_name_baseline_keyword, "resnet34", header.config_baseline["seed"])
+        header.run_name_baseline = utility.generateRunName(header.run_name_keyword_baseline, "resnet34", header.config_baseline["seed"])
 
     if header.run_name_baseline == "":
         logger.log_fatal("Missing baseline run name. Quit.")
@@ -97,7 +97,7 @@ def main():
 
     dataset_transforms = utility.createTransform(header.config_baseline)
     dataset_test = dataset.NPCDataset(header.config_baseline["dir_dataset_test"], dataset_transforms)
-    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_baseline["data_loader_batch_size"], shuffle = False, num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
+    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_baseline["batch_size"], shuffle = False, num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     model_baseline = model.ResNet34(dataset_test.config, device)
     model_baseline = torch.nn.DataParallel(model_baseline)

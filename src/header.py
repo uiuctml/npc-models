@@ -1,49 +1,47 @@
 import multiprocessing
 import type
 
-composed_find_mpe = False
-composed_save_mpe = True
-composed_spn_on_cpu = True
-counterfactual_implausibility_margin_range = 1e-3
-counterfactual_implausibility_margin_sum = 1e-6
-counterfactual_learning_rate = 5e-2
-counterfactual_qp_epsilon = 1
-counterfactual_qp_solver = "clarabel"
-counterfactual_save = True
-counterfactual_steps = 100
 cuda_allow_tf32 = False
 dataset_prefix = "awa2"
-dir_output_counterfactual = "../output/counterfactual"
-dir_output_mpe = "../output/mpe"
-file_name_counterfactual = "counterfactual.json"
-file_name_mpe = "mpe.json"
-file_path_dataset_config = "../../npc-dataset-utils/configs/npc-dataset-utils/" + dataset_prefix + ".json"
-interpret_delimiter_label = "--"
+dataset_config_file_path = "../../npc-dataset-utils/configs/npc-dataset-utils/" + dataset_prefix + ".json"
+log_level = type.LogLevel.debug
+model_head_hidden_size = 128
+project_name = "npc-models"
+seed = 42
+show_model_summary = False
+
+composed_mpe_dir_output = "../output/mpe"
+composed_mpe_file_name = "mpe.json"
+composed_mpe_find = False
+composed_mpe_save = True
+composed_spn_on_cpu = True
+
+counterfactual_dir_output = "../output/counterfactual"
+counterfactual_file_name = "counterfactual.json"
+counterfactual_learning_rate = 5e-2
+counterfactual_save = True
+counterfactual_steps = 100
+
 interpret_dir_dataset = "../../datasets/" + dataset_prefix + "/splits/instances/test"
 interpret_label_width_attribute = 200
 interpret_label_width_original = 350
 interpret_mpe = False
 interpret_preprocess = False
-interpret_threshold_probability = 0.1
 interpret_viewer_height = 300
 interpret_viewer_width = 300
-log_level = type.LogLevel.debug
-model_head_hidden_size = 128
-project_name = "npc-models"
+
 run_mode = "disabled"
-run_name_baseline_keyword = "baseline"
-run_name_decomposed_keyword = "decomposed"
-run_name_reference_keyword = "reference"
-run_name_spn_keyword = "spn"
 run_name_baseline = ""
 run_name_decomposed = ""
 run_name_reference = ""
 run_name_spn = ""
-seed = 42
-show_model_summary = False
+run_name_keyword_baseline = "baseline"
+run_name_keyword_decomposed = "decomposed"
+run_name_keyword_reference = "reference"
+run_name_keyword_spn = "spn"
 
 config_baseline = {
-    "data_loader_batch_size": 256,
+    "batch_size": 256,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dir_checkpoints": "../checkpoints",
@@ -73,7 +71,7 @@ config_baseline = {
 }
 
 config_decomposed = {
-    "data_loader_batch_size": 256,
+    "batch_size": 256,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dir_checkpoints": "../checkpoints",
@@ -106,7 +104,7 @@ config_decomposed = {
 
 config_reference = {
     "concept_loss_weight": 1,
-    "data_loader_batch_size": 256,
+    "batch_size": 256,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dir_checkpoints": "../checkpoints",

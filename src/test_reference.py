@@ -14,13 +14,13 @@ import wandb
 
 def initializeRunName(run_name = ""):
     if run_name != "":
-        if run_name.split(".")[1] != header.run_name_reference_keyword:
+        if run_name.split(".")[1] != header.run_name_keyword_reference:
             logger.log_fatal("Invalid reference run name. Quit.")
             exit(-1)
 
         header.run_name_reference = run_name
     else:
-        header.run_name_reference = utility.generateRunName(header.run_name_reference_keyword, header.config_reference["model"], header.config_reference["seed"])
+        header.run_name_reference = utility.generateRunName(header.run_name_keyword_reference, header.config_reference["model"], header.config_reference["seed"])
 
     if header.run_name_reference == "":
         logger.log_fatal("Missing reference run name. Quit.")
@@ -179,7 +179,7 @@ def main():
 
     dataset_transforms = utility.createTransform(header.config_reference)
     dataset_test = dataset.NPCDataset(header.config_reference["dir_dataset_test"], dataset_transforms)
-    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_reference["data_loader_batch_size"], shuffle = False, num_workers = header.config_reference["data_loader_worker_count"], pin_memory = True)
+    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_reference["batch_size"], shuffle = False, num_workers = header.config_reference["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     model_reference = model.createModelReference(dataset_test.config, device)
     model_reference = torch.nn.DataParallel(model_reference)

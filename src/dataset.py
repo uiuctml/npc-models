@@ -25,7 +25,7 @@ class NPCDataset(torch.utils.data.Dataset):
 
         logger.log_info("Loading dataset \"" + root + "\"...")
 
-        file_config_dataset = open(header.file_path_dataset_config, "r")
+        file_config_dataset = open(header.dataset_config_file_path, "r")
         self.config = json.load(file_config_dataset)
         file_config_dataset.close()
 

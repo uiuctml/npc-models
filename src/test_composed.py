@@ -179,11 +179,11 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
                 tv_distance_batch = 0.5 * torch.sum(torch.abs(output_decomposed[i] - labels_decomposed[i]), dim = 1)
                 tv_distances_epoch[i] += torch.sum(tv_distance_batch).item()
 
-            if header.composed_find_mpe:
+            if header.composed_mpe_find:
                 mpe_attributes = findMPEs(matrix_a, matrix_b, predictions_composed, spn_settings_joint)
                 mpe_correctness = computeMPECorrectness(mpe_attributes, labels_decomposed)
 
-                if header.composed_save_mpe:
+                if header.composed_mpe_save:
                     saveMPEs(input_file_paths, mpes, mpe_attributes, mpe_correctness, data_loader.dataset, labels_decomposed, labels_original, output_decomposed, output_composed)
 
                 mpe_correctness = torch.tensor(mpe_correctness).to(device)
@@ -202,11 +202,11 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
 
     progress_bar.close()
 
-    if header.composed_find_mpe:
-        if not os.path.isdir(header.dir_output_mpe):
-            os.makedirs(header.dir_output_mpe, exist_ok = True)
+    if header.composed_mpe_find:
+        if not os.path.isdir(header.composed_mpe_dir_output):
+            os.makedirs(header.composed_mpe_dir_output, exist_ok = True)
 
-        with open(os.path.join(header.dir_output_mpe, header.file_name_mpe), "w") as file_mpe:
+        with open(os.path.join(header.composed_mpe_dir_output, header.composed_mpe_file_name), "w") as file_mpe:
             json.dump(mpes, file_mpe, indent = 4)
 
     accuracy_attribute_epoch /= len(data_loader)
@@ -229,7 +229,7 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
     logger.log_info("Testing attribute accuracy: " + str(accuracy_attribute_epoch) + ".")
     logger.log_info("Testing task accuracy: " + str(accuracy_task_epoch) + ".")
 
-    if header.composed_find_mpe:
+    if header.composed_mpe_find:
         if len(mpe_correctness_epoch) == 0:
             mpe_correctness_epoch = "N/A"
         else:
@@ -267,7 +267,7 @@ def main():
     dataset_transforms = utility.createTransform(header.config_decomposed)
     dataset_test = dataset.NPCDataset(header.config_decomposed["dir_dataset_test"], dataset_transforms)
     config_dataset = dataset_test.config
-    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
+    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     device_spn = torch.device("cuda")
 

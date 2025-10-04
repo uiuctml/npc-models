@@ -20,7 +20,7 @@ def processArguments():
     arguments = parser.parse_args()
 
     if arguments.batch_size is not None:
-        header.config_baseline["data_loader_batch_size"] = arguments.batch_size
+        header.config_baseline["batch_size"] = arguments.batch_size
 
     if arguments.epochs is not None:
         header.config_baseline["epochs"] = arguments.epochs
@@ -31,7 +31,7 @@ def processArguments():
     test_baseline.initializeRunName()
 
     logger.log_trace("Run name: \"" + header.run_name_baseline + "\".")
-    logger.log_trace("Batch size: " + str(header.config_baseline["data_loader_batch_size"]) + ".")
+    logger.log_trace("Batch size: " + str(header.config_baseline["batch_size"]) + ".")
     logger.log_trace("Epochs: " + str(header.config_baseline["epochs"]) + ".")
     logger.log_trace("Random seed: " + str(header.config_baseline["seed"]) + ".")
 
@@ -153,9 +153,9 @@ def main():
     dataset_test = dataset.NPCDataset(header.config_baseline["dir_dataset_test"], dataset_transforms)
     dataset_train = dataset.NPCDataset(header.config_baseline["dir_dataset_train"], dataset_transforms)
     dataset_validation = dataset.NPCDataset(header.config_baseline["dir_dataset_validation"], dataset_transforms)
-    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_baseline["data_loader_batch_size"], shuffle = False, num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
-    data_loader_train = torch.utils.data.DataLoader(dataset_train, batch_size = header.config_baseline["data_loader_batch_size"], shuffle = header.config_baseline["data_loader_shuffle"], num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
-    data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_baseline["data_loader_batch_size"], shuffle = header.config_baseline["data_loader_shuffle"], num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
+    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_baseline["batch_size"], shuffle = False, num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
+    data_loader_train = torch.utils.data.DataLoader(dataset_train, batch_size = header.config_baseline["batch_size"], shuffle = header.config_baseline["data_loader_shuffle"], num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
+    data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_baseline["batch_size"], shuffle = header.config_baseline["data_loader_shuffle"], num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     epoch = 1
     model_baseline = model.ResNet34(dataset_test.config, device)

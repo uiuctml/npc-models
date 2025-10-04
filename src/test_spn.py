@@ -10,13 +10,13 @@ import wandb
 
 def initializeRunName(run_name = "", optimizer = "cccp"):
     if run_name != "":
-        if run_name.split(".")[1] != header.run_name_spn_keyword:
+        if run_name.split(".")[1] != header.run_name_keyword_spn:
             logger.log_fatal("Invalid PC run name. Quit.")
             exit(-1)
 
         header.run_name_spn = run_name
     else:
-        header.run_name_spn = utility.generateRunName(header.run_name_spn_keyword, optimizer, header.config_spn["seed"])
+        header.run_name_spn = utility.generateRunName(header.run_name_keyword_spn, optimizer, header.config_spn["seed"])
 
     if header.run_name_spn == "":
         logger.log_fatal("Missing PC run name. Quit.")

@@ -34,7 +34,7 @@ def processArguments():
         header.config_spn["model_pretrained_weights"] = arguments.weights_pc
 
     if arguments.batch_size is not None:
-        header.config_decomposed["data_loader_batch_size"] = arguments.batch_size
+        header.config_decomposed["batch_size"] = arguments.batch_size
 
     if arguments.epochs is not None:
         header.config_decomposed["epochs"] = arguments.epochs
@@ -46,7 +46,7 @@ def processArguments():
     logger.log_trace("PC run name: \"" + header.run_name_spn + "\".")
     logger.log_trace("Attribute model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
     logger.log_trace("PC model pretrained weights: \"" + header.config_spn["model_pretrained_weights"] + "\".")
-    logger.log_trace("Batch size: " + str(header.config_decomposed["data_loader_batch_size"]) + ".")
+    logger.log_trace("Batch size: " + str(header.config_decomposed["batch_size"]) + ".")
     logger.log_trace("Epochs: " + str(header.config_decomposed["epochs"]) + ".")
     logger.log_trace("Random seed: " + str(header.config_decomposed["seed"]) + ".")
 
@@ -217,9 +217,9 @@ def main():
     dataset_train = dataset.NPCDataset(header.config_decomposed["dir_dataset_train"], dataset_transforms)
     dataset_validation = dataset.NPCDataset(header.config_decomposed["dir_dataset_validation"], dataset_transforms)
     config_dataset = dataset_test.config
-    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
-    data_loader_train = torch.utils.data.DataLoader(dataset_train, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
-    data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
+    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
+    data_loader_train = torch.utils.data.DataLoader(dataset_train, batch_size = header.config_decomposed["batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
+    data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_decomposed["batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     device_spn = torch.device("cuda")
 

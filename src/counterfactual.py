@@ -236,10 +236,10 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
     logger.log_info("Counterfactual attribute correctness: " + str(correctness_attribute_epoch) + ".")
     logger.log_info("Counterfactual task correctness: " + str(correctness_task_epoch) + ".")
 
-    if not os.path.isdir(header.dir_output_counterfactual):
-        os.makedirs(header.dir_output_counterfactual, exist_ok = True)
+    if not os.path.isdir(header.counterfactual_dir_output):
+        os.makedirs(header.counterfactual_dir_output, exist_ok = True)
 
-    with open(os.path.join(header.dir_output_counterfactual, header.file_name_counterfactual), "w") as file_counterfactual:
+    with open(os.path.join(header.counterfactual_dir_output, header.counterfactual_file_name), "w") as file_counterfactual:
         json.dump(counterfactuals, file_counterfactual, indent = 4)
 
     return
@@ -253,7 +253,7 @@ def main():
     dataset_transforms = utility.createTransform(header.config_decomposed)
     dataset_test = dataset.NPCDataset(header.config_decomposed["dir_dataset_test"], dataset_transforms)
     config_dataset = dataset_test.config
-    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["data_loader_batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
+    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     device_spn = torch.device("cuda")
 
