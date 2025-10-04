@@ -6,7 +6,7 @@ import header
 import logger
 import math
 import model
-import test_reference
+import test_baseline
 import torch
 import tqdm
 import type
@@ -33,7 +33,7 @@ def processArguments():
     if arguments.seed is not None:
         header.config_reference["seed"] = arguments.seed
 
-    test_reference.initializeRunName()
+    test_baseline.initializeRunName()
 
     logger.log_trace("Run name: \"" + header.config_reference["run_name"] + "\".")
     logger.log_trace("Model: \"" + header.config_reference["model"] + "\".")
@@ -104,7 +104,7 @@ def train(model_reference, data_loader, optimizer, device, batch_step):
             loss.backward()
             optimizer.step()
 
-            (accuracy_attribute_batch, accuracy_task_batch) = test_reference.computeAccuracy(output_neck, output_head, labels_decomposed, labels_original, device)
+            (accuracy_attribute_batch, accuracy_task_batch) = test_baseline.computeAccuracy(output_neck, output_head, labels_decomposed, labels_original, device)
             loss_batch = loss.item()
 
             accuracy_attribute_epoch += accuracy_attribute_batch
@@ -154,7 +154,7 @@ def validate(model_reference, data_loader, device, batch_step):
             (output_neck, output_head) = model_reference(input)
 
             loss = computeLoss(output_neck, output_head, labels_decomposed, labels_original)
-            (accuracy_attribute_batch, accuracy_task_batch) = test_reference.computeAccuracy(output_neck, output_head, labels_decomposed, labels_original, device)
+            (accuracy_attribute_batch, accuracy_task_batch) = test_baseline.computeAccuracy(output_neck, output_head, labels_decomposed, labels_original, device)
             loss_batch = loss.item()
 
             accuracy_attribute_epoch += accuracy_attribute_batch
@@ -247,7 +247,7 @@ def main():
     wandb.summary["validation/epoch/accuracy_task_best"] = accuracy_task_validation_best
 
     wandb.log({"testing/epoch/step": batch_step_test})
-    test_reference.test(model_reference, data_loader_test, device, batch_step_test)
+    test_baseline.test(model_reference, data_loader_test, device, batch_step_test)
 
     wandb.finish()
 
