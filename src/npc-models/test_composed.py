@@ -201,13 +201,6 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
 
     progress_bar.close()
 
-    if header.composed_mpe_find:
-        if not os.path.isdir(header.composed_mpe_dir_outputs):
-            os.makedirs(header.composed_mpe_dir_outputs, exist_ok = True)
-
-        with open(os.path.join(header.composed_mpe_dir_outputs, header.composed_mpe_file_name), "w") as file_mpe:
-            json.dump(mpes, file_mpe, indent = 4)
-
     accuracy_attribute_epoch /= len(data_loader)
     accuracy_task_epoch /= len(data_loader.dataset)
 
@@ -247,6 +240,14 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
         logger.log_info("MPE correctness on all predictions: " + str(mpe_correctness_epoch) + ".")
         logger.log_info("MPE correctness on correct predictions: " + str(mpe_correctness_prediction_correct_epoch) + ".")
         logger.log_info("MPE correctness on incorrect predictions: " + str(mpe_correctness_prediction_incorrect_epoch) + ".")
+
+        if header.composed_mpe_save:
+            if not os.path.isdir(header.composed_mpe_dir_outputs):
+                os.makedirs(header.composed_mpe_dir_outputs, exist_ok = True)
+
+            with open(os.path.join(header.composed_mpe_dir_outputs, header.composed_mpe_file_name), "w") as file_mpe:
+                json.dump(mpes, file_mpe, indent = 4)
+                logger.log_info("Saved MPEs to \"" + os.path.join(header.composed_mpe_dir_outputs, header.composed_mpe_file_name) + "\".")
 
     return
 

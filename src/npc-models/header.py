@@ -14,14 +14,14 @@ dataset_dir = os.path.join("../../../datasets", dataset_prefix)
 log_level = type.LogLevel.info
 run_mode = "disabled"
 
-composed_mpe_dir_outputs = os.path.join(dir_outputs, "mpe")
-composed_mpe_file_name = "mpe.json"
+composed_mpe_dir_outputs = os.path.join(dir_outputs, "mpes")
+composed_mpe_file_name = "mpes_" + dataset_prefix + ".json"
 composed_mpe_find = False
 composed_mpe_save = True
 composed_spn_on_cpu = True
 
-counterfactual_dir_outputs = os.path.join(dir_outputs, "counterfactual")
-counterfactual_file_name = "counterfactual.json"
+counterfactual_dir_outputs = os.path.join(dir_outputs, "counterfactuals")
+counterfactual_file_name = "counterfactuals_" + dataset_prefix + ".json"
 counterfactual_learning_rate = 5e-2
 counterfactual_save = True
 counterfactual_steps = 100
