@@ -5,7 +5,7 @@ import dataset
 import header
 import logger
 import model
-import spn
+import pc
 import test_composed
 import test_dl
 import test_pc
@@ -231,12 +231,12 @@ def main():
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
     progress_bar = None
-    spn_joint = spn.SPN(device_spn)
-    spn_marginal = spn.SPN(device_spn)
+    spn_joint = pc.SPN(device_spn)
+    spn_marginal = pc.SPN(device_spn)
     optimizer_decomposed = torch.optim.SGD(model_decomposed.parameters(), lr = header.config_decomposed["optimizer_learning_rate"], momentum = header.config_decomposed["optimizer_momentum"], weight_decay = header.config_decomposed["optimizer_weight_decay"])
-    optimizer_spn = optimizer_spn = spn.PGDSPNOptimizer(spn_joint, spn_marginal, device_spn, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
+    optimizer_spn = pc.PGDSPNOptimizer(spn_joint, spn_marginal, device_spn, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_decomposed, header.config_decomposed["learning_rate_scheduler_mode"], header.config_decomposed["learning_rate_scheduler_factor"], header.config_decomposed["learning_rate_scheduler_patience"], header.config_decomposed["learning_rate_scheduler_threshold"], header.config_decomposed["learning_rate_scheduler_threshold_mode"], header.config_decomposed["learning_rate_scheduler_cooldown"], header.config_decomposed["learning_rate_scheduler_min_learning_rate"], header.config_decomposed["learning_rate_scheduler_min_learning_rate_decay"])
-    learning_rate_scheduler_spn = spn.LossSPNLearningRateScheduler(optimizer_spn, header.config_spn["learning_rate_scheduler_factor"], header.config_spn["learning_rate_scheduler_patience"], header.config_spn["learning_rate_scheduler_threshold"], header.config_spn["learning_rate_scheduler_cooldown"], header.config_spn["learning_rate_scheduler_min_learning_rate"])
+    learning_rate_scheduler_spn = pc.LossSPNLearningRateScheduler(optimizer_spn, header.config_spn["learning_rate_scheduler_factor"], header.config_spn["learning_rate_scheduler_patience"], header.config_spn["learning_rate_scheduler_threshold"], header.config_spn["learning_rate_scheduler_cooldown"], header.config_spn["learning_rate_scheduler_min_learning_rate"])
 
     logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
 

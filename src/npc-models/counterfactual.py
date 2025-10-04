@@ -6,7 +6,7 @@ import json
 import logger
 import model
 import os
-import spn
+import pc
 import test_composed
 import torch
 import tqdm
@@ -266,8 +266,8 @@ def main():
     model_decomposed = model.ResNet34MTL(dataset_test.config, device)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
-    spn_joint = spn.SPN(device_spn)
-    spn_marginal = spn.SPN(device_spn)
+    spn_joint = pc.SPN(device_spn)
+    spn_marginal = pc.SPN(device_spn)
 
     logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
 

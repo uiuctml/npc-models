@@ -3,7 +3,7 @@
 import argparse
 import header
 import logger
-import spn
+import pc
 import torch
 import utility
 import wandb
@@ -90,7 +90,7 @@ def main():
     device = torch.device("cuda")
     dataset_test = loadDataset(header.config_spn["file_path_dataset_test"], device)
 
-    spn_joint = spn.SPN(device)
+    spn_joint = pc.SPN(device)
 
     logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
 

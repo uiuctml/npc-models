@@ -3,7 +3,7 @@
 import argparse
 import header
 import logger
-import spn
+import pc
 import test_pc
 import torch
 import tqdm
@@ -70,11 +70,11 @@ def main():
     log_likelihood_validation_best = float("-inf")
     log_likelihood_train_epoch = 0
     log_likelihood_train_epoch_last = 0
-    spn_joint = spn.SPN(device)
-    spn_marginal = spn.SPN(device)
-    optimizer = spn.CCCPSPNOptimizer(spn_joint, spn_marginal, device)
+    spn_joint = pc.SPN(device)
+    spn_marginal = pc.SPN(device)
+    optimizer = pc.CCCPSPNOptimizer(spn_joint, spn_marginal, device)
     progress_bar = None
-    learning_rate_scheduler = spn.LikelihoodSPNLearningRateScheduler(optimizer, header.config_spn["learning_rate_scheduler_factor"])
+    learning_rate_scheduler = pc.LikelihoodSPNLearningRateScheduler(optimizer, header.config_spn["learning_rate_scheduler_factor"])
 
     logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
 
