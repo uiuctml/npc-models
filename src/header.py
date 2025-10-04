@@ -1,13 +1,13 @@
 import multiprocessing
 import type
 
-cuda_allow_tf32 = False
 checkpoint_dir = "../checkpoints"
 checkpoint_postfix = ".zip"
 checkpoint_postfix_best = ".best.zip"
+cuda_allow_tf32 = False
 dataset_prefix = "awa2"
 dataset_config_file_path = "../../npc-dataset-utils/configs/npc-dataset-utils/" + dataset_prefix + ".json"
-log_level = type.LogLevel.debug
+log_level = type.LogLevel.info
 project_name = "npc-models"
 run_mode = "disabled"
 
@@ -41,17 +41,16 @@ config_baseline = {
     "epochs": 150,
     "file_name_checkpoint": "",
     "file_name_checkpoint_best": "",
-    "learning_rate_scheduler_mode": "min",
+    "learning_rate_scheduler_cooldown": 0,
     "learning_rate_scheduler_factor": 0.1,
+    "learning_rate_scheduler_min_learning_rate": 0,
+    "learning_rate_scheduler_min_learning_rate_decay": 1e-8,
+    "learning_rate_scheduler_mode": "min",
     "learning_rate_scheduler_patience": 10,
     "learning_rate_scheduler_threshold": 1e-4,
     "learning_rate_scheduler_threshold_mode": "rel",
-    "learning_rate_scheduler_cooldown": 0,
-    "learning_rate_scheduler_min_learning_rate": 0,
-    "learning_rate_scheduler_min_learning_rate_decay": 1e-8,
     "model_input_height": 224,
     "model_input_width": 224,
-    "model_input_channels": 3,
     "optimizer_learning_rate": 1e-2,
     "optimizer_momentum": 0.9,
     "optimizer_weight_decay": 4e-5,
@@ -70,19 +69,17 @@ config_decomposed = {
     "epochs": 150,
     "file_name_checkpoint": "",
     "file_name_checkpoint_best": "",
-    "learning_rate_scheduler_mode": "min",
+    "learning_rate_scheduler_cooldown": 0,
     "learning_rate_scheduler_factor": 0.1,
+    "learning_rate_scheduler_min_learning_rate": 0,
+    "learning_rate_scheduler_min_learning_rate_decay": 1e-8,
+    "learning_rate_scheduler_mode": "min",
     "learning_rate_scheduler_patience": 10,
     "learning_rate_scheduler_threshold": 1e-4,
     "learning_rate_scheduler_threshold_mode": "rel",
-    "learning_rate_scheduler_cooldown": 0,
-    "learning_rate_scheduler_min_learning_rate": 0,
-    "learning_rate_scheduler_min_learning_rate_decay": 1e-8,
-    "learning_rate_scheduler_last_epoch": -1,
     "model_head_hidden_size": 128,
     "model_input_height": 224,
     "model_input_width": 224,
-    "model_input_channels": 3,
     "model_pretrained_weights": "",
     "optimizer_learning_rate": 1e-2,
     "optimizer_momentum": 0.9,
@@ -93,8 +90,8 @@ config_decomposed = {
 }
 
 config_reference = {
-    "concept_loss_weight": 1,
     "batch_size": 256,
+    "concept_loss_weight": 1,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
     "dir_dataset_test": "../../datasets/" + dataset_prefix + "/splits/instances/test",
@@ -103,14 +100,13 @@ config_reference = {
     "epochs": 150,
     "file_name_checkpoint": "",
     "file_name_checkpoint_best": "",
-    "learning_rate_scheduler_mode": "min",
     "learning_rate_scheduler_factor": 0.1,
+    "learning_rate_scheduler_mode": "min",
     "learning_rate_scheduler_patience": 10,
     "model": "cbm",
     "model_embedding_size": 16,
     "model_input_height": 224,
     "model_input_width": 224,
-    "model_input_channels": 3,
     "optimizer_learning_rate": 1e-2,
     "optimizer_momentum": 0.9,
     "optimizer_weight_decay": 4e-5,
@@ -124,18 +120,17 @@ config_spn = {
     "dir_dataset_train": "../../datasets/" + dataset_prefix + "/splits/pc/train.txt",
     "dir_dataset_validation": "../../datasets/" + dataset_prefix + "/splits/pc/validate.txt",
     "epochs": 50,
-    "file_path_spn": "../../learnspn/output/learnspn/" + dataset_prefix + ".spn.txt",
     "file_name_checkpoint": "",
     "file_name_checkpoint_best": "",
+    "file_path_spn": "../../learnspn/output/learnspn/" + dataset_prefix + ".spn.txt",
     "epsilon_projection": 1e-2,
     "epsilon_smoothing": 1e-3,
-    "growth_threshold": 100,
-    "joint_inference_only": True,
+    "inference_only": True,
+    "learning_rate_scheduler_cooldown": 1,
     "learning_rate_scheduler_factor": 0.5,
+    "learning_rate_scheduler_min_learning_rate": 1e-4,
     "learning_rate_scheduler_patience": 1,
     "learning_rate_scheduler_threshold": 1e-2,
-    "learning_rate_scheduler_cooldown": 1,
-    "learning_rate_scheduler_min_learning_rate": 1e-4,
     "model_pretrained_weights": "",
     "optimizer_learning_rate": 1e-1,
     "optimizer_prior_factor": 1e2,
