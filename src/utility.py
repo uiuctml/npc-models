@@ -85,6 +85,23 @@ def createTransform(config):
 
     return dataset_transforms
 
+def defineMetrics():
+    wandb.define_metric("testing/batch/step")
+    wandb.define_metric("testing/epoch/step")
+    wandb.define_metric("training/batch/step")
+    wandb.define_metric("training/epoch/step")
+    wandb.define_metric("validation/batch/step")
+    wandb.define_metric("validation/epoch/step")
+
+    wandb.define_metric("testing/batch/*", step_metric = "testing/batch/step")
+    wandb.define_metric("testing/epoch/*", step_metric = "testing/epoch/step")
+    wandb.define_metric("training/batch/*", step_metric = "training/batch/step")
+    wandb.define_metric("training/epoch/*", step_metric = "training/epoch/step")
+    wandb.define_metric("validation/batch/*", step_metric = "validation/batch/step")
+    wandb.define_metric("validation/epoch/*", step_metric = "validation/epoch/step")
+
+    return
+
 def generateRunName(type, model, seed):
     date_time_list = list(datetime.datetime.now().timetuple())[:-4]
     run_name = str(seed)
@@ -188,31 +205,7 @@ def generateSPNSettings(config_dataset, device):
 
     return spn_settings
 
-def loadCheckpointBest(file_name_checkpoint, model):
-    if not os.path.isdir(header.checkpoint_dir):
-        os.makedirs(header.checkpoint_dir, exist_ok = True)
-
-    try:
-        wandb.restore(file_name_checkpoint, root = header.checkpoint_dir)
-    except:
-        pass
-    else:
-        logger.log_info("Restored checkpoint \"" + file_name_checkpoint + "\" from Weights & Biases.")
-
-    file_path_checkpoint = os.path.join(header.checkpoint_dir, file_name_checkpoint)
-
-    if os.path.isfile(file_path_checkpoint):
-        checkpoint = torch.load(file_path_checkpoint)
-        model.load_state_dict(checkpoint["model_state_dict"])
-
-        logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
-    else:
-        logger.log_fatal("Checkpoint file \"" + file_name_checkpoint + "\" missing.")
-        exit(-1)
-
-    return
-
-def loadCheckpointBestSPN(file_name_checkpoint, model):
+def loadCheckpoint(file_name_checkpoint, model, spn = False):
     if not os.path.isdir(header.checkpoint_dir):
         logger.log_fatal("Checkpoint directory \"" + header.checkpoint_dir + "\" missing.")
         exit(-1)
@@ -221,7 +214,11 @@ def loadCheckpointBestSPN(file_name_checkpoint, model):
 
     if os.path.isfile(file_path_checkpoint):
         checkpoint = torch.load(file_path_checkpoint)
-        model.set_weights(checkpoint["weights"])
+
+        if not spn:
+            model.load_state_dict(checkpoint["model_state_dict"])
+        else:
+            model.set_weights(checkpoint["weights"])
 
         logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
     else:
@@ -237,31 +234,17 @@ def lossNegativeLogLikelihood(output, label):
 
     return negative_log_likelihood.mean()
 
-def saveCheckpoint(file_name_checkpoint, model):
+def saveCheckpoint(file_name_checkpoint, model, spn = False):
     if not os.path.isdir(header.checkpoint_dir):
         os.makedirs(header.checkpoint_dir, exist_ok = True)
 
-    checkpoint = {"model_state_dict": model.state_dict()}
-    file_path_checkpoint = os.path.join(header.checkpoint_dir, file_name_checkpoint)
+    checkpoint = None
 
-    torch.save(checkpoint, file_path_checkpoint)
-
-    try:
-        wandb.save(file_path_checkpoint, base_path = header.checkpoint_dir)
-    except:
-        pass
+    if not spn:
+        checkpoint = {"model_state_dict": model.state_dict()}
     else:
-        logger.log_trace("Saved checkpoint \"" + file_name_checkpoint + "\" to Weights & Biases.")
+        checkpoint = {"weights": model.get_weights()}
 
-    logger.log_trace("Saved checkpoint \"" + file_name_checkpoint + "\".")
-
-    return
-
-def saveCheckpointSPN(file_name_checkpoint, model):
-    if not os.path.isdir(header.checkpoint_dir):
-        os.makedirs(header.checkpoint_dir, exist_ok = True)
-
-    checkpoint = {"weights": model.get_weights()}
     file_path_checkpoint = os.path.join(header.checkpoint_dir, file_name_checkpoint)
 
     torch.save(checkpoint, file_path_checkpoint)
@@ -283,22 +266,5 @@ def setSeed(seed):
     torch.manual_seed(seed)
     numpy.random.seed(seed)
     torch.cuda.manual_seed_all(seed)
-
-    return
-
-def wAndBDefineMetrics():
-    wandb.define_metric("testing/batch/step")
-    wandb.define_metric("testing/epoch/step")
-    wandb.define_metric("training/batch/step")
-    wandb.define_metric("training/epoch/step")
-    wandb.define_metric("validation/batch/step")
-    wandb.define_metric("validation/epoch/step")
-
-    wandb.define_metric("testing/batch/*", step_metric = "testing/batch/step")
-    wandb.define_metric("testing/epoch/*", step_metric = "testing/epoch/step")
-    wandb.define_metric("training/batch/*", step_metric = "training/batch/step")
-    wandb.define_metric("training/epoch/*", step_metric = "training/epoch/step")
-    wandb.define_metric("validation/batch/*", step_metric = "validation/batch/step")
-    wandb.define_metric("validation/epoch/*", step_metric = "validation/epoch/step")
 
     return

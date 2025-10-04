@@ -139,7 +139,7 @@ def main():
 
     wandb.init(project = header.project_name, name = header.run_name_baseline, config = header.config_baseline, mode = header.run_mode)
 
-    utility.wAndBDefineMetrics()
+    utility.defineMetrics()
 
     logger.log_info("Started run \"" + header.run_name_baseline + "\".")
 

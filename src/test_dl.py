@@ -47,7 +47,7 @@ def processArguments():
     return
 
 def test(model_decomposed, data_loader, device, batch_step):
-    utility.loadCheckpointBest(header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
+    utility.loadCheckpoint(header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
 
     accuracy_attribute_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)

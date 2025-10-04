@@ -104,7 +104,7 @@ def computeTVDistance(output_neck, labels_decomposed, tv_distances_epoch, data_l
     return
 
 def test(model_reference, data_loader, device, batch_step):
-    utility.loadCheckpointBest(header.config_reference["file_name_checkpoint_best"], model_reference)
+    utility.loadCheckpoint(header.config_reference["file_name_checkpoint_best"], model_reference)
 
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0

@@ -193,7 +193,7 @@ def main():
         wandb.login()
 
     wandb.init(project = header.project_name, name = header.run_name_reference, config = header.config_reference, mode = header.run_mode)
-    utility.wAndBDefineMetrics()
+    utility.defineMetrics()
     logger.log_info("Started run \"" + header.run_name_reference + "\".")
 
     accuracy_task_validation_best = 0

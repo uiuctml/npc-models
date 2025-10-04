@@ -151,7 +151,7 @@ def main():
         wandb.login()
 
     wandb.init(project = header.project_name, name = header.run_name_decomposed, config = header.config_decomposed, mode = header.run_mode)
-    utility.wAndBDefineMetrics()
+    utility.defineMetrics()
     logger.log_info("Started run \"" + header.run_name_decomposed + "\".")
 
     accuracy_attribute_validation_best = 0

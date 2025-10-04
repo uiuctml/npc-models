@@ -47,7 +47,7 @@ def processArguments():
     return
 
 def test(model_baseline, data_loader, device, batch_step):
-    utility.loadCheckpointBest(header.config_baseline["file_name_checkpoint_best"], model_baseline)
+    utility.loadCheckpoint(header.config_baseline["file_name_checkpoint_best"], model_baseline)
 
     accuracy_task_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)

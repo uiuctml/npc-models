@@ -203,7 +203,7 @@ def main():
     }
 
     wandb.init(project = header.project_name, name = header.run_name_decomposed, config = config, mode = header.run_mode)
-    utility.wAndBDefineMetrics()
+    utility.defineMetrics()
     logger.log_info("Started run \"" + header.run_name_decomposed + "\" and " + header.run_name_spn + ".")
 
     accuracy_task_validation_best = 0
@@ -256,11 +256,11 @@ def main():
     spn_marginal.set_leaf_nodes_categorical(spn_settings_marginal)
 
     if header.config_decomposed["model_pretrained_weights"] != "":
-        utility.loadCheckpointBest(header.config_decomposed["model_pretrained_weights"], model_decomposed)
+        utility.loadCheckpoint(header.config_decomposed["model_pretrained_weights"], model_decomposed)
 
     if header.config_spn["model_pretrained_weights"] != "":
-        utility.loadCheckpointBestSPN(header.config_spn["model_pretrained_weights"], spn_joint)
-        utility.loadCheckpointBestSPN(header.config_spn["model_pretrained_weights"], spn_marginal)
+        utility.loadCheckpoint(header.config_spn["model_pretrained_weights"], spn_joint, True)
+        utility.loadCheckpoint(header.config_spn["model_pretrained_weights"], spn_marginal, True)
     elif header.config_spn["randomize_weights"]:
         logger.log_info("Randomizing SPN weights...")
         spn_joint.randomize_weights()
@@ -297,10 +297,10 @@ def main():
             accuracy_task_validation_best = accuracy_task_validation_epoch
             wandb.log({"validation/epoch/accuracy_task_best": accuracy_task_validation_best})
             utility.saveCheckpoint(header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
-            utility.saveCheckpointSPN(header.config_spn["file_name_checkpoint_best"], spn_joint)
+            utility.saveCheckpoint(header.config_spn["file_name_checkpoint_best"], spn_joint, True)
 
         utility.saveCheckpoint(header.config_decomposed["file_name_checkpoint"], model_decomposed)
-        utility.saveCheckpointSPN(header.config_spn["file_name_checkpoint"], spn_joint)
+        utility.saveCheckpoint(header.config_spn["file_name_checkpoint"], spn_joint, True)
 
         epoch += 1
 
@@ -314,15 +314,15 @@ def main():
         settings_marginal = torch.full((1, spn_settings_joint.shape[1]), -1).to(device)
         logger.log_info("Normalizing SPN weights...")
 
-        utility.loadCheckpointBestSPN(header.config_spn["file_name_checkpoint"], spn_marginal)
+        utility.loadCheckpoint(header.config_spn["file_name_checkpoint"], spn_marginal, True)
         spn_marginal(settings_marginal)
         spn_marginal.normalize_weights(header.config_spn["epsilon_smoothing"])
-        utility.saveCheckpointSPN(header.config_spn["file_name_checkpoint"], spn_marginal)
+        utility.saveCheckpoint(header.config_spn["file_name_checkpoint"], spn_marginal, True)
 
-        utility.loadCheckpointBestSPN(header.config_spn["file_name_checkpoint_best"], spn_marginal)
+        utility.loadCheckpoint(header.config_spn["file_name_checkpoint_best"], spn_marginal, True)
         spn_marginal(settings_marginal)
         spn_marginal.normalize_weights(header.config_spn["epsilon_smoothing"])
-        utility.saveCheckpointSPN(header.config_spn["file_name_checkpoint_best"], spn_marginal)
+        utility.saveCheckpoint(header.config_spn["file_name_checkpoint_best"], spn_marginal, True)
 
         spn_marginal.set_leaf_nodes_categorical(spn_settings_marginal)
 

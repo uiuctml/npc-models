@@ -126,11 +126,11 @@ def saveMPEs(input_file_paths, mpes, mpe_attributes, mpe_correctness, dataset, l
     return
 
 def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loader, device, batch_step):
-    utility.loadCheckpointBest(header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
+    utility.loadCheckpoint(header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
 
     if header.config_spn["run_name"] != "":
-        utility.loadCheckpointBestSPN(header.config_spn["file_name_checkpoint_best"], spn_joint)
-        utility.loadCheckpointBestSPN(header.config_spn["file_name_checkpoint_best"], spn_marginal)
+        utility.loadCheckpoint(header.config_spn["file_name_checkpoint_best"], spn_joint, True)
+        utility.loadCheckpoint(header.config_spn["file_name_checkpoint_best"], spn_marginal, True)
 
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
