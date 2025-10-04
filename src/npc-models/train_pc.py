@@ -4,7 +4,7 @@ import argparse
 import header
 import logger
 import spn
-import test_spn
+import test_pc
 import torch
 import tqdm
 import utility
@@ -22,7 +22,7 @@ def processArguments():
     if arguments.seed is not None:
         header.config_spn["seed"] = arguments.seed
 
-    test_spn.initializeRunName()
+    test_pc.initializeRunName()
 
     logger.log_trace("Run name: \"" + header.config_spn["run_name"] + "\".")
     logger.log_trace("Epochs: " + str(header.config_spn["epochs"]) + ".")
@@ -63,9 +63,9 @@ def main():
     logger.log_info("Started run \"" + header.config_spn["run_name"] + "\".")
 
     device = torch.device("cuda")
-    dataset_test = test_spn.loadDataset(header.config_spn["file_path_dataset_test"], device)
-    dataset_train = test_spn.loadDataset(header.config_spn["file_path_dataset_train"], device)
-    dataset_validation = test_spn.loadDataset(header.config_spn["file_path_dataset_validation"], device)
+    dataset_test = test_pc.loadDataset(header.config_spn["file_path_dataset_test"], device)
+    dataset_train = test_pc.loadDataset(header.config_spn["file_path_dataset_train"], device)
+    dataset_validation = test_pc.loadDataset(header.config_spn["file_path_dataset_validation"], device)
     epoch = 1
     log_likelihood_validation_best = float("-inf")
     log_likelihood_train_epoch = 0
@@ -94,7 +94,7 @@ def main():
     logger.log_trace("SPN depth: " + str(spn_joint.depth) + ".")
 
     logger.log_info("Testing SPN...")
-    test_spn.test(spn_joint, dataset_test)
+    test_pc.test(spn_joint, dataset_test)
 
     if epoch <= header.config_spn["epochs"]:
         progress_bar = tqdm.tqdm(total = header.config_spn["epochs"], position = 0)
@@ -139,7 +139,7 @@ def main():
 
     wandb.log({"testing/epoch/step": 1})
     utility.loadCheckpoint(header.config_spn["file_name_checkpoint_best"], spn_joint, True)
-    test_spn.test(spn_joint, dataset_test)
+    test_pc.test(spn_joint, dataset_test)
 
     return
 

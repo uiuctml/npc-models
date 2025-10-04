@@ -8,7 +8,7 @@ import model
 import spn
 import test_composed
 import test_dl
-import test_spn
+import test_pc
 import torch
 import tqdm
 import utility
@@ -24,7 +24,7 @@ def processArguments():
     arguments = parser.parse_args()
 
     test_dl.initializeRunName()
-    test_spn.initializeRunName("", "pgd")
+    test_pc.initializeRunName("", "pgd")
 
     if arguments.weights_attribute != "":
         header.config_decomposed["model_pretrained_weights"] = arguments.weights_attribute

@@ -9,7 +9,7 @@ import model
 import os
 import spn
 import test_dl
-import test_spn
+import test_pc
 import torch
 import tqdm
 import utility
@@ -70,7 +70,7 @@ def processArguments():
         header.config_spn["file_name_checkpoint_best"] = ""
         header.config_spn["run_name"] = ""
     else:
-        test_spn.initializeRunName(arguments.run_name_pc, "pgd")
+        test_pc.initializeRunName(arguments.run_name_pc, "pgd")
 
     if arguments.seed is not None:
         header.config_decomposed["seed"] = arguments.seed

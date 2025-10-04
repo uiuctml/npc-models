@@ -2,4 +2,4 @@
 
 cd "../../src/npc-models"
 
-./train_spn.py -e 50 -s 42
+./train_pc.py -e 50 -s 42
