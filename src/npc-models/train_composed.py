@@ -7,7 +7,7 @@ import logger
 import model
 import pc
 import test_composed
-import test_dl
+import test_neural
 import test_pc
 import torch
 import tqdm
@@ -23,7 +23,7 @@ def processArguments():
     parser.add_argument("-s", "--seed", type = int, default = None, help = "Random seed.")
     arguments = parser.parse_args()
 
-    test_dl.initializeRunName()
+    test_neural.initializeRunName()
     test_pc.initializeRunName("", "pgd")
 
     if arguments.weights_attribute != "":

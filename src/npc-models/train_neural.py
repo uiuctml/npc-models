@@ -6,7 +6,7 @@ import header
 import logger
 import math
 import model
-import test_dl
+import test_neural
 import torch
 import tqdm
 import utility
@@ -40,7 +40,7 @@ def processArguments():
     if arguments.seed is not None:
         header.config_decomposed["seed"] = arguments.seed
 
-    test_dl.initializeRunName()
+    test_neural.initializeRunName()
 
     logger.log_trace("Run name: \"" + header.config_decomposed["run_name"] + "\".")
     logger.log_trace("Batch size: " + str(header.config_decomposed["batch_size"]) + ".")
@@ -214,7 +214,7 @@ def main():
     wandb.summary["validation/epoch/accuracy_attribute_best"] = accuracy_attribute_validation_best
 
     wandb.log({"testing/epoch/step": batch_step_test})
-    test_dl.test(model_decomposed, data_loader_test, device, batch_step_test)
+    test_neural.test(model_decomposed, data_loader_test, device, batch_step_test)
 
     wandb.finish()
 

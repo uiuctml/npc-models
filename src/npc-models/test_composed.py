@@ -8,7 +8,7 @@ import logger
 import model
 import os
 import pc
-import test_dl
+import test_neural
 import test_pc
 import torch
 import tqdm
@@ -62,7 +62,7 @@ def processArguments():
     parser.add_argument("-s", "--seed", type = int, default = None, help = "Random seed.")
     arguments = parser.parse_args()
 
-    test_dl.initializeRunName(arguments.run_name_attribute)
+    test_neural.initializeRunName(arguments.run_name_attribute)
 
     if arguments.run_name_pc == "":
         logger.log_info("Proceeding without PC run name.")
