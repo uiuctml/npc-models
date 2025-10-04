@@ -12,13 +12,13 @@ import wandb
 
 def initializeRunName(run_name = ""):
     if run_name != "":
-        if run_name.split(".")[1] != header.run_name_keyword_baseline:
+        if run_name.split(".")[1] != header.config_baseline["type"]:
             logger.log_fatal("Invalid baseline run name. Quit.")
             exit(-1)
 
         header.run_name_baseline = run_name
     else:
-        header.run_name_baseline = utility.generateRunName(header.run_name_keyword_baseline, "resnet34", header.config_baseline["seed"])
+        header.run_name_baseline = utility.generateRunName(header.config_baseline["type"], "resnet34", header.config_baseline["seed"])
 
     if header.run_name_baseline == "":
         logger.log_fatal("Missing baseline run name. Quit.")
@@ -47,7 +47,7 @@ def processArguments():
     return
 
 def test(model_baseline, data_loader, device, batch_step):
-    utility.loadCheckpointBest(header.config_baseline["dir_checkpoints"], header.config_baseline["file_name_checkpoint_best"], model_baseline)
+    utility.loadCheckpointBest(header.config_baseline["file_name_checkpoint_best"], model_baseline)
 
     accuracy_task_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)

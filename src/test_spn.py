@@ -10,13 +10,13 @@ import wandb
 
 def initializeRunName(run_name = "", optimizer = "cccp"):
     if run_name != "":
-        if run_name.split(".")[1] != header.run_name_keyword_spn:
+        if run_name.split(".")[1] != header.config_spn["type"]:
             logger.log_fatal("Invalid PC run name. Quit.")
             exit(-1)
 
         header.run_name_spn = run_name
     else:
-        header.run_name_spn = utility.generateRunName(header.run_name_keyword_spn, optimizer, header.config_spn["seed"])
+        header.run_name_spn = utility.generateRunName(header.config_spn["type"], optimizer, header.config_spn["seed"])
 
     if header.run_name_spn == "":
         logger.log_fatal("Missing PC run name. Quit.")
@@ -105,7 +105,7 @@ def main():
     logger.log_trace("SPN depth: " + str(spn_joint.depth) + ".")
 
     if header.config_spn["run_name"] != "":
-        utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
+        utility.loadCheckpointBestSPN(spn_joint, header.config_spn["file_name_checkpoint_best"])
 
     test(spn_joint, dataset_test)
 

@@ -14,13 +14,13 @@ import wandb
 
 def initializeRunName(run_name = ""):
     if run_name != "":
-        if run_name.split(".")[1] != header.run_name_keyword_reference:
+        if run_name.split(".")[1] != header.config_reference["type"]:
             logger.log_fatal("Invalid reference run name. Quit.")
             exit(-1)
 
         header.run_name_reference = run_name
     else:
-        header.run_name_reference = utility.generateRunName(header.run_name_keyword_reference, header.config_reference["model"], header.config_reference["seed"])
+        header.run_name_reference = utility.generateRunName(header.config_reference["type"], header.config_reference["model"], header.config_reference["seed"])
 
     if header.run_name_reference == "":
         logger.log_fatal("Missing reference run name. Quit.")
@@ -104,7 +104,7 @@ def computeTVDistance(output_neck, labels_decomposed, tv_distances_epoch, data_l
     return
 
 def test(model_reference, data_loader, device, batch_step):
-    utility.loadCheckpointBest(header.config_reference["dir_checkpoints"], header.config_reference["file_name_checkpoint_best"], model_reference)
+    utility.loadCheckpointBest(header.config_reference["file_name_checkpoint_best"], model_reference)
 
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0

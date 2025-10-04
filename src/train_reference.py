@@ -235,9 +235,9 @@ def main():
         if accuracy_task_validation_epoch > accuracy_task_validation_best or epoch == 1:
             accuracy_task_validation_best = accuracy_task_validation_epoch
             wandb.log({"validation/epoch/accuracy_task_best": accuracy_task_validation_best})
-            utility.saveCheckpoint(header.config_reference["dir_checkpoints"], header.config_reference["file_name_checkpoint_best"], accuracy_task_validation_best, 0, 0, [], epoch, [], model_reference, [])
+            utility.saveCheckpoint(header.config_reference["file_name_checkpoint_best"], model_reference)
 
-        utility.saveCheckpoint(header.config_reference["dir_checkpoints"], header.config_reference["file_name_checkpoint"], accuracy_task_validation_best, 0, 0, [], epoch, [], model_reference, [])
+        utility.saveCheckpoint(header.config_reference["file_name_checkpoint"], model_reference)
 
         epoch += 1
 

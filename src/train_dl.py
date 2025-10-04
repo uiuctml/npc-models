@@ -201,9 +201,9 @@ def main():
         if accuracy_attribute_validation_epoch > accuracy_attribute_validation_best or epoch == 1:
             accuracy_attribute_validation_best = accuracy_attribute_validation_epoch
             wandb.log({"validation/epoch/accuracy_attribute_best": accuracy_attribute_validation_best})
-            utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], accuracy_attribute_validation_best, batch_step_train, batch_step_validate, criterions, epoch, [learning_rate_scheduler], model_decomposed, [optimizer])
+            utility.saveCheckpoint(header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
 
-        utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_attribute_validation_best, batch_step_train, batch_step_validate, criterions, epoch, [learning_rate_scheduler], model_decomposed, [optimizer])
+        utility.saveCheckpoint(header.config_decomposed["file_name_checkpoint"], model_decomposed)
 
         epoch += 1
 

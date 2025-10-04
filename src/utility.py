@@ -1,4 +1,5 @@
 import datetime
+import header
 import logger
 import natsort
 import numpy
@@ -187,18 +188,18 @@ def generateSPNSettings(config_dataset, device):
 
     return spn_settings
 
-def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
-    if not os.path.isdir(dir_checkpoints):
-        os.makedirs(dir_checkpoints, exist_ok = True)
+def loadCheckpointBest(file_name_checkpoint, model):
+    if not os.path.isdir(header.checkpoint_dir):
+        os.makedirs(header.checkpoint_dir, exist_ok = True)
 
     try:
-        wandb.restore(file_name_checkpoint, root = dir_checkpoints)
+        wandb.restore(file_name_checkpoint, root = header.checkpoint_dir)
     except:
         pass
     else:
         logger.log_info("Restored checkpoint \"" + file_name_checkpoint + "\" from Weights & Biases.")
 
-    file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
+    file_path_checkpoint = os.path.join(header.checkpoint_dir, file_name_checkpoint)
 
     if os.path.isfile(file_path_checkpoint):
         checkpoint = torch.load(file_path_checkpoint)
@@ -211,12 +212,12 @@ def loadCheckpointBest(dir_checkpoints, file_name_checkpoint, model):
 
     return
 
-def loadCheckpointBestSPN(spn, dir_checkpoints, file_name_checkpoint):
-    if not os.path.isdir(dir_checkpoints):
-        logger.log_fatal("Checkpoint directory \"" + dir_checkpoints + "\" missing.")
+def loadCheckpointBestSPN(spn, file_name_checkpoint):
+    if not os.path.isdir(header.checkpoint_dir):
+        logger.log_fatal("Checkpoint directory \"" + header.checkpoint_dir + "\" missing.")
         exit(-1)
 
-    file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
+    file_path_checkpoint = os.path.join(header.checkpoint_dir, file_name_checkpoint)
 
     if os.path.isfile(file_path_checkpoint):
         checkpoint = torch.load(file_path_checkpoint)
@@ -236,35 +237,17 @@ def lossNegativeLogLikelihood(output, label):
 
     return negative_log_likelihood.mean()
 
-def saveCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_best, batch_step_train, batch_step_validate, criterions, epoch, learning_rate_schedulers, model, optimizers):
-    if not os.path.isdir(dir_checkpoints):
-        os.makedirs(dir_checkpoints, exist_ok = True)
+def saveCheckpoint(file_name_checkpoint, model):
+    if not os.path.isdir(header.checkpoint_dir):
+        os.makedirs(header.checkpoint_dir, exist_ok = True)
 
-    learning_rate_scheduler_state_dict_list = []
-    optimizer_state_dict_list = []
-
-    for learning_rate_scheduler in learning_rate_schedulers:
-        learning_rate_scheduler_state_dict_list.append(learning_rate_scheduler.state_dict())
-
-    for optimizer in optimizers:
-        optimizer_state_dict_list.append(optimizer.state_dict())
-
-    checkpoint = {
-        "accuracy_validation_best": accuracy_validation_best,
-        "batch_step_train": batch_step_train,
-        "batch_step_validate": batch_step_validate,
-        "criterions": criterions,
-        "epoch": epoch,
-        "learning_rate_scheduler_state_dict_list": learning_rate_scheduler_state_dict_list,
-        "model_state_dict": model.state_dict(),
-        "optimizer_state_dict_list": optimizer_state_dict_list
-    }
-    file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
+    checkpoint = {"model_state_dict": model.state_dict()}
+    file_path_checkpoint = os.path.join(header.checkpoint_dir, file_name_checkpoint)
 
     torch.save(checkpoint, file_path_checkpoint)
 
     try:
-        wandb.save(file_path_checkpoint, base_path = dir_checkpoints)
+        wandb.save(file_path_checkpoint, base_path = header.checkpoint_dir)
     except:
         pass
     else:
@@ -274,24 +257,19 @@ def saveCheckpoint(dir_checkpoints, file_name_checkpoint, accuracy_validation_be
 
     return
 
-def saveCheckpointSPN(spn, dir_checkpoints, file_name_checkpoint, log_likelihood_best, log_likelihood_train_last, epoch):
+def saveCheckpointSPN(spn, file_name_checkpoint):
     weights = spn.get_weights()
 
-    if not os.path.isdir(dir_checkpoints):
-        os.makedirs(dir_checkpoints, exist_ok = True)
+    if not os.path.isdir(header.checkpoint_dir):
+        os.makedirs(header.checkpoint_dir, exist_ok = True)
 
-    checkpoint = {
-        "epoch": epoch,
-        "log_likelihood_best": log_likelihood_best,
-        "log_likelihood_train_last": log_likelihood_train_last,
-        "weights": weights
-    }
-    file_path_checkpoint = os.path.join(dir_checkpoints, file_name_checkpoint)
+    checkpoint = {"weights": weights}
+    file_path_checkpoint = os.path.join(header.checkpoint_dir, file_name_checkpoint)
 
     torch.save(checkpoint, file_path_checkpoint)
 
     try:
-        wandb.save(file_path_checkpoint, base_path = dir_checkpoints)
+        wandb.save(file_path_checkpoint, base_path = header.checkpoint_dir)
     except:
         pass
     else:

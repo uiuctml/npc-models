@@ -12,13 +12,13 @@ import wandb
 
 def initializeRunName(run_name = ""):
     if run_name != "":
-        if run_name.split(".")[1] != header.run_name_keyword_decomposed:
+        if run_name.split(".")[1] != header.config_decomposed["type"]:
             logger.log_fatal("Invalid attribute run name. Quit.")
             exit(-1)
 
         header.run_name_decomposed = run_name
     else:
-        header.run_name_decomposed = utility.generateRunName(header.run_name_keyword_decomposed, "resnet34_mtl", header.config_decomposed["seed"])
+        header.run_name_decomposed = utility.generateRunName(header.config_decomposed["type"], "resnet34_mtl", header.config_decomposed["seed"])
 
     if header.run_name_decomposed == "":
         logger.log_fatal("Missing attribute run name. Quit.")
@@ -47,7 +47,7 @@ def processArguments():
     return
 
 def test(model_decomposed, data_loader, device, batch_step):
-    utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
+    utility.loadCheckpointBest(header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
 
     accuracy_attribute_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)

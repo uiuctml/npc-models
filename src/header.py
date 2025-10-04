@@ -9,6 +9,10 @@ model_head_hidden_size = 128
 project_name = "npc-models"
 seed = 42
 
+checkpoint_dir = "../checkpoints"
+checkpoint_postfix = ".zip"
+checkpoint_postfix_best = ".best.zip"
+
 composed_mpe_dir_output = "../output/mpe"
 composed_mpe_file_name = "mpe.json"
 composed_mpe_find = False
@@ -34,16 +38,11 @@ run_name_baseline = ""
 run_name_decomposed = ""
 run_name_reference = ""
 run_name_spn = ""
-run_name_keyword_baseline = "baseline"
-run_name_keyword_decomposed = "decomposed"
-run_name_keyword_reference = "reference"
-run_name_keyword_spn = "spn"
 
 config_baseline = {
     "batch_size": 256,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
-    "dir_checkpoints": "../checkpoints",
     "dir_dataset_test": "../../datasets/" + dataset_prefix + "/splits/instances/test",
     "dir_dataset_train": "../../datasets/" + dataset_prefix + "/splits/instances/train",
     "dir_dataset_validation": "../../datasets/" + dataset_prefix + "/splits/instances/validate",
@@ -73,7 +72,6 @@ config_decomposed = {
     "batch_size": 256,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
-    "dir_checkpoints": "../checkpoints",
     "dir_dataset_test": "../../datasets/" + dataset_prefix + "/splits/instances/test",
     "dir_dataset_train": "../../datasets/" + dataset_prefix + "/splits/instances/train",
     "dir_dataset_validation": "../../datasets/" + dataset_prefix + "/splits/instances/validate",
@@ -106,7 +104,6 @@ config_reference = {
     "batch_size": 256,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
-    "dir_checkpoints": "../checkpoints",
     "dir_dataset_test": "../../datasets/" + dataset_prefix + "/splits/instances/test",
     "dir_dataset_train": "../../datasets/" + dataset_prefix + "/splits/instances/train",
     "dir_dataset_validation": "../../datasets/" + dataset_prefix + "/splits/instances/validate",
@@ -130,11 +127,10 @@ config_reference = {
 }
 
 config_spn = {
-    "dir_checkpoints": "../checkpoints",
-    "epochs": 50,
     "dir_dataset_test": "../../datasets/" + dataset_prefix + "/splits/pc/test.txt",
     "dir_dataset_train": "../../datasets/" + dataset_prefix + "/splits/pc/train.txt",
     "dir_dataset_validation": "../../datasets/" + dataset_prefix + "/splits/pc/validate.txt",
+    "epochs": 50,
     "file_path_spn": "../../learnspn/output/learnspn/" + dataset_prefix + ".spn.txt",
     "file_name_checkpoint": run_name_spn + ".tar",
     "file_name_checkpoint_best": run_name_spn + ".best.tar",

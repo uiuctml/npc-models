@@ -256,11 +256,11 @@ def main():
     spn_marginal.set_leaf_nodes_categorical(spn_settings_marginal)
 
     if header.config_decomposed["model_pretrained_weights"] != "":
-        utility.loadCheckpointBest(header.config_decomposed["dir_checkpoints"], header.config_decomposed["model_pretrained_weights"], model_decomposed)
+        utility.loadCheckpointBest(header.config_decomposed["model_pretrained_weights"], model_decomposed)
 
     if header.config_spn["model_pretrained_weights"] != "":
-        utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["model_pretrained_weights"])
-        utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["model_pretrained_weights"])
+        utility.loadCheckpointBestSPN(spn_joint, header.config_spn["model_pretrained_weights"])
+        utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["model_pretrained_weights"])
     elif header.config_spn["randomize_weights"]:
         logger.log_info("Randomizing SPN weights...")
         spn_joint.randomize_weights()
@@ -296,11 +296,11 @@ def main():
         if accuracy_task_validation_epoch > accuracy_task_validation_best or epoch == 1:
             accuracy_task_validation_best = accuracy_task_validation_epoch
             wandb.log({"validation/epoch/accuracy_task_best": accuracy_task_validation_best})
-            utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint_best"], accuracy_task_validation_best, batch_step_train, batch_step_validate, [criterion], epoch, [learning_rate_scheduler], model_decomposed, [optimizer_decomposed])
-            utility.saveCheckpointSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"], 0, 0, 0)
+            utility.saveCheckpoint(header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
+            utility.saveCheckpointSPN(spn_joint, header.config_spn["file_name_checkpoint_best"])
 
-        utility.saveCheckpoint(header.config_decomposed["dir_checkpoints"], header.config_decomposed["file_name_checkpoint"], accuracy_task_validation_best, batch_step_train, batch_step_validate, [criterion], epoch, [learning_rate_scheduler], model_decomposed, [optimizer_decomposed])
-        utility.saveCheckpointSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], 0, 0, 0)
+        utility.saveCheckpoint(header.config_decomposed["file_name_checkpoint"], model_decomposed)
+        utility.saveCheckpointSPN(spn_joint, header.config_spn["file_name_checkpoint"])
 
         epoch += 1
 
@@ -314,15 +314,15 @@ def main():
         settings_marginal = torch.full((1, spn_settings_joint.shape[1]), -1).to(device)
         logger.log_info("Normalizing SPN weights...")
 
-        utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"])
+        utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["file_name_checkpoint"])
         spn_marginal(settings_marginal)
         spn_marginal.normalize_weights(header.config_spn["epsilon_smoothing"])
-        utility.saveCheckpointSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint"], 0, 0, 0)
+        utility.saveCheckpointSPN(spn_marginal, header.config_spn["file_name_checkpoint"])
 
-        utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
+        utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["file_name_checkpoint_best"])
         spn_marginal(settings_marginal)
         spn_marginal.normalize_weights(header.config_spn["epsilon_smoothing"])
-        utility.saveCheckpointSPN(spn_marginal, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"], 0, 0, 0)
+        utility.saveCheckpointSPN(spn_marginal, header.config_spn["file_name_checkpoint_best"])
 
         spn_marginal.set_leaf_nodes_categorical(spn_settings_marginal)
 
