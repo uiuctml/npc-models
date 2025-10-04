@@ -145,8 +145,8 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
     utility.loadCheckpointBest(header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
 
     if header.config_spn["run_name"] != "":
-        utility.loadCheckpointBestSPN(spn_joint, header.config_spn["file_name_checkpoint_best"])
-        utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["file_name_checkpoint_best"])
+        utility.loadCheckpointBestSPN(header.config_spn["file_name_checkpoint_best"], spn_joint)
+        utility.loadCheckpointBestSPN(header.config_spn["file_name_checkpoint_best"], spn_marginal)
 
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0

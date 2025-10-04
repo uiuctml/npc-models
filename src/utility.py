@@ -212,7 +212,7 @@ def loadCheckpointBest(file_name_checkpoint, model):
 
     return
 
-def loadCheckpointBestSPN(spn, file_name_checkpoint):
+def loadCheckpointBestSPN(file_name_checkpoint, model):
     if not os.path.isdir(header.checkpoint_dir):
         logger.log_fatal("Checkpoint directory \"" + header.checkpoint_dir + "\" missing.")
         exit(-1)
@@ -221,7 +221,7 @@ def loadCheckpointBestSPN(spn, file_name_checkpoint):
 
     if os.path.isfile(file_path_checkpoint):
         checkpoint = torch.load(file_path_checkpoint)
-        spn.set_weights(checkpoint["weights"])
+        model.set_weights(checkpoint["weights"])
 
         logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
     else:
@@ -257,13 +257,11 @@ def saveCheckpoint(file_name_checkpoint, model):
 
     return
 
-def saveCheckpointSPN(spn, file_name_checkpoint):
-    weights = spn.get_weights()
-
+def saveCheckpointSPN(file_name_checkpoint, model):
     if not os.path.isdir(header.checkpoint_dir):
         os.makedirs(header.checkpoint_dir, exist_ok = True)
 
-    checkpoint = {"weights": weights}
+    checkpoint = {"weights": model.get_weights()}
     file_path_checkpoint = os.path.join(header.checkpoint_dir, file_name_checkpoint)
 
     torch.save(checkpoint, file_path_checkpoint)

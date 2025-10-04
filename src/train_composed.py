@@ -259,8 +259,8 @@ def main():
         utility.loadCheckpointBest(header.config_decomposed["model_pretrained_weights"], model_decomposed)
 
     if header.config_spn["model_pretrained_weights"] != "":
-        utility.loadCheckpointBestSPN(spn_joint, header.config_spn["model_pretrained_weights"])
-        utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["model_pretrained_weights"])
+        utility.loadCheckpointBestSPN(header.config_spn["model_pretrained_weights"], spn_joint)
+        utility.loadCheckpointBestSPN(header.config_spn["model_pretrained_weights"], spn_marginal)
     elif header.config_spn["randomize_weights"]:
         logger.log_info("Randomizing SPN weights...")
         spn_joint.randomize_weights()
@@ -297,10 +297,10 @@ def main():
             accuracy_task_validation_best = accuracy_task_validation_epoch
             wandb.log({"validation/epoch/accuracy_task_best": accuracy_task_validation_best})
             utility.saveCheckpoint(header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
-            utility.saveCheckpointSPN(spn_joint, header.config_spn["file_name_checkpoint_best"])
+            utility.saveCheckpointSPN(header.config_spn["file_name_checkpoint_best"], spn_joint)
 
         utility.saveCheckpoint(header.config_decomposed["file_name_checkpoint"], model_decomposed)
-        utility.saveCheckpointSPN(spn_joint, header.config_spn["file_name_checkpoint"])
+        utility.saveCheckpointSPN(header.config_spn["file_name_checkpoint"], spn_joint)
 
         epoch += 1
 
@@ -314,15 +314,15 @@ def main():
         settings_marginal = torch.full((1, spn_settings_joint.shape[1]), -1).to(device)
         logger.log_info("Normalizing SPN weights...")
 
-        utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["file_name_checkpoint"])
+        utility.loadCheckpointBestSPN(header.config_spn["file_name_checkpoint"], spn_marginal)
         spn_marginal(settings_marginal)
         spn_marginal.normalize_weights(header.config_spn["epsilon_smoothing"])
-        utility.saveCheckpointSPN(spn_marginal, header.config_spn["file_name_checkpoint"])
+        utility.saveCheckpointSPN(header.config_spn["file_name_checkpoint"], spn_marginal)
 
-        utility.loadCheckpointBestSPN(spn_marginal, header.config_spn["file_name_checkpoint_best"])
+        utility.loadCheckpointBestSPN(header.config_spn["file_name_checkpoint_best"], spn_marginal)
         spn_marginal(settings_marginal)
         spn_marginal.normalize_weights(header.config_spn["epsilon_smoothing"])
-        utility.saveCheckpointSPN(spn_marginal, header.config_spn["file_name_checkpoint_best"])
+        utility.saveCheckpointSPN(header.config_spn["file_name_checkpoint_best"], spn_marginal)
 
         spn_marginal.set_leaf_nodes_categorical(spn_settings_marginal)
 

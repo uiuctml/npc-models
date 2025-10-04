@@ -121,9 +121,9 @@ def main():
 
             wandb.log({"validation/epoch/log_likelihood_best": log_likelihood_validation_best})
 
-            utility.saveCheckpointSPN(spn_joint, header.config_spn["file_name_checkpoint_best"])
+            utility.saveCheckpointSPN(header.config_spn["file_name_checkpoint_best"], spn_joint)
 
-        utility.saveCheckpointSPN(spn_joint, header.config_spn["file_name_checkpoint"])
+        utility.saveCheckpointSPN(header.config_spn["file_name_checkpoint"], spn_joint)
 
         if epoch > 1 and abs(log_likelihood_train_epoch - log_likelihood_train_epoch_last) < header.config_spn["stopping_criterion"]:
             logger.log_info("Stopping criterion reached.")
@@ -138,7 +138,7 @@ def main():
     wandb.summary["validation/epoch/log_likelihood_best"] = log_likelihood_validation_best
 
     wandb.log({"testing/epoch/step": 1})
-    utility.loadCheckpointBestSPN(spn_joint, header.config_spn["file_name_checkpoint_best"])
+    utility.loadCheckpointBestSPN(header.config_spn["file_name_checkpoint_best"], spn_joint)
     test_spn.test(spn_joint, dataset_test)
 
     return

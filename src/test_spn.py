@@ -105,7 +105,7 @@ def main():
     logger.log_trace("SPN depth: " + str(spn_joint.depth) + ".")
 
     if header.config_spn["run_name"] != "":
-        utility.loadCheckpointBestSPN(spn_joint, header.config_spn["file_name_checkpoint_best"])
+        utility.loadCheckpointBestSPN(header.config_spn["file_name_checkpoint_best"], spn_joint)
 
     test(spn_joint, dataset_test)
 
