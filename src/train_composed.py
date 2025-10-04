@@ -10,7 +10,6 @@ import test_composed
 import test_dl
 import test_spn
 import torch
-import torchinfo
 import tqdm
 import utility
 import wandb
@@ -267,16 +266,12 @@ def main():
         spn_joint.randomize_weights()
         spn_marginal.set_weights(spn_joint.get_weights())
 
-    if header.show_model_summary:
-        model_input_size = (header.config_decomposed["model_input_channels"], header.config_decomposed["model_input_height"], header.config_decomposed["model_input_width"])
-        torchinfo.summary(model_decomposed, input_size = model_input_size)
-
-        logger.log_info("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
-        logger.log_info("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
-        logger.log_info("Number of product nodes: " + str(len(spn_joint.product_nodes)) + ".")
-        logger.log_info("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
-        logger.log_info("SPN depth: " + str(spn_joint.depth) + ".")
-        logger.log_info("SPN leaf node setting dimension: (" + str(int(spn_settings_joint.shape[0])) + ", " + str(int(spn_settings_joint.shape[1])) + ").")
+    logger.log_trace("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
+    logger.log_trace("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
+    logger.log_trace("Number of product nodes: " + str(len(spn_joint.product_nodes)) + ".")
+    logger.log_trace("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
+    logger.log_trace("SPN depth: " + str(spn_joint.depth) + ".")
+    logger.log_trace("SPN leaf node setting dimension: (" + str(int(spn_settings_joint.shape[0])) + ", " + str(int(spn_settings_joint.shape[1])) + ").")
 
     if epoch <= header.config_decomposed["epochs"]:
         progress_bar = tqdm.tqdm(total = header.config_decomposed["epochs"], position = 0)

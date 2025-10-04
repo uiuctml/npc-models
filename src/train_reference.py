@@ -8,7 +8,6 @@ import math
 import model
 import test_reference
 import torch
-import torchinfo
 import tqdm
 import type
 import utility
@@ -218,10 +217,6 @@ def main():
     progress_bar = tqdm.tqdm(total = header.config_reference["epochs"], position = 0)
 
     progress_bar.set_description_str("[INFO]: Epoch")
-
-    if header.show_model_summary:
-        model_input_size = (header.config_reference["model_input_channels"], header.config_reference["model_input_height"], header.config_reference["model_input_width"])
-        torchinfo.summary(model_reference, input_size = model_input_size)
 
     while epoch <= header.config_reference["epochs"]:
         progress_bar.n = epoch

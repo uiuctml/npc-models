@@ -8,7 +8,6 @@ log_level = type.LogLevel.debug
 model_head_hidden_size = 128
 project_name = "npc-models"
 seed = 42
-show_model_summary = False
 
 composed_mpe_dir_output = "../output/mpe"
 composed_mpe_file_name = "mpe.json"

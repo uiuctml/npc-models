@@ -283,13 +283,12 @@ def main():
     spn_joint.set_leaf_nodes_categorical(spn_settings_joint)
     spn_marginal.set_leaf_nodes_categorical(spn_settings_marginal)
 
-    if header.show_model_summary:
-        logger.log_info("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
-        logger.log_info("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
-        logger.log_info("Number of product nodes: " + str(len(spn_joint.product_nodes)) + ".")
-        logger.log_info("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
-        logger.log_info("SPN depth: " + str(spn_joint.depth) + ".")
-        logger.log_info("SPN leaf node setting dimension: (" + str(int(spn_settings_joint.shape[0])) + ", " + str(int(spn_settings_joint.shape[1])) + ").")
+    logger.log_trace("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
+    logger.log_trace("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
+    logger.log_trace("Number of product nodes: " + str(len(spn_joint.product_nodes)) + ".")
+    logger.log_trace("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
+    logger.log_trace("SPN depth: " + str(spn_joint.depth) + ".")
+    logger.log_trace("SPN leaf node setting dimension: (" + str(int(spn_settings_joint.shape[0])) + ", " + str(int(spn_settings_joint.shape[1])) + ").")
 
     test(model_decomposed, spn_joint, spn_marginal, data_loader_test, device, 1)
 

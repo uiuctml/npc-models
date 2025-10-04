@@ -98,12 +98,11 @@ def main():
 
     spn_joint.load(header.config_spn["file_path_spn"])
 
-    if header.show_model_summary:
-        logger.log_info("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
-        logger.log_info("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
-        logger.log_info("Number of product nodes: " + str(len(spn_joint.product_nodes)) + ".")
-        logger.log_info("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
-        logger.log_info("SPN depth: " + str(spn_joint.depth) + ".")
+    logger.log_trace("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
+    logger.log_trace("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
+    logger.log_trace("Number of product nodes: " + str(len(spn_joint.product_nodes)) + ".")
+    logger.log_trace("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
+    logger.log_trace("SPN depth: " + str(spn_joint.depth) + ".")
 
     if header.config_spn["run_name"] != "":
         utility.loadCheckpointBestSPN(spn_joint, header.config_spn["dir_checkpoints"], header.config_spn["file_name_checkpoint_best"])
