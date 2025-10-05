@@ -12,7 +12,7 @@ import torch
 import tqdm
 import utility
 
-def computeCounterfactuals(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
+def computeCounterfactual(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
     batch_size = labels_original.nelement()
     outputs_decomposed = []
     outputs_decomposed_original = utility.applySoftmaxDecomposed(outputs_decomposed_original)
@@ -93,17 +93,17 @@ def computeCounterfactuals(outputs_decomposed_original, spn_joint, spn_marginal,
 
     return outputs_decomposed
 
-def saveCounterfactuals(input_file_paths, counterfactuals, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_counterfactual, outputs_composed, outputs_composed_counterfactual):
+def saveCounterfactual(input_file_paths, counterfactual, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_counterfactual, outputs_composed, outputs_composed_counterfactual):
     batch_size = labels_original.nelement()
     config_dataset = dataset.config
 
     for batch_index in range(batch_size):
         input_file_path = os.path.basename(input_file_paths[batch_index])
 
-        counterfactuals[input_file_path] = {}
-        counterfactuals[input_file_path]["counterfactual"] = {}
-        counterfactuals[input_file_path]["ground_truth"] = {}
-        counterfactuals[input_file_path]["prediction"] = {}
+        counterfactual[input_file_path] = {}
+        counterfactual[input_file_path]["counterfactual"] = {}
+        counterfactual[input_file_path]["ground_truth"] = {}
+        counterfactual[input_file_path]["prediction"] = {}
 
         for (attribute_index, attribute) in enumerate(config_dataset["attributes"]):
             attribute_name = attribute["name"]
@@ -114,30 +114,30 @@ def saveCounterfactuals(input_file_paths, counterfactuals, dataset, labels_decom
             (outputs_decomposed_counterfactual_mpe_probability, outputs_decomposed_counterfactual_mpe_label) = torch.topk(outputs_decomposed_counterfactual[attribute_index][batch_index], count_positive_labels_decomposed)
             (outputs_decomposed_mpe_probability, outputs_decomposed_mpe_label) = torch.topk(outputs_decomposed[attribute_index][batch_index], count_positive_labels_decomposed)
 
-            counterfactuals[input_file_path]["counterfactual"][attribute_name] = {}
-            counterfactuals[input_file_path]["ground_truth"][attribute_name] = []
-            counterfactuals[input_file_path]["prediction"][attribute_name] = {}
+            counterfactual[input_file_path]["counterfactual"][attribute_name] = {}
+            counterfactual[input_file_path]["ground_truth"][attribute_name] = []
+            counterfactual[input_file_path]["prediction"][attribute_name] = {}
 
             for (output_decomposed_counterfactual_mpe_probability, output_decomposed_counterfactual_mpe_label) in zip(outputs_decomposed_counterfactual_mpe_probability, outputs_decomposed_counterfactual_mpe_label):
-                counterfactuals[input_file_path]["counterfactual"][attribute_name][dataset.classes[attribute_name][output_decomposed_counterfactual_mpe_label.item()]] = output_decomposed_counterfactual_mpe_probability.item()
+                counterfactual[input_file_path]["counterfactual"][attribute_name][dataset.classes[attribute_name][output_decomposed_counterfactual_mpe_label.item()]] = output_decomposed_counterfactual_mpe_probability.item()
 
             for (label_decomposed_index, label_decomposed) in enumerate(labels_decomposed[attribute_index][batch_index]):
                 if label_decomposed > 0:
-                    counterfactuals[input_file_path]["ground_truth"][attribute_name].append(dataset.classes[attribute_name][label_decomposed_index])
+                    counterfactual[input_file_path]["ground_truth"][attribute_name].append(dataset.classes[attribute_name][label_decomposed_index])
 
             for (output_decomposed_mpe_probability, output_decomposed_mpe_label) in zip(outputs_decomposed_mpe_probability, outputs_decomposed_mpe_label):
-                counterfactuals[input_file_path]["prediction"][attribute_name][dataset.classes[attribute_name][output_decomposed_mpe_label.item()]] = output_decomposed_mpe_probability.item()
+                counterfactual[input_file_path]["prediction"][attribute_name][dataset.classes[attribute_name][output_decomposed_mpe_label.item()]] = output_decomposed_mpe_probability.item()
 
-            counterfactuals[input_file_path]["counterfactual"][attribute_name] = dict(sorted(counterfactuals[input_file_path]["counterfactual"][attribute_name].items()))
-            counterfactuals[input_file_path]["ground_truth"][attribute_name] = sorted(counterfactuals[input_file_path]["ground_truth"][attribute_name])
-            counterfactuals[input_file_path]["prediction"][attribute_name] = dict(sorted(counterfactuals[input_file_path]["prediction"][attribute_name].items()))
+            counterfactual[input_file_path]["counterfactual"][attribute_name] = dict(sorted(counterfactual[input_file_path]["counterfactual"][attribute_name].items()))
+            counterfactual[input_file_path]["ground_truth"][attribute_name] = sorted(counterfactual[input_file_path]["ground_truth"][attribute_name])
+            counterfactual[input_file_path]["prediction"][attribute_name] = dict(sorted(counterfactual[input_file_path]["prediction"][attribute_name].items()))
 
         (outputs_composed_counterfactual_mpe_probability, outputs_composed_counterfactual_mpe_label) = torch.max(outputs_composed_counterfactual[batch_index], 0)
         (outputs_composed_mpe_probability, outputs_composed_mpe_label) = torch.max(outputs_composed[batch_index], 0)
 
-        counterfactuals[input_file_path]["counterfactual"]["original"] = {dataset.classes_original[outputs_composed_counterfactual_mpe_label]: outputs_composed_counterfactual_mpe_probability.item()}
-        counterfactuals[input_file_path]["ground_truth"]["original"] = dataset.classes_original[labels_original[batch_index]]
-        counterfactuals[input_file_path]["prediction"]["original"] = {dataset.classes_original[outputs_composed_mpe_label]: outputs_composed_mpe_probability.item()}
+        counterfactual[input_file_path]["counterfactual"]["original"] = {dataset.classes_original[outputs_composed_counterfactual_mpe_label]: outputs_composed_counterfactual_mpe_probability.item()}
+        counterfactual[input_file_path]["ground_truth"]["original"] = dataset.classes_original[labels_original[batch_index]]
+        counterfactual[input_file_path]["prediction"]["original"] = {dataset.classes_original[outputs_composed_mpe_label]: outputs_composed_mpe_probability.item()}
 
     return
 
@@ -158,7 +158,7 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
     tv_distances_epoch = []
 
     config_dataset = data_loader.dataset.config
-    counterfactuals = {}
+    counterfactual = {}
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
     spn_output_rows = len(data_loader.dataset.classes_original)
     spn_output_cols = 1
@@ -182,13 +182,13 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed_original)
 
         with torch.set_grad_enabled(True):
-            outputs_decomposed_counterfactual = computeCounterfactuals(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device)
+            outputs_decomposed_counterfactual = computeCounterfactual(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device)
 
         (_, _, outputs_composed) = utility.compose(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
         (_, _, outputs_composed_counterfactual) = utility.compose(outputs_decomposed_counterfactual, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
 
         if header.counterfactual_save:
-            saveCounterfactuals(input_file_paths, counterfactuals, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_counterfactual, outputs_composed, outputs_composed_counterfactual)
+            saveCounterfactual(input_file_paths, counterfactual, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_counterfactual, outputs_composed, outputs_composed_counterfactual)
 
         (_, predictions_composed) = torch.max(outputs_composed, 1)
         (_, predictions_composed_counterfactual) = torch.max(outputs_composed_counterfactual, 1)
@@ -241,8 +241,8 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
             os.makedirs(header.counterfactual_dir_outputs, exist_ok = True)
 
         with open(os.path.join(header.counterfactual_dir_outputs, header.counterfactual_file_name), "w") as file_counterfactual:
-            json.dump(counterfactuals, file_counterfactual, indent = 4)
-            logger.log_info("Saved counterfactuals to \"" + os.path.join(header.counterfactual_dir_outputs, header.counterfactual_file_name) + "\".")
+            json.dump(counterfactual, file_counterfactual, indent = 4)
+            logger.log_info("Saved counterfactual to \"" + os.path.join(header.counterfactual_dir_outputs, header.counterfactual_file_name) + "\".")
 
     return
 

@@ -399,7 +399,7 @@ def createWindowLayout():
 
     return layout_window
 
-def preprocessCounterfactuals():
+def preprocessCounterfactual():
     file_names_correct = []
 
     for file_name in explanations.keys():
@@ -437,7 +437,7 @@ def main():
             explanations = json.load(file_counterfactual)
 
             if header.interpret_preprocess:
-                preprocessCounterfactuals()
+                preprocessCounterfactual()
 
     window = PyQt5.QtWidgets.QWidget()
 
