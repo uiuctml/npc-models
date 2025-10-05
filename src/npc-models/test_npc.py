@@ -41,17 +41,17 @@ def getMatrixAColIndicesAttributeIndicesMaps(matrix_a_cols, spn_settings):
 
     return (matrix_a_col_indices_to_attribute_indices, attribute_indices_to_matrix_a_col_indices)
 
-def findMPEs(matrix_a, matrix_b, predictions_composed, spn_settings):
+def findMPE(matrix_a, matrix_b, predictions_composed, spn_settings):
     (matrix_a_col_indices_to_attribute_indices, _) = getMatrixAColIndicesAttributeIndicesMaps(matrix_a.shape[1], spn_settings)
     mpe_attributes = []
 
     matrix_a = matrix_a.t() # product of category size of all attributes x number of original labels
     matrix_a = torch.index_select(matrix_a, 1, predictions_composed)   # product of category size of all attributes x batch size
     matrix_c = matrix_a * matrix_b  # product of category size of all attributes x batch size
-    mpes_matrix_a_col_indices = torch.argmax(matrix_c, 0)   # 0 x batch size
+    mpe_matrix_a_col_indices = torch.argmax(matrix_c, 0)   # 0 x batch size
 
-    for mpes_matrix_a_col_index in mpes_matrix_a_col_indices.cpu().tolist():
-        mpe_attributes.append(matrix_a_col_indices_to_attribute_indices[mpes_matrix_a_col_index])
+    for mpe_matrix_a_col_index in mpe_matrix_a_col_indices.cpu().tolist():
+        mpe_attributes.append(matrix_a_col_indices_to_attribute_indices[mpe_matrix_a_col_index])
 
     return mpe_attributes
 
@@ -82,17 +82,17 @@ def processArguments():
 
     return
 
-def saveMPEs(input_file_paths, mpes, mpe_attributes, mpe_correctness, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed):
+def saveMPE(input_file_paths, mpe, mpe_attributes, mpe_correctness, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed):
     batch_size = labels_original.nelement()
     config_dataset = dataset.config
 
     for batch_index in range(batch_size):
         input_file_path = os.path.basename(input_file_paths[batch_index])
 
-        mpes[input_file_path] = {}
-        mpes[input_file_path]["mpe"] = {}
-        mpes[input_file_path]["ground_truth"] = {}
-        mpes[input_file_path]["prediction"] = {}
+        mpe[input_file_path] = {}
+        mpe[input_file_path]["mpe"] = {}
+        mpe[input_file_path]["ground_truth"] = {}
+        mpe[input_file_path]["prediction"] = {}
 
         for (attribute_index, attribute) in enumerate(config_dataset["attributes"]):
             attribute_name = attribute["name"]
@@ -102,25 +102,25 @@ def saveMPEs(input_file_paths, mpes, mpe_attributes, mpe_correctness, dataset, l
 
             (outputs_decomposed_mpe_probability, outputs_decomposed_mpe_label) = torch.topk(outputs_decomposed[attribute_index][batch_index], count_positive_labels_decomposed)
 
-            mpes[input_file_path]["mpe"][attribute_name] = dataset.classes[attribute_name][mpe_attributes[batch_index][attribute_index]]
-            mpes[input_file_path]["ground_truth"][attribute_name] = []
-            mpes[input_file_path]["prediction"][attribute_name] = {}
+            mpe[input_file_path]["mpe"][attribute_name] = dataset.classes[attribute_name][mpe_attributes[batch_index][attribute_index]]
+            mpe[input_file_path]["ground_truth"][attribute_name] = []
+            mpe[input_file_path]["prediction"][attribute_name] = {}
 
             for (label_decomposed_index, label_decomposed) in enumerate(labels_decomposed[attribute_index][batch_index]):
                 if label_decomposed > 0:
-                    mpes[input_file_path]["ground_truth"][attribute_name].append(dataset.classes[attribute_name][label_decomposed_index])
+                    mpe[input_file_path]["ground_truth"][attribute_name].append(dataset.classes[attribute_name][label_decomposed_index])
 
             for (output_decomposed_mpe_probability, output_decomposed_mpe_label) in zip(outputs_decomposed_mpe_probability, outputs_decomposed_mpe_label):
-                mpes[input_file_path]["prediction"][attribute_name][dataset.classes[attribute_name][output_decomposed_mpe_label.item()]] = output_decomposed_mpe_probability.item()
+                mpe[input_file_path]["prediction"][attribute_name][dataset.classes[attribute_name][output_decomposed_mpe_label.item()]] = output_decomposed_mpe_probability.item()
 
-            mpes[input_file_path]["ground_truth"][attribute_name] = sorted(mpes[input_file_path]["ground_truth"][attribute_name])
-            mpes[input_file_path]["prediction"][attribute_name] = dict(sorted(mpes[input_file_path]["prediction"][attribute_name].items()))
+            mpe[input_file_path]["ground_truth"][attribute_name] = sorted(mpe[input_file_path]["ground_truth"][attribute_name])
+            mpe[input_file_path]["prediction"][attribute_name] = dict(sorted(mpe[input_file_path]["prediction"][attribute_name].items()))
 
         (outputs_composed_mpe_probability, outputs_composed_mpe_label) = torch.max(outputs_composed[batch_index], 0)
 
-        mpes[input_file_path]["mpe"]["correct"] = mpe_correctness[batch_index]
-        mpes[input_file_path]["ground_truth"]["original"] = dataset.classes_original[labels_original[batch_index]]
-        mpes[input_file_path]["prediction"]["original"] = (dataset.classes_original[outputs_composed_mpe_label], outputs_composed_mpe_probability.item())
+        mpe[input_file_path]["mpe"]["correct"] = mpe_correctness[batch_index]
+        mpe[input_file_path]["ground_truth"]["original"] = dataset.classes_original[labels_original[batch_index]]
+        mpe[input_file_path]["prediction"]["original"] = (dataset.classes_original[outputs_composed_mpe_label], outputs_composed_mpe_probability.item())
 
     return
 
@@ -136,7 +136,7 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
     mpe_correctness_epoch = []
     mpe_correctness_prediction_correct_epoch = []
     mpe_correctness_prediction_incorrect_epoch = []
-    mpes = {}
+    mpe = {}
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
     spn_output_rows = len(data_loader.dataset.classes_original)
     spn_output_cols = 1
@@ -179,11 +179,11 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
                 tv_distances_epoch[i] += torch.sum(tv_distance_batch).item()
 
             if header.composed_mpe_find:
-                mpe_attributes = findMPEs(matrix_a, matrix_b, predictions_composed, spn_settings_joint)
+                mpe_attributes = findMPE(matrix_a, matrix_b, predictions_composed, spn_settings_joint)
                 mpe_correctness = computeMPECorrectness(mpe_attributes, labels_decomposed)
 
                 if header.composed_mpe_save:
-                    saveMPEs(input_file_paths, mpes, mpe_attributes, mpe_correctness, data_loader.dataset, labels_decomposed, labels_original, output_decomposed, output_composed)
+                    saveMPE(input_file_paths, mpe, mpe_attributes, mpe_correctness, data_loader.dataset, labels_decomposed, labels_original, output_decomposed, output_composed)
 
                 mpe_correctness = torch.tensor(mpe_correctness).to(device)
                 mpe_correctness_epoch += mpe_correctness.tolist()
@@ -246,8 +246,8 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
                 os.makedirs(header.composed_mpe_dir_outputs, exist_ok = True)
 
             with open(os.path.join(header.composed_mpe_dir_outputs, header.composed_mpe_file_name), "w") as file_mpe:
-                json.dump(mpes, file_mpe, indent = 4)
-                logger.log_info("Saved MPEs to \"" + os.path.join(header.composed_mpe_dir_outputs, header.composed_mpe_file_name) + "\".")
+                json.dump(mpe, file_mpe, indent = 4)
+                logger.log_info("Saved MPE to \"" + os.path.join(header.composed_mpe_dir_outputs, header.composed_mpe_file_name) + "\".")
 
     return
 

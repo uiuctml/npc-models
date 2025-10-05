@@ -411,7 +411,7 @@ def preprocessCounterfactual():
 
     return
 
-def preprocessMPEs():
+def preprocessMPE():
     file_names_incorrect = []
 
     for file_name in explanations.keys():
@@ -431,7 +431,7 @@ def main():
             explanations = json.load(file_mpe)
 
             if header.interpret_preprocess:
-                preprocessMPEs()
+                preprocessMPE()
     else:
         with open(os.path.join(header.counterfactual_dir_outputs, header.counterfactual_file_name), "r") as file_counterfactual:
             explanations = json.load(file_counterfactual)
