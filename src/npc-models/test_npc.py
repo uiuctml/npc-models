@@ -73,12 +73,12 @@ def processArguments():
         test_pc.initializeRunName(arguments.run_name_pc, "pgd")
 
     if arguments.seed is not None:
-        header.config_decomposed["seed"] = arguments.seed
+        header.config_neural["seed"] = arguments.seed
         header.config_pc["seed"] = arguments.seed
 
-    logger.log_trace("Attribute run name: \"" + header.config_decomposed["run_name"] + "\".")
+    logger.log_trace("Attribute run name: \"" + header.config_neural["run_name"] + "\".")
     logger.log_trace("PC run name: \"" + header.config_pc["run_name"] + "\".")
-    logger.log_trace("Random seed: " + str(header.config_decomposed["seed"]) + ".")
+    logger.log_trace("Random seed: " + str(header.config_neural["seed"]) + ".")
 
     return
 
@@ -125,7 +125,7 @@ def saveMPE(input_file_paths, mpe, mpe_attributes, mpe_correctness, dataset, lab
     return
 
 def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loader, device, batch_step):
-    utility.loadCheckpoint(header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
+    utility.loadCheckpoint(header.config_neural["file_name_checkpoint_best"], model_decomposed)
 
     if header.config_pc["run_name"] != "":
         utility.loadCheckpoint(header.config_pc["file_name_checkpoint_best"], spn_joint, True)
@@ -254,20 +254,20 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
 def main():
     processArguments()
 
-    utility.setSeed(header.config_decomposed["seed"])
+    utility.setSeed(header.config_neural["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
 
     config = {
-        "decomposed": header.config_decomposed,
+        "decomposed": header.config_neural,
         "spn": header.config_pc
     }
 
     wandb.init(config = config, mode = "disabled")
 
-    dataset_transforms = utility.createTransform(header.config_decomposed)
-    dataset_test = dataset.NPCDataset(header.config_decomposed["dir_dataset_test"], dataset_transforms)
+    dataset_transforms = utility.createTransform(header.config_neural)
+    dataset_test = dataset.NPCDataset(header.config_neural["dir_dataset_test"], dataset_transforms)
     config_dataset = dataset_test.config
-    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
+    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_neural["batch_size"], shuffle = False, num_workers = header.config_neural["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     device_spn = torch.device("cuda")
 

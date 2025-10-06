@@ -27,27 +27,27 @@ def processArguments():
     test_pc.initializeRunName("", "pgd")
 
     if arguments.weights_attribute != "":
-        header.config_decomposed["model_pretrained_weights"] = arguments.weights_attribute
+        header.config_neural["model_pretrained_weights"] = arguments.weights_attribute
 
     if arguments.weights_pc != "":
         header.config_pc["model_pretrained_weights"] = arguments.weights_pc
 
     if arguments.batch_size is not None:
-        header.config_decomposed["batch_size"] = arguments.batch_size
+        header.config_neural["batch_size"] = arguments.batch_size
 
     if arguments.epochs is not None:
-        header.config_decomposed["epochs"] = arguments.epochs
+        header.config_neural["epochs"] = arguments.epochs
 
     if arguments.seed is not None:
-        header.config_decomposed["seed"] = arguments.seed
+        header.config_neural["seed"] = arguments.seed
 
-    logger.log_trace("Attribute run name: \"" + header.config_decomposed["run_name"] + "\".")
+    logger.log_trace("Attribute run name: \"" + header.config_neural["run_name"] + "\".")
     logger.log_trace("PC run name: \"" + header.config_pc["run_name"] + "\".")
-    logger.log_trace("Attribute model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
+    logger.log_trace("Attribute model pretrained weights: \"" + header.config_neural["model_pretrained_weights"] + "\".")
     logger.log_trace("PC model pretrained weights: \"" + header.config_pc["model_pretrained_weights"] + "\".")
-    logger.log_trace("Batch size: " + str(header.config_decomposed["batch_size"]) + ".")
-    logger.log_trace("Epochs: " + str(header.config_decomposed["epochs"]) + ".")
-    logger.log_trace("Random seed: " + str(header.config_decomposed["seed"]) + ".")
+    logger.log_trace("Batch size: " + str(header.config_neural["batch_size"]) + ".")
+    logger.log_trace("Epochs: " + str(header.config_neural["epochs"]) + ".")
+    logger.log_trace("Random seed: " + str(header.config_neural["seed"]) + ".")
 
     return
 
@@ -191,34 +191,34 @@ def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, 
 def main():
     processArguments()
 
-    utility.setSeed(header.config_decomposed["seed"])
+    utility.setSeed(header.config_neural["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
 
     if header.run_mode == "online":
         wandb.login()
 
     config = {
-        "decomposed": header.config_decomposed,
+        "decomposed": header.config_neural,
         "spn": header.config_pc
     }
 
-    wandb.init(project = header.project_name, name = header.config_decomposed["run_name"], config = config, mode = header.run_mode)
+    wandb.init(project = header.project_name, name = header.config_neural["run_name"], config = config, mode = header.run_mode)
     utility.defineMetrics()
-    logger.log_info("Started run \"" + header.config_decomposed["run_name"] + "\" and " + header.config_pc["run_name"] + ".")
+    logger.log_info("Started run \"" + header.config_neural["run_name"] + "\" and " + header.config_pc["run_name"] + ".")
 
     accuracy_task_validation_best = 0
     batch_step_test = 1
     batch_step_train = 1
     batch_step_validate = 1
     criterion = utility.lossNegativeLogLikelihood
-    dataset_transforms = utility.createTransform(header.config_decomposed)
-    dataset_test = dataset.NPCDataset(header.config_decomposed["dir_dataset_test"], dataset_transforms)
-    dataset_train = dataset.NPCDataset(header.config_decomposed["dir_dataset_train"], dataset_transforms)
-    dataset_validation = dataset.NPCDataset(header.config_decomposed["dir_dataset_validation"], dataset_transforms)
+    dataset_transforms = utility.createTransform(header.config_neural)
+    dataset_test = dataset.NPCDataset(header.config_neural["dir_dataset_test"], dataset_transforms)
+    dataset_train = dataset.NPCDataset(header.config_neural["dir_dataset_train"], dataset_transforms)
+    dataset_validation = dataset.NPCDataset(header.config_neural["dir_dataset_validation"], dataset_transforms)
     config_dataset = dataset_test.config
-    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
-    data_loader_train = torch.utils.data.DataLoader(dataset_train, batch_size = header.config_decomposed["batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
-    data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_decomposed["batch_size"], shuffle = header.config_decomposed["data_loader_shuffle"], num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
+    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_neural["batch_size"], shuffle = False, num_workers = header.config_neural["data_loader_worker_count"], pin_memory = True)
+    data_loader_train = torch.utils.data.DataLoader(dataset_train, batch_size = header.config_neural["batch_size"], shuffle = header.config_neural["data_loader_shuffle"], num_workers = header.config_neural["data_loader_worker_count"], pin_memory = True)
+    data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_neural["batch_size"], shuffle = header.config_neural["data_loader_shuffle"], num_workers = header.config_neural["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     device_spn = torch.device("cuda")
 
@@ -233,9 +233,9 @@ def main():
     progress_bar = None
     spn_joint = pc.SPN(device_spn)
     spn_marginal = pc.SPN(device_spn)
-    optimizer_decomposed = torch.optim.SGD(model_decomposed.parameters(), lr = header.config_decomposed["optimizer_learning_rate"], momentum = header.config_decomposed["optimizer_momentum"], weight_decay = header.config_decomposed["optimizer_weight_decay"])
+    optimizer_decomposed = torch.optim.SGD(model_decomposed.parameters(), lr = header.config_neural["optimizer_learning_rate"], momentum = header.config_neural["optimizer_momentum"], weight_decay = header.config_neural["optimizer_weight_decay"])
     optimizer_spn = pc.PGDSPNOptimizer(spn_joint, spn_marginal, device_spn, header.config_pc["optimizer_learning_rate"], header.config_pc["optimizer_prior_factor"], header.config_pc["epsilon_projection"])
-    learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_decomposed, header.config_decomposed["learning_rate_scheduler_mode"], header.config_decomposed["learning_rate_scheduler_factor"], header.config_decomposed["learning_rate_scheduler_patience"], header.config_decomposed["learning_rate_scheduler_threshold"], header.config_decomposed["learning_rate_scheduler_threshold_mode"], header.config_decomposed["learning_rate_scheduler_cooldown"], header.config_decomposed["learning_rate_scheduler_min_learning_rate"], header.config_decomposed["learning_rate_scheduler_min_learning_rate_decay"])
+    learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_decomposed, header.config_neural["learning_rate_scheduler_mode"], header.config_neural["learning_rate_scheduler_factor"], header.config_neural["learning_rate_scheduler_patience"], header.config_neural["learning_rate_scheduler_threshold"], header.config_neural["learning_rate_scheduler_threshold_mode"], header.config_neural["learning_rate_scheduler_cooldown"], header.config_neural["learning_rate_scheduler_min_learning_rate"], header.config_neural["learning_rate_scheduler_min_learning_rate_decay"])
     learning_rate_scheduler_spn = pc.LossSPNLearningRateScheduler(optimizer_spn, header.config_pc["learning_rate_scheduler_factor"], header.config_pc["learning_rate_scheduler_patience"], header.config_pc["learning_rate_scheduler_threshold"], header.config_pc["learning_rate_scheduler_cooldown"], header.config_pc["learning_rate_scheduler_min_learning_rate"])
 
     logger.log_info("Loading SPN from \"" + header.config_pc["file_path_pc"] + "\"...")
@@ -255,8 +255,8 @@ def main():
     spn_joint.set_leaf_nodes_categorical(spn_settings_joint)
     spn_marginal.set_leaf_nodes_categorical(spn_settings_marginal)
 
-    if header.config_decomposed["model_pretrained_weights"] != "":
-        utility.loadCheckpoint(header.config_decomposed["model_pretrained_weights"], model_decomposed)
+    if header.config_neural["model_pretrained_weights"] != "":
+        utility.loadCheckpoint(header.config_neural["model_pretrained_weights"], model_decomposed)
 
     if header.config_pc["model_pretrained_weights"] != "":
         utility.loadCheckpoint(header.config_pc["model_pretrained_weights"], spn_joint, True)
@@ -273,11 +273,11 @@ def main():
     logger.log_trace("SPN depth: " + str(spn_joint.depth) + ".")
     logger.log_trace("SPN leaf node setting dimension: (" + str(int(spn_settings_joint.shape[0])) + ", " + str(int(spn_settings_joint.shape[1])) + ").")
 
-    if epoch <= header.config_decomposed["epochs"]:
-        progress_bar = tqdm.tqdm(total = header.config_decomposed["epochs"], position = 0)
+    if epoch <= header.config_neural["epochs"]:
+        progress_bar = tqdm.tqdm(total = header.config_neural["epochs"], position = 0)
         progress_bar.set_description_str("[INFO]: Epoch")
 
-    while epoch <= header.config_decomposed["epochs"]:
+    while epoch <= header.config_neural["epochs"]:
         if progress_bar is not None:
             progress_bar.n = epoch
             progress_bar.refresh()
@@ -296,10 +296,10 @@ def main():
         if accuracy_task_validation_epoch > accuracy_task_validation_best or epoch == 1:
             accuracy_task_validation_best = accuracy_task_validation_epoch
             wandb.log({"validation/epoch/accuracy_task_best": accuracy_task_validation_best})
-            utility.saveCheckpoint(header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
+            utility.saveCheckpoint(header.config_neural["file_name_checkpoint_best"], model_decomposed)
             utility.saveCheckpoint(header.config_pc["file_name_checkpoint_best"], spn_joint, True)
 
-        utility.saveCheckpoint(header.config_decomposed["file_name_checkpoint"], model_decomposed)
+        utility.saveCheckpoint(header.config_neural["file_name_checkpoint"], model_decomposed)
         utility.saveCheckpoint(header.config_pc["file_name_checkpoint"], spn_joint, True)
 
         epoch += 1

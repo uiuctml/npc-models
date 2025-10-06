@@ -62,7 +62,7 @@ config_blackbox = {
     "type": "blackbox",
 }
 
-config_decomposed = {
+config_neural = {
     "batch_size": 256,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
@@ -89,7 +89,7 @@ config_decomposed = {
     "optimizer_weight_decay": 4e-5,
     "run_name": "",
     "seed": 42,
-    "type": "decomposed",
+    "type": "neural",
 }
 
 config_reference = {
