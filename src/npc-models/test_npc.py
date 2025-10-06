@@ -254,19 +254,19 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
     counterfactual = {}
-    correctness_attribute_epoch = 0
-    correctness_task_epoch = 0
-    instance_count_corrected = 0
-    instance_count_incorrect = 0
+    counterfactual_correctness_attribute_epoch = 0
+    counterfactual_correctness_task_epoch = 0
+    counterfactual_instances_corrected = 0
+    counterfactual_instances_incorrect = 0
     counterfactual_tv_distance_epoch = 0
     counterfactual_tv_distances_epoch = []
     mpe = {}
     mpe_correctness_epoch = []
     mpe_correctness_prediction_correct_epoch = []
     mpe_correctness_prediction_incorrect_epoch = []
-    progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
     pc_output_rows = len(data_loader.dataset.classes_original)
     pc_output_cols = 1
+    progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
     tv_distance_epoch = 0
     tv_distances_epoch = []
 
@@ -277,7 +277,6 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
 
     model_decomposed.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")
-
 
     for (batch_index, (input, labels_decomposed, labels_original, input_file_paths)) in enumerate(data_loader):
         input = input.to(device, non_blocking = True)
@@ -308,8 +307,8 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
         corrects_composed_counterfactual = torch.sum(prediction_correctness_counterfactual).item()
         incorrects_composed = torch.sum(predictions_composed != labels_original).item()
 
-        instance_count_corrected += corrects_composed_counterfactual - corrects_composed
-        instance_count_incorrect += incorrects_composed
+        counterfactual_instances_corrected += corrects_composed_counterfactual - corrects_composed
+        counterfactual_instances_incorrect += incorrects_composed
 
         accuracy_attribute_batch = utility.computeAccuracyDecomposed(outputs_decomposed_original, labels_decomposed, device)
         accuracy_task_batch = corrects_composed / input.size(0)
@@ -321,8 +320,8 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
             tv_distance_batch = 0.5 * torch.sum(torch.abs(outputs_decomposed[i] - labels_decomposed[i]), dim = 1)
             tv_distances_epoch[i] += torch.sum(tv_distance_batch).item()
 
-        correctness_attribute_epoch += utility.computeAccuracyDecomposed(outputs_decomposed_counterfactual, labels_decomposed, device)
-        correctness_task_epoch += corrects_composed_counterfactual
+        counterfactual_correctness_attribute_epoch += utility.computeAccuracyDecomposed(outputs_decomposed_counterfactual, labels_decomposed, device)
+        counterfactual_correctness_task_epoch += corrects_composed_counterfactual
 
         for i in range(len(data_loader.dataset.config["attributes"])):
             counterfactual_tv_distance_batch = 0.5 * torch.sum(torch.abs(outputs_decomposed_counterfactual[i] - outputs_decomposed[i]), dim = 1)
@@ -371,22 +370,22 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
     logger.log_info("Testing attribute accuracy: " + str(accuracy_attribute_epoch) + ".")
     logger.log_info("Testing task accuracy: " + str(accuracy_task_epoch) + ".")
 
-    correctness_attribute_epoch /= len(data_loader)
-    correctness_task_epoch /= len(data_loader.dataset)
+    counterfactual_correctness_attribute_epoch /= len(data_loader)
+    counterfactual_correctness_task_epoch /= len(data_loader.dataset)
 
     for i in range(len(data_loader.dataset.config["attributes"])):
         counterfactual_tv_distances_epoch[i] /= len(data_loader.dataset)
 
     counterfactual_tv_distance_epoch = sum(counterfactual_tv_distances_epoch) / len(counterfactual_tv_distances_epoch)
 
-    if instance_count_incorrect != 0:
-        logger.log_info("Counterfactual correction rate: " + str(instance_count_corrected / instance_count_incorrect) + ".")
+    if counterfactual_instances_incorrect != 0:
+        logger.log_info("Counterfactual correction rate: " + str(counterfactual_instances_corrected / counterfactual_instances_incorrect) + ".")
     else:
         logger.log_info("Counterfactual correction rate: N/A.")
 
     logger.log_info("Counterfactual attribute TV distance: " + str(counterfactual_tv_distance_epoch) + ".")
-    logger.log_info("Counterfactual attribute correctness: " + str(correctness_attribute_epoch) + ".")
-    logger.log_info("Counterfactual task correctness: " + str(correctness_task_epoch) + ".")
+    logger.log_info("Counterfactual attribute correctness: " + str(counterfactual_correctness_attribute_epoch) + ".")
+    logger.log_info("Counterfactual task correctness: " + str(counterfactual_correctness_task_epoch) + ".")
 
     if header.npc_ce_save:
         if not os.path.isdir(header.interpret_dir_outputs):
