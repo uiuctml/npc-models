@@ -101,12 +101,12 @@ def test(model_neural, data_loader, device, batch_step):
     tv_distance_epoch = sum(tv_distances_epoch) / len(tv_distances_epoch)
 
     wandb.log({"testing/epoch/accuracy_concept": accuracy_concept_epoch})
-    wandb.log({"testing/epoch/tv_distance_attribute": tv_distance_epoch})
+    wandb.log({"testing/epoch/tv_distance": tv_distance_epoch})
 
     wandb.summary["testing/epoch/accuracy_concept"] = accuracy_concept_epoch
-    wandb.summary["testing/epoch/tv_distance_attribute"] = tv_distance_epoch
+    wandb.summary["testing/epoch/tv_distance"] = tv_distance_epoch
 
-    logger.log_info("Testing attribute TV distance: " + str(tv_distance_epoch) + ".")
+    logger.log_info("Testing mean TV distance: " + str(tv_distance_epoch) + ".")
     logger.log_info("Testing mean concept accuracy: " + str(accuracy_concept_epoch) + ".")
 
     return batch_step

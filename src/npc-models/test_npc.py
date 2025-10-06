@@ -385,13 +385,13 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
 
     wandb.log({"testing/epoch/accuracy_concept": accuracy_concept_epoch})
     wandb.log({"testing/epoch/accuracy_classification": accuracy_classification_epoch})
-    wandb.log({"testing/epoch/tv_distance_attribute": tv_distance_epoch})
+    wandb.log({"testing/epoch/tv_distance": tv_distance_epoch})
 
     wandb.summary["testing/epoch/accuracy_concept"] = accuracy_concept_epoch
     wandb.summary["testing/epoch/accuracy_classification"] = accuracy_classification_epoch
-    wandb.summary["testing/epoch/tv_distance_attribute"] = tv_distance_epoch
+    wandb.summary["testing/epoch/tv_distance"] = tv_distance_epoch
 
-    logger.log_info("Testing attribute TV distance: " + str(tv_distance_epoch) + ".")
+    logger.log_info("Testing mean TV distance: " + str(tv_distance_epoch) + ".")
     logger.log_info("Testing mean concept accuracy: " + str(accuracy_concept_epoch) + ".")
     logger.log_info("Testing classification accuracy: " + str(accuracy_classification_epoch) + ".")
 
