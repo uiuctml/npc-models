@@ -30,8 +30,8 @@ def computeMPECorrectness(mpe_attributes, labels_decomposed):
 
     return mpe_correctness
 
-def getMatrixAColIndicesAttributeIndicesMaps(matrix_a_cols, spn_settings):
-    attribute_indices_list = spn_settings[:matrix_a_cols, :-1].cpu().int().tolist()
+def getMatrixAColIndicesAttributeIndicesMaps(matrix_a_cols, pc_settings):
+    attribute_indices_list = pc_settings[:matrix_a_cols, :-1].cpu().int().tolist()
     matrix_a_col_indices_to_attribute_indices = {}
     attribute_indices_to_matrix_a_col_indices = {}
 
@@ -41,8 +41,8 @@ def getMatrixAColIndicesAttributeIndicesMaps(matrix_a_cols, spn_settings):
 
     return (matrix_a_col_indices_to_attribute_indices, attribute_indices_to_matrix_a_col_indices)
 
-def findMPE(matrix_a, matrix_b, predictions_composed, spn_settings):
-    (matrix_a_col_indices_to_attribute_indices, _) = getMatrixAColIndicesAttributeIndicesMaps(matrix_a.shape[1], spn_settings)
+def findMPE(matrix_a, matrix_b, predictions_composed, pc_settings):
+    (matrix_a_col_indices_to_attribute_indices, _) = getMatrixAColIndicesAttributeIndicesMaps(matrix_a.shape[1], pc_settings)
     mpe_attributes = []
 
     matrix_a = matrix_a.t() # product of category size of all attributes x number of original labels
@@ -123,12 +123,12 @@ def saveMPE(input_file_paths, mpe, mpe_attributes, mpe_correctness, dataset, lab
 
     return
 
-def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loader, device, batch_step):
+def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader, device, batch_step):
     utility.loadCheckpoint(header.config_neural["file_name_checkpoint_best"], model_decomposed)
 
     if header.config_pc["run_name"] != "":
-        utility.loadCheckpoint(header.config_pc["file_name_checkpoint_best"], spn_joint, True)
-        utility.loadCheckpoint(header.config_pc["file_name_checkpoint_best"], spn_marginal, True)
+        utility.loadCheckpoint(header.config_pc["file_name_checkpoint_best"], pc_joint, True)
+        utility.loadCheckpoint(header.config_pc["file_name_checkpoint_best"], pc_marginal, True)
 
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
@@ -137,14 +137,14 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
     mpe_correctness_prediction_incorrect_epoch = []
     mpe = {}
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
-    spn_output_rows = len(data_loader.dataset.classes_original)
-    spn_output_cols = 1
+    pc_output_rows = len(data_loader.dataset.classes_original)
+    pc_output_cols = 1
     tv_distance_epoch = 0
     tv_distances_epoch = []
 
     for attribute in data_loader.dataset.config["attributes"]:
         attribute_labels = attribute["labels"]
-        spn_output_cols *= len(attribute_labels)
+        pc_output_cols *= len(attribute_labels)
         tv_distances_epoch.append(0)
 
     model_decomposed.eval()
@@ -161,7 +161,7 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
             (output_decomposed, _) = model_decomposed(input)
 
             output_decomposed = utility.applySoftmaxDecomposed(output_decomposed)
-            (matrix_a, matrix_b, output_composed) = utility.compose(output_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+            (matrix_a, matrix_b, output_composed) = utility.compose(output_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
             (_, predictions_composed) = torch.max(output_composed, 1)
 
             prediction_correctness = (predictions_composed == labels_original)
@@ -178,7 +178,7 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
                 tv_distances_epoch[i] += torch.sum(tv_distance_batch).item()
 
             if header.npc_mpe_find:
-                mpe_attributes = findMPE(matrix_a, matrix_b, predictions_composed, spn_settings_joint)
+                mpe_attributes = findMPE(matrix_a, matrix_b, predictions_composed, pc_settings_joint)
                 mpe_correctness = computeMPECorrectness(mpe_attributes, labels_decomposed)
 
                 if header.npc_mpe_save:
@@ -258,7 +258,7 @@ def main():
 
     config = {
         "decomposed": header.config_neural,
-        "spn": header.config_pc
+        "pc": header.config_pc
     }
 
     wandb.init(config = config, mode = "disabled")
@@ -267,42 +267,42 @@ def main():
     dataset_test = dataset.NPCDataset(header.config_neural["dir_dataset_test"], dataset_transforms)
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_neural["batch_size"], shuffle = False, num_workers = header.config_neural["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
-    device_spn = torch.device("cuda")
+    device_pc = torch.device("cuda")
 
     if header.npc_pc_on_cpu:
-        logger.log_info("Computing SPNs on CPU.")
-        device_spn = torch.device("cpu")
+        logger.log_info("Computing PCs on CPU.")
+        device_pc = torch.device("cpu")
 
     model_decomposed = model.ResNet34MTL(dataset_test.config, device)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
-    spn_joint = pc.SPN(device_spn)
-    spn_marginal = pc.SPN(device_spn)
+    pc_joint = pc.SPN(device_pc)
+    pc_marginal = pc.SPN(device_pc)
 
-    logger.log_info("Loading SPN from \"" + header.config_pc["file_path_pc"] + "\"...")
+    logger.log_info("Loading PC from \"" + header.config_pc["file_path_pc"] + "\"...")
 
-    spn_joint.load(header.config_pc["file_path_pc"])
-    spn_marginal.load(header.config_pc["file_path_pc"])
+    pc_joint.load(header.config_pc["file_path_pc"])
+    pc_marginal.load(header.config_pc["file_path_pc"])
 
-    logger.log_info("Loading SPN leaf node settings...")
+    logger.log_info("Loading PC leaf node settings...")
 
-    spn_settings_joint = utility.generateSPNSettings(dataset_test.config, device)
-    spn_settings_marginal = torch.clone(spn_settings_joint)
-    spn_settings_marginal[:, -1] = -1
+    pc_settings_joint = utility.generateSPNSettings(dataset_test.config, device)
+    pc_settings_marginal = torch.clone(pc_settings_joint)
+    pc_settings_marginal[:, -1] = -1
 
-    logger.log_info("Setting SPN leaf nodes...")
+    logger.log_info("Setting PC leaf nodes...")
 
-    spn_joint.set_leaf_nodes_categorical(spn_settings_joint)
-    spn_marginal.set_leaf_nodes_categorical(spn_settings_marginal)
+    pc_joint.set_leaf_nodes_categorical(pc_settings_joint)
+    pc_marginal.set_leaf_nodes_categorical(pc_settings_marginal)
 
-    logger.log_trace("Total PC nodes: " + str(len(spn_joint.nodes)) + ".")
-    logger.log_trace("Total PC sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
-    logger.log_trace("Total PC product nodes: " + str(len(spn_joint.product_nodes)) + ".")
-    logger.log_trace("Total PC leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
-    logger.log_trace("SPN depth: " + str(spn_joint.depth) + ".")
-    logger.log_trace("SPN leaf node setting dimension: (" + str(int(spn_settings_joint.shape[0])) + ", " + str(int(spn_settings_joint.shape[1])) + ").")
+    logger.log_trace("Total PC nodes: " + str(len(pc_joint.nodes)) + ".")
+    logger.log_trace("Total PC sum nodes: " + str(len(pc_joint.sum_nodes)) + ".")
+    logger.log_trace("Total PC product nodes: " + str(len(pc_joint.product_nodes)) + ".")
+    logger.log_trace("Total PC leaf nodes: " + str(len(pc_joint.leaf_nodes)) + ".")
+    logger.log_trace("PC depth: " + str(pc_joint.depth) + ".")
+    logger.log_trace("PC leaf node setting dimension: (" + str(int(pc_settings_joint.shape[0])) + ", " + str(int(pc_settings_joint.shape[1])) + ").")
 
-    test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loader_test, device, 1)
+    test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader_test, device, 1)
 
     return
 
