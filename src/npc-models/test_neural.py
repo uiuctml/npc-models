@@ -18,7 +18,7 @@ def initializeRunName(run_name = ""):
 
         header.config_neural["run_name"] = run_name
     else:
-        header.config_neural["run_name"] = utility.generateRunName(header.config_neural["seed"], header.config_neural["type"], "resnet34_mtl")
+        header.config_neural["run_name"] = utility.generateRunName(header.config_neural["seed"], header.config_neural["type"], "resnet34mtl")
 
     if header.config_neural["run_name"] == "":
         logger.log_fatal("Missing attribute run name. Quit.")
