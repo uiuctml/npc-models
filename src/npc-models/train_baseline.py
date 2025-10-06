@@ -72,18 +72,18 @@ def computeLoss(output_neck, output_head, labels_decomposed, labels_class):
         loss_task = torch.nn.functional.binary_cross_entropy(output_head, labels_class)
         return header.config_baseline["concept_loss_weight"] * loss_attribute + loss_task
     else:
-        logger.log_fatal("Unknown reference model \"" + header.config_baseline["model"] + "\".")
+        logger.log_fatal("Unknown baseline model \"" + header.config_baseline["model"] + "\".")
         exit(-1)
 
     return
 
-def train(model_reference, data_loader, optimizer, device, batch_step):
+def train(model_baseline, data_loader, optimizer, device, batch_step):
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
 
-    model_reference.train()
+    model_baseline.train()
     progress_bar.set_description_str("[INFO]: Training progress")
 
     with torch.set_grad_enabled(True):
@@ -97,7 +97,7 @@ def train(model_reference, data_loader, optimizer, device, batch_step):
 
             optimizer.zero_grad()
 
-            (output_neck, output_head) = model_reference(input)
+            (output_neck, output_head) = model_baseline(input)
 
             loss = computeLoss(output_neck, output_head, labels_decomposed, labels_class)
 
@@ -133,13 +133,13 @@ def train(model_reference, data_loader, optimizer, device, batch_step):
 
     return batch_step
 
-def validate(model_reference, data_loader, device, batch_step):
+def validate(model_baseline, data_loader, device, batch_step):
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
 
-    model_reference.eval()
+    model_baseline.eval()
     progress_bar.set_description_str("[INFO]: Validation progress")
 
     with torch.set_grad_enabled(False):
@@ -151,7 +151,7 @@ def validate(model_reference, data_loader, device, batch_step):
             for i in range(len(labels_decomposed)):
                 labels_decomposed[i] = labels_decomposed[i].to(device)
 
-            (output_neck, output_head) = model_reference(input)
+            (output_neck, output_head) = model_baseline(input)
 
             loss = computeLoss(output_neck, output_head, labels_decomposed, labels_class)
             (accuracy_attribute_batch, accuracy_task_batch) = test_baseline.computeAccuracy(output_neck, output_head, labels_decomposed, labels_class, device)
@@ -209,10 +209,10 @@ def main():
     data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_baseline["batch_size"], shuffle = header.config_baseline["data_loader_shuffle"], num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     epoch = 1
-    model_reference = model.createModelBaseline(dataset_test.config, device)
-    model_reference = torch.nn.DataParallel(model_reference)
-    model_reference = model_reference.to(device)
-    optimizer = torch.optim.SGD(model_reference.module.get_parameters(), lr = header.config_baseline["optimizer_learning_rate"], momentum = header.config_baseline["optimizer_momentum"], weight_decay = header.config_baseline["optimizer_weight_decay"])
+    model_baseline = model.createModelBaseline(dataset_test.config, device)
+    model_baseline = torch.nn.DataParallel(model_baseline)
+    model_baseline = model_baseline.to(device)
+    optimizer = torch.optim.SGD(model_baseline.module.get_parameters(), lr = header.config_baseline["optimizer_learning_rate"], momentum = header.config_baseline["optimizer_momentum"], weight_decay = header.config_baseline["optimizer_weight_decay"])
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.config_baseline["learning_rate_scheduler_mode"], header.config_baseline["learning_rate_scheduler_factor"], header.config_baseline["learning_rate_scheduler_patience"])
     progress_bar = tqdm.tqdm(total = header.config_baseline["epochs"], position = 0)
 
@@ -225,8 +225,8 @@ def main():
         wandb.log({"training/epoch/step": epoch})
         wandb.log({"validation/epoch/step": epoch})
 
-        batch_step_train = train(model_reference, data_loader_train, optimizer, device, batch_step_train)
-        (accuracy_task_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_reference, data_loader_validation, device, batch_step_validate)
+        batch_step_train = train(model_baseline, data_loader_train, optimizer, device, batch_step_train)
+        (accuracy_task_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_baseline, data_loader_validation, device, batch_step_validate)
 
         learning_rate_scheduler.step(loss_validation_epoch)
 
@@ -235,9 +235,9 @@ def main():
         if accuracy_task_validation_epoch > accuracy_task_validation_best or epoch == 1:
             accuracy_task_validation_best = accuracy_task_validation_epoch
             wandb.log({"validation/epoch/accuracy_task_best": accuracy_task_validation_best})
-            utility.saveCheckpoint(header.config_baseline["file_name_checkpoint_best"], model_reference)
+            utility.saveCheckpoint(header.config_baseline["file_name_checkpoint_best"], model_baseline)
 
-        utility.saveCheckpoint(header.config_baseline["file_name_checkpoint"], model_reference)
+        utility.saveCheckpoint(header.config_baseline["file_name_checkpoint"], model_baseline)
 
         epoch += 1
 
@@ -247,7 +247,7 @@ def main():
     wandb.summary["validation/epoch/accuracy_task_best"] = accuracy_task_validation_best
 
     wandb.log({"testing/epoch/step": batch_step_test})
-    test_baseline.test(model_reference, data_loader_test, device, batch_step_test)
+    test_baseline.test(model_baseline, data_loader_test, device, batch_step_test)
 
     wandb.finish()
 

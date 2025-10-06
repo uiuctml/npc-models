@@ -105,8 +105,8 @@ def computeTVDistance(output_neck, labels_decomposed, tv_distances_epoch, data_l
 
     return
 
-def test(model_reference, data_loader, device, batch_step):
-    utility.loadCheckpoint(header.config_baseline["file_name_checkpoint_best"], model_reference)
+def test(model_baseline, data_loader, device, batch_step):
+    utility.loadCheckpoint(header.config_baseline["file_name_checkpoint_best"], model_baseline)
 
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
@@ -117,7 +117,7 @@ def test(model_reference, data_loader, device, batch_step):
     for _ in data_loader.dataset.config["attributes"]:
         tv_distances_epoch.append(0)
 
-    model_reference.eval()
+    model_baseline.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")
 
     with torch.set_grad_enabled(False):
@@ -129,7 +129,7 @@ def test(model_reference, data_loader, device, batch_step):
             for i in range(len(labels_decomposed)):
                 labels_decomposed[i] = labels_decomposed[i].to(device)
 
-            (output_neck, output_head) = model_reference(input)
+            (output_neck, output_head) = model_baseline(input)
 
             (accuracy_attribute_batch, accuracy_task_batch) = computeAccuracy(output_neck, output_head, labels_decomposed, labels_class, device)
 
@@ -183,11 +183,11 @@ def main():
     dataset_test = dataset.NPCDataset(header.config_baseline["dir_dataset_test"], dataset_transforms)
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_baseline["batch_size"], shuffle = False, num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
-    model_reference = model.createModelBaseline(dataset_test.config, device)
-    model_reference = torch.nn.DataParallel(model_reference)
-    model_reference = model_reference.to(device)
+    model_baseline = model.createModelBaseline(dataset_test.config, device)
+    model_baseline = torch.nn.DataParallel(model_baseline)
+    model_baseline = model_baseline.to(device)
 
-    test(model_reference, data_loader_test, device, 1)
+    test(model_baseline, data_loader_test, device, 1)
 
     return
 

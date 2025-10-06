@@ -196,5 +196,5 @@ def createModelBaseline(config_dataset, device):
     elif header.config_baseline["model"] == type.ModelBaseline.dcr.name:
         return DCR(config_dataset, device)
     else:
-        logger.log_fatal("Unknown reference model \"" + header.config_baseline["model"] + "\".")
+        logger.log_fatal("Unknown baseline model \"" + header.config_baseline["model"] + "\".")
         exit(-1)
