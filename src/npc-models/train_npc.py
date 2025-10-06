@@ -51,17 +51,17 @@ def processArguments():
 
     return
 
-def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, optimizer_decomposed, optimizer_spn, device, batch_step):
+def train(model_decomposed, pc_joint, pc_marginal, data_loader, criterion, optimizer_decomposed, optimizer_pc, device, batch_step):
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
-    spn_output_rows = len(data_loader.dataset.classes_original)
-    spn_output_cols = 1
+    pc_output_rows = len(data_loader.dataset.classes_original)
+    pc_output_cols = 1
 
     for attribute in data_loader.dataset.config["attributes"]:
         attribute_labels = attribute["labels"]
-        spn_output_cols *= len(attribute_labels)
+        pc_output_cols *= len(attribute_labels)
 
     model_decomposed.train()
     progress_bar.set_description_str("[INFO]: Training progress")
@@ -79,7 +79,7 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
             (output_decomposed, _) = model_decomposed(input)
 
             output_decomposed = utility.applySoftmaxDecomposed(output_decomposed)
-            (matrix_a, matrix_b, output_composed) = utility.compose(output_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+            (matrix_a, matrix_b, output_composed) = utility.compose(output_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
             loss = criterion(output_composed, labels_original)
@@ -88,10 +88,10 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
             optimizer_decomposed.step()
 
             if header.npc_pc_backward:
-                spn_joint.backward()
-                spn_marginal.backward()
+                pc_joint.backward()
+                pc_marginal.backward()
 
-                optimizer_spn.step(matrix_a.detach(), matrix_b.detach(), output_composed.detach(), labels_original)
+                optimizer_pc.step(matrix_a.detach(), matrix_b.detach(), output_composed.detach(), labels_original)
 
             corrects_composed = torch.sum(predictions_composed == labels_original).item()
 
@@ -125,17 +125,17 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
 
     return batch_step
 
-def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, device, batch_step):
+def validate(model_decomposed, pc_joint, pc_marginal, data_loader, criterion, device, batch_step):
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
-    spn_output_rows = len(data_loader.dataset.classes_original)
-    spn_output_cols = 1
+    pc_output_rows = len(data_loader.dataset.classes_original)
+    pc_output_cols = 1
 
     for attribute in data_loader.dataset.config["attributes"]:
         attribute_labels = attribute["labels"]
-        spn_output_cols *= len(attribute_labels)
+        pc_output_cols *= len(attribute_labels)
 
     model_decomposed.eval()
     progress_bar.set_description_str("[INFO]: Validation progress")
@@ -151,7 +151,7 @@ def validate(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, 
             (output_decomposed, _) = model_decomposed(input)
 
             output_decomposed = utility.applySoftmaxDecomposed(output_decomposed)
-            (_, _, output_composed) = utility.compose(output_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+            (_, _, output_composed) = utility.compose(output_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
             loss = criterion(output_composed, labels_original)
@@ -199,7 +199,7 @@ def main():
 
     config = {
         "decomposed": header.config_neural,
-        "spn": header.config_pc
+        "pc": header.config_pc
     }
 
     wandb.init(project = header.project_name, name = header.config_neural["run_name"], config = config, mode = header.run_mode)
@@ -220,58 +220,58 @@ def main():
     data_loader_train = torch.utils.data.DataLoader(dataset_train, batch_size = header.config_neural["batch_size"], shuffle = header.config_neural["data_loader_shuffle"], num_workers = header.config_neural["data_loader_worker_count"], pin_memory = True)
     data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_neural["batch_size"], shuffle = header.config_neural["data_loader_shuffle"], num_workers = header.config_neural["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
-    device_spn = torch.device("cuda")
+    device_pc = torch.device("cuda")
 
     if header.npc_pc_cpu:
-        logger.log_info("Computing SPNs on CPU.")
-        device_spn = torch.device("cpu")
+        logger.log_info("Computing PCs on CPU.")
+        device_pc = torch.device("cpu")
 
     epoch = 1
     model_decomposed = model.ResNet34MTL(dataset_test.config, device)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
     progress_bar = None
-    spn_joint = pc.SPN(device_spn)
-    spn_marginal = pc.SPN(device_spn)
+    pc_joint = pc.SPN(device_pc)
+    pc_marginal = pc.SPN(device_pc)
     optimizer_decomposed = torch.optim.SGD(model_decomposed.parameters(), lr = header.config_neural["optimizer_learning_rate"], momentum = header.config_neural["optimizer_momentum"], weight_decay = header.config_neural["optimizer_weight_decay"])
-    optimizer_spn = pc.PGDSPNOptimizer(spn_joint, spn_marginal, device_spn, header.config_pc["optimizer_learning_rate"], header.config_pc["optimizer_prior_factor"], header.config_pc["epsilon_projection"])
+    optimizer_pc = pc.PGDSPNOptimizer(pc_joint, pc_marginal, device_pc, header.config_pc["optimizer_learning_rate"], header.config_pc["optimizer_prior_factor"], header.config_pc["epsilon_projection"])
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_decomposed, header.config_neural["learning_rate_scheduler_mode"], header.config_neural["learning_rate_scheduler_factor"], header.config_neural["learning_rate_scheduler_patience"], header.config_neural["learning_rate_scheduler_threshold"], header.config_neural["learning_rate_scheduler_threshold_mode"], header.config_neural["learning_rate_scheduler_cooldown"], header.config_neural["learning_rate_scheduler_min_learning_rate"], header.config_neural["learning_rate_scheduler_min_learning_rate_decay"])
-    learning_rate_scheduler_spn = pc.LossSPNLearningRateScheduler(optimizer_spn, header.config_pc["learning_rate_scheduler_factor"], header.config_pc["learning_rate_scheduler_patience"], header.config_pc["learning_rate_scheduler_threshold"], header.config_pc["learning_rate_scheduler_cooldown"], header.config_pc["learning_rate_scheduler_min_learning_rate"])
+    learning_rate_scheduler_pc = pc.LossSPNLearningRateScheduler(optimizer_pc, header.config_pc["learning_rate_scheduler_factor"], header.config_pc["learning_rate_scheduler_patience"], header.config_pc["learning_rate_scheduler_threshold"], header.config_pc["learning_rate_scheduler_cooldown"], header.config_pc["learning_rate_scheduler_min_learning_rate"])
 
-    logger.log_info("Loading SPN from \"" + header.config_pc["file_path_pc"] + "\"...")
+    logger.log_info("Loading PC from \"" + header.config_pc["file_path_pc"] + "\"...")
 
-    spn_joint.load(header.config_pc["file_path_pc"])
-    spn_marginal.load(header.config_pc["file_path_pc"])
-    optimizer_spn.set_weights_prior(spn_joint.get_weights())
+    pc_joint.load(header.config_pc["file_path_pc"])
+    pc_marginal.load(header.config_pc["file_path_pc"])
+    optimizer_pc.set_weights_prior(pc_joint.get_weights())
 
-    logger.log_info("Loading SPN leaf node settings...")
+    logger.log_info("Loading PC leaf node settings...")
 
-    spn_settings_joint = utility.generateSPNSettings(config_dataset, device)
-    spn_settings_marginal = torch.clone(spn_settings_joint)
-    spn_settings_marginal[:, -1] = -1
+    pc_settings_joint = utility.generatePCSettings(config_dataset, device)
+    pc_settings_marginal = torch.clone(pc_settings_joint)
+    pc_settings_marginal[:, -1] = -1
 
-    logger.log_info("Setting SPN leaf nodes...")
+    logger.log_info("Setting PC leaf nodes...")
 
-    spn_joint.set_leaf_nodes_categorical(spn_settings_joint)
-    spn_marginal.set_leaf_nodes_categorical(spn_settings_marginal)
+    pc_joint.set_leaf_nodes_categorical(pc_settings_joint)
+    pc_marginal.set_leaf_nodes_categorical(pc_settings_marginal)
 
     if header.config_neural["model_pretrained_weights"] != "":
         utility.loadCheckpoint(header.config_neural["model_pretrained_weights"], model_decomposed)
 
     if header.config_pc["model_pretrained_weights"] != "":
-        utility.loadCheckpoint(header.config_pc["model_pretrained_weights"], spn_joint, True)
-        utility.loadCheckpoint(header.config_pc["model_pretrained_weights"], spn_marginal, True)
+        utility.loadCheckpoint(header.config_pc["model_pretrained_weights"], pc_joint, True)
+        utility.loadCheckpoint(header.config_pc["model_pretrained_weights"], pc_marginal, True)
     elif header.config_pc["randomize_weights"]:
-        logger.log_info("Randomizing SPN weights...")
-        spn_joint.randomize_weights()
-        spn_marginal.set_weights(spn_joint.get_weights())
+        logger.log_info("Randomizing PC weights...")
+        pc_joint.randomize_weights()
+        pc_marginal.set_weights(pc_joint.get_weights())
 
-    logger.log_trace("Total PC nodes: " + str(len(spn_joint.nodes)) + ".")
-    logger.log_trace("Total PC sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
-    logger.log_trace("Total PC product nodes: " + str(len(spn_joint.product_nodes)) + ".")
-    logger.log_trace("Total PC leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
-    logger.log_trace("SPN depth: " + str(spn_joint.depth) + ".")
-    logger.log_trace("SPN leaf node setting dimension: (" + str(int(spn_settings_joint.shape[0])) + ", " + str(int(spn_settings_joint.shape[1])) + ").")
+    logger.log_trace("Total PC nodes: " + str(len(pc_joint.nodes)) + ".")
+    logger.log_trace("Total PC sum nodes: " + str(len(pc_joint.sum_nodes)) + ".")
+    logger.log_trace("Total PC product nodes: " + str(len(pc_joint.product_nodes)) + ".")
+    logger.log_trace("Total PC leaf nodes: " + str(len(pc_joint.leaf_nodes)) + ".")
+    logger.log_trace("PC depth: " + str(pc_joint.depth) + ".")
+    logger.log_trace("PC leaf node setting dimension: (" + str(int(pc_settings_joint.shape[0])) + ", " + str(int(pc_settings_joint.shape[1])) + ").")
 
     if epoch <= header.config_neural["epochs"]:
         progress_bar = tqdm.tqdm(total = header.config_neural["epochs"], position = 0)
@@ -285,11 +285,11 @@ def main():
         wandb.log({"training/epoch/step": epoch})
         wandb.log({"validation/epoch/step": epoch})
 
-        batch_step_train = train(model_decomposed, spn_joint, spn_marginal, data_loader_train, criterion, optimizer_decomposed, optimizer_spn, device, batch_step_train)
-        (accuracy_task_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_decomposed, spn_joint, spn_marginal, data_loader_validation, criterion, device, batch_step_validate)
+        batch_step_train = train(model_decomposed, pc_joint, pc_marginal, data_loader_train, criterion, optimizer_decomposed, optimizer_pc, device, batch_step_train)
+        (accuracy_task_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_decomposed, pc_joint, pc_marginal, data_loader_validation, criterion, device, batch_step_validate)
 
         learning_rate_scheduler.step(loss_validation_epoch)
-        learning_rate_scheduler_spn.step(loss_validation_epoch)
+        learning_rate_scheduler_pc.step(loss_validation_epoch)
 
         logger.log_info("Epoch validation task accuracy: " + str(accuracy_task_validation_epoch) + ".")
 
@@ -297,10 +297,10 @@ def main():
             accuracy_task_validation_best = accuracy_task_validation_epoch
             wandb.log({"validation/epoch/accuracy_task_best": accuracy_task_validation_best})
             utility.saveCheckpoint(header.config_neural["file_name_checkpoint_best"], model_decomposed)
-            utility.saveCheckpoint(header.config_pc["file_name_checkpoint_best"], spn_joint, True)
+            utility.saveCheckpoint(header.config_pc["file_name_checkpoint_best"], pc_joint, True)
 
         utility.saveCheckpoint(header.config_neural["file_name_checkpoint"], model_decomposed)
-        utility.saveCheckpoint(header.config_pc["file_name_checkpoint"], spn_joint, True)
+        utility.saveCheckpoint(header.config_pc["file_name_checkpoint"], pc_joint, True)
 
         epoch += 1
 
@@ -311,23 +311,23 @@ def main():
     wandb.summary["validation/epoch/accuracy_task_best"] = accuracy_task_validation_best
 
     if header.npc_pc_backward:
-        settings_marginal = torch.full((1, spn_settings_joint.shape[1]), -1).to(device)
-        logger.log_info("Normalizing SPN weights...")
+        settings_marginal = torch.full((1, pc_settings_joint.shape[1]), -1).to(device)
+        logger.log_info("Normalizing PC weights...")
 
-        utility.loadCheckpoint(header.config_pc["file_name_checkpoint"], spn_marginal, True)
-        spn_marginal(settings_marginal)
-        spn_marginal.normalize_weights(header.config_pc["epsilon_smoothing"])
-        utility.saveCheckpoint(header.config_pc["file_name_checkpoint"], spn_marginal, True)
+        utility.loadCheckpoint(header.config_pc["file_name_checkpoint"], pc_marginal, True)
+        pc_marginal(settings_marginal)
+        pc_marginal.normalize_weights(header.config_pc["epsilon_smoothing"])
+        utility.saveCheckpoint(header.config_pc["file_name_checkpoint"], pc_marginal, True)
 
-        utility.loadCheckpoint(header.config_pc["file_name_checkpoint_best"], spn_marginal, True)
-        spn_marginal(settings_marginal)
-        spn_marginal.normalize_weights(header.config_pc["epsilon_smoothing"])
-        utility.saveCheckpoint(header.config_pc["file_name_checkpoint_best"], spn_marginal, True)
+        utility.loadCheckpoint(header.config_pc["file_name_checkpoint_best"], pc_marginal, True)
+        pc_marginal(settings_marginal)
+        pc_marginal.normalize_weights(header.config_pc["epsilon_smoothing"])
+        utility.saveCheckpoint(header.config_pc["file_name_checkpoint_best"], pc_marginal, True)
 
-        spn_marginal.set_leaf_nodes_categorical(spn_settings_marginal)
+        pc_marginal.set_leaf_nodes_categorical(pc_settings_marginal)
 
     wandb.log({"testing/epoch/step": batch_step_test})
-    test_npc.test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loader_test, device, batch_step_test)
+    test_npc.test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader_test, device, batch_step_test)
 
     wandb.finish()
 

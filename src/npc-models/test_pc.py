@@ -69,8 +69,8 @@ def loadDataset(file_path_dataset, device):
 
     return dataset
 
-def test(spn_joint, settings_joint):
-    log_likelihoods = spn_joint(settings_joint)
+def test(pc_joint, settings_joint):
+    log_likelihoods = pc_joint(settings_joint)
     log_likelihood = torch.log(torch.mean(torch.exp(log_likelihoods))).item()
 
     wandb.log({"testing/epoch/log_likelihood": log_likelihood})
@@ -90,22 +90,22 @@ def main():
     device = torch.device("cuda")
     dataset_test = loadDataset(header.config_pc["file_path_dataset_test"], device)
 
-    spn_joint = pc.SPN(device)
+    pc_joint = pc.SPN(device)
 
-    logger.log_info("Loading SPN from \"" + header.config_pc["file_path_pc"] + "\"...")
+    logger.log_info("Loading PC from \"" + header.config_pc["file_path_pc"] + "\"...")
 
-    spn_joint.load(header.config_pc["file_path_pc"])
+    pc_joint.load(header.config_pc["file_path_pc"])
 
-    logger.log_trace("Total PC nodes: " + str(len(spn_joint.nodes)) + ".")
-    logger.log_trace("Total PC sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
-    logger.log_trace("Total PC product nodes: " + str(len(spn_joint.product_nodes)) + ".")
-    logger.log_trace("Total PC leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
-    logger.log_trace("SPN depth: " + str(spn_joint.depth) + ".")
+    logger.log_trace("Total PC nodes: " + str(len(pc_joint.nodes)) + ".")
+    logger.log_trace("Total PC sum nodes: " + str(len(pc_joint.sum_nodes)) + ".")
+    logger.log_trace("Total PC product nodes: " + str(len(pc_joint.product_nodes)) + ".")
+    logger.log_trace("Total PC leaf nodes: " + str(len(pc_joint.leaf_nodes)) + ".")
+    logger.log_trace("PC depth: " + str(pc_joint.depth) + ".")
 
     if header.config_pc["run_name"] != "":
-        utility.loadCheckpoint(header.config_pc["file_name_checkpoint_best"], spn_joint, True)
+        utility.loadCheckpoint(header.config_pc["file_name_checkpoint_best"], pc_joint, True)
 
-    test(spn_joint, dataset_test)
+    test(pc_joint, dataset_test)
 
     return
 

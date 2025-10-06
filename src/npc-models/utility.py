@@ -21,9 +21,9 @@ def applySoftmaxDecomposed(output_decomposed):
 
     return output_decomposed_softmax
 
-def compose(output_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device):
-    log_likelihoods_joint = spn_joint.forward().to(device)
-    log_likelihoods_marginal = spn_marginal.forward().to(device)
+def compose(output_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device):
+    log_likelihoods_joint = pc_joint.forward().to(device)
+    log_likelihoods_marginal = pc_marginal.forward().to(device)
 
     # Compute matrix A and set entries with zero joint and marginal probabilities to zero
     mask_joint = (log_likelihoods_joint == -float("inf"))
@@ -31,7 +31,7 @@ def compose(output_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_out
     mask_matrix_a = mask_joint & mask_marginal
     matrix_a = torch.exp(log_likelihoods_joint - log_likelihoods_marginal)
     matrix_a[mask_matrix_a] = 0
-    matrix_a = matrix_a.reshape(spn_output_rows, spn_output_cols)
+    matrix_a = matrix_a.reshape(pc_output_rows, pc_output_cols)
 
     batch_size = output_decomposed[0].shape[0]
     matrix_b_list = []
@@ -178,7 +178,7 @@ def getIndicesFromLabelsOriginal(labels_original):
 
     return labels_to_indices
 
-def generateSPNSettings(config_dataset, device):
+def generatePCSettings(config_dataset, device):
     attribute_ranges = []
     labels_attribute = getLabelsAttribute(config_dataset)
     labels_original = getLabelsOriginal(config_dataset)
@@ -197,15 +197,15 @@ def generateSPNSettings(config_dataset, device):
 
     logger.log_trace("Number of original labels: " + str(original_count) + ".")
 
-    spn_settings = torch.cartesian_prod(*attribute_ranges)
+    pc_settings = torch.cartesian_prod(*attribute_ranges)
 
-    original_range = original_range.repeat_interleave(spn_settings.shape[0]).reshape(-1, 1)
-    spn_settings = spn_settings.repeat(original_count, 1)
-    spn_settings = torch.cat((spn_settings, original_range), 1)
+    original_range = original_range.repeat_interleave(pc_settings.shape[0]).reshape(-1, 1)
+    pc_settings = pc_settings.repeat(original_count, 1)
+    pc_settings = torch.cat((pc_settings, original_range), 1)
 
-    return spn_settings
+    return pc_settings
 
-def loadCheckpoint(file_name_checkpoint, model, spn = False):
+def loadCheckpoint(file_name_checkpoint, model, pc = False):
     if not os.path.isdir(header.checkpoint_dir):
         logger.log_fatal("Checkpoint directory \"" + header.checkpoint_dir + "\" missing.")
         exit(-1)
@@ -215,7 +215,7 @@ def loadCheckpoint(file_name_checkpoint, model, spn = False):
     if os.path.isfile(file_path_checkpoint):
         checkpoint = torch.load(file_path_checkpoint)
 
-        if not spn:
+        if not pc:
             model.load_state_dict(checkpoint["model_state_dict"])
         else:
             model.set_weights(checkpoint["weights"])
@@ -234,13 +234,13 @@ def lossNegativeLogLikelihood(output, label):
 
     return negative_log_likelihood.mean()
 
-def saveCheckpoint(file_name_checkpoint, model, spn = False):
+def saveCheckpoint(file_name_checkpoint, model, pc = False):
     if not os.path.isdir(header.checkpoint_dir):
         os.makedirs(header.checkpoint_dir, exist_ok = True)
 
     checkpoint = None
 
-    if not spn:
+    if not pc:
         checkpoint = {"model_state_dict": model.state_dict()}
     else:
         checkpoint = {"weights": model.get_weights()}

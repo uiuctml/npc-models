@@ -447,7 +447,7 @@ def main():
 
     logger.log_info("Loading PC leaf node settings...")
 
-    pc_settings_joint = utility.generateSPNSettings(dataset_test.config, device)
+    pc_settings_joint = utility.generatePCSettings(dataset_test.config, device)
     pc_settings_marginal = torch.clone(pc_settings_joint)
     pc_settings_marginal[:, -1] = -1
 
