@@ -222,7 +222,7 @@ def main():
     device = torch.device("cuda")
     device_spn = torch.device("cuda")
 
-    if header.composed_pc_on_cpu:
+    if header.npc_pc_on_cpu:
         logger.log_info("Computing SPNs on CPU.")
         device_spn = torch.device("cpu")
 

@@ -427,7 +427,7 @@ def main():
     global explanations
 
     if header.interpret_mpe:
-        with open(os.path.join(header.composed_mpe_dir_outputs, header.composed_mpe_file_name), "r") as file_mpe:
+        with open(os.path.join(header.npc_mpe_dir_outputs, header.npc_mpe_file_name), "r") as file_mpe:
             explanations = json.load(file_mpe)
 
             if header.interpret_preprocess:

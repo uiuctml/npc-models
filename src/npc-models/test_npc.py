@@ -178,11 +178,11 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
                 tv_distance_batch = 0.5 * torch.sum(torch.abs(output_decomposed[i] - labels_decomposed[i]), dim = 1)
                 tv_distances_epoch[i] += torch.sum(tv_distance_batch).item()
 
-            if header.composed_mpe_find:
+            if header.npc_mpe_find:
                 mpe_attributes = findMPE(matrix_a, matrix_b, predictions_composed, spn_settings_joint)
                 mpe_correctness = computeMPECorrectness(mpe_attributes, labels_decomposed)
 
-                if header.composed_mpe_save:
+                if header.npc_mpe_save:
                     saveMPE(input_file_paths, mpe, mpe_attributes, mpe_correctness, data_loader.dataset, labels_decomposed, labels_original, output_decomposed, output_composed)
 
                 mpe_correctness = torch.tensor(mpe_correctness).to(device)
@@ -221,7 +221,7 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
     logger.log_info("Testing attribute accuracy: " + str(accuracy_attribute_epoch) + ".")
     logger.log_info("Testing task accuracy: " + str(accuracy_task_epoch) + ".")
 
-    if header.composed_mpe_find:
+    if header.npc_mpe_find:
         if len(mpe_correctness_epoch) == 0:
             mpe_correctness_epoch = "N/A"
         else:
@@ -241,13 +241,13 @@ def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loa
         logger.log_info("MPE correctness on correct predictions: " + str(mpe_correctness_prediction_correct_epoch) + ".")
         logger.log_info("MPE correctness on incorrect predictions: " + str(mpe_correctness_prediction_incorrect_epoch) + ".")
 
-        if header.composed_mpe_save:
-            if not os.path.isdir(header.composed_mpe_dir_outputs):
-                os.makedirs(header.composed_mpe_dir_outputs, exist_ok = True)
+        if header.npc_mpe_save:
+            if not os.path.isdir(header.npc_mpe_dir_outputs):
+                os.makedirs(header.npc_mpe_dir_outputs, exist_ok = True)
 
-            with open(os.path.join(header.composed_mpe_dir_outputs, header.composed_mpe_file_name), "w") as file_mpe:
+            with open(os.path.join(header.npc_mpe_dir_outputs, header.npc_mpe_file_name), "w") as file_mpe:
                 json.dump(mpe, file_mpe, indent = 4)
-                logger.log_info("Saved MPE to \"" + os.path.join(header.composed_mpe_dir_outputs, header.composed_mpe_file_name) + "\".")
+                logger.log_info("Saved MPE to \"" + os.path.join(header.npc_mpe_dir_outputs, header.npc_mpe_file_name) + "\".")
 
     return
 
@@ -271,7 +271,7 @@ def main():
     device = torch.device("cuda")
     device_spn = torch.device("cuda")
 
-    if header.composed_pc_on_cpu:
+    if header.npc_pc_on_cpu:
         logger.log_info("Computing SPNs on CPU.")
         device_spn = torch.device("cpu")
 

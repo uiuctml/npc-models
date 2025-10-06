@@ -14,12 +14,6 @@ dataset_dir = os.path.join("../../../datasets", dataset_prefix)
 log_level = type.LogLevel.info
 run_mode = "disabled"
 
-composed_mpe_dir_outputs = os.path.join(dir_outputs, "mpes")
-composed_mpe_file_name = "mpe_" + dataset_prefix + ".json"
-composed_mpe_find = False
-composed_mpe_save = True
-composed_pc_on_cpu = True
-
 counterfactual_dir_outputs = os.path.join(dir_outputs, "counterfactuals")
 counterfactual_file_name = "counterfactual_" + dataset_prefix + ".json"
 counterfactual_learning_rate = 5e-2
@@ -33,6 +27,12 @@ interpret_mpe = False
 interpret_preprocess = False
 interpret_viewer_height = 300
 interpret_viewer_width = 300
+
+npc_mpe_dir_outputs = os.path.join(dir_outputs, "mpes")
+npc_mpe_file_name = "mpe_" + dataset_prefix + ".json"
+npc_mpe_find = True
+npc_mpe_save = True
+npc_pc_on_cpu = True
 
 config_baseline = {
     "batch_size": 256,
