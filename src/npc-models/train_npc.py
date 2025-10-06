@@ -56,7 +56,7 @@ def train(model_decomposed, pc_joint, pc_marginal, data_loader, criterion, optim
     accuracy_task_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
-    pc_output_rows = len(data_loader.dataset.classes_original)
+    pc_output_rows = len(data_loader.dataset.labels_class)
     pc_output_cols = 1
 
     for attribute in data_loader.dataset.config["attributes"]:
@@ -67,9 +67,9 @@ def train(model_decomposed, pc_joint, pc_marginal, data_loader, criterion, optim
     progress_bar.set_description_str("[INFO]: Training progress")
 
     with torch.set_grad_enabled(True):
-        for (batch_index, (input, labels_decomposed, labels_original, _)) in enumerate(data_loader):
+        for (batch_index, (input, labels_decomposed, labels_class, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
-            labels_original = labels_original.to(device, non_blocking = True)
+            labels_class = labels_class.to(device, non_blocking = True)
 
             for i in range(len(labels_decomposed)):
                 labels_decomposed[i] = labels_decomposed[i].to(device, non_blocking = True)
@@ -82,7 +82,7 @@ def train(model_decomposed, pc_joint, pc_marginal, data_loader, criterion, optim
             (matrix_pc, matrix_neural, output_composed) = test_npc.computeNPCOutput(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
-            loss = criterion(output_composed, labels_original)
+            loss = criterion(output_composed, labels_class)
 
             loss.backward()
             optimizer_decomposed.step()
@@ -91,9 +91,9 @@ def train(model_decomposed, pc_joint, pc_marginal, data_loader, criterion, optim
                 pc_joint.backward()
                 pc_marginal.backward()
 
-                optimizer_pc.step(matrix_pc.detach(), matrix_neural.detach(), output_composed.detach(), labels_original)
+                optimizer_pc.step(matrix_pc.detach(), matrix_neural.detach(), output_composed.detach(), labels_class)
 
-            corrects_composed = torch.sum(predictions_composed == labels_original).item()
+            corrects_composed = torch.sum(predictions_composed == labels_class).item()
 
             accuracy_attribute_batch = utility.computeAccuracyDecomposed(outputs_decomposed, labels_decomposed, device)
             accuracy_task_batch = corrects_composed / input.size(0)
@@ -130,7 +130,7 @@ def validate(model_decomposed, pc_joint, pc_marginal, data_loader, criterion, de
     accuracy_task_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
-    pc_output_rows = len(data_loader.dataset.classes_original)
+    pc_output_rows = len(data_loader.dataset.labels_class)
     pc_output_cols = 1
 
     for attribute in data_loader.dataset.config["attributes"]:
@@ -141,9 +141,9 @@ def validate(model_decomposed, pc_joint, pc_marginal, data_loader, criterion, de
     progress_bar.set_description_str("[INFO]: Validation progress")
 
     with torch.set_grad_enabled(False):
-        for (batch_index, (input, labels_decomposed, labels_original, _)) in enumerate(data_loader):
+        for (batch_index, (input, labels_decomposed, labels_class, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
-            labels_original = labels_original.to(device, non_blocking = True)
+            labels_class = labels_class.to(device, non_blocking = True)
 
             for i in range(len(labels_decomposed)):
                 labels_decomposed[i] = labels_decomposed[i].to(device, non_blocking = True)
@@ -154,9 +154,9 @@ def validate(model_decomposed, pc_joint, pc_marginal, data_loader, criterion, de
             (_, _, output_composed) = test_npc.computeNPCOutput(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
-            loss = criterion(output_composed, labels_original)
+            loss = criterion(output_composed, labels_class)
 
-            corrects_composed = torch.sum(predictions_composed == labels_original).item()
+            corrects_composed = torch.sum(predictions_composed == labels_class).item()
 
             accuracy_attribute_batch = utility.computeAccuracyDecomposed(outputs_decomposed, labels_decomposed, device)
             accuracy_task_batch = corrects_composed / input.size(0)

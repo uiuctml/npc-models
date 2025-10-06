@@ -49,7 +49,7 @@ def processArguments():
 
     return
 
-def computeAccuracy(output_neck, output_head, labels_decomposed, labels_original, device):
+def computeAccuracy(output_neck, output_head, labels_decomposed, labels_class, device):
     accuracy_attribute_batch = None
     accuracy_task_batch = None
     threshold_accuracy_attribute = 0.5
@@ -67,7 +67,7 @@ def computeAccuracy(output_neck, output_head, labels_decomposed, labels_original
         labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed)
         accuracy_attribute_batch = sklearn.metrics.accuracy_score(labels_decomposed.cpu(), (output_neck > threshold_accuracy_attribute).cpu())
 
-    accuracy_task_batch = sklearn.metrics.accuracy_score(labels_original.cpu(), (output_head > threshold_accuracy_task).cpu())
+    accuracy_task_batch = sklearn.metrics.accuracy_score(labels_class.cpu(), (output_head > threshold_accuracy_task).cpu())
 
     return (accuracy_attribute_batch, accuracy_task_batch)
 
@@ -118,17 +118,17 @@ def test(model_reference, data_loader, device, batch_step):
     progress_bar.set_description_str("[INFO]: Testing progress")
 
     with torch.set_grad_enabled(False):
-        for (batch_index, (input, labels_decomposed, labels_original, _)) in enumerate(data_loader):
+        for (batch_index, (input, labels_decomposed, labels_class, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
-            labels_original = labels_original.to(device, non_blocking = True)
-            labels_original = utility.getBinaryLabelsOriginal(labels_original, data_loader)
+            labels_class = labels_class.to(device, non_blocking = True)
+            labels_class = utility.getBinaryLabelsClass(labels_class, data_loader)
 
             for i in range(len(labels_decomposed)):
                 labels_decomposed[i] = labels_decomposed[i].to(device)
 
             (output_neck, output_head) = model_reference(input)
 
-            (accuracy_attribute_batch, accuracy_task_batch) = computeAccuracy(output_neck, output_head, labels_decomposed, labels_original, device)
+            (accuracy_attribute_batch, accuracy_task_batch) = computeAccuracy(output_neck, output_head, labels_decomposed, labels_class, device)
 
             accuracy_attribute_epoch += accuracy_attribute_batch
             accuracy_task_epoch += accuracy_task_batch

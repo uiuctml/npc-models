@@ -26,14 +26,14 @@ class ABM(Model):
         super().__init__()
 
         labels_attribute = utility.getLabelsAttribute(config_dataset)
-        labels_original = utility.getLabelsOriginal(config_dataset)
+        labels_class = utility.getLabelsClass(config_dataset)
         labels_categories = []
 
         for attribute_name in labels_attribute.keys():
             labels_categories += labels_attribute[attribute_name]
 
         self.net = ResNet34MTL(config_dataset, device)
-        self.net.head = torch.nn.Linear(len(labels_categories), len(labels_original))
+        self.net.head = torch.nn.Linear(len(labels_categories), len(labels_class))
 
         return
 
@@ -51,7 +51,7 @@ class CBM(Model):
         super().__init__()
 
         labels_attribute = utility.getLabelsAttribute(config_dataset)
-        labels_original = utility.getLabelsOriginal(config_dataset)
+        labels_class = utility.getLabelsClass(config_dataset)
         labels_categories = []
 
         for attribute_name in labels_attribute.keys():
@@ -59,7 +59,7 @@ class CBM(Model):
 
         self.net = torchvision.models.resnet34(weights = "IMAGENET1K_V1")
         self.net.fc = torch.nn.Linear(self.net.fc.in_features, len(labels_categories))
-        self.net.head = torch.nn.Linear(len(labels_categories), len(labels_original))
+        self.net.head = torch.nn.Linear(len(labels_categories), len(labels_class))
 
         return
 
@@ -77,7 +77,7 @@ class CEM(Model):
         super().__init__()
 
         labels_attribute = utility.getLabelsAttribute(config_dataset)
-        labels_original = utility.getLabelsOriginal(config_dataset)
+        labels_class = utility.getLabelsClass(config_dataset)
         labels_categories = []
 
         for attribute_name in labels_attribute.keys():
@@ -85,7 +85,7 @@ class CEM(Model):
 
         self.net = torchvision.models.resnet34(weights = "IMAGENET1K_V1")
         self.net.fc = torch_explain.nn.ConceptEmbedding(self.net.fc.in_features, len(labels_categories), header.config_baseline["model_embedding_size"])
-        self.net.head = torch.nn.Linear(len(labels_categories) * header.config_baseline["model_embedding_size"], len(labels_original))
+        self.net.head = torch.nn.Linear(len(labels_categories) * header.config_baseline["model_embedding_size"], len(labels_class))
 
         return
 
@@ -103,7 +103,7 @@ class DCR(Model):
         super().__init__()
 
         labels_attribute = utility.getLabelsAttribute(config_dataset)
-        labels_original = utility.getLabelsOriginal(config_dataset)
+        labels_class = utility.getLabelsClass(config_dataset)
         labels_categories = []
 
         for attribute_name in labels_attribute.keys():
@@ -111,7 +111,7 @@ class DCR(Model):
 
         self.net = torchvision.models.resnet34(weights = "IMAGENET1K_V1")
         self.net.fc = torch_explain.nn.ConceptEmbedding(self.net.fc.in_features, len(labels_categories), header.config_baseline["model_embedding_size"])
-        self.net.head = torch_explain.nn.concepts.ConceptReasoningLayer(header.config_baseline["model_embedding_size"], len(labels_original))
+        self.net.head = torch_explain.nn.concepts.ConceptReasoningLayer(header.config_baseline["model_embedding_size"], len(labels_class))
 
         return
 
@@ -129,7 +129,7 @@ class ResNet34(Model):
         super().__init__()
 
         self.net = torchvision.models.resnet34(weights = "IMAGENET1K_V1")
-        class_count = len(utility.getLabelsOriginal(config_dataset))
+        class_count = len(utility.getLabelsClass(config_dataset))
         self.net.fc = torch.nn.Linear(self.net.fc.in_features, class_count)
 
         return

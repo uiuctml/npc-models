@@ -71,8 +71,8 @@ def updateInterpretationWidget():
             font.setPointSize(header.interpret_label_font_size)
             label.setText(text)
 
-            if attribute_name == "original":
-                label.setFixedWidth(header.interpret_label_width_original)
+            if attribute_name == "class":
+                label.setFixedWidth(header.interpret_label_width_class)
             else:
                 label.setFixedWidth(header.interpret_label_width_attribute)
 
@@ -92,14 +92,14 @@ def updateInterpretationWidget():
         layout_ground_truth.addLayout(layout_labels)
         layout_labels.addItem(spacer_top)
 
-        if attribute_name == "original":
+        if attribute_name == "class":
             attribute_label = "         " + explanations[file_name]["ground_truth"][attribute_name]
             font = PyQt5.QtGui.QFontDatabase.systemFont(PyQt5.QtGui.QFontDatabase.FixedFont)
             label = PyQt5.QtWidgets.QLabel()
 
             font.setPointSize(header.interpret_label_font_size)
             label.setText(attribute_label)
-            label.setFixedWidth(header.interpret_label_width_original)
+            label.setFixedWidth(header.interpret_label_width_class)
             label.setFont(font)
             layout_labels.addWidget(label)
         else:
@@ -158,8 +158,8 @@ def updateInterpretationWidget():
             font.setPointSize(header.interpret_label_font_size)
             label.setText(text)
 
-            if attribute_name == "original":
-                label.setFixedWidth(header.interpret_label_width_original)
+            if attribute_name == "class":
+                label.setFixedWidth(header.interpret_label_width_class)
             else:
                 label.setFixedWidth(header.interpret_label_width_attribute)
 
@@ -172,7 +172,7 @@ def updateInterpretationWidget():
 
 def updateViewerWidget():
     file_name = combo_box_application_control.currentText()
-    dir_name_label = explanations[file_name]["ground_truth"]["original"]
+    dir_name_label = explanations[file_name]["ground_truth"]["class"]
     file_path_image = os.path.join(header.interpret_dir_dataset, dir_name_label, file_name)
 
     pixmap = PyQt5.QtGui.QPixmap(file_path_image)
@@ -262,8 +262,8 @@ def createInterpretationWidget():
             label.setText(text)
             label.setFont(font)
 
-            if attribute_name == "original":
-                label.setFixedWidth(header.interpret_label_width_original)
+            if attribute_name == "class":
+                label.setFixedWidth(header.interpret_label_width_class)
             else:
                 label.setFixedWidth(header.interpret_label_width_attribute)
 
@@ -279,14 +279,14 @@ def createInterpretationWidget():
         layout_ground_truth.addLayout(layout_labels)
         layout_labels.addItem(spacer_top)
 
-        if attribute_name == "original":
+        if attribute_name == "class":
             attribute_label = "         " + explanations[file_name]["ground_truth"][attribute_name]
             font = PyQt5.QtGui.QFontDatabase.systemFont(PyQt5.QtGui.QFontDatabase.FixedFont)
             label = PyQt5.QtWidgets.QLabel()
 
             font.setPointSize(header.interpret_label_font_size)
             label.setText(attribute_label)
-            label.setFixedWidth(header.interpret_label_width_original)
+            label.setFixedWidth(header.interpret_label_width_class)
             label.setFont(font)
             layout_labels.addWidget(label)
         else:
@@ -324,7 +324,7 @@ def createInterpretationWidget():
                 label.setText("         Misaligned")
 
             font.setPointSize(header.interpret_label_font_size)
-            label.setFixedWidth(header.interpret_label_width_original)
+            label.setFixedWidth(header.interpret_label_width_class)
             label.setFont(font)
             layout_mpe.addWidget(label)
 
@@ -345,8 +345,8 @@ def createInterpretationWidget():
                 font.setPointSize(header.interpret_label_font_size)
                 label.setText(text)
 
-                if attribute_name == "original":
-                    label.setFixedWidth(header.interpret_label_width_original)
+                if attribute_name == "class":
+                    label.setFixedWidth(header.interpret_label_width_class)
                 else:
                     label.setFixedWidth(header.interpret_label_width_attribute)
 

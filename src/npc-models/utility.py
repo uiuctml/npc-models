@@ -97,8 +97,8 @@ def getBinaryLabelsDecomposed(labels_decomposed):
 
     return torch.cat(labels_decomposed_binary, dim = 1)
 
-def getBinaryLabelsOriginal(labels_original, data_loader):
-    return torch.nn.functional.one_hot(labels_original, num_classes = len(data_loader.dataset.classes_original)).float()
+def getBinaryLabelsClass(labels_class, data_loader):
+    return torch.nn.functional.one_hot(labels_class, num_classes = len(data_loader.dataset.labels_class)).float()
 
 def getLabelsAttribute(dataset_config):
     labels_attribute = {}
@@ -111,19 +111,19 @@ def getLabelsAttribute(dataset_config):
 
     return labels_attribute
 
-def getLabelsOriginal(dataset_config):
+def getLabelsClass(dataset_config):
     if "instance_wise" in dataset_config and dataset_config["instance_wise"]:
-        labels_original = []
-        labels_original_set = set()
+        labels_class = []
+        labels_class_set = set()
 
         for image_name in dataset_config["mappings"].keys():
             class_name = image_name.split('/')[0]
 
-            if class_name not in labels_original_set:
-                labels_original.append(class_name)
-                labels_original_set.add(class_name)
+            if class_name not in labels_class_set:
+                labels_class.append(class_name)
+                labels_class_set.add(class_name)
 
-        return natsort.natsorted(labels_original)
+        return natsort.natsorted(labels_class)
     else:
         return list(dataset_config["mappings"].keys())
 
@@ -140,18 +140,18 @@ def getIndicesFromLabelsAttribute(labels_attribute):
 
     return indices
 
-def getIndicesFromLabelsOriginal(labels_original):
+def getIndicesFromLabelsClass(labels_class):
     labels_to_indices = {}
 
-    for i in range(len(labels_original)):
-        labels_to_indices[labels_original[i]] = i
+    for i in range(len(labels_class)):
+        labels_to_indices[labels_class[i]] = i
 
     return labels_to_indices
 
 def generatePCSettings(config_dataset, device):
     attribute_ranges = []
     labels_attribute = getLabelsAttribute(config_dataset)
-    labels_original = getLabelsOriginal(config_dataset)
+    labels_class = getLabelsClass(config_dataset)
 
     for attribute in labels_attribute.keys():
         attribute_count = len(labels_attribute[attribute])
@@ -161,17 +161,17 @@ def generatePCSettings(config_dataset, device):
 
         logger.log_trace("Number of attribute labels for \"" + attribute + "\": " + str(attribute_count) + ".")
 
-    original_count = len(labels_original)
-    original_range = torch.Tensor(range(original_count))
-    original_range = original_range.to(device)
+    class_count = len(labels_class)
+    class_range = torch.Tensor(range(class_count))
+    class_range = class_range.to(device)
 
-    logger.log_trace("Number of original labels: " + str(original_count) + ".")
+    logger.log_trace("Number of class labels: " + str(class_count) + ".")
 
     pc_settings = torch.cartesian_prod(*attribute_ranges)
 
-    original_range = original_range.repeat_interleave(pc_settings.shape[0]).reshape(-1, 1)
-    pc_settings = pc_settings.repeat(original_count, 1)
-    pc_settings = torch.cat((pc_settings, original_range), 1)
+    class_range = class_range.repeat_interleave(pc_settings.shape[0]).reshape(-1, 1)
+    pc_settings = pc_settings.repeat(class_count, 1)
+    pc_settings = torch.cat((pc_settings, class_range), 1)
 
     return pc_settings
 

@@ -8,14 +8,14 @@ import utility
 
 class NPCDataset(torch.utils.data.Dataset):
     def __init__(self, root, transform = None):
-        self.class_to_idx = []
-        self.class_to_idx_original = {}
-        self.classes = []
-        self.classes_original = []
         self.config = {}
         self.file_paths = []
-        self.labels = []
-        self.labels_original = []
+        self.indices_attribute = []
+        self.indices_class = []
+        self.label_to_index_attribute = []
+        self.label_to_index_class = {}
+        self.labels_attribute = []
+        self.labels_class = []
         self.root = root
         self.transform = transform
 
@@ -29,80 +29,79 @@ class NPCDataset(torch.utils.data.Dataset):
         self.config = json.load(file_config_dataset)
         file_config_dataset.close()
 
-        self.classes = utility.getLabelsAttribute(self.config)
-        self.classes_original = utility.getLabelsOriginal(self.config)
-        self.class_to_idx = utility.getIndicesFromLabelsAttribute(self.classes)
-        self.class_to_idx_original = utility.getIndicesFromLabelsOriginal(self.classes_original)
+        self.labels_attribute = utility.getLabelsAttribute(self.config)
+        self.labels_class = utility.getLabelsClass(self.config)
+        self.label_to_index_attribute = utility.getIndicesFromLabelsAttribute(self.labels_attribute)
+        self.label_to_index_class = utility.getIndicesFromLabelsClass(self.labels_class)
 
         for _ in self.config["attributes"]:
-            self.labels.append([])
+            self.indices_attribute.append([])
 
         if "instance_wise" in self.config and self.config["instance_wise"]:
-            for class_name_original in os.listdir(root):
-                for file_name in os.listdir(os.path.join(root, class_name_original)):
-                    image_name = os.path.join(class_name_original, file_name)
-                    label_original = self.class_to_idx_original[class_name_original]
+            for class_name in os.listdir(root):
+                for file_name in os.listdir(os.path.join(root, class_name)):
+                    image_name = os.path.join(class_name, file_name)
+                    index_class = self.label_to_index_class[class_name]
 
                     self.file_paths.append(os.path.abspath(os.path.join(root, image_name)))
-                    self.labels_original.append(label_original)
+                    self.indices_class.append(index_class)
 
-                    for (attribute_index, attribute) in enumerate(self.config["attributes"]):
+                    for (index_attribute_name, attribute) in enumerate(self.config["attributes"]):
                         attribute_name = attribute["name"]
-                        class_names_decomposed = self.config["mappings"][image_name]["labels"][attribute_name]
-                        count_categories = len(self.classes[attribute_name])
-                        label = [0 for _ in range(count_categories)]
+                        attribute_categories = self.config["mappings"][image_name]["labels"][attribute_name]
+                        count_categories = len(self.labels_attribute[attribute_name])
+                        index_attribute_categories = [0 for _ in range(count_categories)]
 
-                        if isinstance(class_names_decomposed, list):
-                            probability = 1 / len(class_names_decomposed)
+                        if isinstance(attribute_categories, list):
+                            probability = 1 / len(attribute_categories)
 
-                            for class_name_decomposed in class_names_decomposed:
-                                index_category = self.class_to_idx[attribute_name][class_name_decomposed]
-                                label[index_category] = probability
+                            for class_name_decomposed in attribute_categories:
+                                index_category = self.label_to_index_attribute[attribute_name][class_name_decomposed]
+                                index_attribute_categories[index_category] = probability
                         else:
-                            index_category = self.class_to_idx[attribute_name][class_names_decomposed]
-                            label[index_category] = 1
+                            index_category = self.label_to_index_attribute[attribute_name][attribute_categories]
+                            index_attribute_categories[index_category] = 1
 
-                        self.labels[attribute_index].append(label)
+                        self.indices_attribute[index_attribute_name].append(index_attribute_categories)
         else:
-            for class_name_original in self.classes_original:
-                for file_name in os.listdir(os.path.join(root, class_name_original)):
-                    label_original = self.class_to_idx_original[class_name_original]
+            for class_name in self.labels_class:
+                for file_name in os.listdir(os.path.join(root, class_name)):
+                    index_class = self.label_to_index_class[class_name]
 
-                    self.file_paths.append(os.path.abspath(os.path.join(root, class_name_original, file_name)))
-                    self.labels_original.append(label_original)
+                    self.file_paths.append(os.path.abspath(os.path.join(root, class_name, file_name)))
+                    self.indices_class.append(index_class)
 
-                    for (attribute_index, attribute) in enumerate(self.config["attributes"]):
+                    for (index_attribute_name, attribute) in enumerate(self.config["attributes"]):
                         attribute_name = attribute["name"]
-                        class_names_decomposed = self.config["mappings"][class_name_original]["labels"][attribute_name]
+                        attribute_categories = self.config["mappings"][class_name]["labels"][attribute_name]
+                        count_categories = len(self.labels_attribute[attribute_name])
+                        index_attribute_categories = [0 for _ in range(count_categories)]
 
-                        count_categories = len(self.classes[attribute_name])
-                        label = [0 for _ in range(count_categories)]
+                        if isinstance(attribute_categories, list):
+                            probability = 1 / len(attribute_categories)
 
-                        if isinstance(class_names_decomposed, list):
-                            probability = 1 / len(class_names_decomposed)
-
-                            for class_name_decomposed in class_names_decomposed:
-                                index_category = self.class_to_idx[attribute_name][class_name_decomposed]
-                                label[index_category] = probability
+                            for class_name_decomposed in attribute_categories:
+                                index_category = self.label_to_index_attribute[attribute_name][class_name_decomposed]
+                                index_attribute_categories[index_category] = probability
                         else:
-                            index_category = self.class_to_idx[attribute_name][class_names_decomposed]
-                            label[index_category] = 1
+                            index_category = self.label_to_index_attribute[attribute_name][attribute_categories]
+                            index_attribute_categories[index_category] = 1
 
-                        self.labels[attribute_index].append(label)
+                        self.indices_attribute[index_attribute_name].append(index_attribute_categories)
 
         return
 
     def __len__(self):
         return len(self.file_paths)
 
-    def __getitem__(self, index):
-        image = PIL.Image.open(self.file_paths[index]).convert("RGB")
-        labels = []
+    def __getitem__(self, instance):
+        image = PIL.Image.open(self.file_paths[instance]).convert("RGB")
+        indices_attribute = []
 
         if self.transform is not None:
             image = self.transform(image)
 
-        for label in self.labels:
-            labels.append(torch.Tensor(label[index]))
+        for index_attribute in self.indices_attribute:
+            indices_attribute.append(torch.Tensor(index_attribute[instance]))
 
-        return (image, labels, self.labels_original[index], self.file_paths[index])
+        return (image, indices_attribute, self.indices_class[instance], self.file_paths[instance])
