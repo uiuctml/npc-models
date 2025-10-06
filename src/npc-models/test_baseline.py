@@ -14,8 +14,11 @@ import wandb
 
 def initializeRunName(run_name = ""):
     if run_name != "":
-        if run_name.split(".")[1] != header.config_baseline["type"]:
-            logger.log_fatal("Invalid reference run name. Quit.")
+        if run_name.split(".")[2] != header.config_baseline["type"]:
+            logger.log_fatal("Not a baseline run name. Quit.")
+            exit(-1)
+        elif run_name.split(".")[1] != header.dataset_prefix:
+            logger.log_fatal("Baseline run name dataset is not \"" + header.dataset_prefix + "\". Quit.")
             exit(-1)
 
         header.config_baseline["run_name"] = run_name
@@ -23,7 +26,7 @@ def initializeRunName(run_name = ""):
         header.config_baseline["run_name"] = utility.generateRunName(header.config_baseline["seed"], header.config_baseline["type"], header.config_baseline["model"])
 
     if header.config_baseline["run_name"] == "":
-        logger.log_fatal("Missing reference run name. Quit.")
+        logger.log_fatal("Missing baseline run name. Quit.")
         exit(-1)
 
     header.config_baseline["file_name_checkpoint"] = header.config_baseline["run_name"] + header.checkpoint_postfix
@@ -38,7 +41,7 @@ def processArguments():
     arguments = parser.parse_args()
 
     initializeRunName(arguments.run_name)
-    header.config_baseline["model"] = header.config_baseline["run_name"].split(".")[2]
+    header.config_baseline["model"] = header.config_baseline["run_name"].split(".")[3]
 
     if arguments.seed is not None:
         header.config_baseline["seed"] = arguments.seed

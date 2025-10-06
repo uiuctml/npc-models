@@ -75,6 +75,9 @@ def defineMetrics():
 def generateRunName(seed, type, method):
     date_time_list = list(datetime.datetime.now().timetuple())[:-4]
     run_name = str(seed)
+
+    run_name += "."
+    run_name += header.dataset_prefix
     run_name += "."
     run_name += type
     run_name += "."

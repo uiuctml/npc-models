@@ -162,12 +162,12 @@ def findMPE(matrix_pc, matrix_neural, predictions_composed, pc_settings):
 
 def processArguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-r", "--run-name-attribute", type = str, default = "", help = "Attribute run name.", required = True)
+    parser.add_argument("-r", "--run-name-neural", type = str, default = "", help = "Neural run name.", required = True)
     parser.add_argument("-p", "--run-name-pc", type = str, default = "", help = "PC run name.")
     parser.add_argument("-s", "--seed", type = int, default = None, help = "Random seed.")
     arguments = parser.parse_args()
 
-    test_neural.initializeRunName(arguments.run_name_attribute)
+    test_neural.initializeRunName(arguments.run_name_neural)
 
     if arguments.run_name_pc == "":
         logger.log_info("Proceeding without PC run name.")
@@ -181,7 +181,7 @@ def processArguments():
         header.config_neural["seed"] = arguments.seed
         header.config_pc["seed"] = arguments.seed
 
-    logger.log_trace("Attribute run name: \"" + header.config_neural["run_name"] + "\".")
+    logger.log_trace("Neural run name: \"" + header.config_neural["run_name"] + "\".")
     logger.log_trace("PC run name: \"" + header.config_pc["run_name"] + "\".")
     logger.log_trace("Random seed: " + str(header.config_neural["seed"]) + ".")
 

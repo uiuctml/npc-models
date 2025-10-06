@@ -12,8 +12,14 @@ import wandb
 
 def initializeRunName(run_name = ""):
     if run_name != "":
-        if run_name.split(".")[1] != header.config_neural["type"]:
-            logger.log_fatal("Invalid attribute run name. Quit.")
+        if run_name.split(".")[2] != header.config_neural["type"]:
+            logger.log_fatal("Not a neural run name. Quit.")
+            exit(-1)
+        elif run_name.split(".")[1] != header.dataset_prefix:
+            logger.log_fatal("Neural run name dataset is not \"" + header.dataset_prefix + "\". Quit.")
+            exit(-1)
+        elif run_name.split(".")[3] != "resnet34mtl":
+            logger.log_fatal("Unknown neural model \"" + run_name.split(".")[3] + "\". Quit.")
             exit(-1)
 
         header.config_neural["run_name"] = run_name
@@ -21,7 +27,7 @@ def initializeRunName(run_name = ""):
         header.config_neural["run_name"] = utility.generateRunName(header.config_neural["seed"], header.config_neural["type"], "resnet34mtl")
 
     if header.config_neural["run_name"] == "":
-        logger.log_fatal("Missing attribute run name. Quit.")
+        logger.log_fatal("Missing neural run name. Quit.")
         exit(-1)
 
     header.config_neural["file_name_checkpoint"] = header.config_neural["run_name"] + header.checkpoint_postfix

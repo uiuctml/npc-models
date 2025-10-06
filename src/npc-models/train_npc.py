@@ -16,7 +16,7 @@ import wandb
 
 def processArguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-w", "--weights-attribute", type = str, default = "", help = "Attribute model pretrained weights.")
+    parser.add_argument("-w", "--weights-neural", type = str, default = "", help = "Neural model pretrained weights.")
     parser.add_argument("-c", "--weights-pc", type = str, default = "", help = "PC model pretrained weights.")
     parser.add_argument("-b", "--batch-size", type = int, default = None, help = "Batch size.")
     parser.add_argument("-e", "--epochs", type = int, default = None, help = "Epochs.")
@@ -26,8 +26,8 @@ def processArguments():
     test_neural.initializeRunName()
     test_pc.initializeRunName("", "pgd")
 
-    if arguments.weights_attribute != "":
-        header.config_neural["model_pretrained_weights"] = arguments.weights_attribute
+    if arguments.weights_neural != "":
+        header.config_neural["model_pretrained_weights"] = arguments.weights_neural
 
     if arguments.weights_pc != "":
         header.config_pc["model_pretrained_weights"] = arguments.weights_pc
@@ -41,9 +41,9 @@ def processArguments():
     if arguments.seed is not None:
         header.config_neural["seed"] = arguments.seed
 
-    logger.log_trace("Attribute run name: \"" + header.config_neural["run_name"] + "\".")
+    logger.log_trace("Neural run name: \"" + header.config_neural["run_name"] + "\".")
+    logger.log_trace("Neural model pretrained weights: \"" + header.config_neural["model_pretrained_weights"] + "\".")
     logger.log_trace("PC run name: \"" + header.config_pc["run_name"] + "\".")
-    logger.log_trace("Attribute model pretrained weights: \"" + header.config_neural["model_pretrained_weights"] + "\".")
     logger.log_trace("PC model pretrained weights: \"" + header.config_pc["model_pretrained_weights"] + "\".")
     logger.log_trace("Batch size: " + str(header.config_neural["batch_size"]) + ".")
     logger.log_trace("Epochs: " + str(header.config_neural["epochs"]) + ".")

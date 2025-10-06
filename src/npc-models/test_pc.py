@@ -10,8 +10,11 @@ import wandb
 
 def initializeRunName(run_name = "", optimizer = "cccp"):
     if run_name != "":
-        if run_name.split(".")[1] != header.config_pc["type"]:
-            logger.log_fatal("Invalid PC run name. Quit.")
+        if run_name.split(".")[2] != header.config_pc["type"]:
+            logger.log_fatal("Not a PC run name. Quit.")
+            exit(-1)
+        elif run_name.split(".")[1] != header.dataset_prefix:
+            logger.log_fatal("PC run name dataset is not \"" + header.dataset_prefix + "\". Quit.")
             exit(-1)
 
         header.config_pc["run_name"] = run_name

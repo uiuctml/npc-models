@@ -12,8 +12,14 @@ import wandb
 
 def initializeRunName(run_name = ""):
     if run_name != "":
-        if run_name.split(".")[1] != header.config_blackbox["type"]:
-            logger.log_fatal("Invalid baseline run name. Quit.")
+        if run_name.split(".")[2] != header.config_blackbox["type"]:
+            logger.log_fatal("Not a blackbox run name. Quit.")
+            exit(-1)
+        elif run_name.split(".")[1] != header.dataset_prefix:
+            logger.log_fatal("Blackbox run name dataset is not \"" + header.dataset_prefix + "\". Quit.")
+            exit(-1)
+        elif run_name.split(".")[3] != "resnet34":
+            logger.log_fatal("Unknown blackbox model \"" + run_name.split(".")[3] + "\". Quit.")
             exit(-1)
 
         header.config_blackbox["run_name"] = run_name
@@ -21,7 +27,7 @@ def initializeRunName(run_name = ""):
         header.config_blackbox["run_name"] = utility.generateRunName(header.config_blackbox["seed"], header.config_blackbox["type"], "resnet34")
 
     if header.config_blackbox["run_name"] == "":
-        logger.log_fatal("Missing baseline run name. Quit.")
+        logger.log_fatal("Missing blackbox run name. Quit.")
         exit(-1)
 
     header.config_blackbox["file_name_checkpoint"] = header.config_blackbox["run_name"] + header.checkpoint_postfix
