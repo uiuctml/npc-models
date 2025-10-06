@@ -270,8 +270,8 @@ def recordPredictions(input_file_paths, interpret, dataset, labels_decomposed, l
 
     return
 
-def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader, device, batch_step):
-    utility.loadCheckpoint(header.config_neural["file_name_checkpoint_best"], model_decomposed)
+def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, device, batch_step):
+    utility.loadCheckpoint(header.config_neural["file_name_checkpoint_best"], model_neural)
 
     if header.config_pc["run_name"] != "":
         utility.loadCheckpoint(header.config_pc["file_name_checkpoint_best"], pc_joint, True)
@@ -300,7 +300,7 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
         ce_tv_distances_epoch.append(0)
         tv_distances_epoch.append(0)
 
-    model_decomposed.eval()
+    model_neural.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")
 
     for (batch_index, (input, labels_decomposed, labels_class, input_file_paths)) in enumerate(data_loader):
@@ -311,7 +311,7 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
             labels_decomposed[i] = labels_decomposed[i].to(device, non_blocking = True)
 
         with torch.set_grad_enabled(False):
-            (outputs_decomposed_original, _) = model_decomposed(input)
+            (outputs_decomposed_original, _) = model_neural(input)
             outputs_decomposed = utility.applySoftmaxAttribute(outputs_decomposed_original)
 
         (matrix_pc, matrix_neural, outputs_composed) = computeNPCOutput(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
@@ -464,9 +464,9 @@ def main():
         logger.log_info("Computing PCs on CPU.")
         device_pc = torch.device("cpu")
 
-    model_decomposed = model.ResNet34MTL(dataset_test.config, device)
-    model_decomposed = torch.nn.DataParallel(model_decomposed)
-    model_decomposed = model_decomposed.to(device)
+    model_neural = model.ResNet34MTL(dataset_test.config, device)
+    model_neural = torch.nn.DataParallel(model_neural)
+    model_neural = model_neural.to(device)
     pc_joint = pc.ProbabilisticCircuit(device_pc)
     pc_marginal = pc.ProbabilisticCircuit(device_pc)
 
@@ -493,7 +493,7 @@ def main():
     logger.log_trace("PC depth: " + str(pc_joint.depth) + ".")
     logger.log_trace("PC leaf node setting dimension: (" + str(int(pc_settings_joint.shape[0])) + ", " + str(int(pc_settings_joint.shape[1])) + ").")
 
-    test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader_test, device, 1)
+    test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader_test, device, 1)
 
     return
 
