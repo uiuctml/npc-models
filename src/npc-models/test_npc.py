@@ -15,20 +15,20 @@ import tqdm
 import utility
 import wandb
 
-def computeMPECorrectness(mpe_attributes, labels_attribute):
-    mpe_correctness = []
+def computeMPEAlignment(mpe_attributes, labels_attribute):
+    mpe_alignment = []
 
     for batch_index in range(len(mpe_attributes)):
-        correct = True
+        aligned = True
 
         for (attribute_index, category_index) in enumerate(mpe_attributes[batch_index]):
             if labels_attribute[attribute_index][batch_index][category_index] <= 0:
-                correct = False
+                aligned = False
                 break
 
-        mpe_correctness.append(correct)
+        mpe_alignment.append(aligned)
 
-    return mpe_correctness
+    return mpe_alignment
 
 def computeNPCOutput(outputs_attribute, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device):
     log_likelihoods_joint = pc_joint.forward().to(device)
@@ -216,7 +216,7 @@ def recordCE(input_file_paths, interpret, dataset, labels_attribute, labels_clas
 
     return
 
-def recordMPE(input_file_paths, interpret, mpe_attributes, mpe_correctness, dataset, labels_class):
+def recordMPE(input_file_paths, interpret, mpe_attributes, mpe_alignment, dataset, labels_class):
     batch_size = labels_class.nelement()
 
     for batch_index in range(batch_size):
@@ -228,7 +228,7 @@ def recordMPE(input_file_paths, interpret, mpe_attributes, mpe_correctness, data
             attribute_name = attribute["name"]
             interpret[input_file_path]["mpe"][attribute_name] = dataset.labels_attribute[attribute_name][mpe_attributes[batch_index][attribute_index]]
 
-        interpret[input_file_path]["mpe"]["correct"] = mpe_correctness[batch_index]
+        interpret[input_file_path]["mpe"]["aligned"] = mpe_alignment[batch_index]
 
     return
 
@@ -279,16 +279,10 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
 
     accuracy_concept_epoch = 0
     accuracy_classification_epoch = 0
-    ce_correctness_attribute_epoch = 0
-    ce_correctness_task_epoch = 0
     ce_instances_corrected = 0
     ce_instances_incorrect = 0
-    ce_tv_distance_epoch = 0
-    ce_tv_distances_epoch = []
     interpret = {}
-    mpe_correctness_epoch = []
-    mpe_correctness_prediction_correct_epoch = []
-    mpe_correctness_prediction_incorrect_epoch = []
+    mpe_alignment_epoch = []
     pc_output_rows = len(data_loader.dataset.labels_class)
     pc_output_cols = 1
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
@@ -297,7 +291,6 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
 
     for attribute in data_loader.dataset.config["attributes"]:
         pc_output_cols *= len(attribute["labels"])
-        ce_tv_distances_epoch.append(0)
         tv_distances_epoch.append(0)
 
     model_neural.eval()
@@ -344,25 +337,16 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
             corrects_npc_ce = torch.sum(prediction_correctness_ce).item()
             incorrects_npc = torch.sum(predictions_npc != labels_class).item()
 
-            ce_correctness_attribute_epoch += utility.computeConceptAccuracy(outputs_attribute_ce, labels_attribute, device)
-
             ce_instances_corrected += corrects_npc_ce - corrects_npc
             ce_instances_incorrect += incorrects_npc
-            ce_correctness_task_epoch += corrects_npc_ce
-
-            for i in range(len(data_loader.dataset.config["attributes"])):
-                ce_tv_distance_batch = 0.5 * torch.sum(torch.abs(outputs_attribute_ce[i] - outputs_attribute[i]), dim = 1)
-                ce_tv_distances_epoch[i] += torch.sum(ce_tv_distance_batch).item()
 
             mpe_attributes = findMPE(matrix_pc, matrix_neural, predictions_npc, pc_settings_joint)
-            mpe_correctness = computeMPECorrectness(mpe_attributes, labels_attribute)
+            mpe_alignment = computeMPEAlignment(mpe_attributes, labels_attribute)
 
-            recordMPE(input_file_paths, interpret, mpe_attributes, mpe_correctness, data_loader.dataset, labels_class)
+            recordMPE(input_file_paths, interpret, mpe_attributes, mpe_alignment, data_loader.dataset, labels_class)
 
-            mpe_correctness = torch.tensor(mpe_correctness).to(device)
-            mpe_correctness_epoch += mpe_correctness.tolist()
-            mpe_correctness_prediction_correct_epoch += mpe_correctness[prediction_correctness].tolist()
-            mpe_correctness_prediction_incorrect_epoch += mpe_correctness[~prediction_correctness].tolist()
+            mpe_alignment = torch.tensor(mpe_alignment).to(device)
+            mpe_alignment_epoch += mpe_alignment[prediction_correctness].tolist()
 
         progress_bar.n = batch_index + 1
         progress_bar.refresh()
@@ -396,41 +380,15 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
     logger.log_info("Testing classification accuracy: " + str(accuracy_classification_epoch) + ".")
 
     if header.npc_interpret:
-        ce_correctness_attribute_epoch /= len(data_loader)
-        ce_correctness_task_epoch /= len(data_loader.dataset)
-
-        for i in range(len(data_loader.dataset.config["attributes"])):
-            ce_tv_distances_epoch[i] /= len(data_loader.dataset)
-
-        ce_tv_distance_epoch = sum(ce_tv_distances_epoch) / len(ce_tv_distances_epoch)
-
         if ce_instances_incorrect != 0:
             logger.log_info("CE correction rate: " + str(ce_instances_corrected / ce_instances_incorrect) + ".")
         else:
             logger.log_info("CE correction rate: N/A.")
 
-        logger.log_info("CE attribute TV distance: " + str(ce_tv_distance_epoch) + ".")
-        logger.log_info("CE attribute correctness: " + str(ce_correctness_attribute_epoch) + ".")
-        logger.log_info("CE task correctness: " + str(ce_correctness_task_epoch) + ".")
-
-        if len(mpe_correctness_epoch) == 0:
-            mpe_correctness_epoch = "N/A"
+        if len(mpe_alignment_epoch) != 0:
+            logger.log_info("MPE alignment rate: " + str(sum(mpe_alignment_epoch) / len(mpe_alignment_epoch)) + ".")
         else:
-            mpe_correctness_epoch = sum(mpe_correctness_epoch) / len(mpe_correctness_epoch)
-
-        if len(mpe_correctness_prediction_correct_epoch) == 0:
-            mpe_correctness_prediction_correct_epoch = "N/A"
-        else:
-            mpe_correctness_prediction_correct_epoch = sum(mpe_correctness_prediction_correct_epoch) / len(mpe_correctness_prediction_correct_epoch)
-
-        if len(mpe_correctness_prediction_incorrect_epoch) == 0:
-            mpe_correctness_prediction_incorrect_epoch = "N/A"
-        else:
-            mpe_correctness_prediction_incorrect_epoch = sum(mpe_correctness_prediction_incorrect_epoch) / len(mpe_correctness_prediction_incorrect_epoch)
-
-        logger.log_info("MPE correctness on all predictions: " + str(mpe_correctness_epoch) + ".")
-        logger.log_info("MPE correctness on correct predictions: " + str(mpe_correctness_prediction_correct_epoch) + ".")
-        logger.log_info("MPE correctness on incorrect predictions: " + str(mpe_correctness_prediction_incorrect_epoch) + ".")
+            logger.log_info("MPE alignment rate: N/A.")
 
         if not os.path.isdir(header.project_dir_outputs_interpret):
             os.makedirs(header.project_dir_outputs_interpret, exist_ok = True)

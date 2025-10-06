@@ -116,7 +116,7 @@ def updateInterpretationWidget():
         layout_labels.addItem(spacer_bottom)
 
     for (i, attribute_name) in enumerate(explanations[file_name]["mpe"].keys()):
-        if attribute_name != "correct":
+        if attribute_name != "aligned":
             attribute_label = "         " + explanations[file_name]["mpe"][attribute_name]
             font = PyQt5.QtGui.QFontDatabase.systemFont(PyQt5.QtGui.QFontDatabase.FixedFont)
             label = layout_mpe.itemAt(i).widget()
@@ -125,13 +125,13 @@ def updateInterpretationWidget():
             label.setText(attribute_label)
             label.setFont(font)
         else:
-            correct = explanations[file_name]["mpe"][attribute_name]
+            aligned = explanations[file_name]["mpe"][attribute_name]
             font = PyQt5.QtGui.QFontDatabase.systemFont(PyQt5.QtGui.QFontDatabase.FixedFont)
             label = layout_mpe.itemAt(i).widget()
 
             font.setPointSize(header.interpret_label_font_size)
 
-            if correct:
+            if aligned:
                 label.setText("         Aligned")
             else:
                 label.setText("         Misaligned")
@@ -303,7 +303,7 @@ def createInterpretationWidget():
         layout_labels.addItem(spacer_bottom)
 
     for attribute_name in explanations[file_name]["mpe"].keys():
-        if attribute_name != "correct":
+        if attribute_name != "aligned":
             attribute_label = "         " + explanations[file_name]["mpe"][attribute_name]
             font = PyQt5.QtGui.QFontDatabase.systemFont(PyQt5.QtGui.QFontDatabase.FixedFont)
             label = PyQt5.QtWidgets.QLabel()
@@ -314,11 +314,11 @@ def createInterpretationWidget():
             label.setFont(font)
             layout_mpe.addWidget(label)
         else:
-            correct = explanations[file_name]["mpe"][attribute_name]
+            aligned = explanations[file_name]["mpe"][attribute_name]
             font = PyQt5.QtGui.QFontDatabase.systemFont(PyQt5.QtGui.QFontDatabase.FixedFont)
             label = PyQt5.QtWidgets.QLabel()
 
-            if correct:
+            if aligned:
                 label.setText("         Aligned")
             else:
                 label.setText("         Misaligned")
