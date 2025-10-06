@@ -30,7 +30,7 @@ class LogLevel(enum.Enum):
             return self.value < other.value
         return NotImplemented
 
-class ModelReference(enum.Enum):
+class ModelBaseline(enum.Enum):
     abm = 0
     cbm = 1
     cem = 2

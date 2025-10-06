@@ -44,7 +44,7 @@ def processArguments():
     return
 
 def computeLoss(output_neck, output_head, labels_decomposed, labels_class):
-    if header.config_baseline["model"] == type.ModelReference.abm.name:
+    if header.config_baseline["model"] == type.ModelBaseline.abm.name:
         count_attributes = len(output_neck)
         loss_attribute = 0
 
@@ -56,17 +56,17 @@ def computeLoss(output_neck, output_head, labels_decomposed, labels_class):
         loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_class)
 
         return header.config_baseline["concept_loss_weight"] * loss_attribute + loss_task
-    elif header.config_baseline["model"] == type.ModelReference.cbm.name:
+    elif header.config_baseline["model"] == type.ModelBaseline.cbm.name:
         labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed)
         loss_attribute = torch.nn.functional.binary_cross_entropy_with_logits(output_neck, labels_decomposed)
         loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_class)
         return header.config_baseline["concept_loss_weight"] * loss_attribute + loss_task
-    elif header.config_baseline["model"] == type.ModelReference.cem.name:
+    elif header.config_baseline["model"] == type.ModelBaseline.cem.name:
         labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed)
         loss_attribute = torch.nn.functional.binary_cross_entropy(output_neck, labels_decomposed)
         loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_class)
         return header.config_baseline["concept_loss_weight"] * loss_attribute + loss_task
-    elif header.config_baseline["model"] == type.ModelReference.dcr.name:
+    elif header.config_baseline["model"] == type.ModelBaseline.dcr.name:
         labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed)
         loss_attribute = torch.nn.functional.binary_cross_entropy(output_neck, labels_decomposed)
         loss_task = torch.nn.functional.binary_cross_entropy(output_head, labels_class)
@@ -209,7 +209,7 @@ def main():
     data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_baseline["batch_size"], shuffle = header.config_baseline["data_loader_shuffle"], num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     epoch = 1
-    model_reference = model.createModelReference(dataset_test.config, device)
+    model_reference = model.createModelBaseline(dataset_test.config, device)
     model_reference = torch.nn.DataParallel(model_reference)
     model_reference = model_reference.to(device)
     optimizer = torch.optim.SGD(model_reference.module.get_parameters(), lr = header.config_baseline["optimizer_learning_rate"], momentum = header.config_baseline["optimizer_momentum"], weight_decay = header.config_baseline["optimizer_weight_decay"])

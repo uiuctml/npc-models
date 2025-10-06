@@ -186,14 +186,14 @@ class ResNet34MTL(Model):
     def get_parameters(self):
         return self.net.parameters()
 
-def createModelReference(config_dataset, device):
-    if header.config_baseline["model"] == type.ModelReference.abm.name:
+def createModelBaseline(config_dataset, device):
+    if header.config_baseline["model"] == type.ModelBaseline.abm.name:
         return ABM(config_dataset, device)
-    elif header.config_baseline["model"] == type.ModelReference.cbm.name:
+    elif header.config_baseline["model"] == type.ModelBaseline.cbm.name:
         return CBM(config_dataset, device)
-    elif header.config_baseline["model"] == type.ModelReference.cem.name:
+    elif header.config_baseline["model"] == type.ModelBaseline.cem.name:
         return CEM(config_dataset, device)
-    elif header.config_baseline["model"] == type.ModelReference.dcr.name:
+    elif header.config_baseline["model"] == type.ModelBaseline.dcr.name:
         return DCR(config_dataset, device)
     else:
         logger.log_fatal("Unknown reference model \"" + header.config_baseline["model"] + "\".")

@@ -58,13 +58,13 @@ def computeAccuracy(output_neck, output_head, labels_decomposed, labels_class, d
     threshold_accuracy_attribute = 0.5
     threshold_accuracy_task = 0.5
 
-    if header.config_baseline["model"] == type.ModelReference.cbm.name:
+    if header.config_baseline["model"] == type.ModelBaseline.cbm.name:
         threshold_accuracy_attribute = 0
         threshold_accuracy_task = 0
-    elif header.config_baseline["model"] == type.ModelReference.abm.name or header.config_baseline["model"] == type.ModelReference.cem.name:
+    elif header.config_baseline["model"] == type.ModelBaseline.abm.name or header.config_baseline["model"] == type.ModelBaseline.cem.name:
         threshold_accuracy_task = 0
 
-    if header.config_baseline["model"] == type.ModelReference.abm.name:
+    if header.config_baseline["model"] == type.ModelBaseline.abm.name:
         accuracy_attribute_batch = utility.computeAccuracyDecomposed(output_neck, labels_decomposed, device)
     else:
         labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed)
@@ -81,16 +81,16 @@ def computeTVDistance(output_neck, labels_decomposed, tv_distances_epoch, data_l
     for attribute in data_loader.dataset.config["attributes"]:
         counts_categories.append(len(attribute["labels"]))
 
-    if header.config_baseline["model"] == type.ModelReference.abm.name:
+    if header.config_baseline["model"] == type.ModelBaseline.abm.name:
         output = utility.applySoftmaxDecomposed(output_neck)
-    elif header.config_baseline["model"] == type.ModelReference.cbm.name:
+    elif header.config_baseline["model"] == type.ModelBaseline.cbm.name:
         output = torch.nn.functional.sigmoid(output_neck)
         output = list(torch.split(output, counts_categories, dim = 1))
 
         for i in range(len(output)):
             sum = torch.sum(output[i], dim = 1, keepdim = True)
             output[i] /= sum
-    elif header.config_baseline["model"] == type.ModelReference.cem.name or header.config_baseline["model"] == type.ModelReference.dcr.name:
+    elif header.config_baseline["model"] == type.ModelBaseline.cem.name or header.config_baseline["model"] == type.ModelBaseline.dcr.name:
         output = list(torch.split(output_neck, counts_categories, dim = 1))
 
         for i in range(len(output)):
@@ -183,7 +183,7 @@ def main():
     dataset_test = dataset.NPCDataset(header.config_baseline["dir_dataset_test"], dataset_transforms)
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_baseline["batch_size"], shuffle = False, num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
-    model_reference = model.createModelReference(dataset_test.config, device)
+    model_reference = model.createModelBaseline(dataset_test.config, device)
     model_reference = torch.nn.DataParallel(model_reference)
     model_reference = model_reference.to(device)
 
