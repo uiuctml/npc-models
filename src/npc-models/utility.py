@@ -162,13 +162,13 @@ def generatePCSettings(config_dataset, device):
         attribute_range = attribute_range.to(device)
         attribute_ranges.append(attribute_range)
 
-        logger.log_trace("Number of attribute labels for \"" + attribute + "\": " + str(attribute_count) + ".")
+        logger.log_trace("Total attribute labels for \"" + attribute + "\": " + str(attribute_count) + ".")
 
     class_count = len(labels_class)
     class_range = torch.Tensor(range(class_count))
     class_range = class_range.to(device)
 
-    logger.log_trace("Number of class labels: " + str(class_count) + ".")
+    logger.log_trace("Total class labels: " + str(class_count) + ".")
 
     pc_settings = torch.cartesian_prod(*attribute_ranges)
 
