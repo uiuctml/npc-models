@@ -87,7 +87,7 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
             loss.backward()
             optimizer_decomposed.step()
 
-            if not header.npc_pc_inference_only:
+            if header.npc_pc_backward:
                 spn_joint.backward()
                 spn_marginal.backward()
 
@@ -222,7 +222,7 @@ def main():
     device = torch.device("cuda")
     device_spn = torch.device("cuda")
 
-    if header.npc_pc_on_cpu:
+    if header.npc_pc_cpu:
         logger.log_info("Computing SPNs on CPU.")
         device_spn = torch.device("cpu")
 
@@ -310,7 +310,7 @@ def main():
     logger.log_info("Best validation task accuracy: " + str(accuracy_task_validation_best) + ".")
     wandb.summary["validation/epoch/accuracy_task_best"] = accuracy_task_validation_best
 
-    if not header.npc_pc_inference_only:
+    if header.npc_pc_backward:
         settings_marginal = torch.full((1, spn_settings_joint.shape[1]), -1).to(device)
         logger.log_info("Normalizing SPN weights...")
 

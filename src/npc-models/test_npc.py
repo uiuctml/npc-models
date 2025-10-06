@@ -31,85 +31,86 @@ def computeMPECorrectness(mpe_attributes, labels_decomposed):
     return mpe_correctness
 
 def findCE(outputs_decomposed_original, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, labels_original, device):
-    batch_size = labels_original.nelement()
-    outputs_decomposed = []
-    outputs_decomposed_original = utility.applySoftmaxDecomposed(outputs_decomposed_original)
-    progress_bar = tqdm.tqdm(total = batch_size, position = 1, leave = False)
-    progress_bar.set_description_str("[INFO]: Optimizing attributes")
+    with torch.set_grad_enabled(True):
+        batch_size = labels_original.nelement()
+        outputs_decomposed = []
+        outputs_decomposed_original = utility.applySoftmaxDecomposed(outputs_decomposed_original)
+        progress_bar = tqdm.tqdm(total = batch_size, position = 1, leave = False)
+        progress_bar.set_description_str("[INFO]: Optimizing CE attributes")
 
-    for i in range(len(outputs_decomposed_original)):
-        outputs_decomposed.append(outputs_decomposed_original[i].detach().clone().requires_grad_(True))
+        for i in range(len(outputs_decomposed_original)):
+            outputs_decomposed.append(outputs_decomposed_original[i].detach().clone().requires_grad_(True))
 
-    for _ in range(header.npc_ce_steps):
-        (_, _, outputs_composed_original) = utility.compose(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
-        outputs_composed_prediction = torch.max(outputs_composed_original, 1)[1]
-        outputs_composed_indices = torch.where(outputs_composed_prediction != labels_original)[0]
+        for _ in range(header.npc_interpret_ce_steps):
+            (_, _, outputs_composed_original) = utility.compose(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
+            outputs_composed_prediction = torch.max(outputs_composed_original, 1)[1]
+            outputs_composed_indices = torch.where(outputs_composed_prediction != labels_original)[0]
 
-        progress_bar.n = batch_size - outputs_composed_indices.nelement()
-        progress_bar.refresh()
+            progress_bar.n = batch_size - outputs_composed_indices.nelement()
+            progress_bar.refresh()
 
-        if outputs_composed_indices.nelement() == 0:
-            break
+            if outputs_composed_indices.nelement() == 0:
+                break
 
-        outputs_composed = outputs_composed_original.t()   # number of original labels x batch size
-        outputs_composed = outputs_composed[labels_original, torch.arange(outputs_composed.shape[1])]  # 1 x batch size
-        outputs_composed = torch.log(outputs_composed)   # 1 x batch size
-        outputs_composed = torch.sum(outputs_composed[outputs_composed_indices], 0) # 1 x 1
-        outputs_composed.backward(retain_graph = True)
+            outputs_composed = outputs_composed_original.t()   # number of original labels x batch size
+            outputs_composed = outputs_composed[labels_original, torch.arange(outputs_composed.shape[1])]  # 1 x batch size
+            outputs_composed = torch.log(outputs_composed)   # 1 x batch size
+            outputs_composed = torch.sum(outputs_composed[outputs_composed_indices], 0) # 1 x 1
+            outputs_composed.backward(retain_graph = True)
 
-        with torch.set_grad_enabled(False):
+            with torch.set_grad_enabled(False):
+                for i in range(len(outputs_decomposed)):
+                    outputs_decomposed[i] += header.npc_interpret_ce_learning_rate * outputs_decomposed[i].grad
+
+            rhos = []
+
             for i in range(len(outputs_decomposed)):
-                outputs_decomposed[i] += header.npc_ce_learning_rate * outputs_decomposed[i].grad
+                rho_rhs = outputs_decomposed[i].detach().clone().requires_grad_(False)
+                rho_rhs = torch.sort(rho_rhs, descending = True, dim = 1)[0]
+                rho_lhs = rho_rhs.clone()   # batch size x attribute category size
 
-        rhos = []
+                rho_rhs = torch.cumsum(rho_rhs, dim = 1)
+                rho_rhs -= 1
+                rho_rhs /= torch.arange(1, rho_rhs.shape[1] + 1).to(device) # batch size x attribute category size
 
-        for i in range(len(outputs_decomposed)):
-            rho_rhs = outputs_decomposed[i].detach().clone().requires_grad_(False)
-            rho_rhs = torch.sort(rho_rhs, descending = True, dim = 1)[0]
-            rho_lhs = rho_rhs.clone()   # batch size x attribute category size
+                rho = torch.sum(rho_lhs > rho_rhs, dim = 1, keepdim = True)   # batch size x 1
+                rhos.append(rho)
 
-            rho_rhs = torch.cumsum(rho_rhs, dim = 1)
-            rho_rhs -= 1
-            rho_rhs /= torch.arange(1, rho_rhs.shape[1] + 1).to(device) # batch size x attribute category size
+            lambdas = []
 
-            rho = torch.sum(rho_lhs > rho_rhs, dim = 1, keepdim = True)   # batch size x 1
-            rhos.append(rho)
+            for i in range(len(rhos)):
+                output_decomposed = outputs_decomposed[i].detach().clone().requires_grad_(False)
+                lambda_i = torch.sort(output_decomposed, descending = True, dim = 1)[0] # batch size x attribute category size
 
-        lambdas = []
+                lambda_i_row_indices = torch.arange(lambda_i.shape[1]).long().expand_as(lambda_i).to(device)
+                rho = rhos[i].expand_as(lambda_i)
+                lambda_i_zero_mask = lambda_i_row_indices >= rho
+                lambda_i[lambda_i_zero_mask] = 0
 
-        for i in range(len(rhos)):
-            output_decomposed = outputs_decomposed[i].detach().clone().requires_grad_(False)
-            lambda_i = torch.sort(output_decomposed, descending = True, dim = 1)[0] # batch size x attribute category size
+                lambda_i = torch.sum(lambda_i, dim = 1, keepdim = True) # batch size x 1
+                lambda_i = 1 - lambda_i
+                lambda_i /= rhos[i]
 
-            lambda_i_row_indices = torch.arange(lambda_i.shape[1]).long().expand_as(lambda_i).to(device)
-            rho = rhos[i].expand_as(lambda_i)
-            lambda_i_zero_mask = lambda_i_row_indices >= rho
-            lambda_i[lambda_i_zero_mask] = 0
+                lambdas.append(lambda_i)
 
-            lambda_i = torch.sum(lambda_i, dim = 1, keepdim = True) # batch size x 1
-            lambda_i = 1 - lambda_i
-            lambda_i /= rhos[i]
+            with torch.set_grad_enabled(False):
+                for i in range(len(outputs_decomposed)):
+                    outputs_decomposed[i] = torch.clamp(outputs_decomposed[i] + lambdas[i], min = 0)
 
-            lambdas.append(lambda_i)
+                    if torch.sum(torch.isnan(outputs_decomposed[i])) > 0:
+                        rows_nan = torch.isnan(outputs_decomposed[i]).any(dim = 1)
+                        outputs_decomposed[i][rows_nan] = outputs_decomposed_original[i][rows_nan]
 
-        with torch.set_grad_enabled(False):
+                    if torch.sum(torch.isinf(outputs_decomposed[i])) > 0:
+                        rows_nan = torch.isinf(outputs_decomposed[i]).any(dim = 1)
+                        outputs_decomposed[i][rows_nan] = outputs_decomposed_original[i][rows_nan]
+
             for i in range(len(outputs_decomposed)):
-                outputs_decomposed[i] = torch.clamp(outputs_decomposed[i] + lambdas[i], min = 0)
+                outputs_decomposed[i] = outputs_decomposed[i].detach().clone().requires_grad_(True)
 
-                if torch.sum(torch.isnan(outputs_decomposed[i])) > 0:
-                    rows_nan = torch.isnan(outputs_decomposed[i]).any(dim = 1)
-                    outputs_decomposed[i][rows_nan] = outputs_decomposed_original[i][rows_nan]
+        progress_bar.close()
 
-                if torch.sum(torch.isinf(outputs_decomposed[i])) > 0:
-                    rows_nan = torch.isinf(outputs_decomposed[i]).any(dim = 1)
-                    outputs_decomposed[i][rows_nan] = outputs_decomposed_original[i][rows_nan]
-
-        for i in range(len(outputs_decomposed)):
-            outputs_decomposed[i] = outputs_decomposed[i].detach().clone().requires_grad_(True)
-
-    progress_bar.close()
-
-    return outputs_decomposed
+        return outputs_decomposed
 
 def findMPE(matrix_a, matrix_b, predictions_composed, pc_settings):
     attribute_indices_list = pc_settings[:matrix_a.shape[1], :-1].cpu().int().tolist()
@@ -156,7 +157,7 @@ def processArguments():
 
     return
 
-def saveCE(input_file_paths, ce, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_ce, outputs_composed, outputs_composed_ce):
+def recordCE(input_file_paths, ce, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_ce, outputs_composed, outputs_composed_ce):
     batch_size = labels_original.nelement()
 
     for batch_index in range(batch_size):
@@ -203,7 +204,7 @@ def saveCE(input_file_paths, ce, dataset, labels_decomposed, labels_original, ou
 
     return
 
-def saveMPE(input_file_paths, mpe, mpe_attributes, mpe_correctness, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed):
+def recordMPE(input_file_paths, mpe, mpe_attributes, mpe_correctness, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed):
     batch_size = labels_original.nelement()
 
     for batch_index in range(batch_size):
@@ -289,26 +290,11 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
             (outputs_decomposed_original, _) = model_decomposed(input)
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed_original)
 
-        with torch.set_grad_enabled(True):
-            outputs_decomposed_ce = findCE(outputs_decomposed_original, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, labels_original, device)
-
         (matrix_a, matrix_b, outputs_composed) = utility.compose(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
-        (_, _, outputs_composed_ce) = utility.compose(outputs_decomposed_ce, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
-
-        if header.npc_ce_save:
-            saveCE(input_file_paths, ce, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_ce, outputs_composed, outputs_composed_ce)
 
         (_, predictions_composed) = torch.max(outputs_composed, 1)
-        (_, predictions_composed_ce) = torch.max(outputs_composed_ce, 1)
-
         prediction_correctness = (predictions_composed == labels_original)
-        prediction_correctness_ce = (predictions_composed_ce == labels_original)
         corrects_composed = torch.sum(prediction_correctness).item()
-        corrects_composed_ce = torch.sum(prediction_correctness_ce).item()
-        incorrects_composed = torch.sum(predictions_composed != labels_original).item()
-
-        ce_instances_corrected += corrects_composed_ce - corrects_composed
-        ce_instances_incorrect += incorrects_composed
 
         accuracy_attribute_batch = utility.computeAccuracyDecomposed(outputs_decomposed_original, labels_decomposed, device)
         accuracy_task_batch = corrects_composed / input.size(0)
@@ -320,19 +306,32 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
             tv_distance_batch = 0.5 * torch.sum(torch.abs(outputs_decomposed[i] - labels_decomposed[i]), dim = 1)
             tv_distances_epoch[i] += torch.sum(tv_distance_batch).item()
 
-        ce_correctness_attribute_epoch += utility.computeAccuracyDecomposed(outputs_decomposed_ce, labels_decomposed, device)
-        ce_correctness_task_epoch += corrects_composed_ce
+        if header.npc_interpret:
+            outputs_decomposed_ce = findCE(outputs_decomposed_original, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, labels_original, device)
 
-        for i in range(len(data_loader.dataset.config["attributes"])):
-            ce_tv_distance_batch = 0.5 * torch.sum(torch.abs(outputs_decomposed_ce[i] - outputs_decomposed[i]), dim = 1)
-            ce_tv_distances_epoch[i] += torch.sum(ce_tv_distance_batch).item()
+            (_, _, outputs_composed_ce) = utility.compose(outputs_decomposed_ce, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
-        if header.npc_mpe_find:
+            recordCE(input_file_paths, ce, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_ce, outputs_composed, outputs_composed_ce)
+
+            (_, predictions_composed_ce) = torch.max(outputs_composed_ce, 1)
+            prediction_correctness_ce = (predictions_composed_ce == labels_original)
+            corrects_composed_ce = torch.sum(prediction_correctness_ce).item()
+            incorrects_composed = torch.sum(predictions_composed != labels_original).item()
+
+            ce_correctness_attribute_epoch += utility.computeAccuracyDecomposed(outputs_decomposed_ce, labels_decomposed, device)
+
+            ce_instances_corrected += corrects_composed_ce - corrects_composed
+            ce_instances_incorrect += incorrects_composed
+            ce_correctness_task_epoch += corrects_composed_ce
+
+            for i in range(len(data_loader.dataset.config["attributes"])):
+                ce_tv_distance_batch = 0.5 * torch.sum(torch.abs(outputs_decomposed_ce[i] - outputs_decomposed[i]), dim = 1)
+                ce_tv_distances_epoch[i] += torch.sum(ce_tv_distance_batch).item()
+
             mpe_attributes = findMPE(matrix_a, matrix_b, predictions_composed, pc_settings_joint)
             mpe_correctness = computeMPECorrectness(mpe_attributes, labels_decomposed)
 
-            if header.npc_mpe_save:
-                saveMPE(input_file_paths, mpe, mpe_attributes, mpe_correctness, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed)
+            recordMPE(input_file_paths, mpe, mpe_attributes, mpe_correctness, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed)
 
             mpe_correctness = torch.tensor(mpe_correctness).to(device)
             mpe_correctness_epoch += mpe_correctness.tolist()
@@ -370,32 +369,24 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
     logger.log_info("Testing attribute accuracy: " + str(accuracy_attribute_epoch) + ".")
     logger.log_info("Testing task accuracy: " + str(accuracy_task_epoch) + ".")
 
-    ce_correctness_attribute_epoch /= len(data_loader)
-    ce_correctness_task_epoch /= len(data_loader.dataset)
+    if header.npc_interpret:
+        ce_correctness_attribute_epoch /= len(data_loader)
+        ce_correctness_task_epoch /= len(data_loader.dataset)
 
-    for i in range(len(data_loader.dataset.config["attributes"])):
-        ce_tv_distances_epoch[i] /= len(data_loader.dataset)
+        for i in range(len(data_loader.dataset.config["attributes"])):
+            ce_tv_distances_epoch[i] /= len(data_loader.dataset)
 
-    ce_tv_distance_epoch = sum(ce_tv_distances_epoch) / len(ce_tv_distances_epoch)
+        ce_tv_distance_epoch = sum(ce_tv_distances_epoch) / len(ce_tv_distances_epoch)
 
-    if ce_instances_incorrect != 0:
-        logger.log_info("CE correction rate: " + str(ce_instances_corrected / ce_instances_incorrect) + ".")
-    else:
-        logger.log_info("CE correction rate: N/A.")
+        if ce_instances_incorrect != 0:
+            logger.log_info("CE correction rate: " + str(ce_instances_corrected / ce_instances_incorrect) + ".")
+        else:
+            logger.log_info("CE correction rate: N/A.")
 
-    logger.log_info("CE attribute TV distance: " + str(ce_tv_distance_epoch) + ".")
-    logger.log_info("CE attribute correctness: " + str(ce_correctness_attribute_epoch) + ".")
-    logger.log_info("CE task correctness: " + str(ce_correctness_task_epoch) + ".")
+        logger.log_info("CE attribute TV distance: " + str(ce_tv_distance_epoch) + ".")
+        logger.log_info("CE attribute correctness: " + str(ce_correctness_attribute_epoch) + ".")
+        logger.log_info("CE task correctness: " + str(ce_correctness_task_epoch) + ".")
 
-    if header.npc_ce_save:
-        if not os.path.isdir(header.interpret_dir_outputs):
-            os.makedirs(header.interpret_dir_outputs, exist_ok = True)
-
-        with open(os.path.join(header.interpret_dir_outputs, header.npc_ce_file_name), "w") as file_ce:
-            json.dump(ce, file_ce, indent = 4)
-            logger.log_info("Saved CE to \"" + os.path.join(header.interpret_dir_outputs, header.npc_ce_file_name) + "\".")
-
-    if header.npc_mpe_find:
         if len(mpe_correctness_epoch) == 0:
             mpe_correctness_epoch = "N/A"
         else:
@@ -415,13 +406,16 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
         logger.log_info("MPE correctness on correct predictions: " + str(mpe_correctness_prediction_correct_epoch) + ".")
         logger.log_info("MPE correctness on incorrect predictions: " + str(mpe_correctness_prediction_incorrect_epoch) + ".")
 
-        if header.npc_mpe_save:
-            if not os.path.isdir(header.interpret_dir_outputs):
-                os.makedirs(header.interpret_dir_outputs, exist_ok = True)
+        if not os.path.isdir(header.interpret_dir_outputs):
+            os.makedirs(header.interpret_dir_outputs, exist_ok = True)
 
-            with open(os.path.join(header.interpret_dir_outputs, header.npc_mpe_file_name), "w") as file_mpe:
-                json.dump(mpe, file_mpe, indent = 4)
-                logger.log_info("Saved MPE to \"" + os.path.join(header.interpret_dir_outputs, header.npc_mpe_file_name) + "\".")
+        with open(os.path.join(header.interpret_dir_outputs, header.npc_file_name_ce), "w") as file_ce:
+            json.dump(ce, file_ce, indent = 4)
+            logger.log_info("Saved CE to \"" + os.path.join(header.interpret_dir_outputs, header.npc_file_name_ce) + "\".")
+
+        with open(os.path.join(header.interpret_dir_outputs, header.npc_file_name_mpe), "w") as file_mpe:
+            json.dump(mpe, file_mpe, indent = 4)
+            logger.log_info("Saved MPE to \"" + os.path.join(header.interpret_dir_outputs, header.npc_file_name_mpe) + "\".")
 
     return
 
@@ -444,7 +438,7 @@ def main():
     device = torch.device("cuda")
     device_pc = torch.device("cuda")
 
-    if header.npc_pc_on_cpu:
+    if header.npc_pc_cpu:
         logger.log_info("Computing PCs on CPU.")
         device_pc = torch.device("cpu")
 

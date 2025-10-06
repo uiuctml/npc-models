@@ -26,15 +26,13 @@ interpret_preprocess = False
 interpret_viewer_height = 300
 interpret_viewer_width = 300
 
-npc_ce_file_name = "ce_" + dataset_prefix + ".json"
-npc_ce_learning_rate = 5e-2
-npc_ce_save = True
-npc_ce_steps = 100
-npc_mpe_file_name = "mpe_" + dataset_prefix + ".json"
-npc_mpe_find = True
-npc_mpe_save = True
-npc_pc_inference_only = True
-npc_pc_on_cpu = True
+npc_file_name_ce = "ce_" + dataset_prefix + ".json"
+npc_file_name_mpe = "mpe_" + dataset_prefix + ".json"
+npc_interpret = True
+npc_interpret_ce_learning_rate = 5e-2
+npc_interpret_ce_steps = 100
+npc_pc_backward = False
+npc_pc_cpu = True
 
 config_baseline = {
     "batch_size": 256,

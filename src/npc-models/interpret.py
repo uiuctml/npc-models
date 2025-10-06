@@ -427,13 +427,13 @@ def main():
     global explanations
 
     if header.interpret_mpe:
-        with open(os.path.join(header.interpret_dir_outputs, header.npc_mpe_file_name), "r") as file_mpe:
+        with open(os.path.join(header.interpret_dir_outputs, header.npc_file_name_mpe), "r") as file_mpe:
             explanations = json.load(file_mpe)
 
             if header.interpret_preprocess:
                 preprocessMPE()
     else:
-        with open(os.path.join(header.interpret_dir_outputs, header.npc_ce_file_name), "r") as file_ce:
+        with open(os.path.join(header.interpret_dir_outputs, header.npc_file_name_ce), "r") as file_ce:
             explanations = json.load(file_ce)
 
             if header.interpret_preprocess:
