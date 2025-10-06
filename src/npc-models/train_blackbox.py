@@ -36,12 +36,12 @@ def processArguments():
 
     return
 
-def train(model_baseline, data_loader, criterion, optimizer, device, batch_step):
+def train(model_blackbox, data_loader, criterion, optimizer, device, batch_step):
     accuracy_task_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
 
-    model_baseline.train()
+    model_blackbox.train()
     progress_bar.set_description_str("[INFO]: Training progress")
 
     with torch.set_grad_enabled(True):
@@ -51,7 +51,7 @@ def train(model_baseline, data_loader, criterion, optimizer, device, batch_step)
 
             optimizer.zero_grad()
 
-            output = model_baseline(input)
+            output = model_blackbox(input)
             (_, predictions) = torch.max(output, 1)
             loss = criterion(output, labels)
 
@@ -85,12 +85,12 @@ def train(model_baseline, data_loader, criterion, optimizer, device, batch_step)
 
     return batch_step
 
-def validate(model_baseline, data_loader, criterion, device, batch_step):
+def validate(model_blackbox, data_loader, criterion, device, batch_step):
     accuracy_task_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
 
-    model_baseline.eval()
+    model_blackbox.eval()
     progress_bar.set_description_str("[INFO]: Validation progress")
 
     with torch.set_grad_enabled(False):
@@ -98,7 +98,7 @@ def validate(model_baseline, data_loader, criterion, device, batch_step):
             input = input.to(device, non_blocking = True)
             labels = labels.to(device, non_blocking = True)
 
-            output = model_baseline(input)
+            output = model_blackbox(input)
             (_, predictions) = torch.max(output, 1)
             loss = criterion(output, labels)
 
@@ -157,10 +157,10 @@ def main():
     data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_blackbox["batch_size"], shuffle = header.config_blackbox["data_loader_shuffle"], num_workers = header.config_blackbox["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     epoch = 1
-    model_baseline = model.ResNet34(dataset_test.config, device)
-    model_baseline = torch.nn.DataParallel(model_baseline)
-    model_baseline = model_baseline.to(device)
-    optimizer = torch.optim.SGD(model_baseline.module.get_parameters(), lr = header.config_blackbox["optimizer_learning_rate"], momentum = header.config_blackbox["optimizer_momentum"], weight_decay = header.config_blackbox["optimizer_weight_decay"])
+    model_blackbox = model.ResNet34(dataset_test.config, device)
+    model_blackbox = torch.nn.DataParallel(model_blackbox)
+    model_blackbox = model_blackbox.to(device)
+    optimizer = torch.optim.SGD(model_blackbox.module.get_parameters(), lr = header.config_blackbox["optimizer_learning_rate"], momentum = header.config_blackbox["optimizer_momentum"], weight_decay = header.config_blackbox["optimizer_weight_decay"])
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.config_blackbox["learning_rate_scheduler_mode"], header.config_blackbox["learning_rate_scheduler_factor"], header.config_blackbox["learning_rate_scheduler_patience"], header.config_blackbox["learning_rate_scheduler_threshold"], header.config_blackbox["learning_rate_scheduler_threshold_mode"], header.config_blackbox["learning_rate_scheduler_cooldown"], header.config_blackbox["learning_rate_scheduler_min_learning_rate"], header.config_blackbox["learning_rate_scheduler_min_learning_rate_decay"])
     progress_bar = None
 
@@ -176,8 +176,8 @@ def main():
         wandb.log({"training/epoch/step": epoch})
         wandb.log({"validation/epoch/step": epoch})
 
-        batch_step_train = train(model_baseline, data_loader_train, criterion, optimizer, device, batch_step_train)
-        (accuracy_task_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_baseline, data_loader_validation, criterion, device, batch_step_validate)
+        batch_step_train = train(model_blackbox, data_loader_train, criterion, optimizer, device, batch_step_train)
+        (accuracy_task_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_blackbox, data_loader_validation, criterion, device, batch_step_validate)
 
         learning_rate_scheduler.step(loss_validation_epoch)
 
@@ -186,9 +186,9 @@ def main():
         if accuracy_task_validation_epoch > accuracy_task_validation_best or epoch == 1:
             accuracy_task_validation_best = accuracy_task_validation_epoch
             wandb.log({"validation/epoch/accuracy_task_best": accuracy_task_validation_best})
-            utility.saveCheckpoint(header.config_blackbox["file_name_checkpoint_best"], model_baseline)
+            utility.saveCheckpoint(header.config_blackbox["file_name_checkpoint_best"], model_blackbox)
 
-        utility.saveCheckpoint(header.config_blackbox["file_name_checkpoint"], model_baseline)
+        utility.saveCheckpoint(header.config_blackbox["file_name_checkpoint"], model_blackbox)
 
         epoch += 1
 
@@ -199,7 +199,7 @@ def main():
     wandb.summary["validation/epoch/accuracy_task_best"] = accuracy_task_validation_best
 
     wandb.log({"testing/epoch/step": batch_step_test})
-    test_blackbox.test(model_baseline, data_loader_test, device, batch_step_test)
+    test_blackbox.test(model_blackbox, data_loader_test, device, batch_step_test)
 
     wandb.finish()
 

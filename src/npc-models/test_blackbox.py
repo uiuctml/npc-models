@@ -51,13 +51,13 @@ def processArguments():
 
     return
 
-def test(model_baseline, data_loader, device, batch_step):
-    utility.loadCheckpoint(header.config_blackbox["file_name_checkpoint_best"], model_baseline)
+def test(model_blackbox, data_loader, device, batch_step):
+    utility.loadCheckpoint(header.config_blackbox["file_name_checkpoint_best"], model_blackbox)
 
     accuracy_task_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
 
-    model_baseline.eval()
+    model_blackbox.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")
 
     with torch.set_grad_enabled(False):
@@ -65,7 +65,7 @@ def test(model_baseline, data_loader, device, batch_step):
             input = input.to(device, non_blocking = True)
             labels = labels.to(device, non_blocking = True)
 
-            output = model_baseline(input)
+            output = model_blackbox(input)
             (_, predictions) = torch.max(output, 1)
 
             corrects = torch.sum(predictions == labels).item()
@@ -104,11 +104,11 @@ def main():
     dataset_test = dataset.NPCDataset(header.config_blackbox["dir_dataset_test"], dataset_transforms)
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_blackbox["batch_size"], shuffle = False, num_workers = header.config_blackbox["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
-    model_baseline = model.ResNet34(dataset_test.config, device)
-    model_baseline = torch.nn.DataParallel(model_baseline)
-    model_baseline = model_baseline.to(device)
+    model_blackbox = model.ResNet34(dataset_test.config, device)
+    model_blackbox = torch.nn.DataParallel(model_blackbox)
+    model_blackbox = model_blackbox.to(device)
 
-    test(model_baseline, data_loader_test, device, 1)
+    test(model_blackbox, data_loader_test, device, 1)
 
     return
 
