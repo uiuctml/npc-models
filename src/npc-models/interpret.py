@@ -3,6 +3,9 @@
 import header
 import json
 import os
+
+os.environ["QT_LOGGING_RULES"] = "qt.gui.icc=false"
+
 import PyQt5.QtCore
 import PyQt5.QtGui
 import PyQt5.QtWidgets
