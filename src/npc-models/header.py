@@ -12,17 +12,15 @@ dataset_dir = os.path.join("../../../datasets", dataset_prefix)
 
 project_name = "npc-models"
 project_dir_outputs = os.path.join("../../outputs", project_name)
+project_dir_outputs_interpret = os.path.join(project_dir_outputs, "interpret")
 
 checkpoint_dir = os.path.join(project_dir_outputs, "checkpoints")
 checkpoint_postfix = ".zip"
 checkpoint_postfix_best = ".best" + checkpoint_postfix
 
 interpret_dir_dataset = os.path.join(dataset_dir, "splits/instances/test")
-interpret_dir_outputs = os.path.join(project_dir_outputs, "interpret")
 interpret_label_width_attribute = 200
 interpret_label_width_original = 350
-interpret_mpe = False
-interpret_preprocess = False
 interpret_viewer_height = 300
 interpret_viewer_width = 300
 

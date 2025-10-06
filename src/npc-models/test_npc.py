@@ -402,12 +402,12 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
         logger.log_info("MPE correctness on correct predictions: " + str(mpe_correctness_prediction_correct_epoch) + ".")
         logger.log_info("MPE correctness on incorrect predictions: " + str(mpe_correctness_prediction_incorrect_epoch) + ".")
 
-        if not os.path.isdir(header.interpret_dir_outputs):
-            os.makedirs(header.interpret_dir_outputs, exist_ok = True)
+        if not os.path.isdir(header.project_dir_outputs_interpret):
+            os.makedirs(header.project_dir_outputs_interpret, exist_ok = True)
 
-        with open(os.path.join(header.interpret_dir_outputs, header.dataset_prefix + ".json"), "w") as file_interpret:
+        with open(os.path.join(header.project_dir_outputs_interpret, header.dataset_prefix + ".json"), "w") as file_interpret:
             json.dump(interpret, file_interpret, indent = 4)
-            logger.log_info("Saved interpretions to \"" + os.path.join(header.interpret_dir_outputs, header.dataset_prefix + ".json") + "\".")
+            logger.log_info("Saved interpretions to \"" + os.path.join(header.project_dir_outputs_interpret, header.dataset_prefix + ".json") + "\".")
 
     return
 

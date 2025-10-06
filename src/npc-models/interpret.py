@@ -12,8 +12,9 @@ combo_box_application_control = PyQt5.QtWidgets.QComboBox()
 explanations = {}
 group_box_viewer = PyQt5.QtWidgets.QGroupBox()
 label_viewer = PyQt5.QtWidgets.QLabel()
-layout_explanation = PyQt5.QtWidgets.QHBoxLayout()
+layout_ce = PyQt5.QtWidgets.QHBoxLayout()
 layout_ground_truth = PyQt5.QtWidgets.QHBoxLayout()
+layout_mpe = PyQt5.QtWidgets.QHBoxLayout()
 layout_prediction = PyQt5.QtWidgets.QHBoxLayout()
 layout_summary = PyQt5.QtWidgets.QHBoxLayout()
 
@@ -47,46 +48,31 @@ def pushButtonNextSlot():
 def updateInterpretationWidget():
     file_name = combo_box_application_control.currentText()
 
-    if header.interpret_mpe:
-        for (i, attribute_name) in enumerate(explanations[file_name]["mpe"].keys()):
-            if attribute_name != "correct":
-                attribute_label = explanations[file_name]["mpe"][attribute_name]
-                label = layout_explanation.itemAt(i).widget()
-                label.setText(attribute_label)
+    for (i, attribute_name) in enumerate(explanations[file_name]["ce"].keys()):
+        layout_labels = PyQt5.QtWidgets.QVBoxLayout()
+        spacer_bottom = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
+        spacer_top = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
+
+        deleteLayoutChildren(layout_ce.itemAt(0))
+        layout_ce.removeItem(layout_ce.itemAt(0))
+
+        layout_ce.addLayout(layout_labels)
+        layout_labels.addItem(spacer_top)
+
+        for attribute_label in explanations[file_name]["ce"][attribute_name].keys():
+            attribute_probability = "{:.1f}".format(explanations[file_name]["ce"][attribute_name][attribute_label] * 100)
+            label = PyQt5.QtWidgets.QLabel()
+            text = attribute_label + ": " + attribute_probability + "%"
+            label.setText(text)
+
+            if attribute_name == "original":
+                label.setFixedWidth(header.interpret_label_width_original)
             else:
-                correct = explanations[file_name]["mpe"][attribute_name]
-                label = layout_explanation.itemAt(i).widget()
+                label.setFixedWidth(header.interpret_label_width_attribute)
 
-                if correct:
-                    label.setText("Correct")
-                else:
-                    label.setText("Incorrect")
-    else:
-        for (i, attribute_name) in enumerate(explanations[file_name]["ce"].keys()):
-            layout_labels = PyQt5.QtWidgets.QVBoxLayout()
-            spacer_bottom = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
-            spacer_top = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
+            layout_labels.addWidget(label)
 
-            deleteLayoutChildren(layout_explanation.itemAt(0))
-            layout_explanation.removeItem(layout_explanation.itemAt(0))
-
-            layout_explanation.addLayout(layout_labels)
-            layout_labels.addItem(spacer_top)
-
-            for attribute_label in explanations[file_name]["ce"][attribute_name].keys():
-                attribute_probability = "{:.1f}".format(explanations[file_name]["ce"][attribute_name][attribute_label] * 100)
-                label = PyQt5.QtWidgets.QLabel()
-                text = attribute_label + ": " + attribute_probability + "%"
-                label.setText(text)
-
-                if attribute_name == "original":
-                    label.setFixedWidth(header.interpret_label_width_original)
-                else:
-                    label.setFixedWidth(header.interpret_label_width_attribute)
-
-                layout_labels.addWidget(label)
-
-            layout_labels.addItem(spacer_bottom)
+        layout_labels.addItem(spacer_bottom)
 
     for (i, attribute_name) in enumerate(explanations[file_name]["ground_truth"].keys()):
         layout_labels = PyQt5.QtWidgets.QVBoxLayout()
@@ -114,61 +100,45 @@ def updateInterpretationWidget():
 
         layout_labels.addItem(spacer_bottom)
 
+    for (i, attribute_name) in enumerate(explanations[file_name]["mpe"].keys()):
+        if attribute_name != "correct":
+            attribute_label = explanations[file_name]["mpe"][attribute_name]
+            label = layout_mpe.itemAt(i).widget()
+            label.setText(attribute_label)
+        else:
+            correct = explanations[file_name]["mpe"][attribute_name]
+            label = layout_mpe.itemAt(i).widget()
+
+            if correct:
+                label.setText("Correct")
+            else:
+                label.setText("Incorrect")
+
     for (i, attribute_name) in enumerate(explanations[file_name]["prediction"].keys()):
-        if header.interpret_mpe:
-            layout_labels = PyQt5.QtWidgets.QVBoxLayout()
-            spacer_bottom = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
-            spacer_top = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
+        layout_labels = PyQt5.QtWidgets.QVBoxLayout()
+        spacer_bottom = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
+        spacer_top = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
 
-            deleteLayoutChildren(layout_prediction.itemAt(0))
-            layout_prediction.removeItem(layout_prediction.itemAt(0))
+        deleteLayoutChildren(layout_prediction.itemAt(0))
+        layout_prediction.removeItem(layout_prediction.itemAt(0))
 
-            layout_prediction.addLayout(layout_labels)
-            layout_labels.addItem(spacer_top)
+        layout_prediction.addLayout(layout_labels)
+        layout_labels.addItem(spacer_top)
+
+        for attribute_label in explanations[file_name]["prediction"][attribute_name].keys():
+            attribute_probability = "{:.1f}".format(explanations[file_name]["prediction"][attribute_name][attribute_label] * 100)
+            label = PyQt5.QtWidgets.QLabel()
+            text = attribute_label + ": " + attribute_probability + "%"
+            label.setText(text)
 
             if attribute_name == "original":
-                attribute_label = explanations[file_name]["prediction"][attribute_name][0]
-                attribute_probability = "{:.1f}".format(explanations[file_name]["prediction"][attribute_name][1] * 100)
-                text = attribute_label + ": " + attribute_probability + "%"
-                label = PyQt5.QtWidgets.QLabel()
-                label.setText(text)
                 label.setFixedWidth(header.interpret_label_width_original)
-                layout_labels.addWidget(label)
             else:
-                for attribute_label in explanations[file_name]["prediction"][attribute_name].keys():
-                    attribute_probability = "{:.1f}".format(explanations[file_name]["prediction"][attribute_name][attribute_label] * 100)
-                    text = attribute_label + ": " + attribute_probability + "%"
-                    label = PyQt5.QtWidgets.QLabel()
-                    label.setText(text)
-                    label.setFixedWidth(header.interpret_label_width_attribute)
-                    layout_labels.addWidget(label)
+                label.setFixedWidth(header.interpret_label_width_attribute)
 
-            layout_labels.addItem(spacer_bottom)
-        else:
-            layout_labels = PyQt5.QtWidgets.QVBoxLayout()
-            spacer_bottom = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
-            spacer_top = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
+            layout_labels.addWidget(label)
 
-            deleteLayoutChildren(layout_prediction.itemAt(0))
-            layout_prediction.removeItem(layout_prediction.itemAt(0))
-
-            layout_prediction.addLayout(layout_labels)
-            layout_labels.addItem(spacer_top)
-
-            for attribute_label in explanations[file_name]["prediction"][attribute_name].keys():
-                attribute_probability = "{:.1f}".format(explanations[file_name]["prediction"][attribute_name][attribute_label] * 100)
-                label = PyQt5.QtWidgets.QLabel()
-                text = attribute_label + ": " + attribute_probability + "%"
-                label.setText(text)
-
-                if attribute_name == "original":
-                    label.setFixedWidth(header.interpret_label_width_original)
-                else:
-                    label.setFixedWidth(header.interpret_label_width_attribute)
-
-                layout_labels.addWidget(label)
-
-            layout_labels.addItem(spacer_bottom)
+        layout_labels.addItem(spacer_bottom)
 
     return
 
@@ -216,78 +186,58 @@ def createApplicationControlWidget():
     return group_box_application_control
 
 def createInterpretationWidget():
-    group_box_explanation = PyQt5.QtWidgets.QGroupBox()
+    group_box_ce = PyQt5.QtWidgets.QGroupBox()
     group_box_ground_truth = PyQt5.QtWidgets.QGroupBox()
     group_box_interpretation = PyQt5.QtWidgets.QGroupBox()
+    group_box_mpe = PyQt5.QtWidgets.QGroupBox()
     group_box_prediction = PyQt5.QtWidgets.QGroupBox()
     layout_interpretation = PyQt5.QtWidgets.QVBoxLayout()
 
-    group_box_explanation.setAlignment(PyQt5.QtCore.Qt.AlignLeft)
-    group_box_explanation.setLayout(layout_explanation)
-
-    if header.interpret_mpe:
-        group_box_explanation.setTitle("Most Probable Explanation")
-    else:
-        group_box_explanation.setTitle("Counterfactual Explanation")
-
+    group_box_ce.setAlignment(PyQt5.QtCore.Qt.AlignLeft)
+    group_box_ce.setLayout(layout_ce)
+    group_box_ce.setTitle("Counterfactual Explanation")
     group_box_ground_truth.setAlignment(PyQt5.QtCore.Qt.AlignLeft)
     group_box_ground_truth.setLayout(layout_ground_truth)
     group_box_ground_truth.setTitle("Ground Truth")
     group_box_interpretation.setAlignment(PyQt5.QtCore.Qt.AlignHCenter)
     group_box_interpretation.setLayout(layout_interpretation)
     group_box_interpretation.setTitle("Interpretation")
+    group_box_mpe.setAlignment(PyQt5.QtCore.Qt.AlignLeft)
+    group_box_mpe.setLayout(layout_mpe)
+    group_box_mpe.setTitle("Most Probable Explanation")
     group_box_prediction.setAlignment(PyQt5.QtCore.Qt.AlignLeft)
     group_box_prediction.setLayout(layout_prediction)
     group_box_prediction.setTitle("Prediction")
 
     layout_interpretation.addWidget(group_box_ground_truth)
     layout_interpretation.addWidget(group_box_prediction)
-    layout_interpretation.addWidget(group_box_explanation)
+    layout_interpretation.addWidget(group_box_ce)
+    layout_interpretation.addWidget(group_box_mpe)
 
     file_name = combo_box_application_control.currentText()
 
-    if header.interpret_mpe:
-        for attribute_name in explanations[file_name]["mpe"].keys():
-            if attribute_name == "correct":
-                correct = explanations[file_name]["mpe"][attribute_name]
-                label = PyQt5.QtWidgets.QLabel()
+    for attribute_name in explanations[file_name]["ce"].keys():
+        layout_labels = PyQt5.QtWidgets.QVBoxLayout()
+        spacer_bottom = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
+        spacer_top = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
 
-                if correct:
-                    label.setText("Correct")
-                else:
-                    label.setText("Incorrect")
+        layout_ce.addLayout(layout_labels)
+        layout_labels.addItem(spacer_top)
 
+        for attribute_label in explanations[file_name]["ce"][attribute_name].keys():
+            attribute_probability = "{:.1f}".format(explanations[file_name]["ce"][attribute_name][attribute_label] * 100)
+            text = attribute_label + ": " + attribute_probability + "%"
+            label = PyQt5.QtWidgets.QLabel()
+            label.setText(text)
+
+            if attribute_name == "original":
                 label.setFixedWidth(header.interpret_label_width_original)
-                layout_explanation.addWidget(label)
             else:
-                attribute_label = explanations[file_name]["mpe"][attribute_name]
-                label = PyQt5.QtWidgets.QLabel()
-                label.setText(attribute_label)
                 label.setFixedWidth(header.interpret_label_width_attribute)
-                layout_explanation.addWidget(label)
-    else:
-        for attribute_name in explanations[file_name]["ce"].keys():
-            layout_labels = PyQt5.QtWidgets.QVBoxLayout()
-            spacer_bottom = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
-            spacer_top = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
 
-            layout_explanation.addLayout(layout_labels)
-            layout_labels.addItem(spacer_top)
+            layout_labels.addWidget(label)
 
-            for attribute_label in explanations[file_name]["ce"][attribute_name].keys():
-                attribute_probability = "{:.1f}".format(explanations[file_name]["ce"][attribute_name][attribute_label] * 100)
-                text = attribute_label + ": " + attribute_probability + "%"
-                label = PyQt5.QtWidgets.QLabel()
-                label.setText(text)
-
-                if attribute_name == "original":
-                    label.setFixedWidth(header.interpret_label_width_original)
-                else:
-                    label.setFixedWidth(header.interpret_label_width_attribute)
-
-                layout_labels.addWidget(label)
-
-            layout_labels.addItem(spacer_bottom)
+        layout_labels.addItem(spacer_bottom)
 
     for attribute_name in explanations[file_name]["ground_truth"].keys():
         layout_labels = PyQt5.QtWidgets.QVBoxLayout()
@@ -312,34 +262,26 @@ def createInterpretationWidget():
 
         layout_labels.addItem(spacer_bottom)
 
-    for attribute_name in explanations[file_name]["prediction"].keys():
-        if header.interpret_mpe:
-            layout_labels = PyQt5.QtWidgets.QVBoxLayout()
-            spacer_bottom = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
-            spacer_top = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
+    for attribute_name in explanations[file_name]["mpe"].keys():
+        if attribute_name == "correct":
+            correct = explanations[file_name]["mpe"][attribute_name]
+            label = PyQt5.QtWidgets.QLabel()
 
-            layout_prediction.addLayout(layout_labels)
-            layout_labels.addItem(spacer_top)
-
-            if attribute_name == "original":
-                attribute_label = explanations[file_name]["prediction"][attribute_name][0]
-                attribute_probability = "{:.1f}".format(explanations[file_name]["prediction"][attribute_name][1] * 100)
-                text = attribute_label + ": " + attribute_probability + "%"
-                label = PyQt5.QtWidgets.QLabel()
-                label.setText(text)
-                label.setFixedWidth(header.interpret_label_width_original)
-                layout_labels.addWidget(label)
+            if correct:
+                label.setText("Correct")
             else:
-                for attribute_label in explanations[file_name]["prediction"][attribute_name].keys():
-                    attribute_probability = "{:.1f}".format(explanations[file_name]["prediction"][attribute_name][attribute_label] * 100)
-                    text = attribute_label + ": " + attribute_probability + "%"
-                    label = PyQt5.QtWidgets.QLabel()
-                    label.setText(text)
-                    label.setFixedWidth(header.interpret_label_width_attribute)
-                    layout_labels.addWidget(label)
+                label.setText("Incorrect")
 
-            layout_labels.addItem(spacer_bottom)
+            label.setFixedWidth(header.interpret_label_width_original)
+            layout_mpe.addWidget(label)
         else:
+            attribute_label = explanations[file_name]["mpe"][attribute_name]
+            label = PyQt5.QtWidgets.QLabel()
+            label.setText(attribute_label)
+            label.setFixedWidth(header.interpret_label_width_attribute)
+            layout_mpe.addWidget(label)
+
+    for attribute_name in explanations[file_name]["prediction"].keys():
             layout_labels = PyQt5.QtWidgets.QVBoxLayout()
             spacer_bottom = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
             spacer_top = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
@@ -384,6 +326,7 @@ def createViewerWidget():
 def createWindowLayout():
     layout_window = PyQt5.QtWidgets.QVBoxLayout()
     spacer_top = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
+    spacer_bottom = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
     splitter = PyQt5.QtWidgets.QSplitter()
     widget_application_control = createApplicationControlWidget()
     widget_interpretation = createInterpretationWidget()
@@ -392,6 +335,7 @@ def createWindowLayout():
     layout_window.addItem(spacer_top)
     layout_window.addWidget(splitter)
     layout_window.addWidget(widget_application_control)
+    layout_window.addItem(spacer_bottom)
 
     splitter.addWidget(widget_viewer)
     splitter.addWidget(widget_interpretation)
@@ -399,45 +343,11 @@ def createWindowLayout():
 
     return layout_window
 
-def preprocessCE():
-    file_names_correct = []
-
-    for file_name in explanations.keys():
-        if list(explanations[file_name]["prediction"]["original"].keys())[0] == explanations[file_name]["ground_truth"]["original"]:
-            file_names_correct.append(file_name)
-
-    for file_name_correct in file_names_correct:
-        del explanations[file_name_correct]
-
-    return
-
-def preprocessMPE():
-    file_names_incorrect = []
-
-    for file_name in explanations.keys():
-        if explanations[file_name]["prediction"]["original"][0] != explanations[file_name]["ground_truth"]["original"]:
-            file_names_incorrect.append(file_name)
-
-    for file_name_incorrect in file_names_incorrect:
-        del explanations[file_name_incorrect]
-
-    return
-
 def main():
     global explanations
 
-    if header.interpret_mpe:
-        with open(os.path.join(header.interpret_dir_outputs, header.npc_file_name_mpe), "r") as file_mpe:
-            explanations = json.load(file_mpe)
-
-            if header.interpret_preprocess:
-                preprocessMPE()
-    else:
-        with open(os.path.join(header.interpret_dir_outputs, header.npc_file_name_ce), "r") as file_ce:
-            explanations = json.load(file_ce)
-
-            if header.interpret_preprocess:
-                preprocessCE()
+    with open(os.path.join(header.project_dir_outputs_interpret, header.dataset_prefix + ".json"), "r") as file_interpret:
+        explanations = json.load(file_interpret)
 
     window = PyQt5.QtWidgets.QWidget()
 
@@ -445,7 +355,6 @@ def main():
     window.setWindowTitle("NPC Interpretation Utility")
 
     window.show()
-    window.setFixedSize(window.size())
 
     exit(application.exec())
 
