@@ -51,8 +51,8 @@ def processArguments():
 
     return
 
-def test(model_decomposed, data_loader, device, batch_step):
-    utility.loadCheckpoint(header.config_neural["file_name_checkpoint_best"], model_decomposed)
+def test(model_neural, data_loader, device, batch_step):
+    utility.loadCheckpoint(header.config_neural["file_name_checkpoint_best"], model_neural)
 
     accuracy_attribute_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
@@ -62,7 +62,7 @@ def test(model_decomposed, data_loader, device, batch_step):
     for _ in data_loader.dataset.config["attributes"]:
         tv_distances_epoch.append(0)
 
-    model_decomposed.eval()
+    model_neural.eval()
     progress_bar.set_description_str("[INFO]: Testing progress")
 
     with torch.set_grad_enabled(False):
@@ -72,7 +72,7 @@ def test(model_decomposed, data_loader, device, batch_step):
             for i in range(len(labels)):
                 labels[i] = labels[i].to(device, non_blocking = True)
 
-            (output, _) = model_decomposed(input)
+            (output, _) = model_neural(input)
 
             output = utility.applySoftmaxAttribute(output)
             accuracy_attribute_batch = utility.computeAccuracyAttribute(output, labels, device)
@@ -123,11 +123,11 @@ def main():
     dataset_test = dataset.NPCDataset(header.config_neural["dir_dataset_test"], dataset_transforms)
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_neural["batch_size"], shuffle = False, num_workers = header.config_neural["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
-    model_decomposed = model.ResNet34MTL(dataset_test.config, device)
-    model_decomposed = torch.nn.DataParallel(model_decomposed)
-    model_decomposed = model_decomposed.to(device)
+    model_neural = model.ResNet34MTL(dataset_test.config, device)
+    model_neural = torch.nn.DataParallel(model_neural)
+    model_neural = model_neural.to(device)
 
-    test(model_decomposed, data_loader_test, device, 1)
+    test(model_neural, data_loader_test, device, 1)
 
     return
 

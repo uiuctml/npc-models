@@ -49,12 +49,12 @@ def processArguments():
 
     return
 
-def train(model_decomposed, data_loader, criterions, optimizer, device, batch_step):
+def train(model_neural, data_loader, criterions, optimizer, device, batch_step):
     accuracy_attribute_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
 
-    model_decomposed.train()
+    model_neural.train()
     progress_bar.set_description_str("[INFO]: Training progress")
 
     with torch.set_grad_enabled(True):
@@ -66,7 +66,7 @@ def train(model_decomposed, data_loader, criterions, optimizer, device, batch_st
 
             optimizer.zero_grad()
 
-            (output, _) = model_decomposed(input)
+            (output, _) = model_neural(input)
 
             loss = computeLoss(output, labels, criterions)
 
@@ -98,12 +98,12 @@ def train(model_decomposed, data_loader, criterions, optimizer, device, batch_st
 
     return batch_step
 
-def validate(model_decomposed, data_loader, criterions, device, batch_step):
+def validate(model_neural, data_loader, criterions, device, batch_step):
     accuracy_attribute_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
 
-    model_decomposed.eval()
+    model_neural.eval()
     progress_bar.set_description_str("[INFO]: Validation progress")
 
     with torch.set_grad_enabled(False):
@@ -113,7 +113,7 @@ def validate(model_decomposed, data_loader, criterions, device, batch_step):
             for i in range(len(labels)):
                 labels[i] = labels[i].to(device, non_blocking = True)
 
-            (output, _) = model_decomposed(input)
+            (output, _) = model_neural(input)
 
             loss = computeLoss(output, labels, criterions)
             accuracy_attribute_batch = utility.computeAccuracyAttribute(output, labels, device)
@@ -168,10 +168,10 @@ def main():
     data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_neural["batch_size"], shuffle = header.config_neural["data_loader_shuffle"], num_workers = header.config_neural["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     epoch = 1
-    model_decomposed = model.ResNet34MTL(dataset_test.config, device)
-    model_decomposed = torch.nn.DataParallel(model_decomposed)
-    model_decomposed = model_decomposed.to(device)
-    optimizer = torch.optim.SGD(model_decomposed.module.get_parameters(), lr = header.config_neural["optimizer_learning_rate"], momentum = header.config_neural["optimizer_momentum"], weight_decay = header.config_neural["optimizer_weight_decay"])
+    model_neural = model.ResNet34MTL(dataset_test.config, device)
+    model_neural = torch.nn.DataParallel(model_neural)
+    model_neural = model_neural.to(device)
+    optimizer = torch.optim.SGD(model_neural.module.get_parameters(), lr = header.config_neural["optimizer_learning_rate"], momentum = header.config_neural["optimizer_momentum"], weight_decay = header.config_neural["optimizer_weight_decay"])
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.config_neural["learning_rate_scheduler_mode"], header.config_neural["learning_rate_scheduler_factor"], header.config_neural["learning_rate_scheduler_patience"], header.config_neural["learning_rate_scheduler_threshold"], header.config_neural["learning_rate_scheduler_threshold_mode"], header.config_neural["learning_rate_scheduler_cooldown"], header.config_neural["learning_rate_scheduler_min_learning_rate"], header.config_neural["learning_rate_scheduler_min_learning_rate_decay"])
     progress_bar = None
 
@@ -190,8 +190,8 @@ def main():
         wandb.log({"training/epoch/step": epoch})
         wandb.log({"validation/epoch/step": epoch})
 
-        batch_step_train = train(model_decomposed, data_loader_train, criterions, optimizer, device, batch_step_train)
-        (accuracy_attribute_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_decomposed, data_loader_validation, criterions, device, batch_step_validate)
+        batch_step_train = train(model_neural, data_loader_train, criterions, optimizer, device, batch_step_train)
+        (accuracy_attribute_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_neural, data_loader_validation, criterions, device, batch_step_validate)
 
         learning_rate_scheduler.step(loss_validation_epoch)
 
@@ -200,9 +200,9 @@ def main():
         if accuracy_attribute_validation_epoch > accuracy_attribute_validation_best or epoch == 1:
             accuracy_attribute_validation_best = accuracy_attribute_validation_epoch
             wandb.log({"validation/epoch/accuracy_attribute_best": accuracy_attribute_validation_best})
-            utility.saveCheckpoint(header.config_neural["file_name_checkpoint_best"], model_decomposed)
+            utility.saveCheckpoint(header.config_neural["file_name_checkpoint_best"], model_neural)
 
-        utility.saveCheckpoint(header.config_neural["file_name_checkpoint"], model_decomposed)
+        utility.saveCheckpoint(header.config_neural["file_name_checkpoint"], model_neural)
 
         epoch += 1
 
@@ -213,7 +213,7 @@ def main():
     wandb.summary["validation/epoch/accuracy_attribute_best"] = accuracy_attribute_validation_best
 
     wandb.log({"testing/epoch/step": batch_step_test})
-    test_neural.test(model_decomposed, data_loader_test, device, batch_step_test)
+    test_neural.test(model_neural, data_loader_test, device, batch_step_test)
 
     wandb.finish()
 
