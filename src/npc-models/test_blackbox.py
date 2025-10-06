@@ -54,7 +54,7 @@ def processArguments():
 def test(model_blackbox, data_loader, device, batch_step):
     utility.loadCheckpoint(header.config_blackbox["file_name_checkpoint_best"], model_blackbox)
 
-    accuracy_task_epoch = 0
+    accuracy_classification_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
 
     model_blackbox.eval()
@@ -70,25 +70,25 @@ def test(model_blackbox, data_loader, device, batch_step):
 
             corrects = torch.sum(predictions == labels).item()
 
-            accuracy_task_batch = corrects / input.size(0)
-            accuracy_task_epoch += corrects
+            accuracy_classification_batch = corrects / input.size(0)
+            accuracy_classification_epoch += corrects
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
 
-            wandb.log({"testing/batch/accuracy_task": accuracy_task_batch})
+            wandb.log({"testing/batch/accuracy_classification": accuracy_classification_batch})
             wandb.log({"testing/batch/step": batch_step})
 
             batch_step += 1
 
     progress_bar.close()
 
-    accuracy_task_epoch /= len(data_loader.dataset)
+    accuracy_classification_epoch /= len(data_loader.dataset)
 
-    wandb.log({"testing/epoch/accuracy_task": accuracy_task_epoch})
-    wandb.summary["testing/epoch/accuracy_task"] = accuracy_task_epoch
+    wandb.log({"testing/epoch/accuracy_classification": accuracy_classification_epoch})
+    wandb.summary["testing/epoch/accuracy_classification"] = accuracy_classification_epoch
 
-    logger.log_info("Testing task accuracy: " + str(accuracy_task_epoch) + ".")
+    logger.log_info("Testing classification accuracy: " + str(accuracy_classification_epoch) + ".")
 
     return batch_step
 

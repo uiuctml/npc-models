@@ -79,7 +79,7 @@ def computeLoss(output_neck, output_head, labels_attribute, labels_class):
 
 def train(model_baseline, data_loader, optimizer, device, batch_step):
     accuracy_concept_epoch = 0
-    accuracy_task_epoch = 0
+    accuracy_classification_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
 
@@ -104,18 +104,18 @@ def train(model_baseline, data_loader, optimizer, device, batch_step):
             loss.backward()
             optimizer.step()
 
-            (accuracy_concept_batch, accuracy_task_batch) = test_baseline.computeAccuracy(output_neck, output_head, labels_attribute, labels_class, device)
+            (accuracy_concept_batch, accuracy_classification_batch) = test_baseline.computeAccuracy(output_neck, output_head, labels_attribute, labels_class, device)
             loss_batch = loss.item()
 
             accuracy_concept_epoch += accuracy_concept_batch
-            accuracy_task_epoch += accuracy_task_batch
+            accuracy_classification_epoch += accuracy_classification_batch
             loss_epoch += loss_batch
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
 
             wandb.log({"training/batch/accuracy_concept": accuracy_concept_batch})
-            wandb.log({"training/batch/accuracy_task": accuracy_task_batch})
+            wandb.log({"training/batch/accuracy_classification": accuracy_classification_batch})
             wandb.log({"training/batch/step": batch_step})
             wandb.log({"training/batch/loss": loss_batch})
 
@@ -124,18 +124,18 @@ def train(model_baseline, data_loader, optimizer, device, batch_step):
     progress_bar.close()
 
     accuracy_concept_epoch /= len(data_loader)
-    accuracy_task_epoch /= len(data_loader)
+    accuracy_classification_epoch /= len(data_loader)
     loss_epoch /= len(data_loader)
 
     wandb.log({"training/epoch/accuracy_concept": accuracy_concept_epoch})
-    wandb.log({"training/epoch/accuracy_task": accuracy_task_epoch})
+    wandb.log({"training/epoch/accuracy_classification": accuracy_classification_epoch})
     wandb.log({"training/epoch/loss": loss_epoch})
 
     return batch_step
 
 def validate(model_baseline, data_loader, device, batch_step):
     accuracy_concept_epoch = 0
-    accuracy_task_epoch = 0
+    accuracy_classification_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
 
@@ -154,18 +154,18 @@ def validate(model_baseline, data_loader, device, batch_step):
             (output_neck, output_head) = model_baseline(input)
 
             loss = computeLoss(output_neck, output_head, labels_attribute, labels_class)
-            (accuracy_concept_batch, accuracy_task_batch) = test_baseline.computeAccuracy(output_neck, output_head, labels_attribute, labels_class, device)
+            (accuracy_concept_batch, accuracy_classification_batch) = test_baseline.computeAccuracy(output_neck, output_head, labels_attribute, labels_class, device)
             loss_batch = loss.item()
 
             accuracy_concept_epoch += accuracy_concept_batch
-            accuracy_task_epoch += accuracy_task_batch
+            accuracy_classification_epoch += accuracy_classification_batch
             loss_epoch += loss_batch
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
 
             wandb.log({"validation/batch/accuracy_concept": accuracy_concept_batch})
-            wandb.log({"validation/batch/accuracy_task": accuracy_task_batch})
+            wandb.log({"validation/batch/accuracy_classification": accuracy_classification_batch})
             wandb.log({"validation/batch/step": batch_step})
             wandb.log({"validation/batch/loss": loss_batch})
 
@@ -174,14 +174,14 @@ def validate(model_baseline, data_loader, device, batch_step):
     progress_bar.close()
 
     accuracy_concept_epoch /= len(data_loader)
-    accuracy_task_epoch /= len(data_loader)
+    accuracy_classification_epoch /= len(data_loader)
     loss_epoch /= len(data_loader)
 
     wandb.log({"validation/epoch/accuracy_concept": accuracy_concept_epoch})
-    wandb.log({"validation/epoch/accuracy_task": accuracy_task_epoch})
+    wandb.log({"validation/epoch/accuracy_classification": accuracy_classification_epoch})
     wandb.log({"validation/epoch/loss": loss_epoch})
 
-    return (accuracy_task_epoch, loss_epoch, batch_step)
+    return (accuracy_classification_epoch, loss_epoch, batch_step)
 
 def main():
     processArguments()
@@ -196,7 +196,7 @@ def main():
     utility.defineMetrics()
     logger.log_info("Started run \"" + header.config_baseline["run_name"] + "\".")
 
-    accuracy_task_validation_best = 0
+    accuracy_classification_validation_best = 0
     batch_step_test = 1
     batch_step_train = 1
     batch_step_validate = 1
@@ -226,15 +226,15 @@ def main():
         wandb.log({"validation/epoch/step": epoch})
 
         batch_step_train = train(model_baseline, data_loader_train, optimizer, device, batch_step_train)
-        (accuracy_task_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_baseline, data_loader_validation, device, batch_step_validate)
+        (accuracy_classification_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_baseline, data_loader_validation, device, batch_step_validate)
 
         learning_rate_scheduler.step(loss_validation_epoch)
 
-        logger.log_info("Validation task accuracy: " + str(accuracy_task_validation_epoch) + ".")
+        logger.log_info("Validation classification accuracy: " + str(accuracy_classification_validation_epoch) + ".")
 
-        if accuracy_task_validation_epoch > accuracy_task_validation_best or epoch == 1:
-            accuracy_task_validation_best = accuracy_task_validation_epoch
-            wandb.log({"validation/epoch/accuracy_task_best": accuracy_task_validation_best})
+        if accuracy_classification_validation_epoch > accuracy_classification_validation_best or epoch == 1:
+            accuracy_classification_validation_best = accuracy_classification_validation_epoch
+            wandb.log({"validation/epoch/accuracy_classification_best": accuracy_classification_validation_best})
             utility.saveCheckpoint(header.config_baseline["file_name_checkpoint_best"], model_baseline)
 
         utility.saveCheckpoint(header.config_baseline["file_name_checkpoint"], model_baseline)
@@ -243,8 +243,8 @@ def main():
 
     progress_bar.close()
 
-    logger.log_info("Best validation task accuracy: " + str(accuracy_task_validation_best) + ".")
-    wandb.summary["validation/epoch/accuracy_task_best"] = accuracy_task_validation_best
+    logger.log_info("Best validation classification accuracy: " + str(accuracy_classification_validation_best) + ".")
+    wandb.summary["validation/epoch/accuracy_classification_best"] = accuracy_classification_validation_best
 
     wandb.log({"testing/epoch/step": batch_step_test})
     test_baseline.test(model_baseline, data_loader_test, device, batch_step_test)

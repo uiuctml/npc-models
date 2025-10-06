@@ -37,7 +37,7 @@ def processArguments():
     return
 
 def train(model_blackbox, data_loader, criterion, optimizer, device, batch_step):
-    accuracy_task_epoch = 0
+    accuracy_classification_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
 
@@ -60,16 +60,16 @@ def train(model_blackbox, data_loader, criterion, optimizer, device, batch_step)
 
             corrects = torch.sum(predictions == labels).item()
 
-            accuracy_task_batch = corrects / input.size(0)
+            accuracy_classification_batch = corrects / input.size(0)
             loss_batch = loss.item()
 
-            accuracy_task_epoch += corrects
+            accuracy_classification_epoch += corrects
             loss_epoch += loss_batch
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
 
-            wandb.log({"training/batch/accuracy_task": accuracy_task_batch})
+            wandb.log({"training/batch/accuracy_classification": accuracy_classification_batch})
             wandb.log({"training/batch/step": batch_step})
             wandb.log({"training/batch/loss": loss_batch})
 
@@ -77,16 +77,16 @@ def train(model_blackbox, data_loader, criterion, optimizer, device, batch_step)
 
     progress_bar.close()
 
-    accuracy_task_epoch /= len(data_loader.dataset)
+    accuracy_classification_epoch /= len(data_loader.dataset)
     loss_epoch /= len(data_loader)
 
-    wandb.log({"training/epoch/accuracy_task": accuracy_task_epoch})
+    wandb.log({"training/epoch/accuracy_classification": accuracy_classification_epoch})
     wandb.log({"training/epoch/loss": loss_epoch})
 
     return batch_step
 
 def validate(model_blackbox, data_loader, criterion, device, batch_step):
-    accuracy_task_epoch = 0
+    accuracy_classification_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
 
@@ -103,16 +103,16 @@ def validate(model_blackbox, data_loader, criterion, device, batch_step):
             loss = criterion(output, labels)
 
             corrects = torch.sum(predictions == labels).item()
-            accuracy_task_batch = corrects / input.size(0)
+            accuracy_classification_batch = corrects / input.size(0)
             loss_batch = loss.item()
 
-            accuracy_task_epoch += corrects
+            accuracy_classification_epoch += corrects
             loss_epoch += loss_batch
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
 
-            wandb.log({"validation/batch/accuracy_task": accuracy_task_batch})
+            wandb.log({"validation/batch/accuracy_classification": accuracy_classification_batch})
             wandb.log({"validation/batch/step": batch_step})
             wandb.log({"validation/batch/loss": loss_batch})
 
@@ -120,13 +120,13 @@ def validate(model_blackbox, data_loader, criterion, device, batch_step):
 
     progress_bar.close()
 
-    accuracy_task_epoch /= len(data_loader.dataset)
+    accuracy_classification_epoch /= len(data_loader.dataset)
     loss_epoch /= len(data_loader)
 
-    wandb.log({"validation/epoch/accuracy_task": accuracy_task_epoch})
+    wandb.log({"validation/epoch/accuracy_classification": accuracy_classification_epoch})
     wandb.log({"validation/epoch/loss": loss_epoch})
 
-    return (accuracy_task_epoch, loss_epoch, batch_step)
+    return (accuracy_classification_epoch, loss_epoch, batch_step)
 
 def main():
     processArguments()
@@ -143,7 +143,7 @@ def main():
 
     logger.log_info("Started run \"" + header.config_blackbox["run_name"] + "\".")
 
-    accuracy_task_validation_best = 0
+    accuracy_classification_validation_best = 0
     batch_step_test = 1
     batch_step_train = 1
     batch_step_validate = 1
@@ -177,15 +177,15 @@ def main():
         wandb.log({"validation/epoch/step": epoch})
 
         batch_step_train = train(model_blackbox, data_loader_train, criterion, optimizer, device, batch_step_train)
-        (accuracy_task_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_blackbox, data_loader_validation, criterion, device, batch_step_validate)
+        (accuracy_classification_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_blackbox, data_loader_validation, criterion, device, batch_step_validate)
 
         learning_rate_scheduler.step(loss_validation_epoch)
 
-        logger.log_info("Validation task accuracy: " + str(accuracy_task_validation_epoch) + ".")
+        logger.log_info("Validation classification accuracy: " + str(accuracy_classification_validation_epoch) + ".")
 
-        if accuracy_task_validation_epoch > accuracy_task_validation_best or epoch == 1:
-            accuracy_task_validation_best = accuracy_task_validation_epoch
-            wandb.log({"validation/epoch/accuracy_task_best": accuracy_task_validation_best})
+        if accuracy_classification_validation_epoch > accuracy_classification_validation_best or epoch == 1:
+            accuracy_classification_validation_best = accuracy_classification_validation_epoch
+            wandb.log({"validation/epoch/accuracy_classification_best": accuracy_classification_validation_best})
             utility.saveCheckpoint(header.config_blackbox["file_name_checkpoint_best"], model_blackbox)
 
         utility.saveCheckpoint(header.config_blackbox["file_name_checkpoint"], model_blackbox)
@@ -195,8 +195,8 @@ def main():
     if progress_bar is not None:
         progress_bar.close()
 
-    logger.log_info("Best validation task accuracy: " + str(accuracy_task_validation_best) + ".")
-    wandb.summary["validation/epoch/accuracy_task_best"] = accuracy_task_validation_best
+    logger.log_info("Best validation classification accuracy: " + str(accuracy_classification_validation_best) + ".")
+    wandb.summary["validation/epoch/accuracy_classification_best"] = accuracy_classification_validation_best
 
     wandb.log({"testing/epoch/step": batch_step_test})
     test_blackbox.test(model_blackbox, data_loader_test, device, batch_step_test)
