@@ -43,13 +43,13 @@ def processArguments():
 
     return
 
-def computeLoss(output_neck, output_head, labels_decomposed, labels_class):
+def computeLoss(output_neck, output_head, labels_attribute, labels_class):
     if header.config_baseline["model"] == type.ModelBaseline.abm.name:
         count_attributes = len(output_neck)
         loss_attribute = 0
 
         for i in range(count_attributes):
-            loss = torch.nn.functional.cross_entropy(output_neck[i], labels_decomposed[i])
+            loss = torch.nn.functional.cross_entropy(output_neck[i], labels_attribute[i])
             loss_attribute += loss / math.log(output_neck[i].size(1))
 
         loss_attribute /= count_attributes
@@ -57,18 +57,18 @@ def computeLoss(output_neck, output_head, labels_decomposed, labels_class):
 
         return header.config_baseline["concept_loss_weight"] * loss_attribute + loss_task
     elif header.config_baseline["model"] == type.ModelBaseline.cbm.name:
-        labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed)
-        loss_attribute = torch.nn.functional.binary_cross_entropy_with_logits(output_neck, labels_decomposed)
+        labels_attribute = utility.getBinaryLabelsAttribute(labels_attribute)
+        loss_attribute = torch.nn.functional.binary_cross_entropy_with_logits(output_neck, labels_attribute)
         loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_class)
         return header.config_baseline["concept_loss_weight"] * loss_attribute + loss_task
     elif header.config_baseline["model"] == type.ModelBaseline.cem.name:
-        labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed)
-        loss_attribute = torch.nn.functional.binary_cross_entropy(output_neck, labels_decomposed)
+        labels_attribute = utility.getBinaryLabelsAttribute(labels_attribute)
+        loss_attribute = torch.nn.functional.binary_cross_entropy(output_neck, labels_attribute)
         loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_class)
         return header.config_baseline["concept_loss_weight"] * loss_attribute + loss_task
     elif header.config_baseline["model"] == type.ModelBaseline.dcr.name:
-        labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed)
-        loss_attribute = torch.nn.functional.binary_cross_entropy(output_neck, labels_decomposed)
+        labels_attribute = utility.getBinaryLabelsAttribute(labels_attribute)
+        loss_attribute = torch.nn.functional.binary_cross_entropy(output_neck, labels_attribute)
         loss_task = torch.nn.functional.binary_cross_entropy(output_head, labels_class)
         return header.config_baseline["concept_loss_weight"] * loss_attribute + loss_task
     else:
@@ -87,24 +87,24 @@ def train(model_baseline, data_loader, optimizer, device, batch_step):
     progress_bar.set_description_str("[INFO]: Training progress")
 
     with torch.set_grad_enabled(True):
-        for (batch_index, (input, labels_decomposed, labels_class, _)) in enumerate(data_loader):
+        for (batch_index, (input, labels_attribute, labels_class, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
             labels_class = labels_class.to(device, non_blocking = True)
             labels_class = utility.getBinaryLabelsClass(labels_class, data_loader)
 
-            for i in range(len(labels_decomposed)):
-                labels_decomposed[i] = labels_decomposed[i].to(device)
+            for i in range(len(labels_attribute)):
+                labels_attribute[i] = labels_attribute[i].to(device)
 
             optimizer.zero_grad()
 
             (output_neck, output_head) = model_baseline(input)
 
-            loss = computeLoss(output_neck, output_head, labels_decomposed, labels_class)
+            loss = computeLoss(output_neck, output_head, labels_attribute, labels_class)
 
             loss.backward()
             optimizer.step()
 
-            (accuracy_attribute_batch, accuracy_task_batch) = test_baseline.computeAccuracy(output_neck, output_head, labels_decomposed, labels_class, device)
+            (accuracy_attribute_batch, accuracy_task_batch) = test_baseline.computeAccuracy(output_neck, output_head, labels_attribute, labels_class, device)
             loss_batch = loss.item()
 
             accuracy_attribute_epoch += accuracy_attribute_batch
@@ -143,18 +143,18 @@ def validate(model_baseline, data_loader, device, batch_step):
     progress_bar.set_description_str("[INFO]: Validation progress")
 
     with torch.set_grad_enabled(False):
-        for (batch_index, (input, labels_decomposed, labels_class, _)) in enumerate(data_loader):
+        for (batch_index, (input, labels_attribute, labels_class, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
             labels_class = labels_class.to(device, non_blocking = True)
             labels_class = utility.getBinaryLabelsClass(labels_class, data_loader)
 
-            for i in range(len(labels_decomposed)):
-                labels_decomposed[i] = labels_decomposed[i].to(device)
+            for i in range(len(labels_attribute)):
+                labels_attribute[i] = labels_attribute[i].to(device)
 
             (output_neck, output_head) = model_baseline(input)
 
-            loss = computeLoss(output_neck, output_head, labels_decomposed, labels_class)
-            (accuracy_attribute_batch, accuracy_task_batch) = test_baseline.computeAccuracy(output_neck, output_head, labels_decomposed, labels_class, device)
+            loss = computeLoss(output_neck, output_head, labels_attribute, labels_class)
+            (accuracy_attribute_batch, accuracy_task_batch) = test_baseline.computeAccuracy(output_neck, output_head, labels_attribute, labels_class, device)
             loss_batch = loss.item()
 
             accuracy_attribute_epoch += accuracy_attribute_batch

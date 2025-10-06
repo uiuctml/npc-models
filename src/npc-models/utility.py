@@ -13,13 +13,13 @@ import wandb
 def applySoftmax(output):
     return torch.nn.functional.softmax(output, dim = 1)
 
-def applySoftmaxAttribute(outputs_decomposed):
-    outputs_decomposed_softmax = []
+def applySoftmaxAttribute(outputs_attribute):
+    outputs_attribute_softmax = []
 
-    for i in range(len(outputs_decomposed)):
-        outputs_decomposed_softmax.append(applySoftmax(outputs_decomposed[i]))
+    for i in range(len(outputs_attribute)):
+        outputs_attribute_softmax.append(applySoftmax(outputs_attribute[i]))
 
-    return outputs_decomposed_softmax
+    return outputs_attribute_softmax
 
 def computeAccuracyAttribute(outputs, labels, device):
     count_attributes = len(outputs)
@@ -92,13 +92,13 @@ def generateRunName(seed, type, method):
 
     return run_name
 
-def getBinaryLabelsDecomposed(labels_decomposed):
-    labels_decomposed_binary = []
+def getBinaryLabelsAttribute(labels_attribute):
+    labels_attribute_binary = []
 
-    for label_decomposed in labels_decomposed:
-        labels_decomposed_binary.append((label_decomposed > 0).float())
+    for label_attribute in labels_attribute:
+        labels_attribute_binary.append((label_attribute > 0).float())
 
-    return torch.cat(labels_decomposed_binary, dim = 1)
+    return torch.cat(labels_attribute_binary, dim = 1)
 
 def getBinaryLabelsClass(labels_class, data_loader):
     return torch.nn.functional.one_hot(labels_class, num_classes = len(data_loader.dataset.labels_class)).float()

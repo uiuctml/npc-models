@@ -52,7 +52,7 @@ def processArguments():
 
     return
 
-def computeAccuracy(output_neck, output_head, labels_decomposed, labels_class, device):
+def computeAccuracy(output_neck, output_head, labels_attribute, labels_class, device):
     accuracy_attribute_batch = None
     accuracy_task_batch = None
     threshold_accuracy_attribute = 0.5
@@ -65,16 +65,16 @@ def computeAccuracy(output_neck, output_head, labels_decomposed, labels_class, d
         threshold_accuracy_task = 0
 
     if header.config_baseline["model"] == type.ModelBaseline.abm.name:
-        accuracy_attribute_batch = utility.computeAccuracyAttribute(output_neck, labels_decomposed, device)
+        accuracy_attribute_batch = utility.computeAccuracyAttribute(output_neck, labels_attribute, device)
     else:
-        labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed)
-        accuracy_attribute_batch = sklearn.metrics.accuracy_score(labels_decomposed.cpu(), (output_neck > threshold_accuracy_attribute).cpu())
+        labels_attribute = utility.getBinaryLabelsAttribute(labels_attribute)
+        accuracy_attribute_batch = sklearn.metrics.accuracy_score(labels_attribute.cpu(), (output_neck > threshold_accuracy_attribute).cpu())
 
     accuracy_task_batch = sklearn.metrics.accuracy_score(labels_class.cpu(), (output_head > threshold_accuracy_task).cpu())
 
     return (accuracy_attribute_batch, accuracy_task_batch)
 
-def computeTVDistance(output_neck, labels_decomposed, tv_distances_epoch, data_loader):
+def computeTVDistance(output_neck, labels_attribute, tv_distances_epoch, data_loader):
     counts_categories = []
     output = output_neck
 
@@ -100,7 +100,7 @@ def computeTVDistance(output_neck, labels_decomposed, tv_distances_epoch, data_l
         return
 
     for i in range(len(data_loader.dataset.config["attributes"])):
-        tv_distance_batch = 0.5 * torch.sum(torch.abs(output[i] - labels_decomposed[i]), dim = 1)
+        tv_distance_batch = 0.5 * torch.sum(torch.abs(output[i] - labels_attribute[i]), dim = 1)
         tv_distances_epoch[i] += torch.sum(tv_distance_batch).item()
 
     return
@@ -121,22 +121,22 @@ def test(model_baseline, data_loader, device, batch_step):
     progress_bar.set_description_str("[INFO]: Testing progress")
 
     with torch.set_grad_enabled(False):
-        for (batch_index, (input, labels_decomposed, labels_class, _)) in enumerate(data_loader):
+        for (batch_index, (input, labels_attribute, labels_class, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
             labels_class = labels_class.to(device, non_blocking = True)
             labels_class = utility.getBinaryLabelsClass(labels_class, data_loader)
 
-            for i in range(len(labels_decomposed)):
-                labels_decomposed[i] = labels_decomposed[i].to(device)
+            for i in range(len(labels_attribute)):
+                labels_attribute[i] = labels_attribute[i].to(device)
 
             (output_neck, output_head) = model_baseline(input)
 
-            (accuracy_attribute_batch, accuracy_task_batch) = computeAccuracy(output_neck, output_head, labels_decomposed, labels_class, device)
+            (accuracy_attribute_batch, accuracy_task_batch) = computeAccuracy(output_neck, output_head, labels_attribute, labels_class, device)
 
             accuracy_attribute_epoch += accuracy_attribute_batch
             accuracy_task_epoch += accuracy_task_batch
 
-            computeTVDistance(output_neck, labels_decomposed, tv_distances_epoch, data_loader)
+            computeTVDistance(output_neck, labels_attribute, tv_distances_epoch, data_loader)
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()

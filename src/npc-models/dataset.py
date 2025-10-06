@@ -55,8 +55,8 @@ class NPCDataset(torch.utils.data.Dataset):
                         if isinstance(attribute_categories, list):
                             probability = 1 / len(attribute_categories)
 
-                            for class_name_decomposed in attribute_categories:
-                                index_category = self.label_to_index_attribute[attribute_name][class_name_decomposed]
+                            for attribute_category in attribute_categories:
+                                index_category = self.label_to_index_attribute[attribute_name][attribute_category]
                                 index_attribute_categories[index_category] = probability
                         else:
                             index_category = self.label_to_index_attribute[attribute_name][attribute_categories]
@@ -80,8 +80,8 @@ class NPCDataset(torch.utils.data.Dataset):
                         if isinstance(attribute_categories, list):
                             probability = 1 / len(attribute_categories)
 
-                            for class_name_decomposed in attribute_categories:
-                                index_category = self.label_to_index_attribute[attribute_name][class_name_decomposed]
+                            for attribute_category in attribute_categories:
+                                index_category = self.label_to_index_attribute[attribute_name][attribute_category]
                                 index_attribute_categories[index_category] = probability
                         else:
                             index_category = self.label_to_index_attribute[attribute_name][attribute_categories]
