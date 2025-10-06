@@ -10,20 +10,20 @@ import wandb
 
 def initializeRunName(run_name = "", optimizer = "cccp"):
     if run_name != "":
-        if run_name.split(".")[1] != header.config_spn["type"]:
+        if run_name.split(".")[1] != header.config_pc["type"]:
             logger.log_fatal("Invalid PC run name. Quit.")
             exit(-1)
 
-        header.config_spn["run_name"] = run_name
+        header.config_pc["run_name"] = run_name
     else:
-        header.config_spn["run_name"] = utility.generateRunName(header.config_spn["seed"], header.config_spn["type"], optimizer)
+        header.config_pc["run_name"] = utility.generateRunName(header.config_pc["seed"], header.config_pc["type"], optimizer)
 
-    if header.config_spn["run_name"] == "":
+    if header.config_pc["run_name"] == "":
         logger.log_fatal("Missing PC run name. Quit.")
         exit(-1)
 
-    header.config_spn["file_name_checkpoint"] = header.config_spn["run_name"] + header.checkpoint_postfix
-    header.config_spn["file_name_checkpoint_best"] = header.config_spn["run_name"] + header.checkpoint_postfix_best
+    header.config_pc["file_name_checkpoint"] = header.config_pc["run_name"] + header.checkpoint_postfix
+    header.config_pc["file_name_checkpoint_best"] = header.config_pc["run_name"] + header.checkpoint_postfix_best
 
     return
 
@@ -35,17 +35,17 @@ def processArguments():
 
     if arguments.run_name == "":
         logger.log_info("Proceeding without run name.")
-        header.config_spn["file_name_checkpoint"] = ""
-        header.config_spn["file_name_checkpoint_best"] = ""
-        header.config_spn["run_name"] = ""
+        header.config_pc["file_name_checkpoint"] = ""
+        header.config_pc["file_name_checkpoint_best"] = ""
+        header.config_pc["run_name"] = ""
     else:
         initializeRunName(arguments.run_name)
 
     if arguments.seed is not None:
-        header.config_spn["seed"] = arguments.seed
+        header.config_pc["seed"] = arguments.seed
 
-    logger.log_trace("Run name: \"" + header.config_spn["run_name"] + "\".")
-    logger.log_trace("Random seed: " + str(header.config_spn["seed"]) + ".")
+    logger.log_trace("Run name: \"" + header.config_pc["run_name"] + "\".")
+    logger.log_trace("Random seed: " + str(header.config_pc["seed"]) + ".")
 
     return
 
@@ -82,28 +82,28 @@ def test(spn_joint, settings_joint):
 def main():
     processArguments()
 
-    utility.setSeed(header.config_spn["seed"])
+    utility.setSeed(header.config_pc["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
 
-    wandb.init(config = header.config_spn, mode = "disabled")
+    wandb.init(config = header.config_pc, mode = "disabled")
 
     device = torch.device("cuda")
-    dataset_test = loadDataset(header.config_spn["file_path_dataset_test"], device)
+    dataset_test = loadDataset(header.config_pc["file_path_dataset_test"], device)
 
     spn_joint = pc.SPN(device)
 
-    logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
+    logger.log_info("Loading SPN from \"" + header.config_pc["file_path_pc"] + "\"...")
 
-    spn_joint.load(header.config_spn["file_path_spn"])
+    spn_joint.load(header.config_pc["file_path_pc"])
 
-    logger.log_trace("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
-    logger.log_trace("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
-    logger.log_trace("Number of product nodes: " + str(len(spn_joint.product_nodes)) + ".")
-    logger.log_trace("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
+    logger.log_trace("Total PC nodes: " + str(len(spn_joint.nodes)) + ".")
+    logger.log_trace("Total PC sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
+    logger.log_trace("Total PC product nodes: " + str(len(spn_joint.product_nodes)) + ".")
+    logger.log_trace("Total PC leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
     logger.log_trace("SPN depth: " + str(spn_joint.depth) + ".")
 
-    if header.config_spn["run_name"] != "":
-        utility.loadCheckpoint(header.config_spn["file_name_checkpoint_best"], spn_joint, True)
+    if header.config_pc["run_name"] != "":
+        utility.loadCheckpoint(header.config_pc["file_name_checkpoint_best"], spn_joint, True)
 
     test(spn_joint, dataset_test)
 

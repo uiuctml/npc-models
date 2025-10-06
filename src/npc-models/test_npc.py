@@ -66,18 +66,18 @@ def processArguments():
 
     if arguments.run_name_pc == "":
         logger.log_info("Proceeding without PC run name.")
-        header.config_spn["file_name_checkpoint"] = ""
-        header.config_spn["file_name_checkpoint_best"] = ""
-        header.config_spn["run_name"] = ""
+        header.config_pc["file_name_checkpoint"] = ""
+        header.config_pc["file_name_checkpoint_best"] = ""
+        header.config_pc["run_name"] = ""
     else:
         test_pc.initializeRunName(arguments.run_name_pc, "pgd")
 
     if arguments.seed is not None:
         header.config_decomposed["seed"] = arguments.seed
-        header.config_spn["seed"] = arguments.seed
+        header.config_pc["seed"] = arguments.seed
 
     logger.log_trace("Attribute run name: \"" + header.config_decomposed["run_name"] + "\".")
-    logger.log_trace("PC run name: \"" + header.config_spn["run_name"] + "\".")
+    logger.log_trace("PC run name: \"" + header.config_pc["run_name"] + "\".")
     logger.log_trace("Random seed: " + str(header.config_decomposed["seed"]) + ".")
 
     return
@@ -127,9 +127,9 @@ def saveMPE(input_file_paths, mpe, mpe_attributes, mpe_correctness, dataset, lab
 def test(model_decomposed, spn_joint, spn_marginal, spn_settings_joint, data_loader, device, batch_step):
     utility.loadCheckpoint(header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
 
-    if header.config_spn["run_name"] != "":
-        utility.loadCheckpoint(header.config_spn["file_name_checkpoint_best"], spn_joint, True)
-        utility.loadCheckpoint(header.config_spn["file_name_checkpoint_best"], spn_marginal, True)
+    if header.config_pc["run_name"] != "":
+        utility.loadCheckpoint(header.config_pc["file_name_checkpoint_best"], spn_joint, True)
+        utility.loadCheckpoint(header.config_pc["file_name_checkpoint_best"], spn_marginal, True)
 
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
@@ -259,7 +259,7 @@ def main():
 
     config = {
         "decomposed": header.config_decomposed,
-        "spn": header.config_spn
+        "spn": header.config_pc
     }
 
     wandb.init(config = config, mode = "disabled")
@@ -271,7 +271,7 @@ def main():
     device = torch.device("cuda")
     device_spn = torch.device("cuda")
 
-    if header.composed_spn_on_cpu:
+    if header.composed_pc_on_cpu:
         logger.log_info("Computing SPNs on CPU.")
         device_spn = torch.device("cpu")
 
@@ -281,10 +281,10 @@ def main():
     spn_joint = pc.SPN(device_spn)
     spn_marginal = pc.SPN(device_spn)
 
-    logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
+    logger.log_info("Loading SPN from \"" + header.config_pc["file_path_pc"] + "\"...")
 
-    spn_joint.load(header.config_spn["file_path_spn"])
-    spn_marginal.load(header.config_spn["file_path_spn"])
+    spn_joint.load(header.config_pc["file_path_pc"])
+    spn_marginal.load(header.config_pc["file_path_pc"])
 
     logger.log_info("Loading SPN leaf node settings...")
 
@@ -297,10 +297,10 @@ def main():
     spn_joint.set_leaf_nodes_categorical(spn_settings_joint)
     spn_marginal.set_leaf_nodes_categorical(spn_settings_marginal)
 
-    logger.log_trace("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
-    logger.log_trace("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
-    logger.log_trace("Number of product nodes: " + str(len(spn_joint.product_nodes)) + ".")
-    logger.log_trace("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
+    logger.log_trace("Total PC nodes: " + str(len(spn_joint.nodes)) + ".")
+    logger.log_trace("Total PC sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
+    logger.log_trace("Total PC product nodes: " + str(len(spn_joint.product_nodes)) + ".")
+    logger.log_trace("Total PC leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
     logger.log_trace("SPN depth: " + str(spn_joint.depth) + ".")
     logger.log_trace("SPN leaf node setting dimension: (" + str(int(spn_settings_joint.shape[0])) + ", " + str(int(spn_settings_joint.shape[1])) + ").")
 

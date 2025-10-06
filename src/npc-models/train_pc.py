@@ -17,16 +17,16 @@ def processArguments():
     arguments = parser.parse_args()
 
     if arguments.epochs is not None:
-        header.config_spn["epochs"] = arguments.epochs
+        header.config_pc["epochs"] = arguments.epochs
 
     if arguments.seed is not None:
-        header.config_spn["seed"] = arguments.seed
+        header.config_pc["seed"] = arguments.seed
 
     test_pc.initializeRunName()
 
-    logger.log_trace("Run name: \"" + header.config_spn["run_name"] + "\".")
-    logger.log_trace("Epochs: " + str(header.config_spn["epochs"]) + ".")
-    logger.log_trace("Random seed: " + str(header.config_spn["seed"]) + ".")
+    logger.log_trace("Run name: \"" + header.config_pc["run_name"] + "\".")
+    logger.log_trace("Epochs: " + str(header.config_pc["epochs"]) + ".")
+    logger.log_trace("Random seed: " + str(header.config_pc["seed"]) + ".")
 
     return
 
@@ -53,19 +53,19 @@ def validate(spn_joint, settings_joint):
 def main():
     processArguments()
 
-    utility.setSeed(header.config_spn["seed"])
+    utility.setSeed(header.config_pc["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
 
-    wandb.init(project = header.project_name, name = header.config_spn["run_name"], config = header.config_spn, mode = header.run_mode)
+    wandb.init(project = header.project_name, name = header.config_pc["run_name"], config = header.config_pc, mode = header.run_mode)
 
     utility.defineMetrics()
 
-    logger.log_info("Started run \"" + header.config_spn["run_name"] + "\".")
+    logger.log_info("Started run \"" + header.config_pc["run_name"] + "\".")
 
     device = torch.device("cuda")
-    dataset_test = test_pc.loadDataset(header.config_spn["file_path_dataset_test"], device)
-    dataset_train = test_pc.loadDataset(header.config_spn["file_path_dataset_train"], device)
-    dataset_validation = test_pc.loadDataset(header.config_spn["file_path_dataset_validation"], device)
+    dataset_test = test_pc.loadDataset(header.config_pc["file_path_dataset_test"], device)
+    dataset_train = test_pc.loadDataset(header.config_pc["file_path_dataset_train"], device)
+    dataset_validation = test_pc.loadDataset(header.config_pc["file_path_dataset_validation"], device)
     epoch = 1
     log_likelihood_validation_best = float("-inf")
     log_likelihood_train_epoch = 0
@@ -74,33 +74,33 @@ def main():
     spn_marginal = pc.SPN(device)
     optimizer = pc.CCCPSPNOptimizer(spn_joint, spn_marginal, device)
     progress_bar = None
-    learning_rate_scheduler = pc.LikelihoodSPNLearningRateScheduler(optimizer, header.config_spn["learning_rate_scheduler_factor"])
+    learning_rate_scheduler = pc.LikelihoodSPNLearningRateScheduler(optimizer, header.config_pc["learning_rate_scheduler_factor"])
 
-    logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
+    logger.log_info("Loading SPN from \"" + header.config_pc["file_path_pc"] + "\"...")
 
-    spn_joint.load(header.config_spn["file_path_spn"])
-    spn_marginal.load(header.config_spn["file_path_spn"])
+    spn_joint.load(header.config_pc["file_path_pc"])
+    spn_marginal.load(header.config_pc["file_path_pc"])
     optimizer.set_weights_prior(spn_joint.get_weights())
 
-    if header.config_spn["randomize_weights"]:
+    if header.config_pc["randomize_weights"]:
         logger.log_info("Randomizing SPN weights...")
         spn_joint.randomize_weights()
         spn_marginal.set_weights(spn_joint.get_weights())
 
-    logger.log_trace("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
-    logger.log_trace("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
-    logger.log_trace("Number of product nodes: " + str(len(spn_joint.product_nodes)) + ".")
-    logger.log_trace("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
+    logger.log_trace("Total PC nodes: " + str(len(spn_joint.nodes)) + ".")
+    logger.log_trace("Total PC sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
+    logger.log_trace("Total PC product nodes: " + str(len(spn_joint.product_nodes)) + ".")
+    logger.log_trace("Total PC leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
     logger.log_trace("SPN depth: " + str(spn_joint.depth) + ".")
 
     logger.log_info("Testing SPN...")
     test_pc.test(spn_joint, dataset_test)
 
-    if epoch <= header.config_spn["epochs"]:
-        progress_bar = tqdm.tqdm(total = header.config_spn["epochs"], position = 0)
+    if epoch <= header.config_pc["epochs"]:
+        progress_bar = tqdm.tqdm(total = header.config_pc["epochs"], position = 0)
         progress_bar.set_description_str("[INFO]: Epoch")
 
-    while epoch <= header.config_spn["epochs"]:
+    while epoch <= header.config_pc["epochs"]:
         if progress_bar is not None:
             progress_bar.n = epoch
             progress_bar.refresh()
@@ -121,11 +121,11 @@ def main():
 
             wandb.log({"validation/epoch/log_likelihood_best": log_likelihood_validation_best})
 
-            utility.saveCheckpoint(header.config_spn["file_name_checkpoint_best"], spn_joint, True)
+            utility.saveCheckpoint(header.config_pc["file_name_checkpoint_best"], spn_joint, True)
 
-        utility.saveCheckpoint(header.config_spn["file_name_checkpoint"], spn_joint, True)
+        utility.saveCheckpoint(header.config_pc["file_name_checkpoint"], spn_joint, True)
 
-        if epoch > 1 and abs(log_likelihood_train_epoch - log_likelihood_train_epoch_last) < header.config_spn["stopping_criterion"]:
+        if epoch > 1 and abs(log_likelihood_train_epoch - log_likelihood_train_epoch_last) < header.config_pc["stopping_criterion"]:
             logger.log_info("Stopping criterion reached.")
             break
 
@@ -138,7 +138,7 @@ def main():
     wandb.summary["validation/epoch/log_likelihood_best"] = log_likelihood_validation_best
 
     wandb.log({"testing/epoch/step": 1})
-    utility.loadCheckpoint(header.config_spn["file_name_checkpoint_best"], spn_joint, True)
+    utility.loadCheckpoint(header.config_pc["file_name_checkpoint_best"], spn_joint, True)
     test_pc.test(spn_joint, dataset_test)
 
     return

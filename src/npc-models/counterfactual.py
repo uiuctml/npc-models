@@ -12,7 +12,7 @@ import torch
 import tqdm
 import utility
 
-def computeCounterfactual(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device):
+def computeCounterfactual(outputs_decomposed_original, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, labels_original, device):
     batch_size = labels_original.nelement()
     outputs_decomposed = []
     outputs_decomposed_original = utility.applySoftmaxDecomposed(outputs_decomposed_original)
@@ -23,7 +23,7 @@ def computeCounterfactual(outputs_decomposed_original, spn_joint, spn_marginal, 
         outputs_decomposed.append(outputs_decomposed_original[i].detach().clone().requires_grad_(True))
 
     for _ in range(header.counterfactual_steps):
-        (_, _, outputs_composed_original) = utility.compose(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+        (_, _, outputs_composed_original) = utility.compose(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
         outputs_composed_mpe = torch.max(outputs_composed_original, 1)[1]
         outputs_composed_indices = torch.where(outputs_composed_mpe != labels_original)[0]
 
@@ -141,12 +141,12 @@ def saveCounterfactual(input_file_paths, counterfactual, dataset, labels_decompo
 
     return
 
-def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_step):
+def test(model_decomposed, pc_joint, pc_marginal, data_loader, device, batch_step):
     utility.loadCheckpoint(header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
 
-    if header.config_spn["run_name"] != "":
-        utility.loadCheckpoint(header.config_spn["file_name_checkpoint_best"], spn_joint, True)
-        utility.loadCheckpoint(header.config_spn["file_name_checkpoint_best"], spn_marginal, True)
+    if header.config_pc["run_name"] != "":
+        utility.loadCheckpoint(header.config_pc["file_name_checkpoint_best"], pc_joint, True)
+        utility.loadCheckpoint(header.config_pc["file_name_checkpoint_best"], pc_marginal, True)
 
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
@@ -160,11 +160,11 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
     config_dataset = data_loader.dataset.config
     counterfactual = {}
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
-    spn_output_rows = len(data_loader.dataset.classes_original)
-    spn_output_cols = 1
+    pc_output_rows = len(data_loader.dataset.classes_original)
+    pc_output_cols = 1
 
     for attribute in config_dataset["attributes"]:
-        spn_output_cols *= len(attribute["labels"])
+        pc_output_cols *= len(attribute["labels"])
         tv_distances_epoch.append(0)
 
     model_decomposed.eval()
@@ -182,10 +182,10 @@ def test(model_decomposed, spn_joint, spn_marginal, data_loader, device, batch_s
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed_original)
 
         with torch.set_grad_enabled(True):
-            outputs_decomposed_counterfactual = computeCounterfactual(outputs_decomposed_original, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, labels_original, device)
+            outputs_decomposed_counterfactual = computeCounterfactual(outputs_decomposed_original, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, labels_original, device)
 
-        (_, _, outputs_composed) = utility.compose(outputs_decomposed, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
-        (_, _, outputs_composed_counterfactual) = utility.compose(outputs_decomposed_counterfactual, spn_joint, spn_marginal, spn_output_rows, spn_output_cols, device)
+        (_, _, outputs_composed) = utility.compose(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
+        (_, _, outputs_composed_counterfactual) = utility.compose(outputs_decomposed_counterfactual, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
         if header.counterfactual_save:
             saveCounterfactual(input_file_paths, counterfactual, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_counterfactual, outputs_composed, outputs_composed_counterfactual)
@@ -257,42 +257,42 @@ def main():
     config_dataset = dataset_test.config
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_decomposed["batch_size"], shuffle = False, num_workers = header.config_decomposed["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
-    device_spn = torch.device("cuda")
+    device_pc = torch.device("cuda")
 
-    if header.composed_spn_on_cpu:
-        logger.log_info("Computing SPNs on CPU.")
-        device_spn = torch.device("cpu")
+    if header.composed_pc_on_cpu:
+        logger.log_info("Computing PCs on CPU.")
+        device_pc = torch.device("cpu")
 
     model_decomposed = model.ResNet34MTL(dataset_test.config, device)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
-    spn_joint = pc.SPN(device_spn)
-    spn_marginal = pc.SPN(device_spn)
+    pc_joint = pc.SPN(device_pc)
+    pc_marginal = pc.SPN(device_pc)
 
-    logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
+    logger.log_info("Loading PC from \"" + header.config_pc["file_path_pc"] + "\"...")
 
-    spn_joint.load(header.config_spn["file_path_spn"])
-    spn_marginal.load(header.config_spn["file_path_spn"])
+    pc_joint.load(header.config_pc["file_path_pc"])
+    pc_marginal.load(header.config_pc["file_path_pc"])
 
-    logger.log_info("Loading SPN leaf node settings...")
+    logger.log_info("Loading PC leaf node settings...")
 
-    spn_settings_joint = utility.generateSPNSettings(config_dataset, device)
-    spn_settings_marginal = torch.clone(spn_settings_joint)
-    spn_settings_marginal[:, -1] = -1
+    pc_settings_joint = utility.generateSPNSettings(config_dataset, device)
+    pc_settings_marginal = torch.clone(pc_settings_joint)
+    pc_settings_marginal[:, -1] = -1
 
-    logger.log_info("Setting SPN leaf nodes...")
+    logger.log_info("Setting PC leaf nodes...")
 
-    spn_joint.set_leaf_nodes_categorical(spn_settings_joint)
-    spn_marginal.set_leaf_nodes_categorical(spn_settings_marginal)
+    pc_joint.set_leaf_nodes_categorical(pc_settings_joint)
+    pc_marginal.set_leaf_nodes_categorical(pc_settings_marginal)
 
-    logger.log_trace("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
-    logger.log_trace("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
-    logger.log_trace("Number of product nodes: " + str(len(spn_joint.product_nodes)) + ".")
-    logger.log_trace("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
-    logger.log_trace("SPN depth: " + str(spn_joint.depth) + ".")
-    logger.log_trace("SPN leaf node setting dimension: (" + str(int(spn_settings_joint.shape[0])) + ", " + str(int(spn_settings_joint.shape[1])) + ").")
+    logger.log_trace("Total PC nodes: " + str(len(pc_joint.nodes)) + ".")
+    logger.log_trace("Total PC sum nodes: " + str(len(pc_joint.sum_nodes)) + ".")
+    logger.log_trace("Total PC product nodes: " + str(len(pc_joint.product_nodes)) + ".")
+    logger.log_trace("Total PC leaf nodes: " + str(len(pc_joint.leaf_nodes)) + ".")
+    logger.log_trace("PC depth: " + str(pc_joint.depth) + ".")
+    logger.log_trace("PC leaf node setting dimension: (" + str(int(pc_settings_joint.shape[0])) + ", " + str(int(pc_settings_joint.shape[1])) + ").")
 
-    test(model_decomposed, spn_joint, spn_marginal, data_loader_test, device, 1)
+    test(model_decomposed, pc_joint, pc_marginal, data_loader_test, device, 1)
 
     return
 

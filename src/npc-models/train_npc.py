@@ -30,7 +30,7 @@ def processArguments():
         header.config_decomposed["model_pretrained_weights"] = arguments.weights_attribute
 
     if arguments.weights_pc != "":
-        header.config_spn["model_pretrained_weights"] = arguments.weights_pc
+        header.config_pc["model_pretrained_weights"] = arguments.weights_pc
 
     if arguments.batch_size is not None:
         header.config_decomposed["batch_size"] = arguments.batch_size
@@ -42,9 +42,9 @@ def processArguments():
         header.config_decomposed["seed"] = arguments.seed
 
     logger.log_trace("Attribute run name: \"" + header.config_decomposed["run_name"] + "\".")
-    logger.log_trace("PC run name: \"" + header.config_spn["run_name"] + "\".")
+    logger.log_trace("PC run name: \"" + header.config_pc["run_name"] + "\".")
     logger.log_trace("Attribute model pretrained weights: \"" + header.config_decomposed["model_pretrained_weights"] + "\".")
-    logger.log_trace("PC model pretrained weights: \"" + header.config_spn["model_pretrained_weights"] + "\".")
+    logger.log_trace("PC model pretrained weights: \"" + header.config_pc["model_pretrained_weights"] + "\".")
     logger.log_trace("Batch size: " + str(header.config_decomposed["batch_size"]) + ".")
     logger.log_trace("Epochs: " + str(header.config_decomposed["epochs"]) + ".")
     logger.log_trace("Random seed: " + str(header.config_decomposed["seed"]) + ".")
@@ -87,7 +87,7 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
             loss.backward()
             optimizer_decomposed.step()
 
-            if not header.config_spn["inference_only"]:
+            if not header.config_pc["inference_only"]:
                 spn_joint.backward()
                 spn_marginal.backward()
 
@@ -199,12 +199,12 @@ def main():
 
     config = {
         "decomposed": header.config_decomposed,
-        "spn": header.config_spn
+        "spn": header.config_pc
     }
 
     wandb.init(project = header.project_name, name = header.config_decomposed["run_name"], config = config, mode = header.run_mode)
     utility.defineMetrics()
-    logger.log_info("Started run \"" + header.config_decomposed["run_name"] + "\" and " + header.config_spn["run_name"] + ".")
+    logger.log_info("Started run \"" + header.config_decomposed["run_name"] + "\" and " + header.config_pc["run_name"] + ".")
 
     accuracy_task_validation_best = 0
     batch_step_test = 1
@@ -222,7 +222,7 @@ def main():
     device = torch.device("cuda")
     device_spn = torch.device("cuda")
 
-    if header.composed_spn_on_cpu:
+    if header.composed_pc_on_cpu:
         logger.log_info("Computing SPNs on CPU.")
         device_spn = torch.device("cpu")
 
@@ -234,14 +234,14 @@ def main():
     spn_joint = pc.SPN(device_spn)
     spn_marginal = pc.SPN(device_spn)
     optimizer_decomposed = torch.optim.SGD(model_decomposed.parameters(), lr = header.config_decomposed["optimizer_learning_rate"], momentum = header.config_decomposed["optimizer_momentum"], weight_decay = header.config_decomposed["optimizer_weight_decay"])
-    optimizer_spn = pc.PGDSPNOptimizer(spn_joint, spn_marginal, device_spn, header.config_spn["optimizer_learning_rate"], header.config_spn["optimizer_prior_factor"], header.config_spn["epsilon_projection"])
+    optimizer_spn = pc.PGDSPNOptimizer(spn_joint, spn_marginal, device_spn, header.config_pc["optimizer_learning_rate"], header.config_pc["optimizer_prior_factor"], header.config_pc["epsilon_projection"])
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_decomposed, header.config_decomposed["learning_rate_scheduler_mode"], header.config_decomposed["learning_rate_scheduler_factor"], header.config_decomposed["learning_rate_scheduler_patience"], header.config_decomposed["learning_rate_scheduler_threshold"], header.config_decomposed["learning_rate_scheduler_threshold_mode"], header.config_decomposed["learning_rate_scheduler_cooldown"], header.config_decomposed["learning_rate_scheduler_min_learning_rate"], header.config_decomposed["learning_rate_scheduler_min_learning_rate_decay"])
-    learning_rate_scheduler_spn = pc.LossSPNLearningRateScheduler(optimizer_spn, header.config_spn["learning_rate_scheduler_factor"], header.config_spn["learning_rate_scheduler_patience"], header.config_spn["learning_rate_scheduler_threshold"], header.config_spn["learning_rate_scheduler_cooldown"], header.config_spn["learning_rate_scheduler_min_learning_rate"])
+    learning_rate_scheduler_spn = pc.LossSPNLearningRateScheduler(optimizer_spn, header.config_pc["learning_rate_scheduler_factor"], header.config_pc["learning_rate_scheduler_patience"], header.config_pc["learning_rate_scheduler_threshold"], header.config_pc["learning_rate_scheduler_cooldown"], header.config_pc["learning_rate_scheduler_min_learning_rate"])
 
-    logger.log_info("Loading SPN from \"" + header.config_spn["file_path_spn"] + "\"...")
+    logger.log_info("Loading SPN from \"" + header.config_pc["file_path_pc"] + "\"...")
 
-    spn_joint.load(header.config_spn["file_path_spn"])
-    spn_marginal.load(header.config_spn["file_path_spn"])
+    spn_joint.load(header.config_pc["file_path_pc"])
+    spn_marginal.load(header.config_pc["file_path_pc"])
     optimizer_spn.set_weights_prior(spn_joint.get_weights())
 
     logger.log_info("Loading SPN leaf node settings...")
@@ -258,18 +258,18 @@ def main():
     if header.config_decomposed["model_pretrained_weights"] != "":
         utility.loadCheckpoint(header.config_decomposed["model_pretrained_weights"], model_decomposed)
 
-    if header.config_spn["model_pretrained_weights"] != "":
-        utility.loadCheckpoint(header.config_spn["model_pretrained_weights"], spn_joint, True)
-        utility.loadCheckpoint(header.config_spn["model_pretrained_weights"], spn_marginal, True)
-    elif header.config_spn["randomize_weights"]:
+    if header.config_pc["model_pretrained_weights"] != "":
+        utility.loadCheckpoint(header.config_pc["model_pretrained_weights"], spn_joint, True)
+        utility.loadCheckpoint(header.config_pc["model_pretrained_weights"], spn_marginal, True)
+    elif header.config_pc["randomize_weights"]:
         logger.log_info("Randomizing SPN weights...")
         spn_joint.randomize_weights()
         spn_marginal.set_weights(spn_joint.get_weights())
 
-    logger.log_trace("Number of nodes: " + str(len(spn_joint.nodes)) + ".")
-    logger.log_trace("Number of sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
-    logger.log_trace("Number of product nodes: " + str(len(spn_joint.product_nodes)) + ".")
-    logger.log_trace("Number of leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
+    logger.log_trace("Total PC nodes: " + str(len(spn_joint.nodes)) + ".")
+    logger.log_trace("Total PC sum nodes: " + str(len(spn_joint.sum_nodes)) + ".")
+    logger.log_trace("Total PC product nodes: " + str(len(spn_joint.product_nodes)) + ".")
+    logger.log_trace("Total PC leaf nodes: " + str(len(spn_joint.leaf_nodes)) + ".")
     logger.log_trace("SPN depth: " + str(spn_joint.depth) + ".")
     logger.log_trace("SPN leaf node setting dimension: (" + str(int(spn_settings_joint.shape[0])) + ", " + str(int(spn_settings_joint.shape[1])) + ").")
 
@@ -297,10 +297,10 @@ def main():
             accuracy_task_validation_best = accuracy_task_validation_epoch
             wandb.log({"validation/epoch/accuracy_task_best": accuracy_task_validation_best})
             utility.saveCheckpoint(header.config_decomposed["file_name_checkpoint_best"], model_decomposed)
-            utility.saveCheckpoint(header.config_spn["file_name_checkpoint_best"], spn_joint, True)
+            utility.saveCheckpoint(header.config_pc["file_name_checkpoint_best"], spn_joint, True)
 
         utility.saveCheckpoint(header.config_decomposed["file_name_checkpoint"], model_decomposed)
-        utility.saveCheckpoint(header.config_spn["file_name_checkpoint"], spn_joint, True)
+        utility.saveCheckpoint(header.config_pc["file_name_checkpoint"], spn_joint, True)
 
         epoch += 1
 
@@ -310,19 +310,19 @@ def main():
     logger.log_info("Best validation task accuracy: " + str(accuracy_task_validation_best) + ".")
     wandb.summary["validation/epoch/accuracy_task_best"] = accuracy_task_validation_best
 
-    if not header.config_spn["inference_only"]:
+    if not header.config_pc["inference_only"]:
         settings_marginal = torch.full((1, spn_settings_joint.shape[1]), -1).to(device)
         logger.log_info("Normalizing SPN weights...")
 
-        utility.loadCheckpoint(header.config_spn["file_name_checkpoint"], spn_marginal, True)
+        utility.loadCheckpoint(header.config_pc["file_name_checkpoint"], spn_marginal, True)
         spn_marginal(settings_marginal)
-        spn_marginal.normalize_weights(header.config_spn["epsilon_smoothing"])
-        utility.saveCheckpoint(header.config_spn["file_name_checkpoint"], spn_marginal, True)
+        spn_marginal.normalize_weights(header.config_pc["epsilon_smoothing"])
+        utility.saveCheckpoint(header.config_pc["file_name_checkpoint"], spn_marginal, True)
 
-        utility.loadCheckpoint(header.config_spn["file_name_checkpoint_best"], spn_marginal, True)
+        utility.loadCheckpoint(header.config_pc["file_name_checkpoint_best"], spn_marginal, True)
         spn_marginal(settings_marginal)
-        spn_marginal.normalize_weights(header.config_spn["epsilon_smoothing"])
-        utility.saveCheckpoint(header.config_spn["file_name_checkpoint_best"], spn_marginal, True)
+        spn_marginal.normalize_weights(header.config_pc["epsilon_smoothing"])
+        utility.saveCheckpoint(header.config_pc["file_name_checkpoint_best"], spn_marginal, True)
 
         spn_marginal.set_leaf_nodes_categorical(spn_settings_marginal)
 

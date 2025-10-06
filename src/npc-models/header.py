@@ -18,7 +18,7 @@ composed_mpe_dir_outputs = os.path.join(dir_outputs, "mpes")
 composed_mpe_file_name = "mpe_" + dataset_prefix + ".json"
 composed_mpe_find = False
 composed_mpe_save = True
-composed_spn_on_cpu = True
+composed_pc_on_cpu = True
 
 counterfactual_dir_outputs = os.path.join(dir_outputs, "counterfactuals")
 counterfactual_file_name = "counterfactual_" + dataset_prefix + ".json"
@@ -118,14 +118,14 @@ config_reference = {
     "type": "reference",
 }
 
-config_spn = {
+config_pc = {
     "epochs": 50,
     "file_name_checkpoint": "",
     "file_name_checkpoint_best": "",
     "file_path_dataset_test": os.path.join(dataset_dir, "splits/pc/test.txt"),
     "file_path_dataset_train": os.path.join(dataset_dir, "splits/pc/train.txt"),
     "file_path_dataset_validation": os.path.join(dataset_dir, "splits/pc/validate.txt"),
-    "file_path_spn": "../../../learnspn/outputs/learnspn/" + dataset_prefix + ".spn.txt",
+    "file_path_pc": "../../../learnspn/outputs/learnspn/" + dataset_prefix + ".spn.txt",
     "epsilon_projection": 1e-2,
     "epsilon_smoothing": 1e-3,
     "inference_only": True,
@@ -141,5 +141,5 @@ config_spn = {
     "run_name": "",
     "seed": 42,
     "stopping_criterion": 1e-4,
-    "type": "spn",
+    "type": "pc",
 }
