@@ -15,7 +15,22 @@ import tqdm
 import utility
 import wandb
 
-def computeCounterfactual(outputs_decomposed_original, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, labels_original, device):
+def computeMPECorrectness(mpe_attributes, labels_decomposed):
+    mpe_correctness = []
+
+    for batch_index in range(len(mpe_attributes)):
+        correct = True
+
+        for (attribute_index, category_index) in enumerate(mpe_attributes[batch_index]):
+            if labels_decomposed[attribute_index][batch_index][category_index] <= 0:
+                correct = False
+                break
+
+        mpe_correctness.append(correct)
+
+    return mpe_correctness
+
+def findCounterfactual(outputs_decomposed_original, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, labels_original, device):
     batch_size = labels_original.nelement()
     outputs_decomposed = []
     outputs_decomposed_original = utility.applySoftmaxDecomposed(outputs_decomposed_original)
@@ -96,35 +111,13 @@ def computeCounterfactual(outputs_decomposed_original, pc_joint, pc_marginal, pc
 
     return outputs_decomposed
 
-def computeMPECorrectness(mpe_attributes, labels_decomposed):
-    mpe_correctness = []
-
-    for batch_index in range(len(mpe_attributes)):
-        correct = True
-
-        for (attribute_index, category_index) in enumerate(mpe_attributes[batch_index]):
-            if labels_decomposed[attribute_index][batch_index][category_index] <= 0:
-                correct = False
-                break
-
-        mpe_correctness.append(correct)
-
-    return mpe_correctness
-
-def getMatrixAColIndicesAttributeIndicesMaps(matrix_a_cols, pc_settings):
-    attribute_indices_list = pc_settings[:matrix_a_cols, :-1].cpu().int().tolist()
+def findMPE(matrix_a, matrix_b, predictions_composed, pc_settings):
+    attribute_indices_list = pc_settings[:matrix_a.shape[1], :-1].cpu().int().tolist()
     matrix_a_col_indices_to_attribute_indices = {}
-    attribute_indices_to_matrix_a_col_indices = {}
+    mpe_attributes = []
 
     for (matrix_a_row_index, attribute_indices) in enumerate(attribute_indices_list):
         matrix_a_col_indices_to_attribute_indices[matrix_a_row_index] = tuple(attribute_indices)
-        attribute_indices_to_matrix_a_col_indices[tuple(attribute_indices)] = matrix_a_row_index
-
-    return (matrix_a_col_indices_to_attribute_indices, attribute_indices_to_matrix_a_col_indices)
-
-def findMPE(matrix_a, matrix_b, predictions_composed, pc_settings):
-    (matrix_a_col_indices_to_attribute_indices, _) = getMatrixAColIndicesAttributeIndicesMaps(matrix_a.shape[1], pc_settings)
-    mpe_attributes = []
 
     matrix_a = matrix_a.t() # product of category size of all attributes x number of original labels
     matrix_a = torch.index_select(matrix_a, 1, predictions_composed)   # product of category size of all attributes x batch size
@@ -298,7 +291,7 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed_original)
 
         with torch.set_grad_enabled(True):
-            outputs_decomposed_counterfactual = computeCounterfactual(outputs_decomposed_original, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, labels_original, device)
+            outputs_decomposed_counterfactual = findCounterfactual(outputs_decomposed_original, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, labels_original, device)
 
         (matrix_a, matrix_b, outputs_composed) = utility.compose(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
         (_, _, outputs_composed_counterfactual) = utility.compose(outputs_decomposed_counterfactual, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
