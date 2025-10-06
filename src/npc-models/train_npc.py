@@ -51,7 +51,7 @@ def processArguments():
 
     return
 
-def train(model_neural, pc_joint, pc_marginal, data_loader, criterion, optimizer_decomposed, optimizer_pc, device, batch_step):
+def train(model_neural, pc_joint, pc_marginal, data_loader, criterion, optimizer_neural, optimizer_pc, device, batch_step):
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
     loss_epoch = 0
@@ -67,25 +67,25 @@ def train(model_neural, pc_joint, pc_marginal, data_loader, criterion, optimizer
     progress_bar.set_description_str("[INFO]: Training progress")
 
     with torch.set_grad_enabled(True):
-        for (batch_index, (input, labels_decomposed, labels_class, _)) in enumerate(data_loader):
+        for (batch_index, (input, labels_attribute, labels_class, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
             labels_class = labels_class.to(device, non_blocking = True)
 
-            for i in range(len(labels_decomposed)):
-                labels_decomposed[i] = labels_decomposed[i].to(device, non_blocking = True)
+            for i in range(len(labels_attribute)):
+                labels_attribute[i] = labels_attribute[i].to(device, non_blocking = True)
 
-            optimizer_decomposed.zero_grad()
+            optimizer_neural.zero_grad()
 
-            (outputs_decomposed, _) = model_neural(input)
+            (outputs_attribute, _) = model_neural(input)
 
-            outputs_decomposed = utility.applySoftmaxAttribute(outputs_decomposed)
-            (matrix_pc, matrix_neural, output_composed) = test_npc.computeNPCOutput(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
+            outputs_attribute = utility.applySoftmaxAttribute(outputs_attribute)
+            (matrix_pc, matrix_neural, output_composed) = test_npc.computeNPCOutput(outputs_attribute, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
             loss = criterion(output_composed, labels_class)
 
             loss.backward()
-            optimizer_decomposed.step()
+            optimizer_neural.step()
 
             if header.npc_pc_backward:
                 pc_joint.backward()
@@ -95,7 +95,7 @@ def train(model_neural, pc_joint, pc_marginal, data_loader, criterion, optimizer
 
             corrects_composed = torch.sum(predictions_composed == labels_class).item()
 
-            accuracy_attribute_batch = utility.computeAccuracyAttribute(outputs_decomposed, labels_decomposed, device)
+            accuracy_attribute_batch = utility.computeAccuracyAttribute(outputs_attribute, labels_attribute, device)
             accuracy_task_batch = corrects_composed / input.size(0)
             loss_batch = loss.item()
 
@@ -141,24 +141,24 @@ def validate(model_neural, pc_joint, pc_marginal, data_loader, criterion, device
     progress_bar.set_description_str("[INFO]: Validation progress")
 
     with torch.set_grad_enabled(False):
-        for (batch_index, (input, labels_decomposed, labels_class, _)) in enumerate(data_loader):
+        for (batch_index, (input, labels_attribute, labels_class, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
             labels_class = labels_class.to(device, non_blocking = True)
 
-            for i in range(len(labels_decomposed)):
-                labels_decomposed[i] = labels_decomposed[i].to(device, non_blocking = True)
+            for i in range(len(labels_attribute)):
+                labels_attribute[i] = labels_attribute[i].to(device, non_blocking = True)
 
-            (outputs_decomposed, _) = model_neural(input)
+            (outputs_attribute, _) = model_neural(input)
 
-            outputs_decomposed = utility.applySoftmaxAttribute(outputs_decomposed)
-            (_, _, output_composed) = test_npc.computeNPCOutput(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
+            outputs_attribute = utility.applySoftmaxAttribute(outputs_attribute)
+            (_, _, output_composed) = test_npc.computeNPCOutput(outputs_attribute, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
             loss = criterion(output_composed, labels_class)
 
             corrects_composed = torch.sum(predictions_composed == labels_class).item()
 
-            accuracy_attribute_batch = utility.computeAccuracyAttribute(outputs_decomposed, labels_decomposed, device)
+            accuracy_attribute_batch = utility.computeAccuracyAttribute(outputs_attribute, labels_attribute, device)
             accuracy_task_batch = corrects_composed / input.size(0)
             loss_batch = loss.item()
 
@@ -198,7 +198,7 @@ def main():
         wandb.login()
 
     config = {
-        "decomposed": header.config_neural,
+        "neural": header.config_neural,
         "pc": header.config_pc
     }
 
@@ -232,9 +232,9 @@ def main():
     progress_bar = None
     pc_joint = pc.ProbabilisticCircuit(device_pc)
     pc_marginal = pc.ProbabilisticCircuit(device_pc)
-    optimizer_decomposed = torch.optim.SGD(model_neural.parameters(), lr = header.config_neural["optimizer_learning_rate"], momentum = header.config_neural["optimizer_momentum"], weight_decay = header.config_neural["optimizer_weight_decay"])
+    optimizer_neural = torch.optim.SGD(model_neural.parameters(), lr = header.config_neural["optimizer_learning_rate"], momentum = header.config_neural["optimizer_momentum"], weight_decay = header.config_neural["optimizer_weight_decay"])
     optimizer_pc = pc.PGDPCOptimizer(pc_joint, pc_marginal, device_pc, header.config_pc["optimizer_learning_rate"], header.config_pc["optimizer_prior_factor"], header.config_pc["epsilon_projection"])
-    learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_decomposed, header.config_neural["learning_rate_scheduler_mode"], header.config_neural["learning_rate_scheduler_factor"], header.config_neural["learning_rate_scheduler_patience"], header.config_neural["learning_rate_scheduler_threshold"], header.config_neural["learning_rate_scheduler_threshold_mode"], header.config_neural["learning_rate_scheduler_cooldown"], header.config_neural["learning_rate_scheduler_min_learning_rate"], header.config_neural["learning_rate_scheduler_min_learning_rate_decay"])
+    learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_neural, header.config_neural["learning_rate_scheduler_mode"], header.config_neural["learning_rate_scheduler_factor"], header.config_neural["learning_rate_scheduler_patience"], header.config_neural["learning_rate_scheduler_threshold"], header.config_neural["learning_rate_scheduler_threshold_mode"], header.config_neural["learning_rate_scheduler_cooldown"], header.config_neural["learning_rate_scheduler_min_learning_rate"], header.config_neural["learning_rate_scheduler_min_learning_rate_decay"])
     learning_rate_scheduler_pc = pc.LossPCLearningRateScheduler(optimizer_pc, header.config_pc["learning_rate_scheduler_factor"], header.config_pc["learning_rate_scheduler_patience"], header.config_pc["learning_rate_scheduler_threshold"], header.config_pc["learning_rate_scheduler_cooldown"], header.config_pc["learning_rate_scheduler_min_learning_rate"])
 
     logger.log_info("Loading PC from \"" + header.config_pc["file_path_pc"] + "\"...")
@@ -284,7 +284,7 @@ def main():
         wandb.log({"training/epoch/step": epoch})
         wandb.log({"validation/epoch/step": epoch})
 
-        batch_step_train = train(model_neural, pc_joint, pc_marginal, data_loader_train, criterion, optimizer_decomposed, optimizer_pc, device, batch_step_train)
+        batch_step_train = train(model_neural, pc_joint, pc_marginal, data_loader_train, criterion, optimizer_neural, optimizer_pc, device, batch_step_train)
         (accuracy_task_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_neural, pc_joint, pc_marginal, data_loader_validation, criterion, device, batch_step_validate)
 
         learning_rate_scheduler.step(loss_validation_epoch)
