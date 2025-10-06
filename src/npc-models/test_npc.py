@@ -30,7 +30,7 @@ def computeMPECorrectness(mpe_attributes, labels_decomposed):
 
     return mpe_correctness
 
-def findCounterfactual(outputs_decomposed_original, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, labels_original, device):
+def findCE(outputs_decomposed_original, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, labels_original, device):
     batch_size = labels_original.nelement()
     outputs_decomposed = []
     outputs_decomposed_original = utility.applySoftmaxDecomposed(outputs_decomposed_original)
@@ -42,8 +42,8 @@ def findCounterfactual(outputs_decomposed_original, pc_joint, pc_marginal, pc_ou
 
     for _ in range(header.npc_ce_steps):
         (_, _, outputs_composed_original) = utility.compose(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
-        outputs_composed_mpe = torch.max(outputs_composed_original, 1)[1]
-        outputs_composed_indices = torch.where(outputs_composed_mpe != labels_original)[0]
+        outputs_composed_prediction = torch.max(outputs_composed_original, 1)[1]
+        outputs_composed_indices = torch.where(outputs_composed_prediction != labels_original)[0]
 
         progress_bar.n = batch_size - outputs_composed_indices.nelement()
         progress_bar.refresh()
@@ -156,16 +156,16 @@ def processArguments():
 
     return
 
-def saveCounterfactual(input_file_paths, counterfactual, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_counterfactual, outputs_composed, outputs_composed_counterfactual):
+def saveCE(input_file_paths, ce, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_ce, outputs_composed, outputs_composed_ce):
     batch_size = labels_original.nelement()
 
     for batch_index in range(batch_size):
         input_file_path = os.path.basename(input_file_paths[batch_index])
 
-        counterfactual[input_file_path] = {}
-        counterfactual[input_file_path]["counterfactual"] = {}
-        counterfactual[input_file_path]["ground_truth"] = {}
-        counterfactual[input_file_path]["prediction"] = {}
+        ce[input_file_path] = {}
+        ce[input_file_path]["ce"] = {}
+        ce[input_file_path]["ground_truth"] = {}
+        ce[input_file_path]["prediction"] = {}
 
         for (attribute_index, attribute) in enumerate(dataset.config["attributes"]):
             attribute_name = attribute["name"]
@@ -173,33 +173,33 @@ def saveCounterfactual(input_file_paths, counterfactual, dataset, labels_decompo
             counts_positive_labels_decomposed = torch.sum(masks_positive_labels_decomposed, dim = 1)
             count_positive_labels_decomposed = counts_positive_labels_decomposed[batch_index]
 
-            (outputs_decomposed_counterfactual_mpe_probability, outputs_decomposed_counterfactual_mpe_label) = torch.topk(outputs_decomposed_counterfactual[attribute_index][batch_index], count_positive_labels_decomposed)
-            (outputs_decomposed_mpe_probability, outputs_decomposed_mpe_label) = torch.topk(outputs_decomposed[attribute_index][batch_index], count_positive_labels_decomposed)
+            (outputs_decomposed_ce_prediction_probability, outputs_decomposed_ce_prediction_label) = torch.topk(outputs_decomposed_ce[attribute_index][batch_index], count_positive_labels_decomposed)
+            (outputs_decomposed_prediction_probability, outputs_decomposed_prediction_label) = torch.topk(outputs_decomposed[attribute_index][batch_index], count_positive_labels_decomposed)
 
-            counterfactual[input_file_path]["counterfactual"][attribute_name] = {}
-            counterfactual[input_file_path]["ground_truth"][attribute_name] = []
-            counterfactual[input_file_path]["prediction"][attribute_name] = {}
+            ce[input_file_path]["ce"][attribute_name] = {}
+            ce[input_file_path]["ground_truth"][attribute_name] = []
+            ce[input_file_path]["prediction"][attribute_name] = {}
 
-            for (output_decomposed_counterfactual_mpe_probability, output_decomposed_counterfactual_mpe_label) in zip(outputs_decomposed_counterfactual_mpe_probability, outputs_decomposed_counterfactual_mpe_label):
-                counterfactual[input_file_path]["counterfactual"][attribute_name][dataset.classes[attribute_name][output_decomposed_counterfactual_mpe_label.item()]] = output_decomposed_counterfactual_mpe_probability.item()
+            for (output_decomposed_ce_prediction_probability, output_decomposed_ce_prediction_label) in zip(outputs_decomposed_ce_prediction_probability, outputs_decomposed_ce_prediction_label):
+                ce[input_file_path]["ce"][attribute_name][dataset.classes[attribute_name][output_decomposed_ce_prediction_label.item()]] = output_decomposed_ce_prediction_probability.item()
 
             for (label_decomposed_index, label_decomposed) in enumerate(labels_decomposed[attribute_index][batch_index]):
                 if label_decomposed > 0:
-                    counterfactual[input_file_path]["ground_truth"][attribute_name].append(dataset.classes[attribute_name][label_decomposed_index])
+                    ce[input_file_path]["ground_truth"][attribute_name].append(dataset.classes[attribute_name][label_decomposed_index])
 
-            for (output_decomposed_mpe_probability, output_decomposed_mpe_label) in zip(outputs_decomposed_mpe_probability, outputs_decomposed_mpe_label):
-                counterfactual[input_file_path]["prediction"][attribute_name][dataset.classes[attribute_name][output_decomposed_mpe_label.item()]] = output_decomposed_mpe_probability.item()
+            for (output_decomposed_prediction_probability, output_decomposed_prediction_label) in zip(outputs_decomposed_prediction_probability, outputs_decomposed_prediction_label):
+                ce[input_file_path]["prediction"][attribute_name][dataset.classes[attribute_name][output_decomposed_prediction_label.item()]] = output_decomposed_prediction_probability.item()
 
-            counterfactual[input_file_path]["counterfactual"][attribute_name] = dict(sorted(counterfactual[input_file_path]["counterfactual"][attribute_name].items()))
-            counterfactual[input_file_path]["ground_truth"][attribute_name] = sorted(counterfactual[input_file_path]["ground_truth"][attribute_name])
-            counterfactual[input_file_path]["prediction"][attribute_name] = dict(sorted(counterfactual[input_file_path]["prediction"][attribute_name].items()))
+            ce[input_file_path]["ce"][attribute_name] = dict(sorted(ce[input_file_path]["ce"][attribute_name].items()))
+            ce[input_file_path]["ground_truth"][attribute_name] = sorted(ce[input_file_path]["ground_truth"][attribute_name])
+            ce[input_file_path]["prediction"][attribute_name] = dict(sorted(ce[input_file_path]["prediction"][attribute_name].items()))
 
-        (outputs_composed_counterfactual_mpe_probability, outputs_composed_counterfactual_mpe_label) = torch.max(outputs_composed_counterfactual[batch_index], 0)
-        (outputs_composed_mpe_probability, outputs_composed_mpe_label) = torch.max(outputs_composed[batch_index], 0)
+        (outputs_composed_ce_prediction_probability, outputs_composed_ce_prediction_label) = torch.max(outputs_composed_ce[batch_index], 0)
+        (outputs_composed_prediction_probability, outputs_composed_prediction_label) = torch.max(outputs_composed[batch_index], 0)
 
-        counterfactual[input_file_path]["counterfactual"]["original"] = {dataset.classes_original[outputs_composed_counterfactual_mpe_label]: outputs_composed_counterfactual_mpe_probability.item()}
-        counterfactual[input_file_path]["ground_truth"]["original"] = dataset.classes_original[labels_original[batch_index]]
-        counterfactual[input_file_path]["prediction"]["original"] = {dataset.classes_original[outputs_composed_mpe_label]: outputs_composed_mpe_probability.item()}
+        ce[input_file_path]["ce"]["original"] = {dataset.classes_original[outputs_composed_ce_prediction_label]: outputs_composed_ce_prediction_probability.item()}
+        ce[input_file_path]["ground_truth"]["original"] = dataset.classes_original[labels_original[batch_index]]
+        ce[input_file_path]["prediction"]["original"] = {dataset.classes_original[outputs_composed_prediction_label]: outputs_composed_prediction_probability.item()}
 
     return
 
@@ -220,7 +220,7 @@ def saveMPE(input_file_paths, mpe, mpe_attributes, mpe_correctness, dataset, lab
             counts_positive_labels_decomposed = torch.sum(masks_positive_labels_decomposed, dim = 1)
             count_positive_labels_decomposed = counts_positive_labels_decomposed[batch_index]
 
-            (outputs_decomposed_mpe_probability, outputs_decomposed_mpe_label) = torch.topk(outputs_decomposed[attribute_index][batch_index], count_positive_labels_decomposed)
+            (outputs_decomposed_prediction_probability, outputs_decomposed_prediction_label) = torch.topk(outputs_decomposed[attribute_index][batch_index], count_positive_labels_decomposed)
 
             mpe[input_file_path]["mpe"][attribute_name] = dataset.classes[attribute_name][mpe_attributes[batch_index][attribute_index]]
             mpe[input_file_path]["ground_truth"][attribute_name] = []
@@ -230,17 +230,17 @@ def saveMPE(input_file_paths, mpe, mpe_attributes, mpe_correctness, dataset, lab
                 if label_decomposed > 0:
                     mpe[input_file_path]["ground_truth"][attribute_name].append(dataset.classes[attribute_name][label_decomposed_index])
 
-            for (output_decomposed_mpe_probability, output_decomposed_mpe_label) in zip(outputs_decomposed_mpe_probability, outputs_decomposed_mpe_label):
-                mpe[input_file_path]["prediction"][attribute_name][dataset.classes[attribute_name][output_decomposed_mpe_label.item()]] = output_decomposed_mpe_probability.item()
+            for (output_decomposed_prediction_probability, output_decomposed_prediction_label) in zip(outputs_decomposed_prediction_probability, outputs_decomposed_prediction_label):
+                mpe[input_file_path]["prediction"][attribute_name][dataset.classes[attribute_name][output_decomposed_prediction_label.item()]] = output_decomposed_prediction_probability.item()
 
             mpe[input_file_path]["ground_truth"][attribute_name] = sorted(mpe[input_file_path]["ground_truth"][attribute_name])
             mpe[input_file_path]["prediction"][attribute_name] = dict(sorted(mpe[input_file_path]["prediction"][attribute_name].items()))
 
-        (outputs_composed_mpe_probability, outputs_composed_mpe_label) = torch.max(outputs_composed[batch_index], 0)
+        (outputs_composed_prediction_probability, outputs_composed_prediction_label) = torch.max(outputs_composed[batch_index], 0)
 
         mpe[input_file_path]["mpe"]["correct"] = mpe_correctness[batch_index]
         mpe[input_file_path]["ground_truth"]["original"] = dataset.classes_original[labels_original[batch_index]]
-        mpe[input_file_path]["prediction"]["original"] = (dataset.classes_original[outputs_composed_mpe_label], outputs_composed_mpe_probability.item())
+        mpe[input_file_path]["prediction"]["original"] = (dataset.classes_original[outputs_composed_prediction_label], outputs_composed_prediction_probability.item())
 
     return
 
@@ -253,13 +253,13 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
 
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
-    counterfactual = {}
-    counterfactual_correctness_attribute_epoch = 0
-    counterfactual_correctness_task_epoch = 0
-    counterfactual_instances_corrected = 0
-    counterfactual_instances_incorrect = 0
-    counterfactual_tv_distance_epoch = 0
-    counterfactual_tv_distances_epoch = []
+    ce = {}
+    ce_correctness_attribute_epoch = 0
+    ce_correctness_task_epoch = 0
+    ce_instances_corrected = 0
+    ce_instances_incorrect = 0
+    ce_tv_distance_epoch = 0
+    ce_tv_distances_epoch = []
     mpe = {}
     mpe_correctness_epoch = []
     mpe_correctness_prediction_correct_epoch = []
@@ -272,7 +272,7 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
 
     for attribute in data_loader.dataset.config["attributes"]:
         pc_output_cols *= len(attribute["labels"])
-        counterfactual_tv_distances_epoch.append(0)
+        ce_tv_distances_epoch.append(0)
         tv_distances_epoch.append(0)
 
     model_decomposed.eval()
@@ -290,25 +290,25 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed_original)
 
         with torch.set_grad_enabled(True):
-            outputs_decomposed_counterfactual = findCounterfactual(outputs_decomposed_original, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, labels_original, device)
+            outputs_decomposed_ce = findCE(outputs_decomposed_original, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, labels_original, device)
 
         (matrix_a, matrix_b, outputs_composed) = utility.compose(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
-        (_, _, outputs_composed_counterfactual) = utility.compose(outputs_decomposed_counterfactual, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
+        (_, _, outputs_composed_ce) = utility.compose(outputs_decomposed_ce, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
         if header.npc_ce_save:
-            saveCounterfactual(input_file_paths, counterfactual, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_counterfactual, outputs_composed, outputs_composed_counterfactual)
+            saveCE(input_file_paths, ce, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_ce, outputs_composed, outputs_composed_ce)
 
         (_, predictions_composed) = torch.max(outputs_composed, 1)
-        (_, predictions_composed_counterfactual) = torch.max(outputs_composed_counterfactual, 1)
+        (_, predictions_composed_ce) = torch.max(outputs_composed_ce, 1)
 
         prediction_correctness = (predictions_composed == labels_original)
-        prediction_correctness_counterfactual = (predictions_composed_counterfactual == labels_original)
+        prediction_correctness_ce = (predictions_composed_ce == labels_original)
         corrects_composed = torch.sum(prediction_correctness).item()
-        corrects_composed_counterfactual = torch.sum(prediction_correctness_counterfactual).item()
+        corrects_composed_ce = torch.sum(prediction_correctness_ce).item()
         incorrects_composed = torch.sum(predictions_composed != labels_original).item()
 
-        counterfactual_instances_corrected += corrects_composed_counterfactual - corrects_composed
-        counterfactual_instances_incorrect += incorrects_composed
+        ce_instances_corrected += corrects_composed_ce - corrects_composed
+        ce_instances_incorrect += incorrects_composed
 
         accuracy_attribute_batch = utility.computeAccuracyDecomposed(outputs_decomposed_original, labels_decomposed, device)
         accuracy_task_batch = corrects_composed / input.size(0)
@@ -320,12 +320,12 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
             tv_distance_batch = 0.5 * torch.sum(torch.abs(outputs_decomposed[i] - labels_decomposed[i]), dim = 1)
             tv_distances_epoch[i] += torch.sum(tv_distance_batch).item()
 
-        counterfactual_correctness_attribute_epoch += utility.computeAccuracyDecomposed(outputs_decomposed_counterfactual, labels_decomposed, device)
-        counterfactual_correctness_task_epoch += corrects_composed_counterfactual
+        ce_correctness_attribute_epoch += utility.computeAccuracyDecomposed(outputs_decomposed_ce, labels_decomposed, device)
+        ce_correctness_task_epoch += corrects_composed_ce
 
         for i in range(len(data_loader.dataset.config["attributes"])):
-            counterfactual_tv_distance_batch = 0.5 * torch.sum(torch.abs(outputs_decomposed_counterfactual[i] - outputs_decomposed[i]), dim = 1)
-            counterfactual_tv_distances_epoch[i] += torch.sum(counterfactual_tv_distance_batch).item()
+            ce_tv_distance_batch = 0.5 * torch.sum(torch.abs(outputs_decomposed_ce[i] - outputs_decomposed[i]), dim = 1)
+            ce_tv_distances_epoch[i] += torch.sum(ce_tv_distance_batch).item()
 
         if header.npc_mpe_find:
             mpe_attributes = findMPE(matrix_a, matrix_b, predictions_composed, pc_settings_joint)
@@ -370,30 +370,30 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
     logger.log_info("Testing attribute accuracy: " + str(accuracy_attribute_epoch) + ".")
     logger.log_info("Testing task accuracy: " + str(accuracy_task_epoch) + ".")
 
-    counterfactual_correctness_attribute_epoch /= len(data_loader)
-    counterfactual_correctness_task_epoch /= len(data_loader.dataset)
+    ce_correctness_attribute_epoch /= len(data_loader)
+    ce_correctness_task_epoch /= len(data_loader.dataset)
 
     for i in range(len(data_loader.dataset.config["attributes"])):
-        counterfactual_tv_distances_epoch[i] /= len(data_loader.dataset)
+        ce_tv_distances_epoch[i] /= len(data_loader.dataset)
 
-    counterfactual_tv_distance_epoch = sum(counterfactual_tv_distances_epoch) / len(counterfactual_tv_distances_epoch)
+    ce_tv_distance_epoch = sum(ce_tv_distances_epoch) / len(ce_tv_distances_epoch)
 
-    if counterfactual_instances_incorrect != 0:
-        logger.log_info("Counterfactual correction rate: " + str(counterfactual_instances_corrected / counterfactual_instances_incorrect) + ".")
+    if ce_instances_incorrect != 0:
+        logger.log_info("CE correction rate: " + str(ce_instances_corrected / ce_instances_incorrect) + ".")
     else:
-        logger.log_info("Counterfactual correction rate: N/A.")
+        logger.log_info("CE correction rate: N/A.")
 
-    logger.log_info("Counterfactual attribute TV distance: " + str(counterfactual_tv_distance_epoch) + ".")
-    logger.log_info("Counterfactual attribute correctness: " + str(counterfactual_correctness_attribute_epoch) + ".")
-    logger.log_info("Counterfactual task correctness: " + str(counterfactual_correctness_task_epoch) + ".")
+    logger.log_info("CE attribute TV distance: " + str(ce_tv_distance_epoch) + ".")
+    logger.log_info("CE attribute correctness: " + str(ce_correctness_attribute_epoch) + ".")
+    logger.log_info("CE task correctness: " + str(ce_correctness_task_epoch) + ".")
 
     if header.npc_ce_save:
         if not os.path.isdir(header.interpret_dir_outputs):
             os.makedirs(header.interpret_dir_outputs, exist_ok = True)
 
-        with open(os.path.join(header.interpret_dir_outputs, header.npc_ce_file_name), "w") as file_counterfactual:
-            json.dump(counterfactual, file_counterfactual, indent = 4)
-            logger.log_info("Saved counterfactual to \"" + os.path.join(header.interpret_dir_outputs, header.npc_ce_file_name) + "\".")
+        with open(os.path.join(header.interpret_dir_outputs, header.npc_ce_file_name), "w") as file_ce:
+            json.dump(ce, file_ce, indent = 4)
+            logger.log_info("Saved CE to \"" + os.path.join(header.interpret_dir_outputs, header.npc_ce_file_name) + "\".")
 
     if header.npc_mpe_find:
         if len(mpe_correctness_epoch) == 0:

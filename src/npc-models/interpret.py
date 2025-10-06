@@ -62,7 +62,7 @@ def updateInterpretationWidget():
                 else:
                     label.setText("Incorrect")
     else:
-        for (i, attribute_name) in enumerate(explanations[file_name]["counterfactual"].keys()):
+        for (i, attribute_name) in enumerate(explanations[file_name]["ce"].keys()):
             layout_labels = PyQt5.QtWidgets.QVBoxLayout()
             spacer_bottom = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
             spacer_top = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
@@ -73,8 +73,8 @@ def updateInterpretationWidget():
             layout_explanation.addLayout(layout_labels)
             layout_labels.addItem(spacer_top)
 
-            for attribute_label in explanations[file_name]["counterfactual"][attribute_name].keys():
-                attribute_probability = "{:.1f}".format(explanations[file_name]["counterfactual"][attribute_name][attribute_label] * 100)
+            for attribute_label in explanations[file_name]["ce"][attribute_name].keys():
+                attribute_probability = "{:.1f}".format(explanations[file_name]["ce"][attribute_name][attribute_label] * 100)
                 label = PyQt5.QtWidgets.QLabel()
                 text = attribute_label + ": " + attribute_probability + "%"
                 label.setText(text)
@@ -266,7 +266,7 @@ def createInterpretationWidget():
                 label.setFixedWidth(header.interpret_label_width_attribute)
                 layout_explanation.addWidget(label)
     else:
-        for attribute_name in explanations[file_name]["counterfactual"].keys():
+        for attribute_name in explanations[file_name]["ce"].keys():
             layout_labels = PyQt5.QtWidgets.QVBoxLayout()
             spacer_bottom = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
             spacer_top = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
@@ -274,8 +274,8 @@ def createInterpretationWidget():
             layout_explanation.addLayout(layout_labels)
             layout_labels.addItem(spacer_top)
 
-            for attribute_label in explanations[file_name]["counterfactual"][attribute_name].keys():
-                attribute_probability = "{:.1f}".format(explanations[file_name]["counterfactual"][attribute_name][attribute_label] * 100)
+            for attribute_label in explanations[file_name]["ce"][attribute_name].keys():
+                attribute_probability = "{:.1f}".format(explanations[file_name]["ce"][attribute_name][attribute_label] * 100)
                 text = attribute_label + ": " + attribute_probability + "%"
                 label = PyQt5.QtWidgets.QLabel()
                 label.setText(text)
@@ -399,7 +399,7 @@ def createWindowLayout():
 
     return layout_window
 
-def preprocessCounterfactual():
+def preprocessCE():
     file_names_correct = []
 
     for file_name in explanations.keys():
@@ -433,11 +433,11 @@ def main():
             if header.interpret_preprocess:
                 preprocessMPE()
     else:
-        with open(os.path.join(header.interpret_dir_outputs, header.npc_ce_file_name), "r") as file_counterfactual:
-            explanations = json.load(file_counterfactual)
+        with open(os.path.join(header.interpret_dir_outputs, header.npc_ce_file_name), "r") as file_ce:
+            explanations = json.load(file_ce)
 
             if header.interpret_preprocess:
-                preprocessCounterfactual()
+                preprocessCE()
 
     window = PyQt5.QtWidgets.QWidget()
 
