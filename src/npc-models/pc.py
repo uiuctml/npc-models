@@ -101,7 +101,7 @@ class PCOptimizer:
         return
 
     @abc.abstractmethod
-    def step(self, matrix_a = None, matrix_b = None, matrix_c = None, labels_original = None):
+    def step(self, matrix_pc = None, matrix_neural = None, matrix_npc = None, labels_original = None):
         pass
 
 class CCCPPCOptimizer(PCOptimizer):
@@ -110,7 +110,7 @@ class CCCPPCOptimizer(PCOptimizer):
 
         return
 
-    def step(self, matrix_a = None, matrix_b = None, matrix_c = None, labels_original = None):
+    def step(self, matrix_pc = None, matrix_neural = None, matrix_npc = None, labels_original = None):
         self.pc_joint.reuse_forward = False
         self.pc_marginal.reuse_forward = False
 
@@ -143,15 +143,15 @@ class PGDPCOptimizer(PCOptimizer):
 
         return
 
-    def step(self, matrix_a = None, matrix_b = None, matrix_c = None, labels_original = None):
+    def step(self, matrix_pc = None, matrix_neural = None, matrix_npc = None, labels_original = None):
         self.pc_joint.reuse_forward = False
         self.pc_marginal.reuse_forward = False
 
         counter_sum_node = 0
-        matrix_a = matrix_a.to(self.device)
-        matrix_b = matrix_b.to(self.device)
-        matrix_c_transposed = matrix_c.t()  # number of original labels x batch size
-        matrix_c_transposed = matrix_c_transposed.to(self.device)
+        matrix_pc = matrix_pc.to(self.device)
+        matrix_neural = matrix_neural.to(self.device)
+        matrix_npc_transposed = matrix_npc.t()  # number of original labels x batch size
+        matrix_npc_transposed = matrix_npc_transposed.to(self.device)
         labels_original = labels_original.to(self.device)
         progress_bar = None
 
@@ -181,13 +181,13 @@ class PGDPCOptimizer(PCOptimizer):
                 weight_updates_marginal[mask_marginal] = 0
 
                 weight_updates = weight_updates_joint - weight_updates_marginal
-                weight_updates = weight_updates.reshape(matrix_a.shape) # number of original labels x product of category size of all attributes
-                weight_updates *= matrix_a  # number of original labels x product of category size of all attributes
+                weight_updates = weight_updates.reshape(matrix_pc.shape) # number of original labels x product of category size of all attributes
+                weight_updates *= matrix_pc  # number of original labels x product of category size of all attributes
                 weight_updates = weight_updates.t()   # product of category size of all attributes x number of original labels
                 weight_updates = torch.index_select(weight_updates, 1, labels_original)   # product of category size of all attributes x batch size
-                weight_updates *= matrix_b # product of category size of all attributes x batch size
+                weight_updates *= matrix_neural # product of category size of all attributes x batch size
                 weight_updates = torch.sum(weight_updates, 0) # 1 x batch size
-                weight_updates /=  matrix_c_transposed[labels_original, torch.arange(matrix_c_transposed.shape[1])]   # 1 x batch size
+                weight_updates /=  matrix_npc_transposed[labels_original, torch.arange(matrix_npc_transposed.shape[1])]   # 1 x batch size
 
                 # Average weight updates with Dirichlet prior
                 weight_updates_count = weight_updates.shape[0]

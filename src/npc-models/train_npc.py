@@ -79,7 +79,7 @@ def train(model_decomposed, pc_joint, pc_marginal, data_loader, criterion, optim
             (outputs_decomposed, _) = model_decomposed(input)
 
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
-            (matrix_a, matrix_b, output_composed) = test_npc.computeNPCOutput(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
+            (matrix_pc, matrix_neural, output_composed) = test_npc.computeNPCOutput(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
             loss = criterion(output_composed, labels_original)
@@ -91,7 +91,7 @@ def train(model_decomposed, pc_joint, pc_marginal, data_loader, criterion, optim
                 pc_joint.backward()
                 pc_marginal.backward()
 
-                optimizer_pc.step(matrix_a.detach(), matrix_b.detach(), output_composed.detach(), labels_original)
+                optimizer_pc.step(matrix_pc.detach(), matrix_neural.detach(), output_composed.detach(), labels_original)
 
             corrects_composed = torch.sum(predictions_composed == labels_original).item()
 

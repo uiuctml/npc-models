@@ -34,31 +34,31 @@ def computeNPCOutput(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, 
     log_likelihoods_joint = pc_joint.forward().to(device)
     log_likelihoods_marginal = pc_marginal.forward().to(device)
 
-    # Compute matrix A and set entries with zero joint and marginal probabilities to zero
+    # Compute PC matrix and set entries with zero joint and marginal probabilities to zero
     mask_joint = (log_likelihoods_joint == -float("inf"))
     mask_marginal = (log_likelihoods_joint == -float("inf"))
-    mask_matrix_a = mask_joint & mask_marginal
-    matrix_a = torch.exp(log_likelihoods_joint - log_likelihoods_marginal)
-    matrix_a[mask_matrix_a] = 0
-    matrix_a = matrix_a.reshape(pc_output_rows, pc_output_cols)
+    mask_matrix_pc = mask_joint & mask_marginal
+    matrix_pc = torch.exp(log_likelihoods_joint - log_likelihoods_marginal)
+    matrix_pc[mask_matrix_pc] = 0
+    matrix_pc = matrix_pc.reshape(pc_output_rows, pc_output_cols)
 
     batch_size = outputs_decomposed[0].shape[0]
-    matrix_b_list = []
+    matrix_neural_list = []
 
     for batch in range(batch_size):
-        matrix_b_batch = outputs_decomposed[0][batch]
+        matrix_neural_batch = outputs_decomposed[0][batch]
 
         for task_index in range(1, len(outputs_decomposed)):
-            matrix_b_batch = torch.outer(matrix_b_batch, outputs_decomposed[task_index][batch]).flatten()
+            matrix_neural_batch = torch.outer(matrix_neural_batch, outputs_decomposed[task_index][batch]).flatten()
 
-        matrix_b_list.append(matrix_b_batch)
+        matrix_neural_list.append(matrix_neural_batch)
 
-    matrix_b = torch.stack(matrix_b_list, dim = 0).t()
-    matrix_b = matrix_b.to(device)
+    matrix_neural = torch.stack(matrix_neural_list, dim = 0).t()
+    matrix_neural = matrix_neural.to(device)
 
-    matrix_c = torch.matmul(matrix_a, matrix_b).t()
+    matrix_npc = torch.matmul(matrix_pc, matrix_neural).t()
 
-    return (matrix_a, matrix_b, matrix_c)
+    return (matrix_pc, matrix_neural, matrix_npc)
 
 def findCE(outputs_decomposed_original, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, labels_original, device):
     with torch.set_grad_enabled(True):
@@ -142,21 +142,21 @@ def findCE(outputs_decomposed_original, pc_joint, pc_marginal, pc_output_rows, p
 
         return outputs_decomposed
 
-def findMPE(matrix_a, matrix_b, predictions_composed, pc_settings):
-    attribute_indices_list = pc_settings[:matrix_a.shape[1], :-1].cpu().int().tolist()
-    matrix_a_col_indices_to_attribute_indices = {}
+def findMPE(matrix_pc, matrix_neural, predictions_composed, pc_settings):
+    attribute_indices_list = pc_settings[:matrix_pc.shape[1], :-1].cpu().int().tolist()
+    matrix_pc_col_indices_to_attribute_indices = {}
     mpe_attributes = []
 
-    for (matrix_a_row_index, attribute_indices) in enumerate(attribute_indices_list):
-        matrix_a_col_indices_to_attribute_indices[matrix_a_row_index] = tuple(attribute_indices)
+    for (matrix_pc_row_index, attribute_indices) in enumerate(attribute_indices_list):
+        matrix_pc_col_indices_to_attribute_indices[matrix_pc_row_index] = tuple(attribute_indices)
 
-    matrix_a = matrix_a.t() # product of category size of all attributes x number of original labels
-    matrix_a = torch.index_select(matrix_a, 1, predictions_composed)   # product of category size of all attributes x batch size
-    matrix_c = matrix_a * matrix_b  # product of category size of all attributes x batch size
-    mpe_matrix_a_col_indices = torch.argmax(matrix_c, 0)   # 0 x batch size
+    matrix_pc = matrix_pc.t() # product of category size of all attributes x number of original labels
+    matrix_pc = torch.index_select(matrix_pc, 1, predictions_composed)   # product of category size of all attributes x batch size
+    matrix_npc = matrix_pc * matrix_neural  # product of category size of all attributes x batch size
+    mpe_matrix_pc_col_indices = torch.argmax(matrix_npc, 0)   # 0 x batch size
 
-    for mpe_matrix_a_col_index in mpe_matrix_a_col_indices.cpu().tolist():
-        mpe_attributes.append(matrix_a_col_indices_to_attribute_indices[mpe_matrix_a_col_index])
+    for mpe_matrix_pc_col_index in mpe_matrix_pc_col_indices.cpu().tolist():
+        mpe_attributes.append(matrix_pc_col_indices_to_attribute_indices[mpe_matrix_pc_col_index])
 
     return mpe_attributes
 
@@ -314,7 +314,7 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
             (outputs_decomposed_original, _) = model_decomposed(input)
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed_original)
 
-        (matrix_a, matrix_b, outputs_composed) = computeNPCOutput(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
+        (matrix_pc, matrix_neural, outputs_composed) = computeNPCOutput(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
         (_, predictions_composed) = torch.max(outputs_composed, 1)
         prediction_correctness = (predictions_composed == labels_original)
@@ -354,7 +354,7 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
                 ce_tv_distance_batch = 0.5 * torch.sum(torch.abs(outputs_decomposed_ce[i] - outputs_decomposed[i]), dim = 1)
                 ce_tv_distances_epoch[i] += torch.sum(ce_tv_distance_batch).item()
 
-            mpe_attributes = findMPE(matrix_a, matrix_b, predictions_composed, pc_settings_joint)
+            mpe_attributes = findMPE(matrix_pc, matrix_neural, predictions_composed, pc_settings_joint)
             mpe_correctness = computeMPECorrectness(mpe_attributes, labels_decomposed)
 
             recordMPE(input_file_paths, interpret, mpe_attributes, mpe_correctness, data_loader.dataset, labels_original)
