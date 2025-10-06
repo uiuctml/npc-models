@@ -76,10 +76,10 @@ def train(model_decomposed, pc_joint, pc_marginal, data_loader, criterion, optim
 
             optimizer_decomposed.zero_grad()
 
-            (output_decomposed, _) = model_decomposed(input)
+            (outputs_decomposed, _) = model_decomposed(input)
 
-            output_decomposed = utility.applySoftmaxDecomposed(output_decomposed)
-            (matrix_a, matrix_b, output_composed) = utility.compose(output_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
+            outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
+            (matrix_a, matrix_b, output_composed) = test_npc.computeNPCOutput(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
             loss = criterion(output_composed, labels_original)
@@ -95,7 +95,7 @@ def train(model_decomposed, pc_joint, pc_marginal, data_loader, criterion, optim
 
             corrects_composed = torch.sum(predictions_composed == labels_original).item()
 
-            accuracy_attribute_batch = utility.computeAccuracyDecomposed(output_decomposed, labels_decomposed, device)
+            accuracy_attribute_batch = utility.computeAccuracyDecomposed(outputs_decomposed, labels_decomposed, device)
             accuracy_task_batch = corrects_composed / input.size(0)
             loss_batch = loss.item()
 
@@ -148,17 +148,17 @@ def validate(model_decomposed, pc_joint, pc_marginal, data_loader, criterion, de
             for i in range(len(labels_decomposed)):
                 labels_decomposed[i] = labels_decomposed[i].to(device, non_blocking = True)
 
-            (output_decomposed, _) = model_decomposed(input)
+            (outputs_decomposed, _) = model_decomposed(input)
 
-            output_decomposed = utility.applySoftmaxDecomposed(output_decomposed)
-            (_, _, output_composed) = utility.compose(output_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
+            outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
+            (_, _, output_composed) = test_npc.computeNPCOutput(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
             loss = criterion(output_composed, labels_original)
 
             corrects_composed = torch.sum(predictions_composed == labels_original).item()
 
-            accuracy_attribute_batch = utility.computeAccuracyDecomposed(output_decomposed, labels_decomposed, device)
+            accuracy_attribute_batch = utility.computeAccuracyDecomposed(outputs_decomposed, labels_decomposed, device)
             accuracy_task_batch = corrects_composed / input.size(0)
             loss_batch = loss.item()
 

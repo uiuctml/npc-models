@@ -30,6 +30,36 @@ def computeMPECorrectness(mpe_attributes, labels_decomposed):
 
     return mpe_correctness
 
+def computeNPCOutput(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device):
+    log_likelihoods_joint = pc_joint.forward().to(device)
+    log_likelihoods_marginal = pc_marginal.forward().to(device)
+
+    # Compute matrix A and set entries with zero joint and marginal probabilities to zero
+    mask_joint = (log_likelihoods_joint == -float("inf"))
+    mask_marginal = (log_likelihoods_joint == -float("inf"))
+    mask_matrix_a = mask_joint & mask_marginal
+    matrix_a = torch.exp(log_likelihoods_joint - log_likelihoods_marginal)
+    matrix_a[mask_matrix_a] = 0
+    matrix_a = matrix_a.reshape(pc_output_rows, pc_output_cols)
+
+    batch_size = outputs_decomposed[0].shape[0]
+    matrix_b_list = []
+
+    for batch in range(batch_size):
+        matrix_b_batch = outputs_decomposed[0][batch]
+
+        for task_index in range(1, len(outputs_decomposed)):
+            matrix_b_batch = torch.outer(matrix_b_batch, outputs_decomposed[task_index][batch]).flatten()
+
+        matrix_b_list.append(matrix_b_batch)
+
+    matrix_b = torch.stack(matrix_b_list, dim = 0).t()
+    matrix_b = matrix_b.to(device)
+
+    matrix_c = torch.matmul(matrix_a, matrix_b).t()
+
+    return (matrix_a, matrix_b, matrix_c)
+
 def findCE(outputs_decomposed_original, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, labels_original, device):
     with torch.set_grad_enabled(True):
         batch_size = labels_original.nelement()
@@ -42,7 +72,7 @@ def findCE(outputs_decomposed_original, pc_joint, pc_marginal, pc_output_rows, p
             outputs_decomposed.append(outputs_decomposed_original[i].detach().clone().requires_grad_(True))
 
         for _ in range(header.npc_interpret_ce_steps):
-            (_, _, outputs_composed_original) = utility.compose(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
+            (_, _, outputs_composed_original) = computeNPCOutput(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
             outputs_composed_prediction = torch.max(outputs_composed_original, 1)[1]
             outputs_composed_indices = torch.where(outputs_composed_prediction != labels_original)[0]
 
@@ -284,7 +314,7 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
             (outputs_decomposed_original, _) = model_decomposed(input)
             outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed_original)
 
-        (matrix_a, matrix_b, outputs_composed) = utility.compose(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
+        (matrix_a, matrix_b, outputs_composed) = computeNPCOutput(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
         (_, predictions_composed) = torch.max(outputs_composed, 1)
         prediction_correctness = (predictions_composed == labels_original)
@@ -305,7 +335,7 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
 
             outputs_decomposed_ce = findCE(outputs_decomposed_original, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, labels_original, device)
 
-            (_, _, outputs_composed_ce) = utility.compose(outputs_decomposed_ce, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
+            (_, _, outputs_composed_ce) = computeNPCOutput(outputs_decomposed_ce, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
             recordCE(input_file_paths, interpret, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed_ce, outputs_composed_ce)
 

@@ -13,46 +13,16 @@ import wandb
 def applySoftmax(output):
     return torch.nn.functional.softmax(output, dim = 1)
 
-def applySoftmaxDecomposed(output_decomposed):
-    output_decomposed_softmax = []
+def applySoftmaxDecomposed(outputs_decomposed):
+    outputs_decomposed_softmax = []
 
-    for i in range(len(output_decomposed)):
-        output_decomposed_softmax.append(applySoftmax(output_decomposed[i]))
+    for i in range(len(outputs_decomposed)):
+        outputs_decomposed_softmax.append(applySoftmax(outputs_decomposed[i]))
 
-    return output_decomposed_softmax
+    return outputs_decomposed_softmax
 
-def compose(output_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device):
-    log_likelihoods_joint = pc_joint.forward().to(device)
-    log_likelihoods_marginal = pc_marginal.forward().to(device)
-
-    # Compute matrix A and set entries with zero joint and marginal probabilities to zero
-    mask_joint = (log_likelihoods_joint == -float("inf"))
-    mask_marginal = (log_likelihoods_joint == -float("inf"))
-    mask_matrix_a = mask_joint & mask_marginal
-    matrix_a = torch.exp(log_likelihoods_joint - log_likelihoods_marginal)
-    matrix_a[mask_matrix_a] = 0
-    matrix_a = matrix_a.reshape(pc_output_rows, pc_output_cols)
-
-    batch_size = output_decomposed[0].shape[0]
-    matrix_b_list = []
-
-    for batch in range(batch_size):
-        matrix_b_batch = output_decomposed[0][batch]
-
-        for task_index in range(1, len(output_decomposed)):
-            matrix_b_batch = torch.outer(matrix_b_batch, output_decomposed[task_index][batch]).flatten()
-
-        matrix_b_list.append(matrix_b_batch)
-
-    matrix_b = torch.stack(matrix_b_list, dim = 0).t()
-    matrix_b = matrix_b.to(device)
-
-    matrix_c = torch.matmul(matrix_a, matrix_b).t()
-
-    return (matrix_a, matrix_b, matrix_c)
-
-def computeAccuracyDecomposed(output, labels, device):
-    count_attributes = len(output)
+def computeAccuracyDecomposed(outputs, labels, device):
+    count_attributes = len(outputs)
     corrects = []
 
     for i in range(count_attributes):
@@ -60,7 +30,7 @@ def computeAccuracyDecomposed(output, labels, device):
         counts_values = torch.sum(masks_labels, dim = 1)
         masks_predictions = []
 
-        for (output_batch, count_value_batch) in zip(output[i], counts_values):
+        for (output_batch, count_value_batch) in zip(outputs[i], counts_values):
             mask_prediction_batch = torch.zeros(output_batch.shape, dtype = torch.bool)
             (_, prediction_batch) = torch.topk(output_batch, count_value_batch)
             mask_prediction_batch[prediction_batch] = True
