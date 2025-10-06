@@ -215,7 +215,6 @@ def main():
     dataset_test = dataset.NPCDataset(header.config_neural["dir_dataset_test"], dataset_transforms)
     dataset_train = dataset.NPCDataset(header.config_neural["dir_dataset_train"], dataset_transforms)
     dataset_validation = dataset.NPCDataset(header.config_neural["dir_dataset_validation"], dataset_transforms)
-    config_dataset = dataset_test.config
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_neural["batch_size"], shuffle = False, num_workers = header.config_neural["data_loader_worker_count"], pin_memory = True)
     data_loader_train = torch.utils.data.DataLoader(dataset_train, batch_size = header.config_neural["batch_size"], shuffle = header.config_neural["data_loader_shuffle"], num_workers = header.config_neural["data_loader_worker_count"], pin_memory = True)
     data_loader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size = header.config_neural["batch_size"], shuffle = header.config_neural["data_loader_shuffle"], num_workers = header.config_neural["data_loader_worker_count"], pin_memory = True)
@@ -246,7 +245,7 @@ def main():
 
     logger.log_info("Loading PC leaf node settings...")
 
-    pc_settings_joint = utility.generatePCSettings(config_dataset, device)
+    pc_settings_joint = utility.generatePCSettings(dataset_test.config, device)
     pc_settings_marginal = torch.clone(pc_settings_joint)
     pc_settings_marginal[:, -1] = -1
 
