@@ -3,6 +3,7 @@
 import argparse
 import header
 import logger
+import math
 import pc
 import torch
 import utility
@@ -78,7 +79,8 @@ def test(pc_joint, settings_joint):
 
     wandb.log({"testing/epoch/log_likelihood": log_likelihood})
     wandb.summary["testing/epoch/log_likelihood"] = log_likelihood
-    logger.log_info("Testing log likelihood: " + str(log_likelihood) + ".")
+    logger.log_info("Testing mean log likelihood: " + str(log_likelihood) + ".")
+    logger.log_info("Testing mean likelihood: " + str(math.exp(log_likelihood)) + ".")
 
     return
 

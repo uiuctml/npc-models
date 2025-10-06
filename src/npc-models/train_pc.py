@@ -3,6 +3,7 @@
 import argparse
 import header
 import logger
+import math
 import pc
 import test_pc
 import torch
@@ -114,7 +115,8 @@ def main():
 
         learning_rate_scheduler.step(log_likelihood_train_epoch)
 
-        logger.log_info("Validation log likelihood: " + str(log_likelihood_validate_epoch) + ".")
+        logger.log_info("Validation mean log likelihood: " + str(log_likelihood_validate_epoch) + ".")
+        logger.log_info("Validation mean likelihood: " + str(math.exp(log_likelihood_validate_epoch)) + ".")
 
         if log_likelihood_validate_epoch > log_likelihood_validation_best or epoch == 1:
             log_likelihood_validation_best = log_likelihood_validate_epoch
@@ -134,7 +136,8 @@ def main():
     if progress_bar is not None:
         progress_bar.close()
 
-    logger.log_info("Best validation log likelihood: " + str(log_likelihood_validation_best) + ".")
+    logger.log_info("Best validation mean log likelihood: " + str(log_likelihood_validation_best) + ".")
+    logger.log_info("Best validation mean likelihood: " + str(math.exp(log_likelihood_validation_best)) + ".")
     wandb.summary["validation/epoch/log_likelihood_best"] = log_likelihood_validation_best
 
     wandb.log({"testing/epoch/step": 1})
