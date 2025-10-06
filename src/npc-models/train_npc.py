@@ -87,7 +87,7 @@ def train(model_decomposed, spn_joint, spn_marginal, data_loader, criterion, opt
             loss.backward()
             optimizer_decomposed.step()
 
-            if not header.config_pc["inference_only"]:
+            if not header.npc_pc_inference_only:
                 spn_joint.backward()
                 spn_marginal.backward()
 
@@ -310,7 +310,7 @@ def main():
     logger.log_info("Best validation task accuracy: " + str(accuracy_task_validation_best) + ".")
     wandb.summary["validation/epoch/accuracy_task_best"] = accuracy_task_validation_best
 
-    if not header.config_pc["inference_only"]:
+    if not header.npc_pc_inference_only:
         settings_marginal = torch.full((1, spn_settings_joint.shape[1]), -1).to(device)
         logger.log_info("Normalizing SPN weights...")
 

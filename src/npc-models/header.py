@@ -35,6 +35,7 @@ npc_mpe_dir_outputs = os.path.join(project_dir_outputs, "mpes")
 npc_mpe_file_name = "mpe_" + dataset_prefix + ".json"
 npc_mpe_find = True
 npc_mpe_save = True
+npc_pc_inference_only = True
 npc_pc_on_cpu = True
 
 config_baseline = {
@@ -131,7 +132,6 @@ config_pc = {
     "file_path_pc": "../../../learnspn/outputs/learnspn/" + dataset_prefix + ".spn.txt",
     "epsilon_projection": 1e-2,
     "epsilon_smoothing": 1e-3,
-    "inference_only": True,
     "learning_rate_scheduler_cooldown": 1,
     "learning_rate_scheduler_factor": 0.5,
     "learning_rate_scheduler_min_learning_rate": 1e-4,
