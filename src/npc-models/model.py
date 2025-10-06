@@ -84,8 +84,8 @@ class CEM(Model):
             labels_categories += labels_attribute[attribute_name]
 
         self.net = torchvision.models.resnet34(weights = "IMAGENET1K_V1")
-        self.net.fc = torch_explain.nn.ConceptEmbedding(self.net.fc.in_features, len(labels_categories), header.config_reference["model_embedding_size"])
-        self.net.head = torch.nn.Linear(len(labels_categories) * header.config_reference["model_embedding_size"], len(labels_original))
+        self.net.fc = torch_explain.nn.ConceptEmbedding(self.net.fc.in_features, len(labels_categories), header.config_baseline["model_embedding_size"])
+        self.net.head = torch.nn.Linear(len(labels_categories) * header.config_baseline["model_embedding_size"], len(labels_original))
 
         return
 
@@ -110,8 +110,8 @@ class DCR(Model):
             labels_categories += labels_attribute[attribute_name]
 
         self.net = torchvision.models.resnet34(weights = "IMAGENET1K_V1")
-        self.net.fc = torch_explain.nn.ConceptEmbedding(self.net.fc.in_features, len(labels_categories), header.config_reference["model_embedding_size"])
-        self.net.head = torch_explain.nn.concepts.ConceptReasoningLayer(header.config_reference["model_embedding_size"], len(labels_original))
+        self.net.fc = torch_explain.nn.ConceptEmbedding(self.net.fc.in_features, len(labels_categories), header.config_baseline["model_embedding_size"])
+        self.net.head = torch_explain.nn.concepts.ConceptReasoningLayer(header.config_baseline["model_embedding_size"], len(labels_original))
 
         return
 
@@ -187,14 +187,14 @@ class ResNet34MTL(Model):
         return self.net.parameters()
 
 def createModelReference(config_dataset, device):
-    if header.config_reference["model"] == type.ModelReference.abm.name:
+    if header.config_baseline["model"] == type.ModelReference.abm.name:
         return ABM(config_dataset, device)
-    elif header.config_reference["model"] == type.ModelReference.cbm.name:
+    elif header.config_baseline["model"] == type.ModelReference.cbm.name:
         return CBM(config_dataset, device)
-    elif header.config_reference["model"] == type.ModelReference.cem.name:
+    elif header.config_baseline["model"] == type.ModelReference.cem.name:
         return CEM(config_dataset, device)
-    elif header.config_reference["model"] == type.ModelReference.dcr.name:
+    elif header.config_baseline["model"] == type.ModelReference.dcr.name:
         return DCR(config_dataset, device)
     else:
-        logger.log_fatal("Unknown reference model \"" + header.config_reference["model"] + "\".")
+        logger.log_fatal("Unknown reference model \"" + header.config_baseline["model"] + "\".")
         exit(-1)

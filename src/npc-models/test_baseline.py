@@ -14,20 +14,20 @@ import wandb
 
 def initializeRunName(run_name = ""):
     if run_name != "":
-        if run_name.split(".")[1] != header.config_reference["type"]:
+        if run_name.split(".")[1] != header.config_baseline["type"]:
             logger.log_fatal("Invalid reference run name. Quit.")
             exit(-1)
 
-        header.config_reference["run_name"] = run_name
+        header.config_baseline["run_name"] = run_name
     else:
-        header.config_reference["run_name"] = utility.generateRunName(header.config_reference["seed"], header.config_reference["type"], header.config_reference["model"])
+        header.config_baseline["run_name"] = utility.generateRunName(header.config_baseline["seed"], header.config_baseline["type"], header.config_baseline["model"])
 
-    if header.config_reference["run_name"] == "":
+    if header.config_baseline["run_name"] == "":
         logger.log_fatal("Missing reference run name. Quit.")
         exit(-1)
 
-    header.config_reference["file_name_checkpoint"] = header.config_reference["run_name"] + header.checkpoint_postfix
-    header.config_reference["file_name_checkpoint_best"] = header.config_reference["run_name"] + header.checkpoint_postfix_best
+    header.config_baseline["file_name_checkpoint"] = header.config_baseline["run_name"] + header.checkpoint_postfix
+    header.config_baseline["file_name_checkpoint_best"] = header.config_baseline["run_name"] + header.checkpoint_postfix_best
 
     return
 
@@ -38,14 +38,14 @@ def processArguments():
     arguments = parser.parse_args()
 
     initializeRunName(arguments.run_name)
-    header.config_reference["model"] = header.config_reference["run_name"].split(".")[2]
+    header.config_baseline["model"] = header.config_baseline["run_name"].split(".")[2]
 
     if arguments.seed is not None:
-        header.config_reference["seed"] = arguments.seed
+        header.config_baseline["seed"] = arguments.seed
 
-    logger.log_trace("Run name: \"" + header.config_reference["run_name"] + "\".")
-    logger.log_trace("Model: \"" + header.config_reference["model"] + "\".")
-    logger.log_trace("Random seed: " + str(header.config_reference["seed"]) + ".")
+    logger.log_trace("Run name: \"" + header.config_baseline["run_name"] + "\".")
+    logger.log_trace("Model: \"" + header.config_baseline["model"] + "\".")
+    logger.log_trace("Random seed: " + str(header.config_baseline["seed"]) + ".")
 
     return
 
@@ -55,13 +55,13 @@ def computeAccuracy(output_neck, output_head, labels_decomposed, labels_original
     threshold_accuracy_attribute = 0.5
     threshold_accuracy_task = 0.5
 
-    if header.config_reference["model"] == type.ModelReference.cbm.name:
+    if header.config_baseline["model"] == type.ModelReference.cbm.name:
         threshold_accuracy_attribute = 0
         threshold_accuracy_task = 0
-    elif header.config_reference["model"] == type.ModelReference.abm.name or header.config_reference["model"] == type.ModelReference.cem.name:
+    elif header.config_baseline["model"] == type.ModelReference.abm.name or header.config_baseline["model"] == type.ModelReference.cem.name:
         threshold_accuracy_task = 0
 
-    if header.config_reference["model"] == type.ModelReference.abm.name:
+    if header.config_baseline["model"] == type.ModelReference.abm.name:
         accuracy_attribute_batch = utility.computeAccuracyDecomposed(output_neck, labels_decomposed, device)
     else:
         labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed)
@@ -78,16 +78,16 @@ def computeTVDistance(output_neck, labels_decomposed, tv_distances_epoch, data_l
     for attribute in data_loader.dataset.config["attributes"]:
         counts_categories.append(len(attribute["labels"]))
 
-    if header.config_reference["model"] == type.ModelReference.abm.name:
+    if header.config_baseline["model"] == type.ModelReference.abm.name:
         output = utility.applySoftmaxDecomposed(output_neck)
-    elif header.config_reference["model"] == type.ModelReference.cbm.name:
+    elif header.config_baseline["model"] == type.ModelReference.cbm.name:
         output = torch.nn.functional.sigmoid(output_neck)
         output = list(torch.split(output, counts_categories, dim = 1))
 
         for i in range(len(output)):
             sum = torch.sum(output[i], dim = 1, keepdim = True)
             output[i] /= sum
-    elif header.config_reference["model"] == type.ModelReference.cem.name or header.config_reference["model"] == type.ModelReference.dcr.name:
+    elif header.config_baseline["model"] == type.ModelReference.cem.name or header.config_baseline["model"] == type.ModelReference.dcr.name:
         output = list(torch.split(output_neck, counts_categories, dim = 1))
 
         for i in range(len(output)):
@@ -103,7 +103,7 @@ def computeTVDistance(output_neck, labels_decomposed, tv_distances_epoch, data_l
     return
 
 def test(model_reference, data_loader, device, batch_step):
-    utility.loadCheckpoint(header.config_reference["file_name_checkpoint_best"], model_reference)
+    utility.loadCheckpoint(header.config_baseline["file_name_checkpoint_best"], model_reference)
 
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
@@ -171,14 +171,14 @@ def test(model_reference, data_loader, device, batch_step):
 def main():
     processArguments()
 
-    utility.setSeed(header.config_reference["seed"])
+    utility.setSeed(header.config_baseline["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
 
-    wandb.init(config = header.config_reference, mode = "disabled")
+    wandb.init(config = header.config_baseline, mode = "disabled")
 
-    dataset_transforms = utility.createTransform(header.config_reference)
-    dataset_test = dataset.NPCDataset(header.config_reference["dir_dataset_test"], dataset_transforms)
-    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_reference["batch_size"], shuffle = False, num_workers = header.config_reference["data_loader_worker_count"], pin_memory = True)
+    dataset_transforms = utility.createTransform(header.config_baseline)
+    dataset_test = dataset.NPCDataset(header.config_baseline["dir_dataset_test"], dataset_transforms)
+    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_baseline["batch_size"], shuffle = False, num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     model_reference = model.createModelReference(dataset_test.config, device)
     model_reference = torch.nn.DataParallel(model_reference)

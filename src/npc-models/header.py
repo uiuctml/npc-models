@@ -34,6 +34,32 @@ interpret_preprocess = False
 interpret_viewer_height = 300
 interpret_viewer_width = 300
 
+config_baseline = {
+    "batch_size": 256,
+    "concept_loss_weight": 1,
+    "data_loader_shuffle": True,
+    "data_loader_worker_count": multiprocessing.cpu_count(),
+    "dir_dataset_test": os.path.join(dataset_dir, "splits/instances/test"),
+    "dir_dataset_train": os.path.join(dataset_dir, "splits/instances/train"),
+    "dir_dataset_validation": os.path.join(dataset_dir, "splits/instances/validate"),
+    "epochs": 150,
+    "file_name_checkpoint": "",
+    "file_name_checkpoint_best": "",
+    "learning_rate_scheduler_factor": 0.1,
+    "learning_rate_scheduler_mode": "min",
+    "learning_rate_scheduler_patience": 10,
+    "model": "cbm",
+    "model_embedding_size": 16,
+    "model_input_height": 224,
+    "model_input_width": 224,
+    "optimizer_learning_rate": 1e-2,
+    "optimizer_momentum": 0.9,
+    "optimizer_weight_decay": 4e-5,
+    "run_name": "",
+    "seed": 42,
+    "type": "baseline",
+}
+
 config_blackbox = {
     "batch_size": 256,
     "data_loader_shuffle": True,
@@ -90,32 +116,6 @@ config_neural = {
     "run_name": "",
     "seed": 42,
     "type": "neural",
-}
-
-config_reference = {
-    "batch_size": 256,
-    "concept_loss_weight": 1,
-    "data_loader_shuffle": True,
-    "data_loader_worker_count": multiprocessing.cpu_count(),
-    "dir_dataset_test": os.path.join(dataset_dir, "splits/instances/test"),
-    "dir_dataset_train": os.path.join(dataset_dir, "splits/instances/train"),
-    "dir_dataset_validation": os.path.join(dataset_dir, "splits/instances/validate"),
-    "epochs": 150,
-    "file_name_checkpoint": "",
-    "file_name_checkpoint_best": "",
-    "learning_rate_scheduler_factor": 0.1,
-    "learning_rate_scheduler_mode": "min",
-    "learning_rate_scheduler_patience": 10,
-    "model": "cbm",
-    "model_embedding_size": 16,
-    "model_input_height": 224,
-    "model_input_width": 224,
-    "optimizer_learning_rate": 1e-2,
-    "optimizer_momentum": 0.9,
-    "optimizer_weight_decay": 4e-5,
-    "run_name": "",
-    "seed": 42,
-    "type": "reference",
 }
 
 config_pc = {
