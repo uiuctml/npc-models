@@ -28,7 +28,7 @@ interpret_viewer_width = 300
 
 npc_file_name_ce = "ce_" + dataset_prefix + ".json"
 npc_file_name_mpe = "mpe_" + dataset_prefix + ".json"
-npc_interpret = True
+npc_interpret = False
 npc_interpret_ce_learning_rate = 5e-2
 npc_interpret_ce_steps = 100
 npc_pc_backward = False
