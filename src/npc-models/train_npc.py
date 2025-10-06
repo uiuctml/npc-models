@@ -52,7 +52,7 @@ def processArguments():
     return
 
 def train(model_neural, pc_joint, pc_marginal, data_loader, criterion, optimizer_neural, optimizer_pc, device, batch_step):
-    accuracy_attribute_epoch = 0
+    accuracy_concept_epoch = 0
     accuracy_task_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
@@ -95,18 +95,18 @@ def train(model_neural, pc_joint, pc_marginal, data_loader, criterion, optimizer
 
             corrects_npc = torch.sum(predictions_npc == labels_class).item()
 
-            accuracy_attribute_batch = utility.computeAccuracyAttribute(outputs_attribute, labels_attribute, device)
+            accuracy_concept_batch = utility.computeConceptAccuracy(outputs_attribute, labels_attribute, device)
             accuracy_task_batch = corrects_npc / input.size(0)
             loss_batch = loss.item()
 
-            accuracy_attribute_epoch += accuracy_attribute_batch
+            accuracy_concept_epoch += accuracy_concept_batch
             accuracy_task_epoch += corrects_npc
             loss_epoch += loss_batch
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
 
-            wandb.log({"training/batch/accuracy_attribute": accuracy_attribute_batch})
+            wandb.log({"training/batch/accuracy_concept": accuracy_concept_batch})
             wandb.log({"training/batch/accuracy_task": accuracy_task_batch})
             wandb.log({"training/batch/step": batch_step})
             wandb.log({"training/batch/loss": loss_batch})
@@ -115,18 +115,18 @@ def train(model_neural, pc_joint, pc_marginal, data_loader, criterion, optimizer
 
     progress_bar.close()
 
-    accuracy_attribute_epoch /= len(data_loader)
+    accuracy_concept_epoch /= len(data_loader)
     accuracy_task_epoch /= len(data_loader.dataset)
     loss_epoch /= len(data_loader)
 
-    wandb.log({"training/epoch/accuracy_attribute": accuracy_attribute_epoch})
+    wandb.log({"training/epoch/accuracy_concept": accuracy_concept_epoch})
     wandb.log({"training/epoch/accuracy_task": accuracy_task_epoch})
     wandb.log({"training/epoch/loss": loss_epoch})
 
     return batch_step
 
 def validate(model_neural, pc_joint, pc_marginal, data_loader, criterion, device, batch_step):
-    accuracy_attribute_epoch = 0
+    accuracy_concept_epoch = 0
     accuracy_task_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
@@ -158,18 +158,18 @@ def validate(model_neural, pc_joint, pc_marginal, data_loader, criterion, device
 
             corrects_npc = torch.sum(predictions_npc == labels_class).item()
 
-            accuracy_attribute_batch = utility.computeAccuracyAttribute(outputs_attribute, labels_attribute, device)
+            accuracy_concept_batch = utility.computeConceptAccuracy(outputs_attribute, labels_attribute, device)
             accuracy_task_batch = corrects_npc / input.size(0)
             loss_batch = loss.item()
 
-            accuracy_attribute_epoch += accuracy_attribute_batch
+            accuracy_concept_epoch += accuracy_concept_batch
             accuracy_task_epoch += corrects_npc
             loss_epoch += loss_batch
 
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
 
-            wandb.log({"validation/batch/accuracy_attribute": accuracy_attribute_batch})
+            wandb.log({"validation/batch/accuracy_concept": accuracy_concept_batch})
             wandb.log({"validation/batch/accuracy_task": accuracy_task_batch})
             wandb.log({"validation/batch/step": batch_step})
             wandb.log({"validation/batch/loss": loss_batch})
@@ -178,11 +178,11 @@ def validate(model_neural, pc_joint, pc_marginal, data_loader, criterion, device
 
     progress_bar.close()
 
-    accuracy_attribute_epoch /= len(data_loader)
+    accuracy_concept_epoch /= len(data_loader)
     accuracy_task_epoch /= len(data_loader.dataset)
     loss_epoch /= len(data_loader)
 
-    wandb.log({"validation/epoch/accuracy_attribute": accuracy_attribute_epoch})
+    wandb.log({"validation/epoch/accuracy_concept": accuracy_concept_epoch})
     wandb.log({"validation/epoch/accuracy_task": accuracy_task_epoch})
     wandb.log({"validation/epoch/loss": loss_epoch})
 
@@ -290,7 +290,7 @@ def main():
         learning_rate_scheduler.step(loss_validation_epoch)
         learning_rate_scheduler_pc.step(loss_validation_epoch)
 
-        logger.log_info("Epoch validation task accuracy: " + str(accuracy_task_validation_epoch) + ".")
+        logger.log_info("Validation task accuracy: " + str(accuracy_task_validation_epoch) + ".")
 
         if accuracy_task_validation_epoch > accuracy_task_validation_best or epoch == 1:
             accuracy_task_validation_best = accuracy_task_validation_epoch

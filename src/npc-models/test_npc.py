@@ -277,7 +277,7 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
         utility.loadCheckpoint(header.config_pc["file_name_checkpoint_best"], pc_joint, True)
         utility.loadCheckpoint(header.config_pc["file_name_checkpoint_best"], pc_marginal, True)
 
-    accuracy_attribute_epoch = 0
+    accuracy_concept_epoch = 0
     accuracy_task_epoch = 0
     ce_correctness_attribute_epoch = 0
     ce_correctness_task_epoch = 0
@@ -320,10 +320,10 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
         prediction_correctness = (predictions_npc == labels_class)
         corrects_npc = torch.sum(prediction_correctness).item()
 
-        accuracy_attribute_batch = utility.computeAccuracyAttribute(outputs_attribute_original, labels_attribute, device)
+        accuracy_concept_batch = utility.computeConceptAccuracy(outputs_attribute_original, labels_attribute, device)
         accuracy_task_batch = corrects_npc / input.size(0)
 
-        accuracy_attribute_epoch += accuracy_attribute_batch
+        accuracy_concept_epoch += accuracy_concept_batch
         accuracy_task_epoch += corrects_npc
 
         for i in range(len(data_loader.dataset.config["attributes"])):
@@ -344,7 +344,7 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
             corrects_npc_ce = torch.sum(prediction_correctness_ce).item()
             incorrects_npc = torch.sum(predictions_npc != labels_class).item()
 
-            ce_correctness_attribute_epoch += utility.computeAccuracyAttribute(outputs_attribute_ce, labels_attribute, device)
+            ce_correctness_attribute_epoch += utility.computeConceptAccuracy(outputs_attribute_ce, labels_attribute, device)
 
             ce_instances_corrected += corrects_npc_ce - corrects_npc
             ce_instances_incorrect += incorrects_npc
@@ -367,7 +367,7 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
         progress_bar.n = batch_index + 1
         progress_bar.refresh()
 
-        wandb.log({"testing/batch/accuracy_attribute": accuracy_attribute_batch})
+        wandb.log({"testing/batch/accuracy_concept": accuracy_concept_batch})
         wandb.log({"testing/batch/accuracy_task": accuracy_task_batch})
         wandb.log({"testing/batch/step": batch_step})
 
@@ -375,7 +375,7 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
 
     progress_bar.close()
 
-    accuracy_attribute_epoch /= len(data_loader)
+    accuracy_concept_epoch /= len(data_loader)
     accuracy_task_epoch /= len(data_loader.dataset)
 
     for i in range(len(data_loader.dataset.config["attributes"])):
@@ -383,16 +383,16 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
 
     tv_distance_epoch = sum(tv_distances_epoch) / len(tv_distances_epoch)
 
-    wandb.log({"testing/epoch/accuracy_attribute": accuracy_attribute_epoch})
+    wandb.log({"testing/epoch/accuracy_concept": accuracy_concept_epoch})
     wandb.log({"testing/epoch/accuracy_task": accuracy_task_epoch})
     wandb.log({"testing/epoch/tv_distance_attribute": tv_distance_epoch})
 
-    wandb.summary["testing/epoch/accuracy_attribute"] = accuracy_attribute_epoch
+    wandb.summary["testing/epoch/accuracy_concept"] = accuracy_concept_epoch
     wandb.summary["testing/epoch/accuracy_task"] = accuracy_task_epoch
     wandb.summary["testing/epoch/tv_distance_attribute"] = tv_distance_epoch
 
     logger.log_info("Testing attribute TV distance: " + str(tv_distance_epoch) + ".")
-    logger.log_info("Testing attribute accuracy: " + str(accuracy_attribute_epoch) + ".")
+    logger.log_info("Testing mean concept accuracy: " + str(accuracy_concept_epoch) + ".")
     logger.log_info("Testing task accuracy: " + str(accuracy_task_epoch) + ".")
 
     if header.npc_interpret:

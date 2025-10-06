@@ -181,7 +181,7 @@ def main():
 
         learning_rate_scheduler.step(loss_validation_epoch)
 
-        logger.log_info("Epoch validation task accuracy: " + str(accuracy_task_validation_epoch) + ".")
+        logger.log_info("Validation task accuracy: " + str(accuracy_task_validation_epoch) + ".")
 
         if accuracy_task_validation_epoch > accuracy_task_validation_best or epoch == 1:
             accuracy_task_validation_best = accuracy_task_validation_epoch

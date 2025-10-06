@@ -21,7 +21,7 @@ def applySoftmaxAttribute(outputs_attribute):
 
     return outputs_attribute_softmax
 
-def computeAccuracyAttribute(outputs, labels, device):
+def computeConceptAccuracy(outputs, labels, device):
     count_attributes = len(outputs)
     corrects = []
 

@@ -114,7 +114,7 @@ def main():
 
         learning_rate_scheduler.step(log_likelihood_train_epoch)
 
-        logger.log_info("Epoch validation log likelihood: " + str(log_likelihood_validate_epoch) + ".")
+        logger.log_info("Validation log likelihood: " + str(log_likelihood_validate_epoch) + ".")
 
         if log_likelihood_validate_epoch > log_likelihood_validation_best or epoch == 1:
             log_likelihood_validation_best = log_likelihood_validate_epoch

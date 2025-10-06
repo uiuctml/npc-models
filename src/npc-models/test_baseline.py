@@ -53,26 +53,26 @@ def processArguments():
     return
 
 def computeAccuracy(output_neck, output_head, labels_attribute, labels_class, device):
-    accuracy_attribute_batch = None
+    accuracy_concept_batch = None
     accuracy_task_batch = None
-    threshold_accuracy_attribute = 0.5
+    threshold_accuracy_concept = 0.5
     threshold_accuracy_task = 0.5
 
     if header.config_baseline["model"] == type.ModelBaseline.cbm.name:
-        threshold_accuracy_attribute = 0
+        threshold_accuracy_concept = 0
         threshold_accuracy_task = 0
     elif header.config_baseline["model"] == type.ModelBaseline.abm.name or header.config_baseline["model"] == type.ModelBaseline.cem.name:
         threshold_accuracy_task = 0
 
     if header.config_baseline["model"] == type.ModelBaseline.abm.name:
-        accuracy_attribute_batch = utility.computeAccuracyAttribute(output_neck, labels_attribute, device)
+        accuracy_concept_batch = utility.computeConceptAccuracy(output_neck, labels_attribute, device)
     else:
         labels_attribute = utility.getBinaryLabelsAttribute(labels_attribute)
-        accuracy_attribute_batch = sklearn.metrics.accuracy_score(labels_attribute.cpu(), (output_neck > threshold_accuracy_attribute).cpu())
+        accuracy_concept_batch = sklearn.metrics.accuracy_score(labels_attribute.cpu(), (output_neck > threshold_accuracy_concept).cpu())
 
     accuracy_task_batch = sklearn.metrics.accuracy_score(labels_class.cpu(), (output_head > threshold_accuracy_task).cpu())
 
-    return (accuracy_attribute_batch, accuracy_task_batch)
+    return (accuracy_concept_batch, accuracy_task_batch)
 
 def computeTVDistance(output_neck, labels_attribute, tv_distances_epoch, data_loader):
     counts_categories = []
@@ -108,7 +108,7 @@ def computeTVDistance(output_neck, labels_attribute, tv_distances_epoch, data_lo
 def test(model_baseline, data_loader, device, batch_step):
     utility.loadCheckpoint(header.config_baseline["file_name_checkpoint_best"], model_baseline)
 
-    accuracy_attribute_epoch = 0
+    accuracy_concept_epoch = 0
     accuracy_task_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
     tv_distance_epoch = 0
@@ -131,9 +131,9 @@ def test(model_baseline, data_loader, device, batch_step):
 
             (output_neck, output_head) = model_baseline(input)
 
-            (accuracy_attribute_batch, accuracy_task_batch) = computeAccuracy(output_neck, output_head, labels_attribute, labels_class, device)
+            (accuracy_concept_batch, accuracy_task_batch) = computeAccuracy(output_neck, output_head, labels_attribute, labels_class, device)
 
-            accuracy_attribute_epoch += accuracy_attribute_batch
+            accuracy_concept_epoch += accuracy_concept_batch
             accuracy_task_epoch += accuracy_task_batch
 
             computeTVDistance(output_neck, labels_attribute, tv_distances_epoch, data_loader)
@@ -141,7 +141,7 @@ def test(model_baseline, data_loader, device, batch_step):
             progress_bar.n = batch_index + 1
             progress_bar.refresh()
 
-            wandb.log({"testing/batch/accuracy_attribute": accuracy_attribute_batch})
+            wandb.log({"testing/batch/accuracy_concept": accuracy_concept_batch})
             wandb.log({"testing/batch/accuracy_task": accuracy_task_batch})
             wandb.log({"testing/batch/step": batch_step})
 
@@ -149,7 +149,7 @@ def test(model_baseline, data_loader, device, batch_step):
 
     progress_bar.close()
 
-    accuracy_attribute_epoch /= len(data_loader)
+    accuracy_concept_epoch /= len(data_loader)
     accuracy_task_epoch /= len(data_loader)
 
     for i in range(len(data_loader.dataset.config["attributes"])):
@@ -157,16 +157,16 @@ def test(model_baseline, data_loader, device, batch_step):
 
     tv_distance_epoch = sum(tv_distances_epoch) / len(tv_distances_epoch)
 
-    wandb.log({"testing/epoch/accuracy_attribute": accuracy_attribute_epoch})
+    wandb.log({"testing/epoch/accuracy_concept": accuracy_concept_epoch})
     wandb.log({"testing/epoch/accuracy_task": accuracy_task_epoch})
     wandb.log({"testing/epoch/tv_distance_attribute": tv_distance_epoch})
 
-    wandb.summary["testing/epoch/accuracy_attribute"] = accuracy_attribute_epoch
+    wandb.summary["testing/epoch/accuracy_concept"] = accuracy_concept_epoch
     wandb.summary["testing/epoch/accuracy_task"] = accuracy_task_epoch
     wandb.summary["testing/epoch/tv_distance_attribute"] = tv_distance_epoch
 
     logger.log_info("Testing attribute TV distance: " + str(tv_distance_epoch) + ".")
-    logger.log_info("Testing attribute accuracy: " + str(accuracy_attribute_epoch) + ".")
+    logger.log_info("Testing mean concept accuracy: " + str(accuracy_concept_epoch) + ".")
     logger.log_info("Testing task accuracy: " + str(accuracy_task_epoch) + ".")
 
     return batch_step
