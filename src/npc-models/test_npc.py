@@ -437,8 +437,8 @@ def main():
     model_decomposed = model.ResNet34MTL(dataset_test.config, device)
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
-    pc_joint = pc.SPN(device_pc)
-    pc_marginal = pc.SPN(device_pc)
+    pc_joint = pc.ProbabilisticCircuit(device_pc)
+    pc_marginal = pc.ProbabilisticCircuit(device_pc)
 
     logger.log_info("Loading PC from \"" + header.config_pc["file_path_pc"] + "\"...")
 

@@ -231,12 +231,12 @@ def main():
     model_decomposed = torch.nn.DataParallel(model_decomposed)
     model_decomposed = model_decomposed.to(device)
     progress_bar = None
-    pc_joint = pc.SPN(device_pc)
-    pc_marginal = pc.SPN(device_pc)
+    pc_joint = pc.ProbabilisticCircuit(device_pc)
+    pc_marginal = pc.ProbabilisticCircuit(device_pc)
     optimizer_decomposed = torch.optim.SGD(model_decomposed.parameters(), lr = header.config_neural["optimizer_learning_rate"], momentum = header.config_neural["optimizer_momentum"], weight_decay = header.config_neural["optimizer_weight_decay"])
-    optimizer_pc = pc.PGDSPNOptimizer(pc_joint, pc_marginal, device_pc, header.config_pc["optimizer_learning_rate"], header.config_pc["optimizer_prior_factor"], header.config_pc["epsilon_projection"])
+    optimizer_pc = pc.PGDPCOptimizer(pc_joint, pc_marginal, device_pc, header.config_pc["optimizer_learning_rate"], header.config_pc["optimizer_prior_factor"], header.config_pc["epsilon_projection"])
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_decomposed, header.config_neural["learning_rate_scheduler_mode"], header.config_neural["learning_rate_scheduler_factor"], header.config_neural["learning_rate_scheduler_patience"], header.config_neural["learning_rate_scheduler_threshold"], header.config_neural["learning_rate_scheduler_threshold_mode"], header.config_neural["learning_rate_scheduler_cooldown"], header.config_neural["learning_rate_scheduler_min_learning_rate"], header.config_neural["learning_rate_scheduler_min_learning_rate_decay"])
-    learning_rate_scheduler_pc = pc.LossSPNLearningRateScheduler(optimizer_pc, header.config_pc["learning_rate_scheduler_factor"], header.config_pc["learning_rate_scheduler_patience"], header.config_pc["learning_rate_scheduler_threshold"], header.config_pc["learning_rate_scheduler_cooldown"], header.config_pc["learning_rate_scheduler_min_learning_rate"])
+    learning_rate_scheduler_pc = pc.LossPCLearningRateScheduler(optimizer_pc, header.config_pc["learning_rate_scheduler_factor"], header.config_pc["learning_rate_scheduler_patience"], header.config_pc["learning_rate_scheduler_threshold"], header.config_pc["learning_rate_scheduler_cooldown"], header.config_pc["learning_rate_scheduler_min_learning_rate"])
 
     logger.log_info("Loading PC from \"" + header.config_pc["file_path_pc"] + "\"...")
 

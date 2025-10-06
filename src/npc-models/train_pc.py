@@ -70,11 +70,11 @@ def main():
     log_likelihood_validation_best = float("-inf")
     log_likelihood_train_epoch = 0
     log_likelihood_train_epoch_last = 0
-    pc_joint = pc.SPN(device)
-    pc_marginal = pc.SPN(device)
-    optimizer = pc.CCCPSPNOptimizer(pc_joint, pc_marginal, device)
+    pc_joint = pc.ProbabilisticCircuit(device)
+    pc_marginal = pc.ProbabilisticCircuit(device)
+    optimizer = pc.CCCPPCOptimizer(pc_joint, pc_marginal, device)
     progress_bar = None
-    learning_rate_scheduler = pc.LikelihoodSPNLearningRateScheduler(optimizer, header.config_pc["learning_rate_scheduler_factor"])
+    learning_rate_scheduler = pc.LikelihoodPCLearningRateScheduler(optimizer, header.config_pc["learning_rate_scheduler_factor"])
 
     logger.log_info("Loading PC from \"" + header.config_pc["file_path_pc"] + "\"...")
 

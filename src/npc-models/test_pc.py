@@ -90,7 +90,7 @@ def main():
     device = torch.device("cuda")
     dataset_test = loadDataset(header.config_pc["file_path_dataset_test"], device)
 
-    pc_joint = pc.SPN(device)
+    pc_joint = pc.ProbabilisticCircuit(device)
 
     logger.log_info("Loading PC from \"" + header.config_pc["file_path_pc"] + "\"...")
 

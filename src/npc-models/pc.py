@@ -6,7 +6,7 @@ import os
 import torch
 import tqdm
 
-class SPNLearningRateScheduler:
+class PCLearningRateScheduler:
     def __init__(self, optimizer, factor = 0.8, patience = 2, threshold = 1e-4, cooldown = 2, min_learning_rate = 1e-6):
         self.cooldown = cooldown
         self.cooldown_counter = 0
@@ -24,7 +24,7 @@ class SPNLearningRateScheduler:
     def step(self, metrics):
         pass
 
-class LikelihoodSPNLearningRateScheduler(SPNLearningRateScheduler):
+class LikelihoodPCLearningRateScheduler(PCLearningRateScheduler):
     def __init__(self, optimizer, factor = 0.8):
         super().__init__(optimizer, factor)
 
@@ -34,13 +34,13 @@ class LikelihoodSPNLearningRateScheduler(SPNLearningRateScheduler):
         if self.metrics is not None:
             if metrics < self.metrics:
                 self.optimizer.learning_rate *= self.factor
-                logger.log_info("Reducing SPN learning rate to " + "{:e}".format(self.optimizer.learning_rate) + "...")
+                logger.log_info("Reducing PC learning rate to " + "{:e}".format(self.optimizer.learning_rate) + "...")
 
         self.metrics = metrics
 
         return
 
-class LossSPNLearningRateScheduler(SPNLearningRateScheduler):
+class LossPCLearningRateScheduler(PCLearningRateScheduler):
     def __init__(self, optimizer, factor = 0.8, patience = 2, threshold = 1e-4, cooldown = 2, min_learning_rate = 1e-6):
         super().__init__(optimizer, factor, patience, threshold, cooldown, min_learning_rate)
 
@@ -67,7 +67,7 @@ class LossSPNLearningRateScheduler(SPNLearningRateScheduler):
                 return
 
             self.optimizer.learning_rate *= self.factor
-            logger.log_info("Reducing SPN learning rate to " + "{:e}".format(self.optimizer.learning_rate) + "...")
+            logger.log_info("Reducing PC learning rate to " + "{:e}".format(self.optimizer.learning_rate) + "...")
 
             self.cooldown_counter = self.cooldown
             self.patience_counter = 0
@@ -78,16 +78,16 @@ class LossSPNLearningRateScheduler(SPNLearningRateScheduler):
 
         return
 
-class SPNOptimizer:
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
+class PCOptimizer:
+    def __init__(self, pc_joint, pc_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
         self.device = device
         self.growth_threshold = growth_threshold
         self.learning_rate = learning_rate
         self.smoothing_epsilon = torch.finfo(torch.float).eps
         self.prior_factor = prior_factor
         self.projection_epsilon = projection_epsilon
-        self.spn_joint = spn_joint
-        self.spn_marginal = spn_marginal
+        self.pc_joint = pc_joint
+        self.pc_marginal = pc_marginal
         self.weights_prior = None
 
         return
@@ -104,17 +104,17 @@ class SPNOptimizer:
     def step(self, matrix_a = None, matrix_b = None, matrix_c = None, labels_original = None):
         pass
 
-class CCCPSPNOptimizer(SPNOptimizer):
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
-        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold)
+class CCCPPCOptimizer(PCOptimizer):
+    def __init__(self, pc_joint, pc_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
+        super().__init__(pc_joint, pc_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold)
 
         return
 
     def step(self, matrix_a = None, matrix_b = None, matrix_c = None, labels_original = None):
-        self.spn_joint.reuse_forward = False
-        self.spn_marginal.reuse_forward = False
+        self.pc_joint.reuse_forward = False
+        self.pc_marginal.reuse_forward = False
 
-        for sum_node in self.spn_joint.sum_nodes:
+        for sum_node in self.pc_joint.sum_nodes:
             child_values_forward = []
             weight_normalization_sum_node = 0
 
@@ -122,7 +122,7 @@ class CCCPSPNOptimizer(SPNOptimizer):
                 child_values_forward.append(child.value_forward)
 
             child_values_forward = torch.stack(child_values_forward)    # number of children x batch size
-            weight_updates = torch.exp(sum_node.value_backward + child_values_forward - self.spn_joint.root_node.value_forward) # number of children x batch size
+            weight_updates = torch.exp(sum_node.value_backward + child_values_forward - self.pc_joint.root_node.value_forward) # number of children x batch size
             weight_updates = torch.sum(weight_updates, 1)   # number of children
             weight_updates = torch.unsqueeze(weight_updates, 1)    # number of children x 1
             sum_node.weights *= weight_updates   # number of children x 1
@@ -133,19 +133,19 @@ class CCCPSPNOptimizer(SPNOptimizer):
 
             sum_node.weights = (sum_node.weights + self.smoothing_epsilon) / weight_normalization_sum_node
 
-        self.spn_marginal.set_weights(self.spn_joint.get_weights())
+        self.pc_marginal.set_weights(self.pc_joint.get_weights())
 
         return
 
-class PGDSPNOptimizer(SPNOptimizer):
-    def __init__(self, spn_joint, spn_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
-        super().__init__(spn_joint, spn_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold)
+class PGDPCOptimizer(PCOptimizer):
+    def __init__(self, pc_joint, pc_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
+        super().__init__(pc_joint, pc_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold)
 
         return
 
     def step(self, matrix_a = None, matrix_b = None, matrix_c = None, labels_original = None):
-        self.spn_joint.reuse_forward = False
-        self.spn_marginal.reuse_forward = False
+        self.pc_joint.reuse_forward = False
+        self.pc_marginal.reuse_forward = False
 
         counter_sum_node = 0
         matrix_a = matrix_a.to(self.device)
@@ -156,10 +156,10 @@ class PGDSPNOptimizer(SPNOptimizer):
         progress_bar = None
 
         if self.device == torch.device("cpu"):
-            progress_bar = tqdm.tqdm(total = len(self.spn_joint.sum_nodes), leave = False)
-            progress_bar.set_description_str("[INFO]: SPN optimization")
+            progress_bar = tqdm.tqdm(total = len(self.pc_joint.sum_nodes), leave = False)
+            progress_bar.set_description_str("[INFO]: Optimizing PC")
 
-        for (sum_node_joint, sum_node_marginal, weights_prior) in zip(self.spn_joint.sum_nodes, self.spn_marginal.sum_nodes, self.weights_prior):
+        for (sum_node_joint, sum_node_marginal, weights_prior) in zip(self.pc_joint.sum_nodes, self.pc_marginal.sum_nodes, self.weights_prior):
             if progress_bar is not None:
                 progress_bar.n = counter_sum_node + 1
                 progress_bar.refresh()
@@ -167,15 +167,15 @@ class PGDSPNOptimizer(SPNOptimizer):
 
             for (i, (child_joint, child_marginal)) in enumerate(zip(sum_node_joint.children, sum_node_marginal.children)):
                 # Compute weight updates in log space
-                weight_updates_joint = torch.exp(sum_node_joint.value_backward + child_joint.value_forward - self.spn_joint.root_node.value_forward)
-                weight_updates_marginal = torch.exp(sum_node_marginal.value_backward + child_marginal.value_forward - self.spn_marginal.root_node.value_forward)
+                weight_updates_joint = torch.exp(sum_node_joint.value_backward + child_joint.value_forward - self.pc_joint.root_node.value_forward)
+                weight_updates_marginal = torch.exp(sum_node_marginal.value_backward + child_marginal.value_forward - self.pc_marginal.root_node.value_forward)
 
                 # Set gradients corresponding to zero root node forward values to zero
                 mask_1_joint = ((sum_node_joint.value_backward + child_joint.value_forward) == -float("inf"))
-                mask_2_joint = (self.spn_joint.root_node.value_forward == -float("inf"))
+                mask_2_joint = (self.pc_joint.root_node.value_forward == -float("inf"))
                 mask_joint = mask_1_joint & mask_2_joint
                 mask_1_marginal = ((sum_node_marginal.value_backward + child_marginal.value_forward) == -float("inf"))
-                mask_2_marginal = (self.spn_marginal.root_node.value_forward == -float("inf"))
+                mask_2_marginal = (self.pc_marginal.root_node.value_forward == -float("inf"))
                 mask_marginal = mask_1_marginal & mask_2_marginal
                 weight_updates_joint[mask_joint] = 0
                 weight_updates_marginal[mask_marginal] = 0
@@ -203,7 +203,7 @@ class PGDSPNOptimizer(SPNOptimizer):
         if progress_bar is not None:
             progress_bar.close()
 
-        self.spn_marginal.set_weights(self.spn_joint.get_weights())
+        self.pc_marginal.set_weights(self.pc_joint.get_weights())
 
         return
 
@@ -378,7 +378,7 @@ class SumNode(Node):
 
         return
 
-class SPN:
+class ProbabilisticCircuit:
     def __init__(self, device = torch.device("cuda")):
         self.batch_size = -1
         self.depth = None
@@ -428,7 +428,7 @@ class SPN:
             if self.device == torch.device("cpu"):
                 counter_node = 0
                 progress_bar = tqdm.tqdm(total = len(self.nodes), leave = False)
-                progress_bar.set_description_str("[INFO]: SPN backward")
+                progress_bar.set_description_str("[INFO]: Running PC backward pass")
 
                 for level in self.traversal_order_backward[1:]:
                     for node in level:
@@ -462,7 +462,7 @@ class SPN:
             if self.device == torch.device("cpu"):
                 counter_node = 0
                 progress_bar = tqdm.tqdm(total = len(self.nodes), leave = False)
-                progress_bar.set_description_str("[INFO]: SPN forward")
+                progress_bar.set_description_str("[INFO]: Running PC forward pass")
 
                 for level in self.traversal_order_forward:
                     for node in level:
@@ -495,23 +495,23 @@ class SPN:
 
         return weights
 
-    def load(self, file_path_spn):
-        if not os.path.exists(file_path_spn):
-            logger.log_fatal("Invalid SPN file path. Quit.")
+    def load(self, file_path_pc):
+        if not os.path.exists(file_path_pc):
+            logger.log_fatal("Invalid PC file path. Quit.")
             exit(-1)
 
         self.reuse_backward = False
         self.reuse_forward = False
 
-        with open(file_path_spn, "r") as file_spn:
+        with open(file_path_pc, "r") as file_pc:
             categorical_leaf_node_id = -1
             counter_line = 0
             id_to_nodes = {}
-            lines = file_spn.readlines()
+            lines = file_pc.readlines()
             progress_bar = tqdm.tqdm(total = len(lines), leave = False)
             reading_nodes = True
 
-            progress_bar.set_description_str("[INFO]: Loading SPN")
+            progress_bar.set_description_str("[INFO]: Loading PC")
 
             for line in lines:
                 progress_bar.n = counter_line + 1
@@ -648,7 +648,7 @@ class SPN:
                 root_nodes.append(node)
 
         if len(root_nodes) != 1:
-            logger.log_fatal("Invalid SPN.")
+            logger.log_fatal("Invalid PC.")
             exit(-1)
 
         self.depth = self.traverse({0: root_nodes}, 0)
@@ -669,11 +669,11 @@ class SPN:
             return length
 
         if getLengthNestedList(self.traversal_order_backward) != len(self.nodes):
-            logger.log_fatal("Invalid SPN backward traversal.")
+            logger.log_fatal("Invalid PC backward traversal.")
             exit(-1)
 
         if getLengthNestedList(self.traversal_order_forward) != len(self.nodes):
-            logger.log_fatal("Invalid SPN forward traversal.")
+            logger.log_fatal("Invalid PC forward traversal.")
             exit(-1)
 
         return
