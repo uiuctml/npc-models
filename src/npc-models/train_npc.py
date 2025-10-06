@@ -79,10 +79,10 @@ def train(model_neural, pc_joint, pc_marginal, data_loader, criterion, optimizer
             (outputs_attribute, _) = model_neural(input)
 
             outputs_attribute = utility.applySoftmaxAttribute(outputs_attribute)
-            (matrix_pc, matrix_neural, output_composed) = test_npc.computeNPCOutput(outputs_attribute, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
+            (matrix_pc, matrix_neural, output_npc) = test_npc.computeNPCOutput(outputs_attribute, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
-            (_, predictions_composed) = torch.max(output_composed, 1)
-            loss = criterion(output_composed, labels_class)
+            (_, predictions_npc) = torch.max(output_npc, 1)
+            loss = criterion(output_npc, labels_class)
 
             loss.backward()
             optimizer_neural.step()
@@ -91,16 +91,16 @@ def train(model_neural, pc_joint, pc_marginal, data_loader, criterion, optimizer
                 pc_joint.backward()
                 pc_marginal.backward()
 
-                optimizer_pc.step(matrix_pc.detach(), matrix_neural.detach(), output_composed.detach(), labels_class)
+                optimizer_pc.step(matrix_pc.detach(), matrix_neural.detach(), output_npc.detach(), labels_class)
 
-            corrects_composed = torch.sum(predictions_composed == labels_class).item()
+            corrects_npc = torch.sum(predictions_npc == labels_class).item()
 
             accuracy_attribute_batch = utility.computeAccuracyAttribute(outputs_attribute, labels_attribute, device)
-            accuracy_task_batch = corrects_composed / input.size(0)
+            accuracy_task_batch = corrects_npc / input.size(0)
             loss_batch = loss.item()
 
             accuracy_attribute_epoch += accuracy_attribute_batch
-            accuracy_task_epoch += corrects_composed
+            accuracy_task_epoch += corrects_npc
             loss_epoch += loss_batch
 
             progress_bar.n = batch_index + 1
@@ -151,19 +151,19 @@ def validate(model_neural, pc_joint, pc_marginal, data_loader, criterion, device
             (outputs_attribute, _) = model_neural(input)
 
             outputs_attribute = utility.applySoftmaxAttribute(outputs_attribute)
-            (_, _, output_composed) = test_npc.computeNPCOutput(outputs_attribute, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
+            (_, _, output_npc) = test_npc.computeNPCOutput(outputs_attribute, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
-            (_, predictions_composed) = torch.max(output_composed, 1)
-            loss = criterion(output_composed, labels_class)
+            (_, predictions_npc) = torch.max(output_npc, 1)
+            loss = criterion(output_npc, labels_class)
 
-            corrects_composed = torch.sum(predictions_composed == labels_class).item()
+            corrects_npc = torch.sum(predictions_npc == labels_class).item()
 
             accuracy_attribute_batch = utility.computeAccuracyAttribute(outputs_attribute, labels_attribute, device)
-            accuracy_task_batch = corrects_composed / input.size(0)
+            accuracy_task_batch = corrects_npc / input.size(0)
             loss_batch = loss.item()
 
             accuracy_attribute_epoch += accuracy_attribute_batch
-            accuracy_task_epoch += corrects_composed
+            accuracy_task_epoch += corrects_npc
             loss_epoch += loss_batch
 
             progress_bar.n = batch_index + 1

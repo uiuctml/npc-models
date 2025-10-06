@@ -72,21 +72,21 @@ def findCE(outputs_attribute_original, pc_joint, pc_marginal, pc_output_rows, pc
             outputs_attribute.append(outputs_attribute_original[i].detach().clone().requires_grad_(True))
 
         for _ in range(header.npc_interpret_ce_steps):
-            (_, _, outputs_composed_original) = computeNPCOutput(outputs_attribute, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
-            outputs_composed_prediction = torch.max(outputs_composed_original, 1)[1]
-            outputs_composed_indices = torch.where(outputs_composed_prediction != labels_class)[0]
+            (_, _, output_npc_original) = computeNPCOutput(outputs_attribute, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
+            output_npc_prediction = torch.max(output_npc_original, 1)[1]
+            output_npc_indices = torch.where(output_npc_prediction != labels_class)[0]
 
-            progress_bar.n = batch_size - outputs_composed_indices.nelement()
+            progress_bar.n = batch_size - output_npc_indices.nelement()
             progress_bar.refresh()
 
-            if outputs_composed_indices.nelement() == 0:
+            if output_npc_indices.nelement() == 0:
                 break
 
-            outputs_composed = outputs_composed_original.t()   # number of class labels x batch size
-            outputs_composed = outputs_composed[labels_class, torch.arange(outputs_composed.shape[1])]  # 1 x batch size
-            outputs_composed = torch.log(outputs_composed)   # 1 x batch size
-            outputs_composed = torch.sum(outputs_composed[outputs_composed_indices], 0) # 1 x 1
-            outputs_composed.backward(retain_graph = True)
+            output_npc = output_npc_original.t()   # number of class labels x batch size
+            output_npc = output_npc[labels_class, torch.arange(output_npc.shape[1])]  # 1 x batch size
+            output_npc = torch.log(output_npc)   # 1 x batch size
+            output_npc = torch.sum(output_npc[output_npc_indices], 0) # 1 x 1
+            output_npc.backward(retain_graph = True)
 
             with torch.set_grad_enabled(False):
                 for i in range(len(outputs_attribute)):
@@ -142,7 +142,7 @@ def findCE(outputs_attribute_original, pc_joint, pc_marginal, pc_output_rows, pc
 
         return outputs_attribute
 
-def findMPE(matrix_pc, matrix_neural, predictions_composed, pc_settings):
+def findMPE(matrix_pc, matrix_neural, predictions_npc, pc_settings):
     attribute_indices_list = pc_settings[:matrix_pc.shape[1], :-1].cpu().int().tolist()
     matrix_pc_col_indices_to_attribute_indices = {}
     mpe_attributes = []
@@ -151,7 +151,7 @@ def findMPE(matrix_pc, matrix_neural, predictions_composed, pc_settings):
         matrix_pc_col_indices_to_attribute_indices[matrix_pc_row_index] = tuple(attribute_indices)
 
     matrix_pc = matrix_pc.t() # product of category size of all attributes x number of class labels
-    matrix_pc = torch.index_select(matrix_pc, 1, predictions_composed)   # product of category size of all attributes x batch size
+    matrix_pc = torch.index_select(matrix_pc, 1, predictions_npc)   # product of category size of all attributes x batch size
     matrix_npc = matrix_pc * matrix_neural  # product of category size of all attributes x batch size
     mpe_matrix_pc_col_indices = torch.argmax(matrix_npc, 0)   # 0 x batch size
 
@@ -187,7 +187,7 @@ def processArguments():
 
     return
 
-def recordCE(input_file_paths, interpret, dataset, labels_attribute, labels_class, outputs_attribute_ce, outputs_composed_ce):
+def recordCE(input_file_paths, interpret, dataset, labels_attribute, labels_class, outputs_attribute_ce, output_npc_ce):
     batch_size = labels_class.nelement()
 
     for batch_index in range(batch_size):
@@ -210,9 +210,9 @@ def recordCE(input_file_paths, interpret, dataset, labels_attribute, labels_clas
 
             interpret[input_file_path]["ce"][attribute_name] = dict(sorted(interpret[input_file_path]["ce"][attribute_name].items()))
 
-        (outputs_composed_ce_prediction_probability, outputs_composed_ce_prediction_label) = torch.max(outputs_composed_ce[batch_index], 0)
+        (output_npc_ce_prediction_probability, output_npc_ce_prediction_label) = torch.max(output_npc_ce[batch_index], 0)
 
-        interpret[input_file_path]["ce"]["class"] = {dataset.labels_class[outputs_composed_ce_prediction_label]: outputs_composed_ce_prediction_probability.item()}
+        interpret[input_file_path]["ce"]["class"] = {dataset.labels_class[output_npc_ce_prediction_label]: output_npc_ce_prediction_probability.item()}
 
     return
 
@@ -232,7 +232,7 @@ def recordMPE(input_file_paths, interpret, mpe_attributes, mpe_correctness, data
 
     return
 
-def recordPredictions(input_file_paths, interpret, dataset, labels_attribute, labels_class, outputs_attribute, outputs_composed):
+def recordPredictions(input_file_paths, interpret, dataset, labels_attribute, labels_class, outputs_attribute, output_npc):
     batch_size = labels_class.nelement()
 
     for batch_index in range(batch_size):
@@ -263,10 +263,10 @@ def recordPredictions(input_file_paths, interpret, dataset, labels_attribute, la
             interpret[input_file_path]["ground_truth"][attribute_name] = sorted(interpret[input_file_path]["ground_truth"][attribute_name])
             interpret[input_file_path]["prediction"][attribute_name] = dict(sorted(interpret[input_file_path]["prediction"][attribute_name].items()))
 
-        (outputs_composed_prediction_probability, outputs_composed_prediction_label) = torch.max(outputs_composed[batch_index], 0)
+        (output_npc_prediction_probability, output_npc_prediction_label) = torch.max(output_npc[batch_index], 0)
 
         interpret[input_file_path]["ground_truth"]["class"] = dataset.labels_class[labels_class[batch_index]]
-        interpret[input_file_path]["prediction"]["class"] = {dataset.labels_class[outputs_composed_prediction_label]: outputs_composed_prediction_probability.item()}
+        interpret[input_file_path]["prediction"]["class"] = {dataset.labels_class[output_npc_prediction_label]: output_npc_prediction_probability.item()}
 
     return
 
@@ -314,47 +314,47 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
             (outputs_attribute_original, _) = model_neural(input)
             outputs_attribute = utility.applySoftmaxAttribute(outputs_attribute_original)
 
-        (matrix_pc, matrix_neural, outputs_composed) = computeNPCOutput(outputs_attribute, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
+        (matrix_pc, matrix_neural, output_npc) = computeNPCOutput(outputs_attribute, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
-        (_, predictions_composed) = torch.max(outputs_composed, 1)
-        prediction_correctness = (predictions_composed == labels_class)
-        corrects_composed = torch.sum(prediction_correctness).item()
+        (_, predictions_npc) = torch.max(output_npc, 1)
+        prediction_correctness = (predictions_npc == labels_class)
+        corrects_npc = torch.sum(prediction_correctness).item()
 
         accuracy_attribute_batch = utility.computeAccuracyAttribute(outputs_attribute_original, labels_attribute, device)
-        accuracy_task_batch = corrects_composed / input.size(0)
+        accuracy_task_batch = corrects_npc / input.size(0)
 
         accuracy_attribute_epoch += accuracy_attribute_batch
-        accuracy_task_epoch += corrects_composed
+        accuracy_task_epoch += corrects_npc
 
         for i in range(len(data_loader.dataset.config["attributes"])):
             tv_distance_batch = 0.5 * torch.sum(torch.abs(outputs_attribute[i] - labels_attribute[i]), dim = 1)
             tv_distances_epoch[i] += torch.sum(tv_distance_batch).item()
 
         if header.npc_interpret:
-            recordPredictions(input_file_paths, interpret, data_loader.dataset, labels_attribute, labels_class, outputs_attribute, outputs_composed)
+            recordPredictions(input_file_paths, interpret, data_loader.dataset, labels_attribute, labels_class, outputs_attribute, output_npc)
 
             outputs_attribute_ce = findCE(outputs_attribute_original, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, labels_class, device)
 
-            (_, _, outputs_composed_ce) = computeNPCOutput(outputs_attribute_ce, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
+            (_, _, output_npc_ce) = computeNPCOutput(outputs_attribute_ce, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
-            recordCE(input_file_paths, interpret, data_loader.dataset, labels_attribute, labels_class, outputs_attribute_ce, outputs_composed_ce)
+            recordCE(input_file_paths, interpret, data_loader.dataset, labels_attribute, labels_class, outputs_attribute_ce, output_npc_ce)
 
-            (_, predictions_composed_ce) = torch.max(outputs_composed_ce, 1)
-            prediction_correctness_ce = (predictions_composed_ce == labels_class)
-            corrects_composed_ce = torch.sum(prediction_correctness_ce).item()
-            incorrects_composed = torch.sum(predictions_composed != labels_class).item()
+            (_, predictions_npc_ce) = torch.max(output_npc_ce, 1)
+            prediction_correctness_ce = (predictions_npc_ce == labels_class)
+            corrects_npc_ce = torch.sum(prediction_correctness_ce).item()
+            incorrects_npc = torch.sum(predictions_npc != labels_class).item()
 
             ce_correctness_attribute_epoch += utility.computeAccuracyAttribute(outputs_attribute_ce, labels_attribute, device)
 
-            ce_instances_corrected += corrects_composed_ce - corrects_composed
-            ce_instances_incorrect += incorrects_composed
-            ce_correctness_task_epoch += corrects_composed_ce
+            ce_instances_corrected += corrects_npc_ce - corrects_npc
+            ce_instances_incorrect += incorrects_npc
+            ce_correctness_task_epoch += corrects_npc_ce
 
             for i in range(len(data_loader.dataset.config["attributes"])):
                 ce_tv_distance_batch = 0.5 * torch.sum(torch.abs(outputs_attribute_ce[i] - outputs_attribute[i]), dim = 1)
                 ce_tv_distances_epoch[i] += torch.sum(ce_tv_distance_batch).item()
 
-            mpe_attributes = findMPE(matrix_pc, matrix_neural, predictions_composed, pc_settings_joint)
+            mpe_attributes = findMPE(matrix_pc, matrix_neural, predictions_npc, pc_settings_joint)
             mpe_correctness = computeMPECorrectness(mpe_attributes, labels_attribute)
 
             recordMPE(input_file_paths, interpret, mpe_attributes, mpe_correctness, data_loader.dataset, labels_class)
