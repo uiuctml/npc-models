@@ -84,7 +84,6 @@ def processArguments():
 
 def saveMPE(input_file_paths, mpe, mpe_attributes, mpe_correctness, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed):
     batch_size = labels_original.nelement()
-    config_dataset = dataset.config
 
     for batch_index in range(batch_size):
         input_file_path = os.path.basename(input_file_paths[batch_index])
@@ -94,7 +93,7 @@ def saveMPE(input_file_paths, mpe, mpe_attributes, mpe_correctness, dataset, lab
         mpe[input_file_path]["ground_truth"] = {}
         mpe[input_file_path]["prediction"] = {}
 
-        for (attribute_index, attribute) in enumerate(config_dataset["attributes"]):
+        for (attribute_index, attribute) in enumerate(dataset.config["attributes"]):
             attribute_name = attribute["name"]
             masks_positive_labels_decomposed = (labels_decomposed[attribute_index] > 0)
             counts_positive_labels_decomposed = torch.sum(masks_positive_labels_decomposed, dim = 1)
@@ -266,7 +265,6 @@ def main():
 
     dataset_transforms = utility.createTransform(header.config_neural)
     dataset_test = dataset.NPCDataset(header.config_neural["dir_dataset_test"], dataset_transforms)
-    config_dataset = dataset_test.config
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_neural["batch_size"], shuffle = False, num_workers = header.config_neural["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     device_spn = torch.device("cuda")
@@ -288,7 +286,7 @@ def main():
 
     logger.log_info("Loading SPN leaf node settings...")
 
-    spn_settings_joint = utility.generateSPNSettings(config_dataset, device)
+    spn_settings_joint = utility.generateSPNSettings(dataset_test.config, device)
     spn_settings_marginal = torch.clone(spn_settings_joint)
     spn_settings_marginal[:, -1] = -1
 

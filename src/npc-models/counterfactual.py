@@ -95,7 +95,6 @@ def computeCounterfactual(outputs_decomposed_original, pc_joint, pc_marginal, pc
 
 def saveCounterfactual(input_file_paths, counterfactual, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_counterfactual, outputs_composed, outputs_composed_counterfactual):
     batch_size = labels_original.nelement()
-    config_dataset = dataset.config
 
     for batch_index in range(batch_size):
         input_file_path = os.path.basename(input_file_paths[batch_index])
@@ -105,7 +104,7 @@ def saveCounterfactual(input_file_paths, counterfactual, dataset, labels_decompo
         counterfactual[input_file_path]["ground_truth"] = {}
         counterfactual[input_file_path]["prediction"] = {}
 
-        for (attribute_index, attribute) in enumerate(config_dataset["attributes"]):
+        for (attribute_index, attribute) in enumerate(dataset.config["attributes"]):
             attribute_name = attribute["name"]
             masks_positive_labels_decomposed = (labels_decomposed[attribute_index] > 0)
             counts_positive_labels_decomposed = torch.sum(masks_positive_labels_decomposed, dim = 1)
@@ -156,19 +155,21 @@ def test(model_decomposed, pc_joint, pc_marginal, data_loader, device, batch_ste
     instance_count_incorrect = 0
     tv_distance_epoch = 0
     tv_distances_epoch = []
+    counterfactual_tv_distance_epoch = 0
+    counterfactual_tv_distances_epoch = []
 
-    config_dataset = data_loader.dataset.config
     counterfactual = {}
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
     pc_output_rows = len(data_loader.dataset.classes_original)
     pc_output_cols = 1
 
-    for attribute in config_dataset["attributes"]:
+    for attribute in data_loader.dataset.config["attributes"]:
         pc_output_cols *= len(attribute["labels"])
+        counterfactual_tv_distances_epoch.append(0)
         tv_distances_epoch.append(0)
 
     model_decomposed.eval()
-    progress_bar.set_description_str("[INFO]: Counterfactual progress")
+    progress_bar.set_description_str("[INFO]: Testing progress")
 
     for (batch_index, (input, labels_decomposed, labels_original, input_file_paths)) in enumerate(data_loader):
         input = input.to(device, non_blocking = True)
@@ -202,12 +203,17 @@ def test(model_decomposed, pc_joint, pc_marginal, data_loader, device, batch_ste
 
         accuracy_attribute_epoch += utility.computeAccuracyDecomposed(outputs_decomposed_original, labels_decomposed, device)
         accuracy_task_epoch += corrects_composed
+
+        for i in range(len(data_loader.dataset.config["attributes"])):
+            tv_distance_batch = 0.5 * torch.sum(torch.abs(outputs_decomposed[i] - labels_decomposed[i]), dim = 1)
+            tv_distances_epoch[i] += torch.sum(tv_distance_batch).item()
+
         correctness_attribute_epoch += utility.computeAccuracyDecomposed(outputs_decomposed_counterfactual, labels_decomposed, device)
         correctness_task_epoch += corrects_composed_counterfactual
 
         for i in range(len(data_loader.dataset.config["attributes"])):
-            tv_distance_batch = 0.5 * torch.sum(torch.abs(outputs_decomposed_counterfactual[i] - outputs_decomposed[i]), dim = 1)
-            tv_distances_epoch[i] += torch.sum(tv_distance_batch).item()
+            counterfactual_tv_distance_batch = 0.5 * torch.sum(torch.abs(outputs_decomposed_counterfactual[i] - outputs_decomposed[i]), dim = 1)
+            counterfactual_tv_distances_epoch[i] += torch.sum(counterfactual_tv_distance_batch).item()
 
         progress_bar.n = batch_index + 1
         progress_bar.refresh()
@@ -216,23 +222,30 @@ def test(model_decomposed, pc_joint, pc_marginal, data_loader, device, batch_ste
 
     accuracy_attribute_epoch /= len(data_loader)
     accuracy_task_epoch /= len(data_loader.dataset)
-    correctness_attribute_epoch /= len(data_loader)
-    correctness_task_epoch /= len(data_loader.dataset)
 
     for i in range(len(data_loader.dataset.config["attributes"])):
         tv_distances_epoch[i] /= len(data_loader.dataset)
 
     tv_distance_epoch = sum(tv_distances_epoch) / len(tv_distances_epoch)
 
+    logger.log_info("Testing attribute TV distance: " + str(tv_distance_epoch) + ".")
     logger.log_info("Testing attribute accuracy: " + str(accuracy_attribute_epoch) + ".")
     logger.log_info("Testing task accuracy: " + str(accuracy_task_epoch) + ".")
 
-    if instance_count_incorrect != 0:
-        logger.log_info("Correction rate: " + str(instance_count_corrected / instance_count_incorrect) + ".")
-    else:
-        logger.log_info("Correction rate: N/A.")
+    correctness_attribute_epoch /= len(data_loader)
+    correctness_task_epoch /= len(data_loader.dataset)
 
-    logger.log_info("Counterfactual attribute TV distance: " + str(tv_distance_epoch) + ".")
+    for i in range(len(data_loader.dataset.config["attributes"])):
+        counterfactual_tv_distances_epoch[i] /= len(data_loader.dataset)
+
+    counterfactual_tv_distance_epoch = sum(counterfactual_tv_distances_epoch) / len(counterfactual_tv_distances_epoch)
+
+    if instance_count_incorrect != 0:
+        logger.log_info("Counterfactual correction rate: " + str(instance_count_corrected / instance_count_incorrect) + ".")
+    else:
+        logger.log_info("Counterfactual correction rate: N/A.")
+
+    logger.log_info("Counterfactual attribute TV distance: " + str(counterfactual_tv_distance_epoch) + ".")
     logger.log_info("Counterfactual attribute correctness: " + str(correctness_attribute_epoch) + ".")
     logger.log_info("Counterfactual task correctness: " + str(correctness_task_epoch) + ".")
 
@@ -254,7 +267,6 @@ def main():
 
     dataset_transforms = utility.createTransform(header.config_neural)
     dataset_test = dataset.NPCDataset(header.config_neural["dir_dataset_test"], dataset_transforms)
-    config_dataset = dataset_test.config
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_neural["batch_size"], shuffle = False, num_workers = header.config_neural["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     device_pc = torch.device("cuda")
@@ -276,7 +288,7 @@ def main():
 
     logger.log_info("Loading PC leaf node settings...")
 
-    pc_settings_joint = utility.generateSPNSettings(config_dataset, device)
+    pc_settings_joint = utility.generateSPNSettings(dataset_test.config, device)
     pc_settings_marginal = torch.clone(pc_settings_joint)
     pc_settings_marginal[:, -1] = -1
 
