@@ -40,7 +40,7 @@ def findCounterfactual(outputs_decomposed_original, pc_joint, pc_marginal, pc_ou
     for i in range(len(outputs_decomposed_original)):
         outputs_decomposed.append(outputs_decomposed_original[i].detach().clone().requires_grad_(True))
 
-    for _ in range(header.counterfactual_steps):
+    for _ in range(header.npc_ce_steps):
         (_, _, outputs_composed_original) = utility.compose(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
         outputs_composed_mpe = torch.max(outputs_composed_original, 1)[1]
         outputs_composed_indices = torch.where(outputs_composed_mpe != labels_original)[0]
@@ -59,7 +59,7 @@ def findCounterfactual(outputs_decomposed_original, pc_joint, pc_marginal, pc_ou
 
         with torch.set_grad_enabled(False):
             for i in range(len(outputs_decomposed)):
-                outputs_decomposed[i] += header.counterfactual_learning_rate * outputs_decomposed[i].grad
+                outputs_decomposed[i] += header.npc_ce_learning_rate * outputs_decomposed[i].grad
 
         rhos = []
 
@@ -296,7 +296,7 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
         (matrix_a, matrix_b, outputs_composed) = utility.compose(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
         (_, _, outputs_composed_counterfactual) = utility.compose(outputs_decomposed_counterfactual, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
-        if header.counterfactual_save:
+        if header.npc_ce_save:
             saveCounterfactual(input_file_paths, counterfactual, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_counterfactual, outputs_composed, outputs_composed_counterfactual)
 
         (_, predictions_composed) = torch.max(outputs_composed, 1)
@@ -388,13 +388,13 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
     logger.log_info("Counterfactual attribute correctness: " + str(correctness_attribute_epoch) + ".")
     logger.log_info("Counterfactual task correctness: " + str(correctness_task_epoch) + ".")
 
-    if header.counterfactual_save:
-        if not os.path.isdir(header.counterfactual_dir_outputs):
-            os.makedirs(header.counterfactual_dir_outputs, exist_ok = True)
+    if header.npc_ce_save:
+        if not os.path.isdir(header.interpret_dir_outputs):
+            os.makedirs(header.interpret_dir_outputs, exist_ok = True)
 
-        with open(os.path.join(header.counterfactual_dir_outputs, header.counterfactual_file_name), "w") as file_counterfactual:
+        with open(os.path.join(header.interpret_dir_outputs, header.npc_ce_file_name), "w") as file_counterfactual:
             json.dump(counterfactual, file_counterfactual, indent = 4)
-            logger.log_info("Saved counterfactual to \"" + os.path.join(header.counterfactual_dir_outputs, header.counterfactual_file_name) + "\".")
+            logger.log_info("Saved counterfactual to \"" + os.path.join(header.interpret_dir_outputs, header.npc_ce_file_name) + "\".")
 
     if header.npc_mpe_find:
         if len(mpe_correctness_epoch) == 0:
@@ -417,12 +417,12 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
         logger.log_info("MPE correctness on incorrect predictions: " + str(mpe_correctness_prediction_incorrect_epoch) + ".")
 
         if header.npc_mpe_save:
-            if not os.path.isdir(header.npc_mpe_dir_outputs):
-                os.makedirs(header.npc_mpe_dir_outputs, exist_ok = True)
+            if not os.path.isdir(header.interpret_dir_outputs):
+                os.makedirs(header.interpret_dir_outputs, exist_ok = True)
 
-            with open(os.path.join(header.npc_mpe_dir_outputs, header.npc_mpe_file_name), "w") as file_mpe:
+            with open(os.path.join(header.interpret_dir_outputs, header.npc_mpe_file_name), "w") as file_mpe:
                 json.dump(mpe, file_mpe, indent = 4)
-                logger.log_info("Saved MPE to \"" + os.path.join(header.npc_mpe_dir_outputs, header.npc_mpe_file_name) + "\".")
+                logger.log_info("Saved MPE to \"" + os.path.join(header.interpret_dir_outputs, header.npc_mpe_file_name) + "\".")
 
     return
 

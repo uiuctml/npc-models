@@ -17,13 +17,8 @@ checkpoint_dir = os.path.join(project_dir_outputs, "checkpoints")
 checkpoint_postfix = ".zip"
 checkpoint_postfix_best = ".best" + checkpoint_postfix
 
-counterfactual_dir_outputs = os.path.join(project_dir_outputs, "counterfactuals")
-counterfactual_file_name = "counterfactual_" + dataset_prefix + ".json"
-counterfactual_learning_rate = 5e-2
-counterfactual_save = True
-counterfactual_steps = 100
-
 interpret_dir_dataset = os.path.join(dataset_dir, "splits/instances/test")
+interpret_dir_outputs = os.path.join(project_dir_outputs, "interpret")
 interpret_label_width_attribute = 200
 interpret_label_width_original = 350
 interpret_mpe = False
@@ -31,7 +26,10 @@ interpret_preprocess = False
 interpret_viewer_height = 300
 interpret_viewer_width = 300
 
-npc_mpe_dir_outputs = os.path.join(project_dir_outputs, "mpes")
+npc_ce_file_name = "ce_" + dataset_prefix + ".json"
+npc_ce_learning_rate = 5e-2
+npc_ce_save = True
+npc_ce_steps = 100
 npc_mpe_file_name = "mpe_" + dataset_prefix + ".json"
 npc_mpe_find = True
 npc_mpe_save = True
