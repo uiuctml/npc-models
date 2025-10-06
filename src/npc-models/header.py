@@ -2,19 +2,22 @@ import multiprocessing
 import os
 import type
 
-project_name = "npc-models"
-dir_outputs = os.path.join("../../outputs", project_name)
-checkpoint_dir = os.path.join(dir_outputs, "checkpoints")
-checkpoint_postfix = ".zip"
-checkpoint_postfix_best = ".best" + checkpoint_postfix
 cuda_allow_tf32 = False
-dataset_prefix = "awa2"
-dataset_config_file_path = os.path.join("../../../npc-dataset-utils/configs/npc-dataset-utils", dataset_prefix + ".json")
-dataset_dir = os.path.join("../../../datasets", dataset_prefix)
 log_level = type.LogLevel.info
 run_mode = "disabled"
 
-counterfactual_dir_outputs = os.path.join(dir_outputs, "counterfactuals")
+dataset_prefix = "awa2"
+dataset_config_file_path = os.path.join("../../../npc-dataset-utils/configs/npc-dataset-utils", dataset_prefix + ".json")
+dataset_dir = os.path.join("../../../datasets", dataset_prefix)
+
+project_name = "npc-models"
+project_dir_outputs = os.path.join("../../outputs", project_name)
+
+checkpoint_dir = os.path.join(project_dir_outputs, "checkpoints")
+checkpoint_postfix = ".zip"
+checkpoint_postfix_best = ".best" + checkpoint_postfix
+
+counterfactual_dir_outputs = os.path.join(project_dir_outputs, "counterfactuals")
 counterfactual_file_name = "counterfactual_" + dataset_prefix + ".json"
 counterfactual_learning_rate = 5e-2
 counterfactual_save = True
@@ -28,7 +31,7 @@ interpret_preprocess = False
 interpret_viewer_height = 300
 interpret_viewer_width = 300
 
-npc_mpe_dir_outputs = os.path.join(dir_outputs, "mpes")
+npc_mpe_dir_outputs = os.path.join(project_dir_outputs, "mpes")
 npc_mpe_file_name = "mpe_" + dataset_prefix + ".json"
 npc_mpe_find = True
 npc_mpe_save = True
