@@ -78,7 +78,7 @@ def train(model_decomposed, pc_joint, pc_marginal, data_loader, criterion, optim
 
             (outputs_decomposed, _) = model_decomposed(input)
 
-            outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
+            outputs_decomposed = utility.applySoftmaxAttribute(outputs_decomposed)
             (matrix_pc, matrix_neural, output_composed) = test_npc.computeNPCOutput(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
@@ -95,7 +95,7 @@ def train(model_decomposed, pc_joint, pc_marginal, data_loader, criterion, optim
 
             corrects_composed = torch.sum(predictions_composed == labels_class).item()
 
-            accuracy_attribute_batch = utility.computeAccuracyDecomposed(outputs_decomposed, labels_decomposed, device)
+            accuracy_attribute_batch = utility.computeAccuracyAttribute(outputs_decomposed, labels_decomposed, device)
             accuracy_task_batch = corrects_composed / input.size(0)
             loss_batch = loss.item()
 
@@ -150,7 +150,7 @@ def validate(model_decomposed, pc_joint, pc_marginal, data_loader, criterion, de
 
             (outputs_decomposed, _) = model_decomposed(input)
 
-            outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed)
+            outputs_decomposed = utility.applySoftmaxAttribute(outputs_decomposed)
             (_, _, output_composed) = test_npc.computeNPCOutput(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
             (_, predictions_composed) = torch.max(output_composed, 1)
@@ -158,7 +158,7 @@ def validate(model_decomposed, pc_joint, pc_marginal, data_loader, criterion, de
 
             corrects_composed = torch.sum(predictions_composed == labels_class).item()
 
-            accuracy_attribute_batch = utility.computeAccuracyDecomposed(outputs_decomposed, labels_decomposed, device)
+            accuracy_attribute_batch = utility.computeAccuracyAttribute(outputs_decomposed, labels_decomposed, device)
             accuracy_task_batch = corrects_composed / input.size(0)
             loss_batch = loss.item()
 

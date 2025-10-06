@@ -73,7 +73,7 @@ def train(model_decomposed, data_loader, criterions, optimizer, device, batch_st
             loss.backward()
             optimizer.step()
 
-            accuracy_attribute_batch = utility.computeAccuracyDecomposed(output, labels, device)
+            accuracy_attribute_batch = utility.computeAccuracyAttribute(output, labels, device)
             loss_batch = loss.item()
 
             accuracy_attribute_epoch += accuracy_attribute_batch
@@ -116,7 +116,7 @@ def validate(model_decomposed, data_loader, criterions, device, batch_step):
             (output, _) = model_decomposed(input)
 
             loss = computeLoss(output, labels, criterions)
-            accuracy_attribute_batch = utility.computeAccuracyDecomposed(output, labels, device)
+            accuracy_attribute_batch = utility.computeAccuracyAttribute(output, labels, device)
             loss_batch = loss.item()
 
             accuracy_attribute_epoch += accuracy_attribute_batch

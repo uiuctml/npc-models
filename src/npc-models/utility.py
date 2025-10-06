@@ -13,7 +13,7 @@ import wandb
 def applySoftmax(output):
     return torch.nn.functional.softmax(output, dim = 1)
 
-def applySoftmaxDecomposed(outputs_decomposed):
+def applySoftmaxAttribute(outputs_decomposed):
     outputs_decomposed_softmax = []
 
     for i in range(len(outputs_decomposed)):
@@ -21,7 +21,7 @@ def applySoftmaxDecomposed(outputs_decomposed):
 
     return outputs_decomposed_softmax
 
-def computeAccuracyDecomposed(outputs, labels, device):
+def computeAccuracyAttribute(outputs, labels, device):
     count_attributes = len(outputs)
     corrects = []
 

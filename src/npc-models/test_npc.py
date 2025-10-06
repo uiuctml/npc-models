@@ -64,7 +64,7 @@ def findCE(outputs_decomposed_original, pc_joint, pc_marginal, pc_output_rows, p
     with torch.set_grad_enabled(True):
         batch_size = labels_class.nelement()
         outputs_decomposed = []
-        outputs_decomposed_original = utility.applySoftmaxDecomposed(outputs_decomposed_original)
+        outputs_decomposed_original = utility.applySoftmaxAttribute(outputs_decomposed_original)
         progress_bar = tqdm.tqdm(total = batch_size, position = 1, leave = False)
         progress_bar.set_description_str("[INFO]: Optimizing CE attributes")
 
@@ -312,7 +312,7 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
 
         with torch.set_grad_enabled(False):
             (outputs_decomposed_original, _) = model_decomposed(input)
-            outputs_decomposed = utility.applySoftmaxDecomposed(outputs_decomposed_original)
+            outputs_decomposed = utility.applySoftmaxAttribute(outputs_decomposed_original)
 
         (matrix_pc, matrix_neural, outputs_composed) = computeNPCOutput(outputs_decomposed, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
@@ -320,7 +320,7 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
         prediction_correctness = (predictions_composed == labels_class)
         corrects_composed = torch.sum(prediction_correctness).item()
 
-        accuracy_attribute_batch = utility.computeAccuracyDecomposed(outputs_decomposed_original, labels_decomposed, device)
+        accuracy_attribute_batch = utility.computeAccuracyAttribute(outputs_decomposed_original, labels_decomposed, device)
         accuracy_task_batch = corrects_composed / input.size(0)
 
         accuracy_attribute_epoch += accuracy_attribute_batch
@@ -344,7 +344,7 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
             corrects_composed_ce = torch.sum(prediction_correctness_ce).item()
             incorrects_composed = torch.sum(predictions_composed != labels_class).item()
 
-            ce_correctness_attribute_epoch += utility.computeAccuracyDecomposed(outputs_decomposed_ce, labels_decomposed, device)
+            ce_correctness_attribute_epoch += utility.computeAccuracyAttribute(outputs_decomposed_ce, labels_decomposed, device)
 
             ce_instances_corrected += corrects_composed_ce - corrects_composed
             ce_instances_incorrect += incorrects_composed

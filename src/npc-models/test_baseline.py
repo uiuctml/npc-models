@@ -65,7 +65,7 @@ def computeAccuracy(output_neck, output_head, labels_decomposed, labels_class, d
         threshold_accuracy_task = 0
 
     if header.config_baseline["model"] == type.ModelBaseline.abm.name:
-        accuracy_attribute_batch = utility.computeAccuracyDecomposed(output_neck, labels_decomposed, device)
+        accuracy_attribute_batch = utility.computeAccuracyAttribute(output_neck, labels_decomposed, device)
     else:
         labels_decomposed = utility.getBinaryLabelsDecomposed(labels_decomposed)
         accuracy_attribute_batch = sklearn.metrics.accuracy_score(labels_decomposed.cpu(), (output_neck > threshold_accuracy_attribute).cpu())
@@ -82,7 +82,7 @@ def computeTVDistance(output_neck, labels_decomposed, tv_distances_epoch, data_l
         counts_categories.append(len(attribute["labels"]))
 
     if header.config_baseline["model"] == type.ModelBaseline.abm.name:
-        output = utility.applySoftmaxDecomposed(output_neck)
+        output = utility.applySoftmaxAttribute(output_neck)
     elif header.config_baseline["model"] == type.ModelBaseline.cbm.name:
         output = torch.nn.functional.sigmoid(output_neck)
         output = list(torch.split(output, counts_categories, dim = 1))

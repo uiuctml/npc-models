@@ -74,8 +74,8 @@ def test(model_decomposed, data_loader, device, batch_step):
 
             (output, _) = model_decomposed(input)
 
-            output = utility.applySoftmaxDecomposed(output)
-            accuracy_attribute_batch = utility.computeAccuracyDecomposed(output, labels, device)
+            output = utility.applySoftmaxAttribute(output)
+            accuracy_attribute_batch = utility.computeAccuracyAttribute(output, labels, device)
 
             accuracy_attribute_epoch += accuracy_attribute_batch
 
