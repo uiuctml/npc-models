@@ -60,9 +60,12 @@ def updateInterpretationWidget():
         layout_labels.addItem(spacer_top)
 
         for attribute_label in explanations[file_name]["ce"][attribute_name].keys():
-            attribute_probability = "{:.1f}".format(explanations[file_name]["ce"][attribute_name][attribute_label] * 100)
+            attribute_probability = "{:05.1f}".format(explanations[file_name]["ce"][attribute_name][attribute_label] * 100)
+            font = PyQt5.QtGui.QFontDatabase.systemFont(PyQt5.QtGui.QFontDatabase.FixedFont)
             label = PyQt5.QtWidgets.QLabel()
-            text = attribute_label + ": " + attribute_probability + "%"
+            text = '[' + attribute_probability + "%] " + attribute_label
+
+            font.setPointSize(header.interpret_label_font_size)
             label.setText(text)
 
             if attribute_name == "original":
@@ -70,6 +73,7 @@ def updateInterpretationWidget():
             else:
                 label.setFixedWidth(header.interpret_label_width_attribute)
 
+            label.setFont(font)
             layout_labels.addWidget(label)
 
         layout_labels.addItem(spacer_bottom)
@@ -86,33 +90,50 @@ def updateInterpretationWidget():
         layout_labels.addItem(spacer_top)
 
         if attribute_name == "original":
-            attribute_label = explanations[file_name]["ground_truth"][attribute_name]
+            attribute_label = "         " + explanations[file_name]["ground_truth"][attribute_name]
+            font = PyQt5.QtGui.QFontDatabase.systemFont(PyQt5.QtGui.QFontDatabase.FixedFont)
             label = PyQt5.QtWidgets.QLabel()
+
+            font.setPointSize(header.interpret_label_font_size)
             label.setText(attribute_label)
             label.setFixedWidth(header.interpret_label_width_original)
+            label.setFont(font)
             layout_labels.addWidget(label)
         else:
             for attribute_label in explanations[file_name]["ground_truth"][attribute_name]:
+                font = PyQt5.QtGui.QFontDatabase.systemFont(PyQt5.QtGui.QFontDatabase.FixedFont)
                 label = PyQt5.QtWidgets.QLabel()
-                label.setText(attribute_label)
+
+                font.setPointSize(header.interpret_label_font_size)
+                label.setText("         " + attribute_label)
                 label.setFixedWidth(header.interpret_label_width_attribute)
+                label.setFont(font)
                 layout_labels.addWidget(label)
 
         layout_labels.addItem(spacer_bottom)
 
     for (i, attribute_name) in enumerate(explanations[file_name]["mpe"].keys()):
         if attribute_name != "correct":
-            attribute_label = explanations[file_name]["mpe"][attribute_name]
-            label = layout_mpe.itemAt(i).widget()
-            label.setText(attribute_label)
-        else:
-            correct = explanations[file_name]["mpe"][attribute_name]
+            attribute_label = "         " + explanations[file_name]["mpe"][attribute_name]
+            font = PyQt5.QtGui.QFontDatabase.systemFont(PyQt5.QtGui.QFontDatabase.FixedFont)
             label = layout_mpe.itemAt(i).widget()
 
+            font.setPointSize(header.interpret_label_font_size)
+            label.setText(attribute_label)
+            label.setFont(font)
+        else:
+            correct = explanations[file_name]["mpe"][attribute_name]
+            font = PyQt5.QtGui.QFontDatabase.systemFont(PyQt5.QtGui.QFontDatabase.FixedFont)
+            label = layout_mpe.itemAt(i).widget()
+
+            font.setPointSize(header.interpret_label_font_size)
+
             if correct:
-                label.setText("Correct")
+                label.setText("         Aligned")
             else:
-                label.setText("Incorrect")
+                label.setText("         Misaligned")
+
+            label.setFont(font)
 
     for (i, attribute_name) in enumerate(explanations[file_name]["prediction"].keys()):
         layout_labels = PyQt5.QtWidgets.QVBoxLayout()
@@ -126,9 +147,12 @@ def updateInterpretationWidget():
         layout_labels.addItem(spacer_top)
 
         for attribute_label in explanations[file_name]["prediction"][attribute_name].keys():
-            attribute_probability = "{:.1f}".format(explanations[file_name]["prediction"][attribute_name][attribute_label] * 100)
+            attribute_probability = "{:05.1f}".format(explanations[file_name]["prediction"][attribute_name][attribute_label] * 100)
+            font = PyQt5.QtGui.QFontDatabase.systemFont(PyQt5.QtGui.QFontDatabase.FixedFont)
             label = PyQt5.QtWidgets.QLabel()
-            text = attribute_label + ": " + attribute_probability + "%"
+            text = '[' + attribute_probability + "%] " + attribute_label
+
+            font.setPointSize(header.interpret_label_font_size)
             label.setText(text)
 
             if attribute_name == "original":
@@ -136,6 +160,7 @@ def updateInterpretationWidget():
             else:
                 label.setFixedWidth(header.interpret_label_width_attribute)
 
+            label.setFont(font)
             layout_labels.addWidget(label)
 
         layout_labels.addItem(spacer_bottom)
@@ -225,10 +250,14 @@ def createInterpretationWidget():
         layout_labels.addItem(spacer_top)
 
         for attribute_label in explanations[file_name]["ce"][attribute_name].keys():
-            attribute_probability = "{:.1f}".format(explanations[file_name]["ce"][attribute_name][attribute_label] * 100)
-            text = attribute_label + ": " + attribute_probability + "%"
+            attribute_probability = "{:05.1f}".format(explanations[file_name]["ce"][attribute_name][attribute_label] * 100)
+            font = PyQt5.QtGui.QFontDatabase.systemFont(PyQt5.QtGui.QFontDatabase.FixedFont)
             label = PyQt5.QtWidgets.QLabel()
+            text = '[' + attribute_probability + "%] " + attribute_label
+
+            font.setPointSize(header.interpret_label_font_size)
             label.setText(text)
+            label.setFont(font)
 
             if attribute_name == "original":
                 label.setFixedWidth(header.interpret_label_width_original)
@@ -248,37 +277,52 @@ def createInterpretationWidget():
         layout_labels.addItem(spacer_top)
 
         if attribute_name == "original":
-            attribute_label = explanations[file_name]["ground_truth"][attribute_name]
+            attribute_label = "         " + explanations[file_name]["ground_truth"][attribute_name]
+            font = PyQt5.QtGui.QFontDatabase.systemFont(PyQt5.QtGui.QFontDatabase.FixedFont)
             label = PyQt5.QtWidgets.QLabel()
+
+            font.setPointSize(header.interpret_label_font_size)
             label.setText(attribute_label)
             label.setFixedWidth(header.interpret_label_width_original)
+            label.setFont(font)
             layout_labels.addWidget(label)
         else:
             for attribute_label in explanations[file_name]["ground_truth"][attribute_name]:
+                font = PyQt5.QtGui.QFontDatabase.systemFont(PyQt5.QtGui.QFontDatabase.FixedFont)
                 label = PyQt5.QtWidgets.QLabel()
-                label.setText(attribute_label)
+
+                font.setPointSize(header.interpret_label_font_size)
+                label.setText("         " + attribute_label)
                 label.setFixedWidth(header.interpret_label_width_attribute)
+                label.setFont(font)
                 layout_labels.addWidget(label)
 
         layout_labels.addItem(spacer_bottom)
 
     for attribute_name in explanations[file_name]["mpe"].keys():
-        if attribute_name == "correct":
+        if attribute_name != "correct":
+            attribute_label = "         " + explanations[file_name]["mpe"][attribute_name]
+            font = PyQt5.QtGui.QFontDatabase.systemFont(PyQt5.QtGui.QFontDatabase.FixedFont)
+            label = PyQt5.QtWidgets.QLabel()
+
+            font.setPointSize(header.interpret_label_font_size)
+            label.setText(attribute_label)
+            label.setFixedWidth(header.interpret_label_width_attribute)
+            label.setFont(font)
+            layout_mpe.addWidget(label)
+        else:
             correct = explanations[file_name]["mpe"][attribute_name]
+            font = PyQt5.QtGui.QFontDatabase.systemFont(PyQt5.QtGui.QFontDatabase.FixedFont)
             label = PyQt5.QtWidgets.QLabel()
 
             if correct:
-                label.setText("Correct")
+                label.setText("         Aligned")
             else:
-                label.setText("Incorrect")
+                label.setText("         Misaligned")
 
+            font.setPointSize(header.interpret_label_font_size)
             label.setFixedWidth(header.interpret_label_width_original)
-            layout_mpe.addWidget(label)
-        else:
-            attribute_label = explanations[file_name]["mpe"][attribute_name]
-            label = PyQt5.QtWidgets.QLabel()
-            label.setText(attribute_label)
-            label.setFixedWidth(header.interpret_label_width_attribute)
+            label.setFont(font)
             layout_mpe.addWidget(label)
 
     for attribute_name in explanations[file_name]["prediction"].keys():
@@ -290,9 +334,12 @@ def createInterpretationWidget():
             layout_labels.addItem(spacer_top)
 
             for attribute_label in explanations[file_name]["prediction"][attribute_name].keys():
-                attribute_probability = "{:.1f}".format(explanations[file_name]["prediction"][attribute_name][attribute_label] * 100)
-                text = attribute_label + ": " + attribute_probability + "%"
+                attribute_probability = "{:05.1f}".format(explanations[file_name]["prediction"][attribute_name][attribute_label] * 100)
+                font = PyQt5.QtGui.QFontDatabase.systemFont(PyQt5.QtGui.QFontDatabase.FixedFont)
                 label = PyQt5.QtWidgets.QLabel()
+                text = '[' + attribute_probability + "%] " + attribute_label
+
+                font.setPointSize(header.interpret_label_font_size)
                 label.setText(text)
 
                 if attribute_name == "original":
@@ -300,6 +347,7 @@ def createInterpretationWidget():
                 else:
                     label.setFixedWidth(header.interpret_label_width_attribute)
 
+                label.setFont(font)
                 layout_labels.addWidget(label)
 
             layout_labels.addItem(spacer_bottom)
@@ -325,17 +373,15 @@ def createViewerWidget():
 
 def createWindowLayout():
     layout_window = PyQt5.QtWidgets.QVBoxLayout()
-    spacer_top = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
-    spacer_bottom = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
+    spacer = PyQt5.QtWidgets.QSpacerItem(10, 10, PyQt5.QtWidgets.QSizePolicy.Minimum, PyQt5.QtWidgets.QSizePolicy.Expanding)
     splitter = PyQt5.QtWidgets.QSplitter()
     widget_application_control = createApplicationControlWidget()
     widget_interpretation = createInterpretationWidget()
     widget_viewer = createViewerWidget()
 
-    layout_window.addItem(spacer_top)
     layout_window.addWidget(splitter)
+    layout_window.addItem(spacer)
     layout_window.addWidget(widget_application_control)
-    layout_window.addItem(spacer_bottom)
 
     splitter.addWidget(widget_viewer)
     splitter.addWidget(widget_interpretation)

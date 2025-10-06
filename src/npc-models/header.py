@@ -19,8 +19,9 @@ checkpoint_postfix = ".zip"
 checkpoint_postfix_best = ".best" + checkpoint_postfix
 
 interpret_dir_dataset = os.path.join(dataset_dir, "splits/instances/test")
-interpret_label_width_attribute = 200
-interpret_label_width_original = 350
+interpret_label_font_size = 10
+interpret_label_width_attribute = 250
+interpret_label_width_original = 250
 interpret_viewer_height = 300
 interpret_viewer_width = 300
 
