@@ -157,16 +157,51 @@ def processArguments():
 
     return
 
-def recordCE(input_file_paths, ce, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_ce, outputs_composed, outputs_composed_ce):
+def recordPredictions(input_file_paths, interpret, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed):
     batch_size = labels_original.nelement()
 
     for batch_index in range(batch_size):
         input_file_path = os.path.basename(input_file_paths[batch_index])
 
-        ce[input_file_path] = {}
-        ce[input_file_path]["ce"] = {}
-        ce[input_file_path]["ground_truth"] = {}
-        ce[input_file_path]["prediction"] = {}
+        interpret[input_file_path] = {}
+        interpret[input_file_path]["ground_truth"] = {}
+        interpret[input_file_path]["prediction"] = {}
+
+        for (attribute_index, attribute) in enumerate(dataset.config["attributes"]):
+            attribute_name = attribute["name"]
+            masks_positive_labels_decomposed = (labels_decomposed[attribute_index] > 0)
+            counts_positive_labels_decomposed = torch.sum(masks_positive_labels_decomposed, dim = 1)
+            count_positive_labels_decomposed = counts_positive_labels_decomposed[batch_index]
+
+            (outputs_decomposed_prediction_probability, outputs_decomposed_prediction_label) = torch.topk(outputs_decomposed[attribute_index][batch_index], count_positive_labels_decomposed)
+
+            interpret[input_file_path]["ground_truth"][attribute_name] = []
+            interpret[input_file_path]["prediction"][attribute_name] = {}
+
+            for (label_decomposed_index, label_decomposed) in enumerate(labels_decomposed[attribute_index][batch_index]):
+                if label_decomposed > 0:
+                    interpret[input_file_path]["ground_truth"][attribute_name].append(dataset.classes[attribute_name][label_decomposed_index])
+
+            for (output_decomposed_prediction_probability, output_decomposed_prediction_label) in zip(outputs_decomposed_prediction_probability, outputs_decomposed_prediction_label):
+                interpret[input_file_path]["prediction"][attribute_name][dataset.classes[attribute_name][output_decomposed_prediction_label.item()]] = output_decomposed_prediction_probability.item()
+
+            interpret[input_file_path]["ground_truth"][attribute_name] = sorted(interpret[input_file_path]["ground_truth"][attribute_name])
+            interpret[input_file_path]["prediction"][attribute_name] = dict(sorted(interpret[input_file_path]["prediction"][attribute_name].items()))
+
+        (outputs_composed_prediction_probability, outputs_composed_prediction_label) = torch.max(outputs_composed[batch_index], 0)
+
+        interpret[input_file_path]["ground_truth"]["original"] = dataset.classes_original[labels_original[batch_index]]
+        interpret[input_file_path]["prediction"]["original"] = {dataset.classes_original[outputs_composed_prediction_label]: outputs_composed_prediction_probability.item()}
+
+    return
+
+def recordCE(input_file_paths, interpret, dataset, labels_decomposed, labels_original, outputs_decomposed_ce, outputs_composed_ce):
+    batch_size = labels_original.nelement()
+
+    for batch_index in range(batch_size):
+        input_file_path = os.path.basename(input_file_paths[batch_index])
+
+        interpret[input_file_path]["ce"] = {}
 
         for (attribute_index, attribute) in enumerate(dataset.config["attributes"]):
             attribute_name = attribute["name"]
@@ -175,73 +210,33 @@ def recordCE(input_file_paths, ce, dataset, labels_decomposed, labels_original, 
             count_positive_labels_decomposed = counts_positive_labels_decomposed[batch_index]
 
             (outputs_decomposed_ce_prediction_probability, outputs_decomposed_ce_prediction_label) = torch.topk(outputs_decomposed_ce[attribute_index][batch_index], count_positive_labels_decomposed)
-            (outputs_decomposed_prediction_probability, outputs_decomposed_prediction_label) = torch.topk(outputs_decomposed[attribute_index][batch_index], count_positive_labels_decomposed)
 
-            ce[input_file_path]["ce"][attribute_name] = {}
-            ce[input_file_path]["ground_truth"][attribute_name] = []
-            ce[input_file_path]["prediction"][attribute_name] = {}
+            interpret[input_file_path]["ce"][attribute_name] = {}
 
             for (output_decomposed_ce_prediction_probability, output_decomposed_ce_prediction_label) in zip(outputs_decomposed_ce_prediction_probability, outputs_decomposed_ce_prediction_label):
-                ce[input_file_path]["ce"][attribute_name][dataset.classes[attribute_name][output_decomposed_ce_prediction_label.item()]] = output_decomposed_ce_prediction_probability.item()
+                interpret[input_file_path]["ce"][attribute_name][dataset.classes[attribute_name][output_decomposed_ce_prediction_label.item()]] = output_decomposed_ce_prediction_probability.item()
 
-            for (label_decomposed_index, label_decomposed) in enumerate(labels_decomposed[attribute_index][batch_index]):
-                if label_decomposed > 0:
-                    ce[input_file_path]["ground_truth"][attribute_name].append(dataset.classes[attribute_name][label_decomposed_index])
-
-            for (output_decomposed_prediction_probability, output_decomposed_prediction_label) in zip(outputs_decomposed_prediction_probability, outputs_decomposed_prediction_label):
-                ce[input_file_path]["prediction"][attribute_name][dataset.classes[attribute_name][output_decomposed_prediction_label.item()]] = output_decomposed_prediction_probability.item()
-
-            ce[input_file_path]["ce"][attribute_name] = dict(sorted(ce[input_file_path]["ce"][attribute_name].items()))
-            ce[input_file_path]["ground_truth"][attribute_name] = sorted(ce[input_file_path]["ground_truth"][attribute_name])
-            ce[input_file_path]["prediction"][attribute_name] = dict(sorted(ce[input_file_path]["prediction"][attribute_name].items()))
+            interpret[input_file_path]["ce"][attribute_name] = dict(sorted(interpret[input_file_path]["ce"][attribute_name].items()))
 
         (outputs_composed_ce_prediction_probability, outputs_composed_ce_prediction_label) = torch.max(outputs_composed_ce[batch_index], 0)
-        (outputs_composed_prediction_probability, outputs_composed_prediction_label) = torch.max(outputs_composed[batch_index], 0)
 
-        ce[input_file_path]["ce"]["original"] = {dataset.classes_original[outputs_composed_ce_prediction_label]: outputs_composed_ce_prediction_probability.item()}
-        ce[input_file_path]["ground_truth"]["original"] = dataset.classes_original[labels_original[batch_index]]
-        ce[input_file_path]["prediction"]["original"] = {dataset.classes_original[outputs_composed_prediction_label]: outputs_composed_prediction_probability.item()}
+        interpret[input_file_path]["ce"]["original"] = {dataset.classes_original[outputs_composed_ce_prediction_label]: outputs_composed_ce_prediction_probability.item()}
 
     return
 
-def recordMPE(input_file_paths, mpe, mpe_attributes, mpe_correctness, dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed):
+def recordMPE(input_file_paths, interpret, mpe_attributes, mpe_correctness, dataset, labels_original):
     batch_size = labels_original.nelement()
 
     for batch_index in range(batch_size):
         input_file_path = os.path.basename(input_file_paths[batch_index])
 
-        mpe[input_file_path] = {}
-        mpe[input_file_path]["mpe"] = {}
-        mpe[input_file_path]["ground_truth"] = {}
-        mpe[input_file_path]["prediction"] = {}
+        interpret[input_file_path]["mpe"] = {}
 
         for (attribute_index, attribute) in enumerate(dataset.config["attributes"]):
             attribute_name = attribute["name"]
-            masks_positive_labels_decomposed = (labels_decomposed[attribute_index] > 0)
-            counts_positive_labels_decomposed = torch.sum(masks_positive_labels_decomposed, dim = 1)
-            count_positive_labels_decomposed = counts_positive_labels_decomposed[batch_index]
+            interpret[input_file_path]["mpe"][attribute_name] = dataset.classes[attribute_name][mpe_attributes[batch_index][attribute_index]]
 
-            (outputs_decomposed_prediction_probability, outputs_decomposed_prediction_label) = torch.topk(outputs_decomposed[attribute_index][batch_index], count_positive_labels_decomposed)
-
-            mpe[input_file_path]["mpe"][attribute_name] = dataset.classes[attribute_name][mpe_attributes[batch_index][attribute_index]]
-            mpe[input_file_path]["ground_truth"][attribute_name] = []
-            mpe[input_file_path]["prediction"][attribute_name] = {}
-
-            for (label_decomposed_index, label_decomposed) in enumerate(labels_decomposed[attribute_index][batch_index]):
-                if label_decomposed > 0:
-                    mpe[input_file_path]["ground_truth"][attribute_name].append(dataset.classes[attribute_name][label_decomposed_index])
-
-            for (output_decomposed_prediction_probability, output_decomposed_prediction_label) in zip(outputs_decomposed_prediction_probability, outputs_decomposed_prediction_label):
-                mpe[input_file_path]["prediction"][attribute_name][dataset.classes[attribute_name][output_decomposed_prediction_label.item()]] = output_decomposed_prediction_probability.item()
-
-            mpe[input_file_path]["ground_truth"][attribute_name] = sorted(mpe[input_file_path]["ground_truth"][attribute_name])
-            mpe[input_file_path]["prediction"][attribute_name] = dict(sorted(mpe[input_file_path]["prediction"][attribute_name].items()))
-
-        (outputs_composed_prediction_probability, outputs_composed_prediction_label) = torch.max(outputs_composed[batch_index], 0)
-
-        mpe[input_file_path]["mpe"]["correct"] = mpe_correctness[batch_index]
-        mpe[input_file_path]["ground_truth"]["original"] = dataset.classes_original[labels_original[batch_index]]
-        mpe[input_file_path]["prediction"]["original"] = (dataset.classes_original[outputs_composed_prediction_label], outputs_composed_prediction_probability.item())
+        interpret[input_file_path]["mpe"]["correct"] = mpe_correctness[batch_index]
 
     return
 
@@ -254,14 +249,13 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
 
     accuracy_attribute_epoch = 0
     accuracy_task_epoch = 0
-    ce = {}
     ce_correctness_attribute_epoch = 0
     ce_correctness_task_epoch = 0
     ce_instances_corrected = 0
     ce_instances_incorrect = 0
     ce_tv_distance_epoch = 0
     ce_tv_distances_epoch = []
-    mpe = {}
+    interpret = {}
     mpe_correctness_epoch = []
     mpe_correctness_prediction_correct_epoch = []
     mpe_correctness_prediction_incorrect_epoch = []
@@ -307,11 +301,13 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
             tv_distances_epoch[i] += torch.sum(tv_distance_batch).item()
 
         if header.npc_interpret:
+            recordPredictions(input_file_paths, interpret, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed)
+
             outputs_decomposed_ce = findCE(outputs_decomposed_original, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, labels_original, device)
 
             (_, _, outputs_composed_ce) = utility.compose(outputs_decomposed_ce, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
-            recordCE(input_file_paths, ce, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_decomposed_ce, outputs_composed, outputs_composed_ce)
+            recordCE(input_file_paths, interpret, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed_ce, outputs_composed_ce)
 
             (_, predictions_composed_ce) = torch.max(outputs_composed_ce, 1)
             prediction_correctness_ce = (predictions_composed_ce == labels_original)
@@ -331,7 +327,7 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
             mpe_attributes = findMPE(matrix_a, matrix_b, predictions_composed, pc_settings_joint)
             mpe_correctness = computeMPECorrectness(mpe_attributes, labels_decomposed)
 
-            recordMPE(input_file_paths, mpe, mpe_attributes, mpe_correctness, data_loader.dataset, labels_decomposed, labels_original, outputs_decomposed, outputs_composed)
+            recordMPE(input_file_paths, interpret, mpe_attributes, mpe_correctness, data_loader.dataset, labels_original)
 
             mpe_correctness = torch.tensor(mpe_correctness).to(device)
             mpe_correctness_epoch += mpe_correctness.tolist()
@@ -409,13 +405,9 @@ def test(model_decomposed, pc_joint, pc_marginal, pc_settings_joint, data_loader
         if not os.path.isdir(header.interpret_dir_outputs):
             os.makedirs(header.interpret_dir_outputs, exist_ok = True)
 
-        with open(os.path.join(header.interpret_dir_outputs, header.npc_file_name_ce), "w") as file_ce:
-            json.dump(ce, file_ce, indent = 4)
-            logger.log_info("Saved CE to \"" + os.path.join(header.interpret_dir_outputs, header.npc_file_name_ce) + "\".")
-
-        with open(os.path.join(header.interpret_dir_outputs, header.npc_file_name_mpe), "w") as file_mpe:
-            json.dump(mpe, file_mpe, indent = 4)
-            logger.log_info("Saved MPE to \"" + os.path.join(header.interpret_dir_outputs, header.npc_file_name_mpe) + "\".")
+        with open(os.path.join(header.interpret_dir_outputs, header.dataset_prefix + ".json"), "w") as file_interpret:
+            json.dump(interpret, file_interpret, indent = 4)
+            logger.log_info("Saved interpretions to \"" + os.path.join(header.interpret_dir_outputs, header.dataset_prefix + ".json") + "\".")
 
     return
 
