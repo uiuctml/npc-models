@@ -12,20 +12,20 @@ import wandb
 
 def initializeRunName(run_name = ""):
     if run_name != "":
-        if run_name.split(".")[1] != header.config_baseline["type"]:
+        if run_name.split(".")[1] != header.config_blackbox["type"]:
             logger.log_fatal("Invalid baseline run name. Quit.")
             exit(-1)
 
-        header.config_baseline["run_name"] = run_name
+        header.config_blackbox["run_name"] = run_name
     else:
-        header.config_baseline["run_name"] = utility.generateRunName(header.config_baseline["seed"], header.config_baseline["type"], "resnet34")
+        header.config_blackbox["run_name"] = utility.generateRunName(header.config_blackbox["seed"], header.config_blackbox["type"], "resnet34")
 
-    if header.config_baseline["run_name"] == "":
+    if header.config_blackbox["run_name"] == "":
         logger.log_fatal("Missing baseline run name. Quit.")
         exit(-1)
 
-    header.config_baseline["file_name_checkpoint"] = header.config_baseline["run_name"] + header.checkpoint_postfix
-    header.config_baseline["file_name_checkpoint_best"] = header.config_baseline["run_name"] + header.checkpoint_postfix_best
+    header.config_blackbox["file_name_checkpoint"] = header.config_blackbox["run_name"] + header.checkpoint_postfix
+    header.config_blackbox["file_name_checkpoint_best"] = header.config_blackbox["run_name"] + header.checkpoint_postfix_best
 
     return
 
@@ -38,15 +38,15 @@ def processArguments():
     initializeRunName(arguments.run_name)
 
     if arguments.seed is not None:
-        header.config_baseline["seed"] = arguments.seed
+        header.config_blackbox["seed"] = arguments.seed
 
-    logger.log_trace("Run name: \"" + header.config_baseline["run_name"] + "\".")
-    logger.log_trace("Random seed: " + str(header.config_baseline["seed"]) + ".")
+    logger.log_trace("Run name: \"" + header.config_blackbox["run_name"] + "\".")
+    logger.log_trace("Random seed: " + str(header.config_blackbox["seed"]) + ".")
 
     return
 
 def test(model_baseline, data_loader, device, batch_step):
-    utility.loadCheckpoint(header.config_baseline["file_name_checkpoint_best"], model_baseline)
+    utility.loadCheckpoint(header.config_blackbox["file_name_checkpoint_best"], model_baseline)
 
     accuracy_task_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 0, leave = False)
@@ -89,14 +89,14 @@ def test(model_baseline, data_loader, device, batch_step):
 def main():
     processArguments()
 
-    utility.setSeed(header.config_baseline["seed"])
+    utility.setSeed(header.config_blackbox["seed"])
     torch.backends.cuda.matmul.allow_tf32 = header.cuda_allow_tf32
 
-    wandb.init(config = header.config_baseline, mode = "disabled")
+    wandb.init(config = header.config_blackbox, mode = "disabled")
 
-    dataset_transforms = utility.createTransform(header.config_baseline)
-    dataset_test = dataset.NPCDataset(header.config_baseline["dir_dataset_test"], dataset_transforms)
-    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_baseline["batch_size"], shuffle = False, num_workers = header.config_baseline["data_loader_worker_count"], pin_memory = True)
+    dataset_transforms = utility.createTransform(header.config_blackbox)
+    dataset_test = dataset.NPCDataset(header.config_blackbox["dir_dataset_test"], dataset_transforms)
+    data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_blackbox["batch_size"], shuffle = False, num_workers = header.config_blackbox["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
     model_baseline = model.ResNet34(dataset_test.config, device)
     model_baseline = torch.nn.DataParallel(model_baseline)

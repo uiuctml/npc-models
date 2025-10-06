@@ -34,7 +34,7 @@ interpret_preprocess = False
 interpret_viewer_height = 300
 interpret_viewer_width = 300
 
-config_baseline = {
+config_blackbox = {
     "batch_size": 256,
     "data_loader_shuffle": True,
     "data_loader_worker_count": multiprocessing.cpu_count(),
@@ -59,7 +59,7 @@ config_baseline = {
     "optimizer_weight_decay": 4e-5,
     "run_name": "",
     "seed": 42,
-    "type": "baseline",
+    "type": "blackbox",
 }
 
 config_decomposed = {
