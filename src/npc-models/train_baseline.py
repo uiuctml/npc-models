@@ -18,7 +18,7 @@ def processArguments():
     parser.add_argument("-m", "--model", type = str, default = "", help = "Model.")
     parser.add_argument("-b", "--batch-size", type = int, default = None, help = "Batch size.")
     parser.add_argument("-e", "--epochs", type = int, default = None, help = "Epochs.")
-    parser.add_argument("-s", "--seed", type = int, default = None, help = "Random seed.")
+    parser.add_argument("-s", "--seed", type = int, default = None, help = "Seed.")
     arguments = parser.parse_args()
 
     if arguments.model != "":
@@ -39,7 +39,7 @@ def processArguments():
     logger.log_trace("Model: \"" + header.config_baseline["model"] + "\".")
     logger.log_trace("Batch size: " + str(header.config_baseline["batch_size"]) + ".")
     logger.log_trace("Epochs: " + str(header.config_baseline["epochs"]) + ".")
-    logger.log_trace("Random seed: " + str(header.config_baseline["seed"]) + ".")
+    logger.log_trace("Seed: " + str(header.config_baseline["seed"]) + ".")
 
     return
 
@@ -72,7 +72,7 @@ def computeLoss(output_neck, output_head, labels_attribute, labels_class):
         loss_task = torch.nn.functional.binary_cross_entropy(output_head, labels_class)
         return header.config_baseline["concept_loss_weight"] * loss_attribute + loss_task
     else:
-        logger.log_fatal("Unknown baseline model \"" + header.config_baseline["model"] + "\".")
+        logger.log_fatal("Unknown baseline model \"" + header.config_baseline["model"] + "\". Quit.")
         exit(-1)
 
     return
@@ -200,7 +200,7 @@ def main():
     batch_step_test = 1
     batch_step_train = 1
     batch_step_validate = 1
-    dataset_transforms = utility.createTransform(header.config_baseline)
+    dataset_transforms = utility.createTransforms(header.config_baseline)
     dataset_test = dataset.NPCDataset(header.config_baseline["dir_dataset_test"], dataset_transforms)
     dataset_train = dataset.NPCDataset(header.config_baseline["dir_dataset_train"], dataset_transforms)
     dataset_validation = dataset.NPCDataset(header.config_baseline["dir_dataset_validation"], dataset_transforms)

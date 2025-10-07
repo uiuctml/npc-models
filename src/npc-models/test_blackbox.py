@@ -38,7 +38,7 @@ def initializeRunName(run_name = ""):
 def processArguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.", required = True)
-    parser.add_argument("-s", "--seed", type = int, default = None, help = "Random seed.")
+    parser.add_argument("-s", "--seed", type = int, default = None, help = "Seed.")
     arguments = parser.parse_args()
 
     initializeRunName(arguments.run_name)
@@ -47,7 +47,7 @@ def processArguments():
         header.config_blackbox["seed"] = arguments.seed
 
     logger.log_trace("Run name: \"" + header.config_blackbox["run_name"] + "\".")
-    logger.log_trace("Random seed: " + str(header.config_blackbox["seed"]) + ".")
+    logger.log_trace("Seed: " + str(header.config_blackbox["seed"]) + ".")
 
     return
 
@@ -100,7 +100,7 @@ def main():
 
     wandb.init(config = header.config_blackbox, mode = "disabled")
 
-    dataset_transforms = utility.createTransform(header.config_blackbox)
+    dataset_transforms = utility.createTransforms(header.config_blackbox)
     dataset_test = dataset.NPCDataset(header.config_blackbox["dir_dataset_test"], dataset_transforms)
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_blackbox["batch_size"], shuffle = False, num_workers = header.config_blackbox["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")

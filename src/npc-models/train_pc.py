@@ -14,7 +14,7 @@ import wandb
 def processArguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--epochs", type = int, default = None, help = "Epochs.")
-    parser.add_argument("-s", "--seed", type = int, default = None, help = "Random seed.")
+    parser.add_argument("-s", "--seed", type = int, default = None, help = "Seed.")
     arguments = parser.parse_args()
 
     if arguments.epochs is not None:
@@ -27,7 +27,7 @@ def processArguments():
 
     logger.log_trace("Run name: \"" + header.config_pc["run_name"] + "\".")
     logger.log_trace("Epochs: " + str(header.config_pc["epochs"]) + ".")
-    logger.log_trace("Random seed: " + str(header.config_pc["seed"]) + ".")
+    logger.log_trace("Seed: " + str(header.config_pc["seed"]) + ".")
 
     return
 
@@ -74,10 +74,10 @@ def main():
     pc_joint = pc.ProbabilisticCircuit(device)
     pc_marginal = pc.ProbabilisticCircuit(device)
     optimizer = pc.CCCPPCOptimizer(pc_joint, pc_marginal, device)
-    progress_bar = None
+    progress_bar = tqdm.tqdm(total = header.config_pc["epochs"], position = 0)
     learning_rate_scheduler = pc.LikelihoodPCLearningRateScheduler(optimizer, header.config_pc["learning_rate_scheduler_factor"])
 
-    logger.log_info("Loading PC from \"" + header.config_pc["file_path_pc"] + "\"...")
+    logger.log_info("Loading PC \"" + header.config_pc["file_path_pc"] + "\"...")
 
     pc_joint.load(header.config_pc["file_path_pc"])
     pc_marginal.load(header.config_pc["file_path_pc"])
@@ -97,14 +97,11 @@ def main():
     logger.log_info("Testing PC...")
     test_pc.test(pc_joint, dataset_test)
 
-    if epoch <= header.config_pc["epochs"]:
-        progress_bar = tqdm.tqdm(total = header.config_pc["epochs"], position = 0)
-        progress_bar.set_description_str("[INFO]: Epoch")
+    progress_bar.set_description_str("[INFO]: Epoch")
 
     while epoch <= header.config_pc["epochs"]:
-        if progress_bar is not None:
-            progress_bar.n = epoch
-            progress_bar.refresh()
+        progress_bar.n = epoch
+        progress_bar.refresh()
 
         wandb.log({"training/epoch/step": epoch})
         wandb.log({"validation/epoch/step": epoch})
@@ -115,7 +112,7 @@ def main():
 
         learning_rate_scheduler.step(log_likelihood_train_epoch)
 
-        logger.log_info("Validation mean log likelihood: " + str(log_likelihood_validate_epoch) + ".")
+        logger.log_info("Validation log mean likelihood: " + str(log_likelihood_validate_epoch) + ".")
         logger.log_info("Validation mean likelihood: " + str(math.exp(log_likelihood_validate_epoch)) + ".")
 
         if log_likelihood_validate_epoch > log_likelihood_validation_best or epoch == 1:
@@ -133,10 +130,9 @@ def main():
 
         epoch += 1
 
-    if progress_bar is not None:
-        progress_bar.close()
+    progress_bar.close()
 
-    logger.log_info("Best validation mean log likelihood: " + str(log_likelihood_validation_best) + ".")
+    logger.log_info("Best validation log mean likelihood: " + str(log_likelihood_validation_best) + ".")
     logger.log_info("Best validation mean likelihood: " + str(math.exp(log_likelihood_validation_best)) + ".")
     wandb.summary["validation/epoch/log_likelihood_best"] = log_likelihood_validation_best
 

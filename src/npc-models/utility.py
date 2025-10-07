@@ -47,13 +47,11 @@ def computeConceptAccuracy(outputs, labels, device):
 
     return accuracy
 
-def createTransform(config):
-    dataset_transforms = torchvision.transforms.Compose([
-        torchvision.transforms.Resize((config["model_input_height"], config["model_input_width"])),
+def createTransforms(config_dataset):
+    return torchvision.transforms.Compose([
+        torchvision.transforms.Resize((config_dataset["model_input_height"], config_dataset["model_input_width"])),
         torchvision.transforms.ToTensor()
     ])
-
-    return dataset_transforms
 
 def defineMetrics():
     wandb.define_metric("testing/batch/step")
@@ -131,17 +129,17 @@ def getLabelsClass(dataset_config):
         return list(dataset_config["mappings"].keys())
 
 def getIndicesFromLabelsAttribute(labels_attribute):
-    indices = {}
+    labels_to_indices = {}
 
     for attribute in labels_attribute.keys():
-        labels_to_indices = {}
+        label_to_index = {}
 
         for i in range(len(labels_attribute[attribute])):
-            labels_to_indices[labels_attribute[attribute][i]] = i
+            label_to_index[labels_attribute[attribute][i]] = i
 
-        indices[attribute] = labels_to_indices
+        labels_to_indices[attribute] = label_to_index
 
-    return indices
+    return labels_to_indices
 
 def getIndicesFromLabelsClass(labels_class):
     labels_to_indices = {}
@@ -180,7 +178,7 @@ def generatePCSettings(config_dataset, device):
 
 def loadCheckpoint(file_name_checkpoint, model, pc = False):
     if not os.path.isdir(header.checkpoint_dir):
-        logger.log_fatal("Checkpoint directory \"" + header.checkpoint_dir + "\" missing.")
+        logger.log_fatal("Checkpoint directory \"" + header.checkpoint_dir + "\" missing. Quit.")
         exit(-1)
 
     file_path_checkpoint = os.path.join(header.checkpoint_dir, file_name_checkpoint)
@@ -195,7 +193,7 @@ def loadCheckpoint(file_name_checkpoint, model, pc = False):
 
         logger.log_info("Loaded checkpoint \"" + file_name_checkpoint + "\".")
     else:
-        logger.log_fatal("Checkpoint file \"" + file_name_checkpoint + "\" missing.")
+        logger.log_fatal("Checkpoint file \"" + file_name_checkpoint + "\" missing. Quit.")
         exit(-1)
 
     return
@@ -234,10 +232,11 @@ def saveCheckpoint(file_name_checkpoint, model, pc = False):
     return
 
 def setSeed(seed):
-    torch.backends.cudnn.deterministic = True
     random.seed(seed)
-    torch.manual_seed(seed)
     numpy.random.seed(seed)
+
+    torch.backends.cudnn.deterministic = True
+    torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
 
     return

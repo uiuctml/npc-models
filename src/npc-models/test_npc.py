@@ -164,7 +164,7 @@ def processArguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--run-name-neural", type = str, default = "", help = "Neural run name.", required = True)
     parser.add_argument("-p", "--run-name-pc", type = str, default = "", help = "PC run name.")
-    parser.add_argument("-s", "--seed", type = int, default = None, help = "Random seed.")
+    parser.add_argument("-s", "--seed", type = int, default = None, help = "Seed.")
     arguments = parser.parse_args()
 
     test_neural.initializeRunName(arguments.run_name_neural)
@@ -183,7 +183,7 @@ def processArguments():
 
     logger.log_trace("Neural run name: \"" + header.config_neural["run_name"] + "\".")
     logger.log_trace("PC run name: \"" + header.config_pc["run_name"] + "\".")
-    logger.log_trace("Random seed: " + str(header.config_neural["seed"]) + ".")
+    logger.log_trace("Seed: " + str(header.config_neural["seed"]) + ".")
 
     return
 
@@ -412,7 +412,7 @@ def main():
 
     wandb.init(config = config, mode = "disabled")
 
-    dataset_transforms = utility.createTransform(header.config_neural)
+    dataset_transforms = utility.createTransforms(header.config_neural)
     dataset_test = dataset.NPCDataset(header.config_neural["dir_dataset_test"], dataset_transforms)
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size = header.config_neural["batch_size"], shuffle = False, num_workers = header.config_neural["data_loader_worker_count"], pin_memory = True)
     device = torch.device("cuda")
@@ -428,7 +428,7 @@ def main():
     pc_joint = pc.ProbabilisticCircuit(device_pc)
     pc_marginal = pc.ProbabilisticCircuit(device_pc)
 
-    logger.log_info("Loading PC from \"" + header.config_pc["file_path_pc"] + "\"...")
+    logger.log_info("Loading PC \"" + header.config_pc["file_path_pc"] + "\"...")
 
     pc_joint.load(header.config_pc["file_path_pc"])
     pc_marginal.load(header.config_pc["file_path_pc"])

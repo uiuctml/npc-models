@@ -34,7 +34,7 @@ def initializeRunName(run_name = "", optimizer = "cccp"):
 def processArguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.")
-    parser.add_argument("-s", "--seed", type = int, default = None, help = "Random seed.")
+    parser.add_argument("-s", "--seed", type = int, default = None, help = "Seed.")
     arguments = parser.parse_args()
 
     if arguments.run_name == "":
@@ -49,7 +49,7 @@ def processArguments():
         header.config_pc["seed"] = arguments.seed
 
     logger.log_trace("Run name: \"" + header.config_pc["run_name"] + "\".")
-    logger.log_trace("Random seed: " + str(header.config_pc["seed"]) + ".")
+    logger.log_trace("Seed: " + str(header.config_pc["seed"]) + ".")
 
     return
 
@@ -79,7 +79,7 @@ def test(pc_joint, settings_joint):
 
     wandb.log({"testing/epoch/log_likelihood": log_likelihood})
     wandb.summary["testing/epoch/log_likelihood"] = log_likelihood
-    logger.log_info("Testing mean log likelihood: " + str(log_likelihood) + ".")
+    logger.log_info("Testing log mean likelihood: " + str(log_likelihood) + ".")
     logger.log_info("Testing mean likelihood: " + str(math.exp(log_likelihood)) + ".")
 
     return
@@ -97,7 +97,7 @@ def main():
 
     pc_joint = pc.ProbabilisticCircuit(device)
 
-    logger.log_info("Loading PC from \"" + header.config_pc["file_path_pc"] + "\"...")
+    logger.log_info("Loading PC \"" + header.config_pc["file_path_pc"] + "\"...")
 
     pc_joint.load(header.config_pc["file_path_pc"])
 

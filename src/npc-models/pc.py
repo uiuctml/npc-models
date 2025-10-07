@@ -79,9 +79,8 @@ class LossPCLearningRateScheduler(PCLearningRateScheduler):
         return
 
 class PCOptimizer:
-    def __init__(self, pc_joint, pc_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
+    def __init__(self, pc_joint, pc_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2):
         self.device = device
-        self.growth_threshold = growth_threshold
         self.learning_rate = learning_rate
         self.smoothing_epsilon = torch.finfo(torch.float).eps
         self.prior_factor = prior_factor
@@ -105,8 +104,8 @@ class PCOptimizer:
         pass
 
 class CCCPPCOptimizer(PCOptimizer):
-    def __init__(self, pc_joint, pc_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
-        super().__init__(pc_joint, pc_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold)
+    def __init__(self, pc_joint, pc_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2):
+        super().__init__(pc_joint, pc_marginal, device, learning_rate, prior_factor, projection_epsilon)
 
         return
 
@@ -138,8 +137,8 @@ class CCCPPCOptimizer(PCOptimizer):
         return
 
 class PGDPCOptimizer(PCOptimizer):
-    def __init__(self, pc_joint, pc_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2, growth_threshold = 1):
-        super().__init__(pc_joint, pc_marginal, device, learning_rate, prior_factor, projection_epsilon, growth_threshold)
+    def __init__(self, pc_joint, pc_marginal, device = torch.device("cuda"), learning_rate = 1e-1, prior_factor = 1e2, projection_epsilon = 1e-2):
+        super().__init__(pc_joint, pc_marginal, device, learning_rate, prior_factor, projection_epsilon)
 
         return
 
@@ -611,7 +610,7 @@ class ProbabilisticCircuit:
                     nodes.append(id_to_nodes[node_id_second])
 
                     if len(nodes) != 2:
-                        logger.log_fatal("Invalid edge.")
+                        logger.log_fatal("Invalid edge. Quit.")
                         exit(-1)
 
                     if len(line_list) >= 3:
@@ -648,7 +647,7 @@ class ProbabilisticCircuit:
                 root_nodes.append(node)
 
         if len(root_nodes) != 1:
-            logger.log_fatal("Invalid PC.")
+            logger.log_fatal("Invalid PC. Quit.")
             exit(-1)
 
         self.depth = self.traverse({0: root_nodes}, 0)
@@ -669,11 +668,11 @@ class ProbabilisticCircuit:
             return length
 
         if getLengthNestedList(self.traversal_order_backward) != len(self.nodes):
-            logger.log_fatal("Invalid PC backward traversal.")
+            logger.log_fatal("Invalid PC backward traversal. Quit.")
             exit(-1)
 
         if getLengthNestedList(self.traversal_order_forward) != len(self.nodes):
-            logger.log_fatal("Invalid PC forward traversal.")
+            logger.log_fatal("Invalid PC forward traversal. Quit.")
             exit(-1)
 
         return

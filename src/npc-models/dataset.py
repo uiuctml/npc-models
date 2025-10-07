@@ -12,10 +12,10 @@ class NPCDataset(torch.utils.data.Dataset):
         self.file_paths = []
         self.indices_attribute = []
         self.indices_class = []
-        self.label_to_index_attribute = []
-        self.label_to_index_class = {}
         self.labels_attribute = []
         self.labels_class = []
+        self.labels_to_indices_attribute = []
+        self.labels_to_indices_class = {}
         self.root = root
         self.transform = transform
 
@@ -31,8 +31,8 @@ class NPCDataset(torch.utils.data.Dataset):
 
         self.labels_attribute = utility.getLabelsAttribute(self.config)
         self.labels_class = utility.getLabelsClass(self.config)
-        self.label_to_index_attribute = utility.getIndicesFromLabelsAttribute(self.labels_attribute)
-        self.label_to_index_class = utility.getIndicesFromLabelsClass(self.labels_class)
+        self.labels_to_indices_attribute = utility.getIndicesFromLabelsAttribute(self.labels_attribute)
+        self.labels_to_indices_class = utility.getIndicesFromLabelsClass(self.labels_class)
 
         for _ in self.config["attributes"]:
             self.indices_attribute.append([])
@@ -41,7 +41,7 @@ class NPCDataset(torch.utils.data.Dataset):
             for class_name in os.listdir(root):
                 for file_name in os.listdir(os.path.join(root, class_name)):
                     image_name = os.path.join(class_name, file_name)
-                    index_class = self.label_to_index_class[class_name]
+                    index_class = self.labels_to_indices_class[class_name]
 
                     self.file_paths.append(os.path.abspath(os.path.join(root, image_name)))
                     self.indices_class.append(index_class)
@@ -56,17 +56,17 @@ class NPCDataset(torch.utils.data.Dataset):
                             probability = 1 / len(attribute_categories)
 
                             for attribute_category in attribute_categories:
-                                index_category = self.label_to_index_attribute[attribute_name][attribute_category]
+                                index_category = self.labels_to_indices_attribute[attribute_name][attribute_category]
                                 index_attribute_categories[index_category] = probability
                         else:
-                            index_category = self.label_to_index_attribute[attribute_name][attribute_categories]
+                            index_category = self.labels_to_indices_attribute[attribute_name][attribute_categories]
                             index_attribute_categories[index_category] = 1
 
                         self.indices_attribute[index_attribute_name].append(index_attribute_categories)
         else:
             for class_name in self.labels_class:
                 for file_name in os.listdir(os.path.join(root, class_name)):
-                    index_class = self.label_to_index_class[class_name]
+                    index_class = self.labels_to_indices_class[class_name]
 
                     self.file_paths.append(os.path.abspath(os.path.join(root, class_name, file_name)))
                     self.indices_class.append(index_class)
@@ -81,10 +81,10 @@ class NPCDataset(torch.utils.data.Dataset):
                             probability = 1 / len(attribute_categories)
 
                             for attribute_category in attribute_categories:
-                                index_category = self.label_to_index_attribute[attribute_name][attribute_category]
+                                index_category = self.labels_to_indices_attribute[attribute_name][attribute_category]
                                 index_attribute_categories[index_category] = probability
                         else:
-                            index_category = self.label_to_index_attribute[attribute_name][attribute_categories]
+                            index_category = self.labels_to_indices_attribute[attribute_name][attribute_categories]
                             index_attribute_categories[index_category] = 1
 
                         self.indices_attribute[index_attribute_name].append(index_attribute_categories)

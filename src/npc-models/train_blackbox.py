@@ -15,7 +15,7 @@ def processArguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-b", "--batch-size", type = int, default = None, help = "Batch size.")
     parser.add_argument("-e", "--epochs", type = int, default = None, help = "Epochs.")
-    parser.add_argument("-s", "--seed", type = int, default = None, help = "Random seed.")
+    parser.add_argument("-s", "--seed", type = int, default = None, help = "Seed.")
     arguments = parser.parse_args()
 
     if arguments.batch_size is not None:
@@ -32,11 +32,11 @@ def processArguments():
     logger.log_trace("Run name: \"" + header.config_blackbox["run_name"] + "\".")
     logger.log_trace("Batch size: " + str(header.config_blackbox["batch_size"]) + ".")
     logger.log_trace("Epochs: " + str(header.config_blackbox["epochs"]) + ".")
-    logger.log_trace("Random seed: " + str(header.config_blackbox["seed"]) + ".")
+    logger.log_trace("Seed: " + str(header.config_blackbox["seed"]) + ".")
 
     return
 
-def train(model_blackbox, data_loader, criterion, optimizer, device, batch_step):
+def train(model_blackbox, data_loader, optimizer, device, batch_step):
     accuracy_classification_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
@@ -53,7 +53,7 @@ def train(model_blackbox, data_loader, criterion, optimizer, device, batch_step)
 
             output = model_blackbox(input)
             (_, predictions) = torch.max(output, 1)
-            loss = criterion(output, labels)
+            loss = torch.nn.functional.cross_entropy(output, labels)
 
             loss.backward()
             optimizer.step()
@@ -85,7 +85,7 @@ def train(model_blackbox, data_loader, criterion, optimizer, device, batch_step)
 
     return batch_step
 
-def validate(model_blackbox, data_loader, criterion, device, batch_step):
+def validate(model_blackbox, data_loader, device, batch_step):
     accuracy_classification_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
@@ -100,7 +100,7 @@ def validate(model_blackbox, data_loader, criterion, device, batch_step):
 
             output = model_blackbox(input)
             (_, predictions) = torch.max(output, 1)
-            loss = criterion(output, labels)
+            loss = torch.nn.functional.cross_entropy(output, labels)
 
             corrects = torch.sum(predictions == labels).item()
             accuracy_classification_batch = corrects / input.size(0)
@@ -147,8 +147,7 @@ def main():
     batch_step_test = 1
     batch_step_train = 1
     batch_step_validate = 1
-    criterion = torch.nn.CrossEntropyLoss()
-    dataset_transforms = utility.createTransform(header.config_blackbox)
+    dataset_transforms = utility.createTransforms(header.config_blackbox)
     dataset_test = dataset.NPCDataset(header.config_blackbox["dir_dataset_test"], dataset_transforms)
     dataset_train = dataset.NPCDataset(header.config_blackbox["dir_dataset_train"], dataset_transforms)
     dataset_validation = dataset.NPCDataset(header.config_blackbox["dir_dataset_validation"], dataset_transforms)
@@ -162,22 +161,19 @@ def main():
     model_blackbox = model_blackbox.to(device)
     optimizer = torch.optim.SGD(model_blackbox.module.get_parameters(), lr = header.config_blackbox["optimizer_learning_rate"], momentum = header.config_blackbox["optimizer_momentum"], weight_decay = header.config_blackbox["optimizer_weight_decay"])
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.config_blackbox["learning_rate_scheduler_mode"], header.config_blackbox["learning_rate_scheduler_factor"], header.config_blackbox["learning_rate_scheduler_patience"], header.config_blackbox["learning_rate_scheduler_threshold"], header.config_blackbox["learning_rate_scheduler_threshold_mode"], header.config_blackbox["learning_rate_scheduler_cooldown"], header.config_blackbox["learning_rate_scheduler_min_learning_rate"], header.config_blackbox["learning_rate_scheduler_min_learning_rate_decay"])
-    progress_bar = None
+    progress_bar = tqdm.tqdm(total = header.config_blackbox["epochs"], position = 0)
 
-    if epoch <= header.config_blackbox["epochs"]:
-        progress_bar = tqdm.tqdm(total = header.config_blackbox["epochs"], position = 0)
-        progress_bar.set_description_str("[INFO]: Epoch")
+    progress_bar.set_description_str("[INFO]: Epoch")
 
     while epoch <= header.config_blackbox["epochs"]:
-        if progress_bar is not None:
-            progress_bar.n = epoch
-            progress_bar.refresh()
+        progress_bar.n = epoch
+        progress_bar.refresh()
 
         wandb.log({"training/epoch/step": epoch})
         wandb.log({"validation/epoch/step": epoch})
 
-        batch_step_train = train(model_blackbox, data_loader_train, criterion, optimizer, device, batch_step_train)
-        (accuracy_classification_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_blackbox, data_loader_validation, criterion, device, batch_step_validate)
+        batch_step_train = train(model_blackbox, data_loader_train, optimizer, device, batch_step_train)
+        (accuracy_classification_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_blackbox, data_loader_validation, device, batch_step_validate)
 
         learning_rate_scheduler.step(loss_validation_epoch)
 
@@ -192,8 +188,7 @@ def main():
 
         epoch += 1
 
-    if progress_bar is not None:
-        progress_bar.close()
+    progress_bar.close()
 
     logger.log_info("Best validation classification accuracy: " + str(accuracy_classification_validation_best) + ".")
     wandb.summary["validation/epoch/accuracy_classification_best"] = accuracy_classification_validation_best

@@ -20,7 +20,7 @@ def processArguments():
     parser.add_argument("-c", "--weights-pc", type = str, default = "", help = "PC model pretrained weights.")
     parser.add_argument("-b", "--batch-size", type = int, default = None, help = "Batch size.")
     parser.add_argument("-e", "--epochs", type = int, default = None, help = "Epochs.")
-    parser.add_argument("-s", "--seed", type = int, default = None, help = "Random seed.")
+    parser.add_argument("-s", "--seed", type = int, default = None, help = "Seed.")
     arguments = parser.parse_args()
 
     test_neural.initializeRunName()
@@ -47,11 +47,11 @@ def processArguments():
     logger.log_trace("PC model pretrained weights: \"" + header.config_pc["model_pretrained_weights"] + "\".")
     logger.log_trace("Batch size: " + str(header.config_neural["batch_size"]) + ".")
     logger.log_trace("Epochs: " + str(header.config_neural["epochs"]) + ".")
-    logger.log_trace("Random seed: " + str(header.config_neural["seed"]) + ".")
+    logger.log_trace("Seed: " + str(header.config_neural["seed"]) + ".")
 
     return
 
-def train(model_neural, pc_joint, pc_marginal, data_loader, criterion, optimizer_neural, optimizer_pc, device, batch_step):
+def train(model_neural, pc_joint, pc_marginal, data_loader, optimizer_neural, optimizer_pc, device, batch_step):
     accuracy_concept_epoch = 0
     accuracy_classification_epoch = 0
     loss_epoch = 0
@@ -82,7 +82,7 @@ def train(model_neural, pc_joint, pc_marginal, data_loader, criterion, optimizer
             (matrix_pc, matrix_neural, output_npc) = test_npc.computeNPCOutput(outputs_attribute, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
             (_, predictions_npc) = torch.max(output_npc, 1)
-            loss = criterion(output_npc, labels_class)
+            loss = utility.lossNegativeLogLikelihood(output_npc, labels_class)
 
             loss.backward()
             optimizer_neural.step()
@@ -125,7 +125,7 @@ def train(model_neural, pc_joint, pc_marginal, data_loader, criterion, optimizer
 
     return batch_step
 
-def validate(model_neural, pc_joint, pc_marginal, data_loader, criterion, device, batch_step):
+def validate(model_neural, pc_joint, pc_marginal, data_loader, device, batch_step):
     accuracy_concept_epoch = 0
     accuracy_classification_epoch = 0
     loss_epoch = 0
@@ -154,7 +154,7 @@ def validate(model_neural, pc_joint, pc_marginal, data_loader, criterion, device
             (_, _, output_npc) = test_npc.computeNPCOutput(outputs_attribute, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
             (_, predictions_npc) = torch.max(output_npc, 1)
-            loss = criterion(output_npc, labels_class)
+            loss = utility.lossNegativeLogLikelihood(output_npc, labels_class)
 
             corrects_npc = torch.sum(predictions_npc == labels_class).item()
 
@@ -210,8 +210,7 @@ def main():
     batch_step_test = 1
     batch_step_train = 1
     batch_step_validate = 1
-    criterion = utility.lossNegativeLogLikelihood
-    dataset_transforms = utility.createTransform(header.config_neural)
+    dataset_transforms = utility.createTransforms(header.config_neural)
     dataset_test = dataset.NPCDataset(header.config_neural["dir_dataset_test"], dataset_transforms)
     dataset_train = dataset.NPCDataset(header.config_neural["dir_dataset_train"], dataset_transforms)
     dataset_validation = dataset.NPCDataset(header.config_neural["dir_dataset_validation"], dataset_transforms)
@@ -229,15 +228,15 @@ def main():
     model_neural = model.ResNet34MTL(dataset_test.config, device)
     model_neural = torch.nn.DataParallel(model_neural)
     model_neural = model_neural.to(device)
-    progress_bar = None
     pc_joint = pc.ProbabilisticCircuit(device_pc)
     pc_marginal = pc.ProbabilisticCircuit(device_pc)
     optimizer_neural = torch.optim.SGD(model_neural.parameters(), lr = header.config_neural["optimizer_learning_rate"], momentum = header.config_neural["optimizer_momentum"], weight_decay = header.config_neural["optimizer_weight_decay"])
     optimizer_pc = pc.PGDPCOptimizer(pc_joint, pc_marginal, device_pc, header.config_pc["optimizer_learning_rate"], header.config_pc["optimizer_prior_factor"], header.config_pc["epsilon_projection"])
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_neural, header.config_neural["learning_rate_scheduler_mode"], header.config_neural["learning_rate_scheduler_factor"], header.config_neural["learning_rate_scheduler_patience"], header.config_neural["learning_rate_scheduler_threshold"], header.config_neural["learning_rate_scheduler_threshold_mode"], header.config_neural["learning_rate_scheduler_cooldown"], header.config_neural["learning_rate_scheduler_min_learning_rate"], header.config_neural["learning_rate_scheduler_min_learning_rate_decay"])
     learning_rate_scheduler_pc = pc.LossPCLearningRateScheduler(optimizer_pc, header.config_pc["learning_rate_scheduler_factor"], header.config_pc["learning_rate_scheduler_patience"], header.config_pc["learning_rate_scheduler_threshold"], header.config_pc["learning_rate_scheduler_cooldown"], header.config_pc["learning_rate_scheduler_min_learning_rate"])
+    progress_bar = tqdm.tqdm(total = header.config_neural["epochs"], position = 0)
 
-    logger.log_info("Loading PC from \"" + header.config_pc["file_path_pc"] + "\"...")
+    logger.log_info("Loading PC \"" + header.config_pc["file_path_pc"] + "\"...")
 
     pc_joint.load(header.config_pc["file_path_pc"])
     pc_marginal.load(header.config_pc["file_path_pc"])
@@ -272,20 +271,17 @@ def main():
     logger.log_trace("PC depth: " + str(pc_joint.depth) + ".")
     logger.log_trace("PC leaf node setting dimension: (" + str(int(pc_settings_joint.shape[0])) + ", " + str(int(pc_settings_joint.shape[1])) + ").")
 
-    if epoch <= header.config_neural["epochs"]:
-        progress_bar = tqdm.tqdm(total = header.config_neural["epochs"], position = 0)
-        progress_bar.set_description_str("[INFO]: Epoch")
+    progress_bar.set_description_str("[INFO]: Epoch")
 
     while epoch <= header.config_neural["epochs"]:
-        if progress_bar is not None:
-            progress_bar.n = epoch
-            progress_bar.refresh()
+        progress_bar.n = epoch
+        progress_bar.refresh()
 
         wandb.log({"training/epoch/step": epoch})
         wandb.log({"validation/epoch/step": epoch})
 
-        batch_step_train = train(model_neural, pc_joint, pc_marginal, data_loader_train, criterion, optimizer_neural, optimizer_pc, device, batch_step_train)
-        (accuracy_classification_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_neural, pc_joint, pc_marginal, data_loader_validation, criterion, device, batch_step_validate)
+        batch_step_train = train(model_neural, pc_joint, pc_marginal, data_loader_train, optimizer_neural, optimizer_pc, device, batch_step_train)
+        (accuracy_classification_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_neural, pc_joint, pc_marginal, data_loader_validation, device, batch_step_validate)
 
         learning_rate_scheduler.step(loss_validation_epoch)
         learning_rate_scheduler_pc.step(loss_validation_epoch)
@@ -303,8 +299,7 @@ def main():
 
         epoch += 1
 
-    if progress_bar is not None:
-        progress_bar.close()
+    progress_bar.close()
 
     logger.log_info("Best validation classification accuracy: " + str(accuracy_classification_validation_best) + ".")
     wandb.summary["validation/epoch/accuracy_classification_best"] = accuracy_classification_validation_best

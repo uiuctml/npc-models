@@ -12,12 +12,12 @@ import tqdm
 import utility
 import wandb
 
-def computeLoss(output, labels, criterions):
+def computeLoss(output, labels):
     count_attributes = len(output)
     loss_attribute = 0
 
     for i in range(count_attributes):
-        loss = criterions[i](output[i], labels[i])
+        loss = torch.nn.functional.cross_entropy(output[i], labels[i])
         loss_attribute += loss / math.log(output[i].size(1))
 
     loss_attribute /= count_attributes
@@ -28,7 +28,7 @@ def processArguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-b", "--batch-size", type = int, default = None, help = "Batch size.")
     parser.add_argument("-e", "--epochs", type = int, default = None, help = "Epochs.")
-    parser.add_argument("-s", "--seed", type = int, default = None, help = "Random seed.")
+    parser.add_argument("-s", "--seed", type = int, default = None, help = "Seed.")
     arguments = parser.parse_args()
 
     if arguments.batch_size is not None:
@@ -45,11 +45,11 @@ def processArguments():
     logger.log_trace("Run name: \"" + header.config_neural["run_name"] + "\".")
     logger.log_trace("Batch size: " + str(header.config_neural["batch_size"]) + ".")
     logger.log_trace("Epochs: " + str(header.config_neural["epochs"]) + ".")
-    logger.log_trace("Random seed: " + str(header.config_neural["seed"]) + ".")
+    logger.log_trace("Seed: " + str(header.config_neural["seed"]) + ".")
 
     return
 
-def train(model_neural, data_loader, criterions, optimizer, device, batch_step):
+def train(model_neural, data_loader, optimizer, device, batch_step):
     accuracy_concept_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
@@ -68,7 +68,7 @@ def train(model_neural, data_loader, criterions, optimizer, device, batch_step):
 
             (output, _) = model_neural(input)
 
-            loss = computeLoss(output, labels, criterions)
+            loss = computeLoss(output, labels)
 
             loss.backward()
             optimizer.step()
@@ -98,7 +98,7 @@ def train(model_neural, data_loader, criterions, optimizer, device, batch_step):
 
     return batch_step
 
-def validate(model_neural, data_loader, criterions, device, batch_step):
+def validate(model_neural, data_loader, device, batch_step):
     accuracy_concept_epoch = 0
     loss_epoch = 0
     progress_bar = tqdm.tqdm(total = len(data_loader), position = 1, leave = False)
@@ -115,7 +115,7 @@ def validate(model_neural, data_loader, criterions, device, batch_step):
 
             (output, _) = model_neural(input)
 
-            loss = computeLoss(output, labels, criterions)
+            loss = computeLoss(output, labels)
             accuracy_concept_batch = utility.computeConceptAccuracy(output, labels, device)
             loss_batch = loss.item()
 
@@ -158,8 +158,7 @@ def main():
     batch_step_test = 1
     batch_step_train = 1
     batch_step_validate = 1
-    criterions = []
-    dataset_transforms = utility.createTransform(header.config_neural)
+    dataset_transforms = utility.createTransforms(header.config_neural)
     dataset_test = dataset.NPCDataset(header.config_neural["dir_dataset_test"], dataset_transforms)
     dataset_train = dataset.NPCDataset(header.config_neural["dir_dataset_train"], dataset_transforms)
     dataset_validation = dataset.NPCDataset(header.config_neural["dir_dataset_validation"], dataset_transforms)
@@ -173,25 +172,19 @@ def main():
     model_neural = model_neural.to(device)
     optimizer = torch.optim.SGD(model_neural.module.get_parameters(), lr = header.config_neural["optimizer_learning_rate"], momentum = header.config_neural["optimizer_momentum"], weight_decay = header.config_neural["optimizer_weight_decay"])
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.config_neural["learning_rate_scheduler_mode"], header.config_neural["learning_rate_scheduler_factor"], header.config_neural["learning_rate_scheduler_patience"], header.config_neural["learning_rate_scheduler_threshold"], header.config_neural["learning_rate_scheduler_threshold_mode"], header.config_neural["learning_rate_scheduler_cooldown"], header.config_neural["learning_rate_scheduler_min_learning_rate"], header.config_neural["learning_rate_scheduler_min_learning_rate_decay"])
-    progress_bar = None
+    progress_bar = tqdm.tqdm(total = header.config_neural["epochs"], position = 0)
 
-    for _ in dataset_test.config["attributes"]:
-        criterions.append(torch.nn.CrossEntropyLoss())
-
-    if epoch <= header.config_neural["epochs"]:
-        progress_bar = tqdm.tqdm(total = header.config_neural["epochs"], position = 0)
-        progress_bar.set_description_str("[INFO]: Epoch")
+    progress_bar.set_description_str("[INFO]: Epoch")
 
     while epoch <= header.config_neural["epochs"]:
-        if progress_bar is not None:
-            progress_bar.n = epoch
-            progress_bar.refresh()
+        progress_bar.n = epoch
+        progress_bar.refresh()
 
         wandb.log({"training/epoch/step": epoch})
         wandb.log({"validation/epoch/step": epoch})
 
-        batch_step_train = train(model_neural, data_loader_train, criterions, optimizer, device, batch_step_train)
-        (accuracy_concept_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_neural, data_loader_validation, criterions, device, batch_step_validate)
+        batch_step_train = train(model_neural, data_loader_train, optimizer, device, batch_step_train)
+        (accuracy_concept_validation_epoch, loss_validation_epoch, batch_step_validate) = validate(model_neural, data_loader_validation, device, batch_step_validate)
 
         learning_rate_scheduler.step(loss_validation_epoch)
 
@@ -206,8 +199,7 @@ def main():
 
         epoch += 1
 
-    if progress_bar is not None:
-        progress_bar.close()
+    progress_bar.close()
 
     logger.log_info("Best validation mean concept accuracy: " + str(accuracy_concept_validation_best) + ".")
     wandb.summary["validation/epoch/accuracy_concept_best"] = accuracy_concept_validation_best
