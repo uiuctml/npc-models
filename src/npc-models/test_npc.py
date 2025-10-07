@@ -162,10 +162,15 @@ def findMPE(matrix_pc, matrix_neural, predictions_npc, pc_settings):
 
 def generatePCSettings(config_dataset, device):
     attribute_ranges = []
+    index_attribute_exclude = None
     labels_attribute = utility.getLabelsAttribute(config_dataset)
     labels_class = utility.getLabelsClass(config_dataset)
 
-    for attribute in labels_attribute.keys():
+    for (index, attribute) in enumerate(labels_attribute.keys()):
+        if header.npc_attribute_exclude != "" and attribute == header.npc_attribute_exclude:
+            index_attribute_exclude = index
+            continue
+
         attribute_count = len(labels_attribute[attribute])
         attribute_range = torch.Tensor(range(attribute_count))
         attribute_range = attribute_range.to(device)
@@ -180,6 +185,10 @@ def generatePCSettings(config_dataset, device):
     logger.log_trace("Total class labels: " + str(class_count) + ".")
 
     pc_settings = torch.cartesian_prod(*attribute_ranges)
+
+    if index_attribute_exclude is not None:
+        pc_settings_marginal = torch.full((pc_settings.shape[0], 1), -1).to(device)
+        pc_settings = torch.cat((pc_settings[:, :index_attribute_exclude], pc_settings_marginal, pc_settings[:, index_attribute_exclude:]), 1)
 
     class_range = class_range.repeat_interleave(pc_settings.shape[0]).reshape(-1, 1)
     pc_settings = pc_settings.repeat(class_count, 1)
@@ -308,7 +317,9 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
     accuracy_classification_epoch = 0
     ce_instances_corrected = 0
     ce_instances_incorrect = 0
+    index_attribute_exclude = None
     interpret = {}
+    log_attribute_exclude = ""
     mpe_alignment_epoch = []
     pc_output_rows = len(data_loader.dataset.labels_class)
     pc_output_cols = 1
@@ -316,7 +327,12 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
     tv_distance_epoch = 0
     tv_distances_epoch = []
 
-    for attribute in data_loader.dataset.config["attributes"]:
+    for (index, attribute) in enumerate(data_loader.dataset.config["attributes"]):
+        if header.npc_attribute_exclude != "" and attribute["name"] == header.npc_attribute_exclude:
+            index_attribute_exclude = index
+            log_attribute_exclude = " excluding \"" + attribute["name"] + "\""
+            continue
+
         pc_output_cols *= len(attribute["labels"])
         tv_distances_epoch.append(0)
 
@@ -332,8 +348,12 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
 
         with torch.set_grad_enabled(False):
             (outputs_attribute_original, _) = model_neural(input)
-            outputs_attribute = utility.applySoftmaxAttribute(outputs_attribute_original)
 
+        if index_attribute_exclude is not None:
+            labels_attribute = labels_attribute[:index_attribute_exclude] + labels_attribute[index_attribute_exclude + 1:]
+            outputs_attribute_original = outputs_attribute_original[:index_attribute_exclude] + outputs_attribute_original[index_attribute_exclude + 1:]
+
+        outputs_attribute = utility.applySoftmaxAttribute(outputs_attribute_original)
         (matrix_pc, matrix_neural, output_npc) = computeNPCOutput(outputs_attribute, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
         (_, predictions_npc) = torch.max(output_npc, 1)
@@ -346,7 +366,7 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
         accuracy_concept_epoch += accuracy_concept_batch
         accuracy_classification_epoch += corrects_npc
 
-        for i in range(len(data_loader.dataset.config["attributes"])):
+        for i in range(len(labels_attribute)):
             tv_distance_batch = 0.5 * torch.sum(torch.abs(outputs_attribute[i] - labels_attribute[i]), dim = 1)
             tv_distances_epoch[i] += torch.sum(tv_distance_batch).item()
 
@@ -389,7 +409,7 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
     accuracy_concept_epoch /= len(data_loader)
     accuracy_classification_epoch /= len(data_loader.dataset)
 
-    for i in range(len(data_loader.dataset.config["attributes"])):
+    for i in range(len(labels_attribute)):
         tv_distances_epoch[i] /= len(data_loader.dataset)
 
     tv_distance_epoch = sum(tv_distances_epoch) / len(tv_distances_epoch)
@@ -402,9 +422,9 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
     wandb.summary["testing/epoch/accuracy_classification"] = accuracy_classification_epoch
     wandb.summary["testing/epoch/tv_distance"] = tv_distance_epoch
 
-    logger.log_info("Testing mean TV distance: " + str(tv_distance_epoch) + ".")
-    logger.log_info("Testing mean concept accuracy: " + str(accuracy_concept_epoch) + ".")
-    logger.log_info("Testing classification accuracy: " + str(accuracy_classification_epoch) + ".")
+    logger.log_info("Testing mean TV distance" + log_attribute_exclude + ": " + str(tv_distance_epoch) + ".")
+    logger.log_info("Testing mean concept accuracy" + log_attribute_exclude + ": " + str(accuracy_concept_epoch) + ".")
+    logger.log_info("Testing classification accuracy" + log_attribute_exclude + ": " + str(accuracy_classification_epoch) + ".")
 
     if header.npc_interpret:
         if ce_instances_incorrect != 0:
@@ -454,6 +474,16 @@ def main():
     model_neural = model_neural.to(device)
     pc_joint = pc.ProbabilisticCircuit(device_pc)
     pc_marginal = pc.ProbabilisticCircuit(device_pc)
+
+    if header.npc_attribute_exclude != "":
+        if header.npc_attribute_exclude in utility.getLabelsAttribute(dataset_test.config).keys():
+            logger.log_info("Excluded attribute \"" + header.npc_attribute_exclude + "\".")
+
+            if header.npc_interpret:
+                header.npc_interpret = False
+                logger.log_info("Disabled interpretation with attribute exclusion.")
+        else:
+            logger.log_warn("Unknown attribute for exclusion: \"" + header.npc_attribute_exclude + "\". Skip.")
 
     logger.log_info("Loading PC \"" + header.config_pc["file_path_pc"] + "\"...")
 
