@@ -6,6 +6,27 @@ import PIL.Image
 import torch
 import utility
 
+def getIndicesFromLabelsAttribute(labels_attribute):
+    labels_to_indices = {}
+
+    for attribute in labels_attribute.keys():
+        label_to_index = {}
+
+        for i in range(len(labels_attribute[attribute])):
+            label_to_index[labels_attribute[attribute][i]] = i
+
+        labels_to_indices[attribute] = label_to_index
+
+    return labels_to_indices
+
+def getIndicesFromLabelsClass(labels_class):
+    labels_to_indices = {}
+
+    for i in range(len(labels_class)):
+        labels_to_indices[labels_class[i]] = i
+
+    return labels_to_indices
+
 class NPCDataset(torch.utils.data.Dataset):
     def __init__(self, root, transform = None):
         self.config = {}
@@ -31,8 +52,8 @@ class NPCDataset(torch.utils.data.Dataset):
 
         self.labels_attribute = utility.getLabelsAttribute(self.config)
         self.labels_class = utility.getLabelsClass(self.config)
-        self.labels_to_indices_attribute = utility.getIndicesFromLabelsAttribute(self.labels_attribute)
-        self.labels_to_indices_class = utility.getIndicesFromLabelsClass(self.labels_class)
+        self.labels_to_indices_attribute = getIndicesFromLabelsAttribute(self.labels_attribute)
+        self.labels_to_indices_class = getIndicesFromLabelsClass(self.labels_class)
 
         for _ in self.config["attributes"]:
             self.indices_attribute.append([])

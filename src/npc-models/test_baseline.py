@@ -12,6 +12,17 @@ import type
 import utility
 import wandb
 
+def getBinaryLabelsAttribute(labels_attribute):
+    labels_attribute_binary = []
+
+    for label_attribute in labels_attribute:
+        labels_attribute_binary.append((label_attribute > 0).float())
+
+    return torch.cat(labels_attribute_binary, dim = 1)
+
+def getBinaryLabelsClass(labels_class, data_loader):
+    return torch.nn.functional.one_hot(labels_class, num_classes = len(data_loader.dataset.labels_class)).float()
+
 def initializeRunName(run_name = ""):
     if run_name != "":
         if run_name.split(".")[2] != header.config_baseline["type"]:
@@ -67,7 +78,7 @@ def computeAccuracy(output_neck, output_head, labels_attribute, labels_class, de
     if header.config_baseline["model"] == type.ModelBaseline.abm.name:
         accuracy_concept_batch = utility.computeConceptAccuracy(output_neck, labels_attribute, device)
     else:
-        labels_attribute = utility.getBinaryLabelsAttribute(labels_attribute)
+        labels_attribute = getBinaryLabelsAttribute(labels_attribute)
         accuracy_concept_batch = sklearn.metrics.accuracy_score(labels_attribute.cpu(), (output_neck > threshold_accuracy_concept).cpu())
 
     accuracy_classification_batch = sklearn.metrics.accuracy_score(labels_class.cpu(), (output_head > threshold_accuracy_classification).cpu())
@@ -124,7 +135,7 @@ def test(model_baseline, data_loader, device, batch_step):
         for (batch_index, (input, labels_attribute, labels_class, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
             labels_class = labels_class.to(device, non_blocking = True)
-            labels_class = utility.getBinaryLabelsClass(labels_class, data_loader)
+            labels_class = getBinaryLabelsClass(labels_class, data_loader)
 
             for i in range(len(labels_attribute)):
                 labels_attribute[i] = labels_attribute[i].to(device)

@@ -74,7 +74,6 @@ def main():
     pc_joint = pc.ProbabilisticCircuit(device)
     pc_marginal = pc.ProbabilisticCircuit(device)
     optimizer = pc.CCCPPCOptimizer(pc_joint, pc_marginal, device)
-    progress_bar = tqdm.tqdm(total = header.config_pc["epochs"], position = 0)
     learning_rate_scheduler = pc.LikelihoodPCLearningRateScheduler(optimizer, header.config_pc["learning_rate_scheduler_factor"])
 
     logger.log_info("Loading PC \"" + header.config_pc["file_path_pc"] + "\"...")
@@ -96,6 +95,8 @@ def main():
 
     logger.log_info("Testing PC...")
     test_pc.test(pc_joint, dataset_test)
+
+    progress_bar = tqdm.tqdm(total = header.config_pc["epochs"], position = 0)
 
     progress_bar.set_description_str("[INFO]: Epoch")
 

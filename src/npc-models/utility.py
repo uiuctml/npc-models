@@ -90,17 +90,6 @@ def generateRunName(seed, type, method):
 
     return run_name
 
-def getBinaryLabelsAttribute(labels_attribute):
-    labels_attribute_binary = []
-
-    for label_attribute in labels_attribute:
-        labels_attribute_binary.append((label_attribute > 0).float())
-
-    return torch.cat(labels_attribute_binary, dim = 1)
-
-def getBinaryLabelsClass(labels_class, data_loader):
-    return torch.nn.functional.one_hot(labels_class, num_classes = len(data_loader.dataset.labels_class)).float()
-
 def getLabelsAttribute(dataset_config):
     labels_attribute = {}
 
@@ -127,54 +116,6 @@ def getLabelsClass(dataset_config):
         return natsort.natsorted(labels_class)
     else:
         return list(dataset_config["mappings"].keys())
-
-def getIndicesFromLabelsAttribute(labels_attribute):
-    labels_to_indices = {}
-
-    for attribute in labels_attribute.keys():
-        label_to_index = {}
-
-        for i in range(len(labels_attribute[attribute])):
-            label_to_index[labels_attribute[attribute][i]] = i
-
-        labels_to_indices[attribute] = label_to_index
-
-    return labels_to_indices
-
-def getIndicesFromLabelsClass(labels_class):
-    labels_to_indices = {}
-
-    for i in range(len(labels_class)):
-        labels_to_indices[labels_class[i]] = i
-
-    return labels_to_indices
-
-def generatePCSettings(config_dataset, device):
-    attribute_ranges = []
-    labels_attribute = getLabelsAttribute(config_dataset)
-    labels_class = getLabelsClass(config_dataset)
-
-    for attribute in labels_attribute.keys():
-        attribute_count = len(labels_attribute[attribute])
-        attribute_range = torch.Tensor(range(attribute_count))
-        attribute_range = attribute_range.to(device)
-        attribute_ranges.append(attribute_range)
-
-        logger.log_trace("Total attribute labels for \"" + attribute + "\": " + str(attribute_count) + ".")
-
-    class_count = len(labels_class)
-    class_range = torch.Tensor(range(class_count))
-    class_range = class_range.to(device)
-
-    logger.log_trace("Total class labels: " + str(class_count) + ".")
-
-    pc_settings = torch.cartesian_prod(*attribute_ranges)
-
-    class_range = class_range.repeat_interleave(pc_settings.shape[0]).reshape(-1, 1)
-    pc_settings = pc_settings.repeat(class_count, 1)
-    pc_settings = torch.cat((pc_settings, class_range), 1)
-
-    return pc_settings
 
 def loadCheckpoint(file_name_checkpoint, model, pc = False):
     if not os.path.isdir(header.checkpoint_dir):

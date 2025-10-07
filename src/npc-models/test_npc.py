@@ -160,6 +160,33 @@ def findMPE(matrix_pc, matrix_neural, predictions_npc, pc_settings):
 
     return mpe_attributes
 
+def generatePCSettings(config_dataset, device):
+    attribute_ranges = []
+    labels_attribute = utility.getLabelsAttribute(config_dataset)
+    labels_class = utility.getLabelsClass(config_dataset)
+
+    for attribute in labels_attribute.keys():
+        attribute_count = len(labels_attribute[attribute])
+        attribute_range = torch.Tensor(range(attribute_count))
+        attribute_range = attribute_range.to(device)
+        attribute_ranges.append(attribute_range)
+
+        logger.log_trace("Total attribute labels for \"" + attribute + "\": " + str(attribute_count) + ".")
+
+    class_count = len(labels_class)
+    class_range = torch.Tensor(range(class_count))
+    class_range = class_range.to(device)
+
+    logger.log_trace("Total class labels: " + str(class_count) + ".")
+
+    pc_settings = torch.cartesian_prod(*attribute_ranges)
+
+    class_range = class_range.repeat_interleave(pc_settings.shape[0]).reshape(-1, 1)
+    pc_settings = pc_settings.repeat(class_count, 1)
+    pc_settings = torch.cat((pc_settings, class_range), 1)
+
+    return pc_settings
+
 def processArguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--run-name-neural", type = str, default = "", help = "Neural run name.", required = True)
@@ -435,7 +462,7 @@ def main():
 
     logger.log_info("Loading PC leaf node settings...")
 
-    pc_settings_joint = utility.generatePCSettings(dataset_test.config, device)
+    pc_settings_joint = generatePCSettings(dataset_test.config, device)
     pc_settings_marginal = torch.clone(pc_settings_joint)
     pc_settings_marginal[:, -1] = -1
 

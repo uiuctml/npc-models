@@ -234,7 +234,6 @@ def main():
     optimizer_pc = pc.PGDPCOptimizer(pc_joint, pc_marginal, device_pc, header.config_pc["optimizer_learning_rate"], header.config_pc["optimizer_prior_factor"], header.config_pc["epsilon_projection"])
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_neural, header.config_neural["learning_rate_scheduler_mode"], header.config_neural["learning_rate_scheduler_factor"], header.config_neural["learning_rate_scheduler_patience"], header.config_neural["learning_rate_scheduler_threshold"], header.config_neural["learning_rate_scheduler_threshold_mode"], header.config_neural["learning_rate_scheduler_cooldown"], header.config_neural["learning_rate_scheduler_min_learning_rate"], header.config_neural["learning_rate_scheduler_min_learning_rate_decay"])
     learning_rate_scheduler_pc = pc.LossPCLearningRateScheduler(optimizer_pc, header.config_pc["learning_rate_scheduler_factor"], header.config_pc["learning_rate_scheduler_patience"], header.config_pc["learning_rate_scheduler_threshold"], header.config_pc["learning_rate_scheduler_cooldown"], header.config_pc["learning_rate_scheduler_min_learning_rate"])
-    progress_bar = tqdm.tqdm(total = header.config_neural["epochs"], position = 0)
 
     logger.log_info("Loading PC \"" + header.config_pc["file_path_pc"] + "\"...")
 
@@ -244,7 +243,7 @@ def main():
 
     logger.log_info("Loading PC leaf node settings...")
 
-    pc_settings_joint = utility.generatePCSettings(dataset_test.config, device)
+    pc_settings_joint = test_npc.generatePCSettings(dataset_test.config, device)
     pc_settings_marginal = torch.clone(pc_settings_joint)
     pc_settings_marginal[:, -1] = -1
 
@@ -270,6 +269,8 @@ def main():
     logger.log_trace("Total PC leaf nodes: " + str(len(pc_joint.leaf_nodes)) + ".")
     logger.log_trace("PC depth: " + str(pc_joint.depth) + ".")
     logger.log_trace("PC leaf node setting dimension: (" + str(int(pc_settings_joint.shape[0])) + ", " + str(int(pc_settings_joint.shape[1])) + ").")
+
+    progress_bar = tqdm.tqdm(total = header.config_neural["epochs"], position = 0)
 
     progress_bar.set_description_str("[INFO]: Epoch")
 

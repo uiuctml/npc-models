@@ -57,17 +57,17 @@ def computeLoss(output_neck, output_head, labels_attribute, labels_class):
 
         return header.config_baseline["concept_loss_weight"] * loss_attribute + loss_task
     elif header.config_baseline["model"] == type.ModelBaseline.cbm.name:
-        labels_attribute = utility.getBinaryLabelsAttribute(labels_attribute)
+        labels_attribute = test_baseline.getBinaryLabelsAttribute(labels_attribute)
         loss_attribute = torch.nn.functional.binary_cross_entropy_with_logits(output_neck, labels_attribute)
         loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_class)
         return header.config_baseline["concept_loss_weight"] * loss_attribute + loss_task
     elif header.config_baseline["model"] == type.ModelBaseline.cem.name:
-        labels_attribute = utility.getBinaryLabelsAttribute(labels_attribute)
+        labels_attribute = test_baseline.getBinaryLabelsAttribute(labels_attribute)
         loss_attribute = torch.nn.functional.binary_cross_entropy(output_neck, labels_attribute)
         loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_class)
         return header.config_baseline["concept_loss_weight"] * loss_attribute + loss_task
     elif header.config_baseline["model"] == type.ModelBaseline.dcr.name:
-        labels_attribute = utility.getBinaryLabelsAttribute(labels_attribute)
+        labels_attribute = test_baseline.getBinaryLabelsAttribute(labels_attribute)
         loss_attribute = torch.nn.functional.binary_cross_entropy(output_neck, labels_attribute)
         loss_task = torch.nn.functional.binary_cross_entropy(output_head, labels_class)
         return header.config_baseline["concept_loss_weight"] * loss_attribute + loss_task
@@ -90,7 +90,7 @@ def train(model_baseline, data_loader, optimizer, device, batch_step):
         for (batch_index, (input, labels_attribute, labels_class, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
             labels_class = labels_class.to(device, non_blocking = True)
-            labels_class = utility.getBinaryLabelsClass(labels_class, data_loader)
+            labels_class = test_baseline.getBinaryLabelsClass(labels_class, data_loader)
 
             for i in range(len(labels_attribute)):
                 labels_attribute[i] = labels_attribute[i].to(device)
@@ -146,7 +146,7 @@ def validate(model_baseline, data_loader, device, batch_step):
         for (batch_index, (input, labels_attribute, labels_class, _)) in enumerate(data_loader):
             input = input.to(device, non_blocking = True)
             labels_class = labels_class.to(device, non_blocking = True)
-            labels_class = utility.getBinaryLabelsClass(labels_class, data_loader)
+            labels_class = test_baseline.getBinaryLabelsClass(labels_class, data_loader)
 
             for i in range(len(labels_attribute)):
                 labels_attribute[i] = labels_attribute[i].to(device)
