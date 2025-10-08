@@ -34,6 +34,8 @@ This project was developed on Ubuntu and tested on both Ubuntu and Arch Linux. O
 
 This project is designed to run directly on the operating system, without any Python virtual environments such as Conda. Using such environments is unnecessary and not recommended. Additionally, avoid installing Python packages via `pip` unless explicitly instructed. Packages from the system package manager are preferred.
 
+To ensure maximum compatibility and performance, run this project on a system with at least 64 GB of CPU memory (swap space acceptable) and 16 GB of GPU memory (aggregate across all available GPUs).
+
 ## Project Hierarchy
 
 This project is part of the NPC pipeline. To ensure compatibility and maintain consistent references across the pipeline, organize the project directories as follows:
@@ -45,6 +47,8 @@ This project is part of the NPC pipeline. To ensure compatibility and maintain c
     └── npc-models
 
 All subsequent instructions assume the above project hierarchy.
+
+Before running this project, first ensure that all datasets are properly set up under `npc/datasets` by following the instructions in the `npc-dataset-utils` project. Then, construct and generate PCs for all datasets as described in the `learnspn` project instructions.
 
 ## Publications
 
