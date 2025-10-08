@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# Go to script directory
+cd "$(dirname $0)"
+
+# Go to source directory
 cd "../../src/npc-models"
 
 # Independently trained with data-driven PC

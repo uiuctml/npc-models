@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# Go to script directory
+cd "$(dirname $0)"
+
+# Go to source directory
 cd "../../src/npc-models"
 
 ./test_baseline.py -r "42.awa2.baseline.abm.2024.12.13.7.6.PowerEdge-R720"

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# Go to script directory
+cd "$(dirname $0)"
+
+# Go to source directory
 cd "../../src/npc-models"
 
 ./test_blackbox.py -r "42.awa2.blackbox.resnet34.2024.12.14.8.11.PowerEdge-R720"

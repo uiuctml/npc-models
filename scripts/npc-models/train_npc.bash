@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# Go to script directory
+cd "$(dirname $0)"
+
+# Go to source directory
 cd "../../src/npc-models"
 
 # Joint optimization with data-driven PC
