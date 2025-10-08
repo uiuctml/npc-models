@@ -2,7 +2,7 @@
 
 cd "../../src/npc-models"
 
-# Independently trained
+# Independently trained with data-driven PC
 ./test_npc.py -r "42.awa2.neural.resnet34mtl.2024.12.12.20.5.Aurora-R11" -p "42.awa2.pc.cccp.2024.12.12.19.55.Aurora-R11"
 ./test_npc.py -r "52.awa2.neural.resnet34mtl.2024.12.24.0.30.Aurora-R11" -p "52.awa2.pc.cccp.2024.12.22.15.16.Aurora-R11"
 ./test_npc.py -r "62.awa2.neural.resnet34mtl.2024.12.24.3.25.Aurora-R11" -p "62.awa2.pc.cccp.2024.12.22.15.17.Aurora-R11"
