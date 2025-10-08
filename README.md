@@ -21,13 +21,13 @@ This project requires the following system packages:
 Ubuntu:
 
 ```bash
-apt install
+apt install libgl1-mesa-dev python3-natsort python3-numpy python3-pil python3-pyqt5 python3-tqdm
 ```
 
 Arch Linux:
 
 ```bash
-pacman -S
+pacman -S mesa python-natsort python-numpy python-pillow python-pyqt5 python-pytorch-cuda python-scikit-learn python-torchvision python-tqdm python-wandb
 ```
 
 This project was developed on Ubuntu and tested on both Ubuntu and Arch Linux. Other Linux distributions, macOS, or Windows Subsystem for Linux (WSL) may also work with additional setup. However, these platforms are not officially supported.
