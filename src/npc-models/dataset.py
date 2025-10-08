@@ -1,3 +1,10 @@
+"""
+@file   dataset.py
+@author Simon Yu
+@date   02/15/2023
+@brief  NPC dataset class.
+"""
+
 import header
 import json
 import logger

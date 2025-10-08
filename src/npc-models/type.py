@@ -1,3 +1,10 @@
+"""
+@file   type.py
+@author Simon Yu
+@date   02/06/2023
+@brief  Global types.
+"""
+
 import enum
 
 class LogLevel(enum.Enum):

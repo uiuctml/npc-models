@@ -1,3 +1,10 @@
+"""
+@file   header.py
+@author Simon Yu
+@date   02/21/2023
+@brief  Project header file.
+"""
+
 import multiprocessing
 import os
 import type

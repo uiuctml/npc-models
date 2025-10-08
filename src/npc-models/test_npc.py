@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+"""
+@file   test_npc.py
+@author Simon Yu
+@date   02/28/2023
+@brief  Script for testing NPC models.
+"""
+
 import argparse
 import dataset
 import header

@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+"""
+@file   train_pc.py
+@author Simon Yu
+@date   02/11/2024
+@brief  Script for training PC models.
+"""
+
 import argparse
 import header
 import logger

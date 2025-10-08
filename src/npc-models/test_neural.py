@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+"""
+@file   test_neural.py
+@author Simon Yu
+@date   02/12/2024
+@brief  Script for testing neural models.
+"""
+
 import argparse
 import dataset
 import header

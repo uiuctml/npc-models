@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+"""
+@file   train_blackbox.py
+@author Simon Yu
+@date   01/26/2023
+@brief  Script for training blackbox models.
+"""
+
 import argparse
 import dataset
 import header

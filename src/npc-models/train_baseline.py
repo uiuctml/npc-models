@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+"""
+@file   train_baseline.py
+@author Simon Yu
+@date   12/02/2024
+@brief  Script for training baseline models.
+"""
+
 import argparse
 import dataset
 import header

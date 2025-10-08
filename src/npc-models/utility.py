@@ -1,3 +1,10 @@
+"""
+@file   utility.py
+@author Simon Yu
+@date   01/26/2023
+@brief  Utility functions.
+"""
+
 import datetime
 import header
 import logger

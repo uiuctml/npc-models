@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+"""
+@file   train_npc.py
+@author Simon Yu
+@date   02/15/2024
+@brief  Script for training NPC models.
+"""
+
 import argparse
 import dataset
 import header

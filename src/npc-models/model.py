@@ -1,3 +1,10 @@
+"""
+@file   model.py
+@author Simon Yu
+@date   02/06/2023
+@brief  Model classes and functions.
+"""
+
 import abc
 import header
 import logger

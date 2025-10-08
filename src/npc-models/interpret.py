@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+"""
+@file   interpret.py
+@author Simon Yu
+@date   03/12/2024
+@brief  NPC Interpretation Utility.
+"""
+
 import header
 import json
 import os

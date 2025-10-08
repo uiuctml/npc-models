@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+"""
+@file   test_pc.py
+@author Simon Yu
+@date   02/10/2024
+@brief  Script for testing PC models.
+"""
+
 import argparse
 import header
 import logger

@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+"""
+@file   test_baseline.py
+@author Simon Yu
+@date   12/02/2024
+@brief  Script for testing baseline models.
+"""
+
 import argparse
 import dataset
 import header

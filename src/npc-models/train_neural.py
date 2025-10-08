@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+"""
+@file   train_neural.py
+@author Simon Yu
+@date   02/15/2023
+@brief  Script for training neural models.
+"""
+
 import argparse
 import dataset
 import header
