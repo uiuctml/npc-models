@@ -21,18 +21,18 @@ This project requires the following system packages:
 Ubuntu:
 
 ```bash
-apt install libgl1-mesa-dev python3-venv
+apt install libgl1-mesa-dev python3.10 python3-venv
 ```
 
 Arch Linux:
 
 ```bash
-pacman -S mesa
+yay -S mesa python310
 ```
 
 This project was developed on Ubuntu and tested on both Ubuntu and Arch Linux. Other Linux distributions, macOS, or Windows Subsystem for Linux (WSL) may also work with additional setup. However, these platforms are not officially supported.
 
-To ensure maximum compatibility and performance, run this project on a system with at least 64 GB of CPU memory (swap space acceptable) and 16 GB of GPU memory (aggregate across all available GPUs).
+Ensure the graphics driver is installed. Additionally, for maximum compatibility and performance, run this project on a system with at least 64 GB of CPU memory (swap space acceptable) and 16 GB of GPU memory (aggregate across all available GPUs).
 
 ## Project Hierarchy
 
@@ -52,9 +52,9 @@ This project is designed to run within a simple Python virtual environment. Crea
 ```bash
 cd npc
 deactivate
-python3 -m venv npc-venv
+python3.10 -m venv npc-venv
 source npc-venv/bin/activate
-python3 -m pip install -r npc-models/requirements.txt
+python3.10 -m pip install -r npc-models/requirements.txt
 ```
 
 Always ensure the virtual environment is activated before running the project.
