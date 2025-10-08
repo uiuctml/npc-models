@@ -54,7 +54,7 @@ cd npc
 deactivate
 python3 -m venv npc-venv
 source npc-venv/bin/activate
-python3 -m pip install -r npc-dataset-utils/requirements.txt
+python3 -m pip install -r npc-models/requirements.txt
 ```
 
 Always ensure the virtual environment is activated before running the project.
