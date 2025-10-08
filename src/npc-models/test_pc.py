@@ -19,6 +19,7 @@ def initializeRunName(run_name = "", optimizer = "cccp"):
             exit(-1)
 
         header.config_pc["run_name"] = run_name
+        header.config_pc["seed"] = run_name.split(".")[0]
     else:
         header.config_pc["run_name"] = utility.generateRunName(header.config_pc["seed"], header.config_pc["type"], optimizer)
 
@@ -34,7 +35,6 @@ def initializeRunName(run_name = "", optimizer = "cccp"):
 def processArguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.")
-    parser.add_argument("-s", "--seed", type = int, default = None, help = "Seed.")
     arguments = parser.parse_args()
 
     if arguments.run_name == "":
@@ -44,9 +44,6 @@ def processArguments():
         header.config_pc["run_name"] = ""
     else:
         initializeRunName(arguments.run_name)
-
-    if arguments.seed is not None:
-        header.config_pc["seed"] = arguments.seed
 
     logger.log_trace("Run name: \"" + header.config_pc["run_name"] + "\".")
     logger.log_trace("Seed: " + str(header.config_pc["seed"]) + ".")

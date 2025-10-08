@@ -32,7 +32,9 @@ def initializeRunName(run_name = ""):
             logger.log_fatal("Baseline run name dataset is not \"" + header.dataset_prefix + "\". Quit.")
             exit(-1)
 
+        header.config_baseline["model"] = run_name.split(".")[3]
         header.config_baseline["run_name"] = run_name
+        header.config_baseline["seed"] = run_name.split(".")[0]
     else:
         header.config_baseline["run_name"] = utility.generateRunName(header.config_baseline["seed"], header.config_baseline["type"], header.config_baseline["model"])
 
@@ -48,14 +50,9 @@ def initializeRunName(run_name = ""):
 def processArguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.", required = True)
-    parser.add_argument("-s", "--seed", type = int, default = None, help = "Seed.")
     arguments = parser.parse_args()
 
     initializeRunName(arguments.run_name)
-    header.config_baseline["model"] = header.config_baseline["run_name"].split(".")[3]
-
-    if arguments.seed is not None:
-        header.config_baseline["seed"] = arguments.seed
 
     logger.log_trace("Run name: \"" + header.config_baseline["run_name"] + "\".")
     logger.log_trace("Model: \"" + header.config_baseline["model"] + "\".")

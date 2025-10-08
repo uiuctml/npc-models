@@ -23,9 +23,6 @@ def processArguments():
     parser.add_argument("-s", "--seed", type = int, default = None, help = "Seed.")
     arguments = parser.parse_args()
 
-    test_neural.initializeRunName()
-    test_pc.initializeRunName("", "pgd")
-
     if arguments.weights_neural != "":
         header.config_neural["model_pretrained_weights"] = arguments.weights_neural
 
@@ -40,6 +37,10 @@ def processArguments():
 
     if arguments.seed is not None:
         header.config_neural["seed"] = arguments.seed
+        header.config_pc["seed"] = arguments.seed
+
+    test_neural.initializeRunName()
+    test_pc.initializeRunName("", "pgd")
 
     logger.log_trace("Neural run name: \"" + header.config_neural["run_name"] + "\".")
     logger.log_trace("Neural model pretrained weights: \"" + header.config_neural["model_pretrained_weights"] + "\".")

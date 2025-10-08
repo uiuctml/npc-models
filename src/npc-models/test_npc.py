@@ -200,7 +200,6 @@ def processArguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--run-name-neural", type = str, default = "", help = "Neural run name.", required = True)
     parser.add_argument("-p", "--run-name-pc", type = str, default = "", help = "PC run name.")
-    parser.add_argument("-s", "--seed", type = int, default = None, help = "Seed.")
     arguments = parser.parse_args()
 
     test_neural.initializeRunName(arguments.run_name_neural)
@@ -210,12 +209,9 @@ def processArguments():
         header.config_pc["file_name_checkpoint"] = ""
         header.config_pc["file_name_checkpoint_best"] = ""
         header.config_pc["run_name"] = ""
+        header.config_pc["seed"] = header.config_neural["seed"]
     else:
         test_pc.initializeRunName(arguments.run_name_pc, "pgd")
-
-    if arguments.seed is not None:
-        header.config_neural["seed"] = arguments.seed
-        header.config_pc["seed"] = arguments.seed
 
     logger.log_trace("Neural run name: \"" + header.config_neural["run_name"] + "\".")
     logger.log_trace("PC run name: \"" + header.config_pc["run_name"] + "\".")

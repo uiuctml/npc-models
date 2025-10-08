@@ -23,6 +23,7 @@ def initializeRunName(run_name = ""):
             exit(-1)
 
         header.config_blackbox["run_name"] = run_name
+        header.config_blackbox["seed"] = run_name.split(".")[0]
     else:
         header.config_blackbox["run_name"] = utility.generateRunName(header.config_blackbox["seed"], header.config_blackbox["type"], "resnet34")
 
@@ -38,13 +39,9 @@ def initializeRunName(run_name = ""):
 def processArguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.", required = True)
-    parser.add_argument("-s", "--seed", type = int, default = None, help = "Seed.")
     arguments = parser.parse_args()
 
     initializeRunName(arguments.run_name)
-
-    if arguments.seed is not None:
-        header.config_blackbox["seed"] = arguments.seed
 
     logger.log_trace("Run name: \"" + header.config_blackbox["run_name"] + "\".")
     logger.log_trace("Seed: " + str(header.config_blackbox["seed"]) + ".")
