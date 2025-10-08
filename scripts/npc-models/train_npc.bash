@@ -2,7 +2,7 @@
 
 cd "../../src/npc-models"
 
-# Jointly optimized with data-driven PC
+# Joint optimization with data-driven PC
 ./train_npc.py -w "42.awa2.neural.resnet34mtl.2024.12.12.20.5.Aurora-R11.best.zip" -c "42.awa2.pc.cccp.2024.12.12.19.55.Aurora-R11.best.zip" -b 256 -e 150 -s 42
 ./train_npc.py -w "52.awa2.neural.resnet34mtl.2024.12.24.0.30.Aurora-R11.best.zip" -c "52.awa2.pc.cccp.2024.12.22.15.16.Aurora-R11.best.zip" -b 256 -e 150 -s 52
 ./train_npc.py -w "62.awa2.neural.resnet34mtl.2024.12.24.3.25.Aurora-R11.best.zip" -c "62.awa2.pc.cccp.2024.12.22.15.17.Aurora-R11.best.zip" -b 256 -e 150 -s 62
@@ -24,7 +24,7 @@ cd "../../src/npc-models"
 ./train_npc.py -w "72.mnist.neural.resnet34mtl.2024.12.24.9.9.PowerEdge-R720.best.zip" -c "72.mnist.pc.cccp.2024.12.22.15.55.Aurora-R11.best.zip" -b 256 -e 150 -s 72
 ./train_npc.py -w "82.mnist.neural.resnet34mtl.2024.12.24.13.37.PowerEdge-R720.best.zip" -c "82.mnist.pc.cccp.2024.12.22.15.56.Aurora-R11.best.zip" -b 256 -e 150 -s 82
 
-# Jointly optimized with knowledge-injected PC
+# Joint optimization with knowledge-injected PC
 ./train_npc.py -w "42.awa2.neural.resnet34mtl.2024.12.12.20.5.Aurora-R11.best.zip" -b 256 -e 150 -s 42
 ./train_npc.py -w "52.awa2.neural.resnet34mtl.2024.12.24.0.30.Aurora-R11.best.zip" -b 256 -e 150 -s 52
 ./train_npc.py -w "62.awa2.neural.resnet34mtl.2024.12.24.3.25.Aurora-R11.best.zip" -b 256 -e 150 -s 62
