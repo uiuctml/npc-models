@@ -1,63 +1,147 @@
-# VISAT Benchmark Tools
+# Neural Probabilistic Circuit Models
 
-## Overview
+## Table of Contents
 
-This codebase contains tools and scripts for performing the VISAT robustness benchmarks.
+1. [Project Overview](#project-overview)
+1. [Project Prerequisites](#project-prerequisites)
+1. [Project Hierarchy](#project-hierarchy)
+1. [Publications](#publications)
+1. [Acknowledgements](#acknowledgements)
+1. [License](#license)
+1. [Contact](#contact)
 
-## Prerequisites
+## Project Overview
 
-This codebase was developed on Ubuntu 20.04 LTS and requires the following packages:
 
- - (apt) python3-pip [20.0.2-5ubuntu1.8]
- - (apt) python3-opencv [4.2.0+dfsg-5]
- - (pip) scikit-image [0.18.0]
- - (pip) torch [1.13.1]
- - (pip) torchsummary [1.5.1]
- - (pip) torchvision [0.14.1]
- - (pip) tqdm [4.64.1]
 
-Before attempting to launch a script, please refer to `header.py` and ensure that all relevant parameters, such as model type, hyperparameters, testing split path, etc., are properly set.
+## Project Prerequisites
 
-## Base Model Training
+This project requires the following system packages:
 
-Under the project directory, the base models can be trained as follows:
+Ubuntu:
 
 ```bash
-cd src/
-./train_baseline.py
-
+apt install
 ```
 
-## Multi-Task Learning (MTL) Model Training
-
-Under the project directory, the MTL models can be trained as follows:
+Arch Linux:
 
 ```bash
-cd src/
-./train_decomposed.py
-
+pacman -S
 ```
 
-## Base Model Testing
+This project was developed on Ubuntu and tested on both Ubuntu and Arch Linux. Other Linux distributions, macOS, or Windows Subsystem for Linux (WSL) may also work with additional setup. However, these platforms are not officially supported.
 
-Under the project directory, the base models can be tested as follows:
+This project is designed to run directly on the operating system, without any Python virtual environments such as Conda. Using such environments is unnecessary and not recommended. Additionally, avoid installing Python packages via `pip` unless explicitly instructed. Packages from the system package manager are preferred.
 
-```bash
-cd src/
-./test_baseline.py
+## Project Hierarchy
+
+This project is part of the NPC pipeline. To ensure compatibility and maintain consistent references across the pipeline, organize the project directories as follows:
+
+    npc
+    ├── datasets
+    ├── learnspn
+    ├── npc-dataset-utils
+    └── npc-models
+
+All subsequent instructions assume the above project hierarchy.
+
+## Publications
+
+Upon using this project, cite any relevant publications listed below:
+
+### Neural Probabilistic Circuit (NPC)
 
 ```
-
-## Multi-Task Learning (MTL) Model Testing
-
-Under the project directory, the MTL models can be tested as follows:
-
-```bash
-cd src/
-./test_decomposed.py
+@article{chen2025neural,
+  title={Neural probabilistic circuits: Enabling compositional and interpretable predictions through logical reasoning},
+  author={Chen, Weixin and Yu, Simon and Shao, Huajie and Sha, Lui and Zhao, Han},
+  journal={arXiv preprint arXiv:2501.07021},
+  year={2025}
+}
+```
 
 ```
+@inproceedings{chenneural,
+  title={Neural Probabilistic Circuits: An Overview},
+  author={Chen, Weixin and Yu, Simon and Shao, Huajie and Sha, Lui and Zhao, Han},
+  booktitle={Eighth Workshop on Tractable Probabilistic Modeling}
+}
+```
+
+### Probabilistic Circuit (PC)
+
+```
+@article{zhao2016unified,
+  title={A unified approach for learning the parameters of sum-product networks},
+  author={Zhao, Han and Poupart, Pascal and Gordon, Geoffrey J},
+  journal={Advances in neural information processing systems},
+  volume={29},
+  year={2016}
+}
+```
+
+### Residual Network (ResNet)
+
+```
+@inproceedings{he2016deep,
+  title={Deep residual learning for image recognition},
+  author={He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian},
+  booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
+  pages={770--778},
+  year={2016}
+}
+```
+
+### Concept Bottleneck Model (CBM)
+
+```
+@inproceedings{koh2020concept,
+  title={Concept bottleneck models},
+  author={Koh, Pang Wei and Nguyen, Thao and Tang, Yew Siang and Mussmann, Stephen and Pierson, Emma and Kim, Been and Liang, Percy},
+  booktitle={International conference on machine learning},
+  pages={5338--5348},
+  year={2020},
+  organization={PMLR}
+}
+```
+
+### Concept Embedding Model (CEM)
+
+```
+@article{espinosa2022concept,
+  title={Concept embedding models: Beyond the accuracy-explainability trade-off},
+  author={Espinosa Zarlenga, Mateo and Barbiero, Pietro and Ciravegna, Gabriele and Marra, Giuseppe and Giannini, Francesco and Diligenti, Michelangelo and Shams, Zohreh and Precioso, Frederic and Melacci, Stefano and Weller, Adrian and others},
+  journal={Advances in neural information processing systems},
+  volume={35},
+  pages={21400--21413},
+  year={2022}
+}
+```
+
+### Deep Concept Reasoner (DCR)
+
+```
+@inproceedings{barbiero2023interpretable,
+  title={Interpretable neural-symbolic concept reasoning},
+  author={Barbiero, Pietro and Ciravegna, Gabriele and Giannini, Francesco and Zarlenga, Mateo Espinosa and Magister, Lucie Charlotte and Tonda, Alberto and Li{\'o}, Pietro and Precioso, Frederic and Jamnik, Mateja and Marra, Giuseppe},
+  booktitle={International Conference on Machine Learning},
+  pages={1801--1825},
+  year={2023},
+  organization={PMLR}
+}
+```
+
+## Acknowledgements
+
+Special thanks to Rahim Khan, Tommy Tang, Alex Tanthiptham, and Trusha Vernekar for their contributions to the implementation, testing, and experiments involved in this project.
 
 ## License
 
-The codebase is provided under the Creative Commons Attribution NonCommercial ShareAlike (CC BY-NC-SA) license, which can be viewed under `LICENSE`.
+This codebase is released under the [Creative Commons Attribution NonCommercial ShareAlike (CC BY-NC-SA)](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en) license, which can be viewed under `LICENSE`.
+
+## Contact
+
+For questions, feedback, or comments, open an issue or reach out to [Simon Yu](mailto:simonyu@simonyu.net).
+
+Written by [Simon Yu](https://www.simonyu.net/).
