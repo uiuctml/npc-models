@@ -34,7 +34,7 @@ def initializeRunName(run_name = ""):
 
         header.config_baseline["model"] = run_name.split(".")[3]
         header.config_baseline["run_name"] = run_name
-        header.config_baseline["seed"] = run_name.split(".")[0]
+        header.config_baseline["seed"] = int(run_name.split(".")[0])
     else:
         header.config_baseline["run_name"] = utility.generateRunName(header.config_baseline["seed"], header.config_baseline["type"], header.config_baseline["model"])
 

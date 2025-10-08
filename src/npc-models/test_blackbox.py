@@ -23,7 +23,7 @@ def initializeRunName(run_name = ""):
             exit(-1)
 
         header.config_blackbox["run_name"] = run_name
-        header.config_blackbox["seed"] = run_name.split(".")[0]
+        header.config_blackbox["seed"] = int(run_name.split(".")[0])
     else:
         header.config_blackbox["run_name"] = utility.generateRunName(header.config_blackbox["seed"], header.config_blackbox["type"], "resnet34")
 

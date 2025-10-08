@@ -19,7 +19,7 @@ def initializeRunName(run_name = "", optimizer = "cccp"):
             exit(-1)
 
         header.config_pc["run_name"] = run_name
-        header.config_pc["seed"] = run_name.split(".")[0]
+        header.config_pc["seed"] = int(run_name.split(".")[0])
     else:
         header.config_pc["run_name"] = utility.generateRunName(header.config_pc["seed"], header.config_pc["type"], optimizer)
 
