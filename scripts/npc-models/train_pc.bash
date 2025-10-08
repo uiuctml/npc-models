@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+##
+# @file   train_pc.bash
+# @author Simon Yu
+# @date   02/13/2024
+# @brief  Script for training PC models.
+##
+
 # Go to script directory
 cd "$(dirname $0)"
 

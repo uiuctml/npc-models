@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+##
+# @file   train_neural.bash
+# @author Simon Yu
+# @date   12/06/2024
+# @brief  Script for training neural models.
+##
+
 # Go to script directory
 cd "$(dirname $0)"
 

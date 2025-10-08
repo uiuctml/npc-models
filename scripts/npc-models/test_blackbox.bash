@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+##
+# @file   test_blackbox.bash
+# @author Simon Yu
+# @date   10/03/2025
+# @brief  Script for testing blackbox models.
+##
+
 # Go to script directory
 cd "$(dirname $0)"
 

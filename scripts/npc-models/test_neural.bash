@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+##
+# @file   test_neural.bash
+# @author Simon Yu
+# @date   10/04/2025
+# @brief  Script for testing neural models.
+##
+
 # Go to script directory
 cd "$(dirname $0)"
 

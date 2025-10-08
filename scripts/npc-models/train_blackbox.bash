@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+##
+# @file   train_blackbox.bash
+# @author Simon Yu
+# @date   12/12/2024
+# @brief  Script for training blackbox models.
+##
+
 # Go to script directory
 cd "$(dirname $0)"
 

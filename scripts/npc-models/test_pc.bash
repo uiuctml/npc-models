@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+##
+# @file   test_pc.bash
+# @author Simon Yu
+# @date   10/04/2025
+# @brief  Script for testing PC models.
+##
+
 # Go to script directory
 cd "$(dirname $0)"
 

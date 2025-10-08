@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+##
+# @file   train_npc.bash
+# @author Simon Yu
+# @date   02/16/2024
+# @brief  Script for training NPC models.
+##
+
 # Go to script directory
 cd "$(dirname $0)"
 

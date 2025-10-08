@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+##
+# @file   test_baseline.bash
+# @author Simon Yu
+# @date   10/03/2025
+# @brief  Script for testing baseline models.
+##
+
 # Go to script directory
 cd "$(dirname $0)"
 

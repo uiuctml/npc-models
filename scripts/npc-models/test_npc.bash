@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+##
+# @file   test_npc.bash
+# @author Simon Yu
+# @date   11/09/2024
+# @brief  Script for testing NPC models.
+##
+
 # Go to script directory
 cd "$(dirname $0)"
 
