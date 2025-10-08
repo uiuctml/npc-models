@@ -21,18 +21,16 @@ This project requires the following system packages:
 Ubuntu:
 
 ```bash
-apt install libgl1-mesa-dev python3-natsort python3-numpy python3-pil python3-pyqt5 python3-tqdm
+apt install libgl1-mesa-dev python3-venv
 ```
 
 Arch Linux:
 
 ```bash
-pacman -S mesa python-natsort python-numpy python-pillow python-pyqt5 python-pytorch-cuda python-scikit-learn python-torchvision python-tqdm python-wandb
+pacman -S mesa
 ```
 
 This project was developed on Ubuntu and tested on both Ubuntu and Arch Linux. Other Linux distributions, macOS, or Windows Subsystem for Linux (WSL) may also work with additional setup. However, these platforms are not officially supported.
-
-This project is designed to run directly on the operating system, without any Python virtual environments such as Conda. Using such environments is unnecessary and not recommended. Additionally, avoid installing Python packages via `pip` unless explicitly instructed. Packages from the system package manager are preferred.
 
 To ensure maximum compatibility and performance, run this project on a system with at least 64 GB of CPU memory (swap space acceptable) and 16 GB of GPU memory (aggregate across all available GPUs).
 
@@ -44,9 +42,22 @@ This project is part of the NPC pipeline. To ensure compatibility and maintain c
     ├── datasets
     ├── learnspn
     ├── npc-dataset-utils
-    └── npc-models
+    ├── npc-models
+    └── npc-venv
 
 All subsequent instructions assume the above project hierarchy.
+
+This project is designed to run within a dedicated Python virtual environment. Create and activate the environment as follows:
+
+```bash
+cd npc
+deactivate
+python3 -m venv npc-venv
+source npc-venv/bin/activate
+python3 -m pip install -r npc-dataset-utils/requirements.txt
+```
+
+Always ensure the virtual environment is activated before running the project.
 
 Before running this project, first ensure that all datasets are properly set up under `npc/datasets` by following the instructions in the `npc-dataset-utils` project. Then, construct and generate PCs for all datasets as described in the `learnspn` project instructions.
 
