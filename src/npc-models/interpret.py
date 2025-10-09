@@ -9,6 +9,7 @@
 
 import header
 import json
+import logger
 import os
 
 os.environ["QT_LOGGING_RULES"] = "qt.gui.icc=false"
@@ -405,6 +406,10 @@ def hideCorrectPredictions():
     for file_name in explanations.keys():
         if list(explanations[file_name]["prediction"]["class"].keys())[0] == explanations[file_name]["ground_truth"]["class"]:
             file_names_correct.append(file_name)
+
+    if len(file_names_correct) == len(explanations):
+        logger.log_warn("All predictions are correct.")
+        return
 
     for file_name_correct in file_names_correct:
         del explanations[file_name_correct]
