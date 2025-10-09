@@ -92,6 +92,8 @@ Before running this project, first ensure that all datasets are properly set up 
 
 ## Getting Started
 
+TODO
+
 First, ensure the dataset prefix is properly set to the desired dataset in `header.py`:
 
 ```bash
@@ -126,6 +128,8 @@ wandb is enabled only during training and is automatically disabled during testi
 
 ## Training and Testing
 
+TODO
+
 - [Neural Probabilistic Circuit](docs/npc-models/training/npc.md)
 - [Baseline](docs/npc-models/training/baseline.md)
 
@@ -133,9 +137,15 @@ wandb is enabled only during training and is automatically disabled during testi
 
 ### Most Probable Explanations (MPE)
 
+TODO
+
 ### Counterfactual Explanations (CE)
 
+TODO
+
 ### NPC Interpretation Utility
+
+TODO
 
 Preview of the NPC Interpretation Utility:
 
