@@ -92,9 +92,27 @@ Before running this project, first ensure that all datasets are properly set up 
 
 ## Neural Probabilistic Circuit
 
+### Training
+
+### Testing
+
 ## Baseline
 
+### Training
+
+### Testing
+
 ## Interpretability
+
+### Most Probable Explanations (MPE)
+
+### Counterfactual Explanations (CE)
+
+### NPC Interpretation Utility
+
+Preview of the NPC Interpretation Utility:
+
+![NPC Interpretation Utility](docs/npc-models/images/interpret.png)
 
 ## Publications
 
