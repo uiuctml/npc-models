@@ -3,8 +3,8 @@
 ## Table of Contents
 
 1. [Project Overview](#project-overview)
-1. [Project Prerequisites](#project-prerequisites)
 1. [Project Hierarchy](#project-hierarchy)
+1. [Project Prerequisites](#project-prerequisites)
 1. [Getting Started](#getting-started)
 1. [Training and Testing](#training-and-testing)
 1. [Interpretability](#interpretability)
@@ -44,6 +44,21 @@ The codebase includes the [NPC Interpretation Utility](#interpretability), which
 
 Refer to the [NPC Paper](https://arxiv.org/abs/2501.07021) for complete details on the design, formulation, training, and evaluation of the NPC.
 
+## Project Hierarchy
+
+This project is part of the NPC pipeline. To ensure compatibility and maintain consistent references across the pipeline, organize the project directories as follows:
+
+    npc
+    ├── datasets
+    ├── learnspn
+    ├── npc-dataset-utils
+    ├── npc-models
+    └── venv
+
+All subsequent instructions assume the above project hierarchy.
+
+Before running this project, first ensure that all datasets are properly set up under `npc/datasets` by following the instructions in the `npc-dataset-utils` project. Then, construct and generate PCs for all datasets as described in the `learnspn` project instructions. Furthermore, review `header.py` and ensure that all relevant parameters are set to the desired values. More detailed instructions on certain parameters are provided in later sections.
+
 ## Project Prerequisites
 
 This project requires the following system packages:
@@ -62,21 +77,6 @@ yay -S mesa python310
 
 This project was developed on Ubuntu and tested on both Ubuntu and Arch Linux. Other Linux distributions, macOS, or Windows Subsystem for Linux (WSL) may also work with additional setup. However, these platforms are not officially supported.
 
-Ensure the graphics driver is installed. Additionally, for maximum compatibility and performance, run this project on a system with at least 64 GB of CPU memory (swap space acceptable) and 16 GB of GPU memory (aggregate across all available GPUs).
-
-## Project Hierarchy
-
-This project is part of the NPC pipeline. To ensure compatibility and maintain consistent references across the pipeline, organize the project directories as follows:
-
-    npc
-    ├── datasets
-    ├── learnspn
-    ├── npc-dataset-utils
-    ├── npc-models
-    └── venv
-
-All subsequent instructions assume the above project hierarchy.
-
 This project is designed to run within a simple Python virtual environment. Create and activate the environment as follows:
 
 ```bash
@@ -89,7 +89,7 @@ python3.10 -m pip install -r npc-models/requirements.txt
 
 Always ensure the virtual environment is activated before running the project.
 
-Before running this project, first ensure that all datasets are properly set up under `npc/datasets` by following the instructions in the `npc-dataset-utils` project. Then, construct and generate PCs for all datasets as described in the `learnspn` project instructions. Furthermore, review `header.py` and ensure that all relevant parameters are set to the desired values. More detailed instructions on certain parameters are provided in later sections.
+Ensure the graphics driver is installed. Additionally, for maximum compatibility and performance, run this project on a system with at least 64 GB of CPU memory (swap space acceptable) and 16 GB of GPU memory (aggregate across all available GPUs).
 
 ## Getting Started
 
