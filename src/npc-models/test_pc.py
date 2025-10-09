@@ -41,7 +41,7 @@ def initializeRunName(run_name = "", optimizer = "cccp"):
 
 def processArguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.")
+    parser.add_argument("-p", "--run-name", type = str, default = "", help = "Run name.")
     arguments = parser.parse_args()
 
     if arguments.run_name == "":
