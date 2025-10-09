@@ -19,9 +19,9 @@ This codebase provides scripts and utilities for training, testing, and evaluati
 
 The NPC pipeline follows a three-stage training algorithm:
 
-1. [Neural Attribute Recognition](https://arxiv.org/abs/2501.07021): trained through multi-task learning (MTL) to predict attributes from input dataset.
-2. [Probablistic Circuit (PC)](https://ieeexplore.ieee.org/document/6130310): constructed using data-driven or knowledge-injected approaches, and trained via the Concave–Convex Procedure (CCCP) for parameter learning.
-3. [Neural Probablistic Circuit (NPC)](https://arxiv.org/abs/2501.07021): combines the independently trained Neural and PC models and jointly optimizes them to produce final predictions.
+1. [Neural Attribute Recognition](https://arxiv.org/abs/2501.07021): trained through [Multi-Task Learning (MTL)](https://link.springer.com/article/10.1023/a:1007379606734) to predict attributes from input dataset.
+2. [Probablistic Circuit (PC)](https://ieeexplore.ieee.org/document/6130310): constructed using data-driven or knowledge-injected approaches, and trained via the [Concave–Convex Procedure (CCCP)](https://proceedings.neurips.cc/paper/2016/hash/6c9882bbac1c7093bd25041881277658-Abstract.html) for parameter learning.
+3. [Neural Probablistic Circuit (NPC)](https://arxiv.org/abs/2501.07021): combines the independently trained Neural and PC models with joint optimization.
 
 Furthermore, a set of baseline models is trained, tested, and evaluated for comparison:
 
@@ -113,6 +113,19 @@ Upon using this project, cite any relevant publications listed below:
 }
 ```
 
+```
+@article{caruana1997multitask,
+  title={Multitask learning},
+  author={Caruana, Rich},
+  journal={Machine learning},
+  volume={28},
+  number={1},
+  pages={41--75},
+  year={1997},
+  publisher={Springer}
+}
+```
+
 ### Probabilistic Circuit (PC)
 
 ```
@@ -133,6 +146,19 @@ Upon using this project, cite any relevant publications listed below:
   pages={689--690},
   year={2011},
   organization={IEEE}
+}
+```
+
+```
+@article{sanchez2021sum,
+  title={Sum-product networks: A survey},
+  author={S{\'a}nchez-Cauce, Raquel and Paris, Iago and D{\'\i}ez, Francisco Javier},
+  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  volume={44},
+  number={7},
+  pages={3821--3839},
+  year={2021},
+  publisher={IEEE}
 }
 ```
 
