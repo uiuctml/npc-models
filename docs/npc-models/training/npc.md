@@ -69,7 +69,7 @@ For the data-driven approach, jointly optimize the independently trained Neural 
 
 ```bash
 cd npc/npc-models/src/npc-models
-./train_npc.py -w "42.awa2.neural.resnet34mtl.2024.12.12.20.5.Aurora-R11.best.zip" -c "42.awa2.pc.cccp.2024.12.12.19.55.Aurora-R11.best.zip" -b 256 -e 150 -s 42
+./train_npc.py -w "<neural checkpoint file name>" -c "<pc checkpoint file name>" -b 256 -e 150 -s 42
 ```
 
 Arguments:
@@ -96,7 +96,7 @@ Test the trained Neural Attribute Recognition model:
 
 ```bash
 cd npc/npc-models/src/npc-models
-./test_neural.py -r "42.awa2.neural.resnet34mtl.2024.12.12.20.5.Aurora-R11"
+./test_neural.py -r "<run name>"
 ```
 
 Arguments:
@@ -109,7 +109,7 @@ Test the trained PC model:
 
 ```bash
 cd npc/npc-models/src/npc-models
-./test_pc.py -p "42.awa2.pc.cccp.2024.12.12.19.55.Aurora-R11"
+./test_pc.py -p "<run name>"
 ```
 
 Arguments:
@@ -122,7 +122,7 @@ Test the trained Neural and PC models, either independently trained or jointly o
 
 ```bash
 cd npc/npc-models/src/npc-models
-./test_npc.py -r "42.awa2.neural.resnet34mtl.2024.12.12.20.5.Aurora-R11" -p "42.awa2.pc.cccp.2024.12.12.19.55.Aurora-R11"
+./test_npc.py -r "<neural run name>" -p "<pc run name>"
 ```
 
 Arguments:
