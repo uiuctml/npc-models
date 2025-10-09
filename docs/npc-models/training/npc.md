@@ -38,7 +38,7 @@ Train the Neural Attribute Recognition model:
 
 ```bash
 cd npc/npc-models/src/npc-models
-./train_neural.py -b 256 -e 150 -s 42
+./train_neural.py -b <batches> -e <epochs> -s <seed>
 ```
 
 Arguments:
@@ -53,7 +53,7 @@ Train the PC model constructed using the data-driven approach via CCCP parameter
 
 ```bash
 cd npc/npc-models/src/npc-models
-./train_pc.py -e 50 -s 42
+./train_pc.py -e <epochs> -s <seed>
 ```
 
 Arguments:
@@ -69,7 +69,7 @@ For the data-driven approach, jointly optimize the independently trained Neural 
 
 ```bash
 cd npc/npc-models/src/npc-models
-./train_npc.py -w "<neural checkpoint file name>" -c "<pc checkpoint file name>" -b 256 -e 150 -s 42
+./train_npc.py -w "<neural checkpoint>" -c "<pc checkpoint>" -b <batches> -e <epochs> -s <seed>
 ```
 
 Arguments:
@@ -96,7 +96,7 @@ Test the trained Neural Attribute Recognition model:
 
 ```bash
 cd npc/npc-models/src/npc-models
-./test_neural.py -r "<run name>"
+./test_neural.py -r "<run>"
 ```
 
 Arguments:
@@ -109,7 +109,7 @@ Test the trained PC model:
 
 ```bash
 cd npc/npc-models/src/npc-models
-./test_pc.py -p "<run name>"
+./test_pc.py -p "<run>"
 ```
 
 Arguments:
@@ -122,7 +122,7 @@ Test the trained Neural and PC models, either independently trained or jointly o
 
 ```bash
 cd npc/npc-models/src/npc-models
-./test_npc.py -r "<neural run name>" -p "<pc run name>"
+./test_npc.py -r "<neural run>" -p "<pc run>"
 ```
 
 Arguments:
