@@ -93,27 +93,25 @@ Before running this project, first ensure that all datasets are properly set up 
 
 ## Getting Started
 
-TODO
-
-First, ensure the dataset prefix is properly set to the desired dataset in `header.py`:
+Begin by setting the dataset prefix in `header.py` to specify the dataset to be used:
 
 ```python
 dataset_prefix = "<dataset prefix>"
 ```
 
-If applicable, enable tensor core matrix multiplications on Ampere or newer GPUs:
+If applicable, enable Tensor Core acceleration on Ampere or newer GPUs:
 
 ```python
 cuda_allow_tf32 = True
 ```
 
-Optionally, set log level to `trace` for more verbose outputs:
+Optionally, set the log level to `trace` for more detailed output:
 
 ```python
 log_level = type.LogLevel.trace
 ```
 
-This project supports [Weights & Biases (wandb)](https://wandb.ai/), which allows for logging and visualization of key metrics such as model performance and loss, and saves checkpoint files containing model weights to wandb cloud storage. To use wandb, first log in with API key:
+This project supports [Weights & Biases (wandb)](https://wandb.ai/) for experiment tracking and visualization. wandb logs key metrics such as model performance and loss, and automatically uploads model checkpoint files to cloud storage. To use wandb, log in with API key:
 
 ```bash
 wandb login
@@ -139,7 +137,7 @@ Pretrained checkpoint files from the paper experiments are not released by defau
 
 If wandb is enabled, a wandb run is automatically created under the generated run name, and all checkpoints are uploaded to the wandb cloud storage.
 
-At the end of each training session, the training scripts automatically test the trained models. The identical test can be repeated manually by running the testing scripts and passing the training run names as arguments. Note that wandb is automatically disabled in the testing scripts.
+At the end of each training session, the training scripts automatically test the trained models. The identical test can be repeated manually by running the testing scripts and passing the training run names as arguments.
 
 Before joint optimization and testing, ensure that the dataset prefix in `header.py` matches the one specified in the run name or checkpoint file name passed as arguments.
 
