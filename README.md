@@ -5,8 +5,8 @@
 1. [Project Overview](#project-overview)
 1. [Project Prerequisites](#project-prerequisites)
 1. [Project Hierarchy](#project-hierarchy)
-1. [Neural Probabilistic Circuit](#neural-probabilistic-circuit)
-1. [Baseline](#baseline)
+1. [Getting Started](#getting-started)
+1. [Training and Testing](#training-and-testing)
 1. [Interpretability](#interpretability)
 1. [Publications](#publications)
 1. [Acknowledgements](#acknowledgements)
@@ -88,19 +88,46 @@ python3.10 -m pip install -r npc-models/requirements.txt
 
 Always ensure the virtual environment is activated before running the project.
 
-Before running this project, first ensure that all datasets are properly set up under `npc/datasets` by following the instructions in the `npc-dataset-utils` project. Then, construct and generate PCs for all datasets as described in the `learnspn` project instructions.
+Before running this project, first ensure that all datasets are properly set up under `npc/datasets` by following the instructions in the `npc-dataset-utils` project. Then, construct and generate PCs for all datasets as described in the `learnspn` project instructions. Furthermore, review `header.py` and ensure that all relevant parameters are set to the desired values. More detailed instructions on certain parameters are provided in later sections.
 
-## Neural Probabilistic Circuit
+## Getting Started
 
-### Training
+First, ensure the dataset prefix is properly set to the desired dataset in `header.py`:
 
-### Testing
+```bash
+dataset_prefix = "<dataset prefix>"
+```
 
-## Baseline
+If applicable, enable tensor core matrix multiplications on Ampere or newer GPUs:
 
-### Training
+```bash
+cuda_allow_tf32 = True
+```
 
-### Testing
+Optionally, set log level to `trace` for more verbose outputs:
+
+```bash
+log_level = type.LogLevel.trace
+```
+
+This project supports [Weights & Biases (wandb)](https://wandb.ai/), which allows for logging and visualization of key metrics such as model performance and loss, and saves checkpoint files containing model weights to wandb cloud storage. To use wandb, first log in with API key:
+
+```bash
+wandb login
+```
+
+Then, set run mode to `online` in `header.py`:
+
+```bash
+run_mode = "online"
+```
+
+wandb is enabled only during training and is automatically disabled during testing.
+
+## Training and Testing
+
+- [Neural Probabilistic Circuit](docs/npc-models/training/npc.md)
+- [Baseline](docs/npc-models/training/baseline.md)
 
 ## Interpretability
 
