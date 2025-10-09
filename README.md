@@ -19,7 +19,7 @@ This codebase provides scripts and utilities for training, testing, and evaluati
 
 The NPC pipeline follows a three-stage training algorithm:
 
-1. **Neural Attribute Recognition**: trained through [Multi-Task Learning (MTL)](https://link.springer.com/article/10.1023/a:1007379606734) to predict attributes from input dataset.
+1. **Neural Attribute Recognition**: trained through [Multi-Task Learning (MTL)](https://link.springer.com/article/10.1023/a:1007379606734) to predict attributes from input.
 2. **Probabilistic Circuit (PC)**: constructed using data-driven or knowledge-injected approaches, and trained via the [Concave-Convex Procedure (CCCP)](https://proceedings.neurips.cc/paper/2016/hash/6c9882bbac1c7093bd25041881277658-Abstract.html) for parameter learning.
 3. **Joint Optimization**: jointly optimize the independently trained Neural and PC models to form the final NPC pipeline.
 
@@ -89,7 +89,7 @@ python3.10 -m pip install -r npc-models/requirements.txt
 
 Always ensure the virtual environment is activated before running the project.
 
-Ensure the graphics driver is installed. Additionally, for maximum compatibility and performance, run this project on a system with at least 64 GB of CPU memory (swap space acceptable) and 16 GB of GPU memory (aggregate across all available GPUs).
+Ensure the appropriate graphics GPU is installed. Additionally, for maximum compatibility and performance, run this project on a system with at least 64 GB of CPU memory (swap space acceptable) and 16 GB of GPU memory (aggregate across all available GPUs).
 
 ## Getting Started
 
