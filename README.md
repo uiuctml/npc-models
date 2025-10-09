@@ -19,9 +19,9 @@ This codebase provides scripts and utilities for training, testing, and evaluati
 
 The NPC pipeline follows a three-stage training algorithm:
 
-1. [Neural Attribute Recognition](https://arxiv.org/abs/2501.07021): trained through [Multi-Task Learning (MTL)](https://link.springer.com/article/10.1023/a:1007379606734) to predict attributes from input dataset.
-2. [Probablistic Circuit (PC)](https://ieeexplore.ieee.org/document/6130310): constructed using data-driven or knowledge-injected approaches, and trained via the [Concave–Convex Procedure (CCCP)](https://proceedings.neurips.cc/paper/2016/hash/6c9882bbac1c7093bd25041881277658-Abstract.html) for parameter learning.
-3. [Neural Probablistic Circuit (NPC)](https://arxiv.org/abs/2501.07021): combines the independently trained Neural and PC models with joint optimization.
+1. **Neural Attribute Recognition**: trained through [Multi-Task Learning (MTL)](https://link.springer.com/article/10.1023/a:1007379606734) to predict attributes from input dataset.
+2. **Probablistic Circuit (PC)**: constructed using data-driven or knowledge-injected approaches, and trained via the [Concave-Convex Procedure (CCCP)](https://proceedings.neurips.cc/paper/2016/hash/6c9882bbac1c7093bd25041881277658-Abstract.html) for parameter learning.
+3. **Joint Optimization**: jointly optimize the independently trained Neural and PC models to form the final NPC pipeline.
 
 Furthermore, a set of baseline models is trained, tested, and evaluated for comparison:
 
@@ -40,9 +40,9 @@ Beyond its excellent performance, the NPC is inherently interpretable by design.
 - [Most Probable Explanations (MPE)](https://ieeexplore.ieee.org/document/9363463)
 - [Counterfactual Explanations (CE)](https://christophm.github.io/interpretable-ml-book/counterfactual.html)
 
-The codebase includes the NPC Interpretation Utility, which visualizes generated MPEs and CEs for each instance, comparing them against both NPC predictions and ground truths.
+The codebase includes the [NPC Interpretation Utility](#interpretability), which visualizes generated MPEs and CEs for each instance, enabling easy comparson against both NPC predictions and ground truths.
 
-Refer to the [paper](https://arxiv.org/abs/2501.07021) for complete details on the design, formulation, training, and evaluation of the NPC.
+Refer to the NPC [paper](https://arxiv.org/abs/2501.07021) for complete details on the design, formulation, training, and evaluation of the NPC.
 
 ## Project Prerequisites
 
@@ -127,21 +127,19 @@ wandb is enabled only during training and is automatically disabled during testi
 
 ## Training and Testing
 
-First, review and adjust additional parameters, such as training hyperparameters, if applicable, in the configuration dictionaries within `header.py`.
+For general setup and execution:
+- Review and adjust additional parameters, such as training hyperparameters, if applicable, in the configuration dictionaries within `header.py`.
+- Before joint optimization and testing, ensure that the dataset prefix in `header.py` matches the one specified in the run name or checkpoint file name passed as arguments.
+- At the end of each training session, the training scripts automatically test the trained models. The identical test can be repeated manually by running the testing scripts and passing the training run names as arguments.
 
-At the start of each training, a unique run name is automatically generated. During training, two checkpoint files containing model weights are produced, one updated every epoch and another updated only when validation performance improves, i.e., the _best_ checkpoint.
+For checkpoint and run management:
+- Each training session automatically generates a unique run name. Two checkpoint files containing model weights are produced during training, one updated every epoch and another updated only when validation performance improves, i.e., the _best_ checkpoint.
+- Checkpoint files are stored under `npc-models/outputs/npc-models/checkpoints` and named using the generated run name. The best checkpoint file ends with `.best.zip`, as defined in `header.py`, and should be used for joint optimization and testing.
+- If wandb is enabled, a wandb run is automatically created under the generated run name, and all checkpoints are uploaded to the wandb cloud storage.
 
-Checkpoint files are stored under `npc-models/outputs/npc-models/checkpoints` and named using the generated run name. The best checkpoint file ends with `.best.zip`, as defined in `header.py`, and should be used for joint optimization and testing.
-
-Pretrained checkpoint files from the paper experiments are not released by default. Contact [Simon Yu](mailto:simonyu@simonyu.net) to request access. All pretrained checkpoint files should be placed under `npc-models/outputs/npc-models/checkpoints`. Create the directories if they do not already exist.
-
-If wandb is enabled, a wandb run is automatically created under the generated run name, and all checkpoints are uploaded to the wandb cloud storage.
-
-At the end of each training session, the training scripts automatically test the trained models. The identical test can be repeated manually by running the testing scripts and passing the training run names as arguments.
-
-Before joint optimization and testing, ensure that the dataset prefix in `header.py` matches the one specified in the run name or checkpoint file name passed as arguments.
-
-Refer to the bash scripts in `npc/npc-models/script` for examples on batch training and testing, and the use of pretrained checkpoint files from the paper experiments.
+For batch jobs and pretrained checkpoint files:
+- Refer to the bash scripts in `npc/npc-models/script` for examples on batch training and testing, and the use of pretrained checkpoint files from the NPC [paper](https://arxiv.org/abs/2501.07021) experiments.
+- Pretrained checkpoint files from the NPC [paper](https://arxiv.org/abs/2501.07021) experiments are not released by default. Contact [Simon Yu](mailto:simonyu@simonyu.net) to request access.
 
 Detailed references for the training and testing commands are available in the following documents:
 

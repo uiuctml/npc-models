@@ -36,7 +36,7 @@ Arguments:
 
 ### Stage 2: Probabilistic Circuit (PC)
 
-Train the PC model constructed using the data-driven approach via CCCP parameter learning:
+Train the PC model constructed using the data-driven approach via [CCCP](https://proceedings.neurips.cc/paper/2016/hash/6c9882bbac1c7093bd25041881277658-Abstract.html) parameter learning:
 
 ```bash
 cd npc/npc-models/src/npc-models
