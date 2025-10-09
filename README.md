@@ -127,17 +127,17 @@ wandb is enabled only during training and is automatically disabled during testi
 
 ## Training and Testing
 
-For general setup and execution:
+General setup and execution:
 - Review and adjust additional parameters, such as training hyperparameters, if applicable, in the configuration dictionaries within `header.py`.
 - Before joint optimization and testing, ensure that the dataset prefix in `header.py` matches the one specified in the run name or checkpoint file name passed as arguments.
 - At the end of each training session, the training scripts automatically test the trained models. The identical test can be repeated manually by running the testing scripts and passing the training run names as arguments.
 
-For checkpoint and run management:
+Checkpoint and run management:
 - Each training session automatically generates a unique run name. Two checkpoint files containing model weights are produced during training, one updated every epoch and another updated only when validation performance improves, i.e., the _best_ checkpoint.
 - Checkpoint files are stored under `npc-models/outputs/npc-models/checkpoints` and named using the generated run name. The best checkpoint file ends with `.best.zip`, as defined in `header.py`, and should be used for joint optimization and testing.
 - If wandb is enabled, a wandb run is automatically created under the generated run name, and all checkpoints are uploaded to the wandb cloud storage.
 
-For batch jobs and pretrained checkpoint files:
+Batch jobs and pretrained checkpoint files:
 - Refer to the bash scripts in `npc/npc-models/script` for examples on batch training and testing, and the use of pretrained checkpoint files from the [NPC Paper](https://arxiv.org/abs/2501.07021) experiments.
 - Pretrained checkpoint files from the [NPC Paper](https://arxiv.org/abs/2501.07021) experiments are not released by default. Contact [Simon Yu](mailto:simonyu@simonyu.net) to request access.
 
