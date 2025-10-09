@@ -26,6 +26,7 @@ checkpoint_postfix = ".zip"
 checkpoint_postfix_best = ".best" + checkpoint_postfix
 
 interpret_dir_dataset = os.path.join(dataset_dir, "splits/instances/test")
+interpret_hide_correct = True
 interpret_label_font_size = 10
 interpret_label_width_attribute = 250
 interpret_label_width_class = 250
@@ -36,7 +37,6 @@ npc_attribute_exclude = ""
 npc_interpret = False
 npc_interpret_ce_learning_rate = 5e-2
 npc_interpret_ce_steps = 100
-npc_interpret_hide_correct = True
 npc_pc_backward = False
 npc_pc_cpu = True
 

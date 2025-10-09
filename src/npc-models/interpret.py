@@ -417,7 +417,7 @@ def main():
     with open(os.path.join(header.project_dir_outputs_interpret, header.dataset_prefix + ".json"), "r") as file_interpret:
         explanations = json.load(file_interpret)
 
-    if header.npc_interpret_hide_correct:
+    if header.interpret_hide_correct:
         hideCorrectPredictions()
 
     window = PyQt5.QtWidgets.QWidget()
