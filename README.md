@@ -140,10 +140,12 @@ At the end of each training session, the training scripts automatically test the
 
 Refer to the bash scripts in `npc/npc-models/script` for examples on batch training and testing, and the use of pretrained checkpoint files from the paper experiments.
 
-- [NPC Models](docs/npc-models/training/npc.md)
-- [Baseline Models](docs/npc-models/training/baseline.md)
-
 Pretrained checkpoint files from the paper experiments are not released by default. Contact [Simon Yu](mailto:simonyu@simonyu.net) to request access. All pretrained checkpoint files should be placed under `npc-models/outputs/npc-models/checkpoints`. Create the directories if they do not already exist.
+
+Detailed command references for the training and testing scripts are available in the following documents:
+
+- [Command References for NPC Models](docs/npc-models/commands/npc.md)
+- [Command References for Baseline Models](docs/npc-models/commands/baseline.md)
 
 ## Interpretability
 

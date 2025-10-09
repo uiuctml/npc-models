@@ -1,4 +1,4 @@
-# Neural Probabilistic Circuit Models
+# Command References for NPC Models
 
 ## Table of Contents
 
