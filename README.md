@@ -96,19 +96,19 @@ TODO
 
 First, ensure the dataset prefix is properly set to the desired dataset in `header.py`:
 
-```bash
+```python
 dataset_prefix = "<dataset prefix>"
 ```
 
 If applicable, enable tensor core matrix multiplications on Ampere or newer GPUs:
 
-```bash
+```python
 cuda_allow_tf32 = True
 ```
 
 Optionally, set log level to `trace` for more verbose outputs:
 
-```bash
+```python
 log_level = type.LogLevel.trace
 ```
 
@@ -120,7 +120,7 @@ wandb login
 
 Then, set run mode to `online` in `header.py`:
 
-```bash
+```python
 run_mode = "online"
 ```
 
@@ -148,6 +148,14 @@ Detailed command references for the training and testing scripts are available i
 - [Command References for Baseline Models](docs/npc-models/commands/baseline.md)
 
 ## Interpretability
+
+Furthermore, `test_npc.py` is used to generate Most Probable Explanations (MPE) and Counterfactual Explanations (CE). To enable the generation of such model explanations, set the following parameter in `header.py`:
+
+```python
+npc_interpret = True
+```
+
+The generated model explanations are stored as `npc/npc-models/outputs/npc-models/interpret/<dataset prefix>.json`.
 
 ### Most Probable Explanations (MPE)
 

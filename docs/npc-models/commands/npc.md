@@ -11,7 +11,7 @@ Before joint optimization and testing, ensure that the dataset prefix in `header
 
 For joint optimization and testing involving PCs constructed using the knowledge-injected approach, modify the following parameter in `header.py` to point to the knowledge-injected PC model constructed by the `learnspn` project:
 
-```bash
+```python
 config_pc = {
     ...
     "file_path_pc": "../../../learnspn/outputs/manual/" + dataset_prefix + ".spn.txt",
@@ -114,5 +114,16 @@ Arguments:
 
 - `-r`: Neural run name.
 - `-p`: PC run name.
+
+In addition to standard model testing, `test_npc.py` also analyzes the impact of attribute selection during inference. This functionality helps study the role and influence of each attribute within the NPC pipeline:
+
+- _How does the exclusion of one particular attribute during inference impact the performance of NPC on downstream tasks?_
+- _How does the exclusion of different attributes vary the impact?_
+
+To exclude an attribute during the testing, set the following parameter in `header.py`:
+
+```python
+npc_attribute_exclude = "<attribute>"
+```
 
 Written by [Simon Yu](https://www.simonyu.net/).
