@@ -1,4 +1,4 @@
-# Command References for NPC Models
+# Command Reference for NPC Models
 
 ## Table of Contents
 
@@ -6,8 +6,6 @@
 1. [Testing](#testing)
 
 ## Training
-
-Before joint optimization and testing, ensure that the dataset prefix in `header.py` matches the one specified in the run name or checkpoint file name passed as arguments.
 
 For joint optimization and testing involving PCs constructed using the knowledge-injected approach, modify the following parameter in `header.py` to point to the knowledge-injected PC model constructed by the `learnspn` project:
 
@@ -120,7 +118,7 @@ In addition to standard model testing, `test_npc.py` also analyzes the impact of
 - _How does the exclusion of one particular attribute during inference impact the performance of NPC on downstream tasks?_
 - _How does the exclusion of different attributes vary the impact?_
 
-To exclude an attribute during the testing, set the following parameter in `header.py`:
+To exclude an attribute during testing, set the following parameter in `header.py`:
 
 ```python
 npc_attribute_exclude = "<attribute>"

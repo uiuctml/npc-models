@@ -26,6 +26,7 @@ The NPC pipeline follows a three-stage training algorithm:
 Furthermore, a set of baseline models is trained, tested, and evaluated for comparison:
 
 - [Residual Network (ResNet)](https://openaccess.thecvf.com/content_cvpr_2016/html/He_Deep_Residual_Learning_CVPR_2016_paper.html)
+- [Attribute Bottleneck Model (ABM)](https://arxiv.org/abs/2501.07021)
 - [Concept Bottleneck Model (CBM)](https://proceedings.mlr.press/v119/koh20a)
 - [Concept Embedding Model (CEM)](https://proceedings.neurips.cc/paper_files/paper/2022/hash/867c06823281e506e8059f5c13a57f75-Abstract-Conference.html)
 - [Deep Concept Reasoner (DCR)](https://proceedings.mlr.press/v202/barbiero23a.html)
@@ -140,12 +141,14 @@ If wandb is enabled, a wandb run is automatically created under the generated ru
 
 At the end of each training session, the training scripts automatically test the trained models. The identical test can be repeated manually by running the testing scripts and passing the training run names as arguments. Note that wandb is automatically disabled in the testing scripts.
 
+Before joint optimization and testing, ensure that the dataset prefix in `header.py` matches the one specified in the run name or checkpoint file name passed as arguments.
+
 Refer to the bash scripts in `npc/npc-models/script` for examples on batch training and testing, and the use of pretrained checkpoint files from the paper experiments.
 
-Detailed command references for the training and testing scripts are available in the following documents:
+Detailed references for the training and testing commands are available in the following documents:
 
-- [Command References for NPC Models](docs/npc-models/commands/npc.md)
-- [Command References for Baseline Models](docs/npc-models/commands/baseline.md)
+- [Command Reference for NPC Models](docs/npc-models/references/npc.md)
+- [Command Reference for Baseline Models](docs/npc-models/references/baseline.md)
 
 ## Interpretability
 
