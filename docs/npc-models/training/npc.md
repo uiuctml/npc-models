@@ -1,8 +1,14 @@
 # Neural Probabilistic Circuit
 
+## Table of Contents
+
+1. [Training](#training)
+1. [Testing](#testing)
+1. [Pretrained Checkpoint Files](#pretrained-checkpoint-files)
+
 ## Training
 
-Before start, review and adjust additional parameters, such as training hyperparameters, if applicable, in `config_neural` and `config_pc` within `header.py`.
+Before starting, review and adjust additional parameters, such as training hyperparameters, if applicable, in `config_neural` and `config_pc` within `header.py`.
 
 At the start of each training, a unique run name is automatically generated. During training, two checkpoint files containing model weights are produced, one updated every epoch and another updated only when validation performance improves, i.e., the _best_ checkpoint.
 
@@ -10,9 +16,9 @@ Checkpoint files are stored under `npc-models/outputs/npc-models/checkpoints` an
 
 If Weights & Biases (wandb) is enabled, a wandb run is automatically created under the generated run name, and all checkpoints are uploaded to the wandb cloud storage.
 
-Before joint optimization and testing, it is also important to ensure that the dataset prefix in `header.py` must match the one specified in the checkpoint file name.
+Before joint optimization and testing, ensure that the dataset prefix in `header.py` matches the one specified in the run name or checkpoint file name passed as arguments.
 
-For joint optimization and testing involving PC constructed using the knowledge-injected approach, it is critical to modify the following parameter in `header.py` to point to the PC model constructed by the `learnspn` project using the knowledge-injected approach:
+For joint optimization and testing involving PCs constructed using the knowledge-injected approach, modify the following parameter in `header.py` to point to the knowledge-injected PC model constructed by the `learnspn` project:
 
 ```bash
 config_pc = {
@@ -23,6 +29,8 @@ config_pc = {
 ```
 
 Be sure to revert this parameter when switching back to the data-driven approach.
+
+Refer to the training bash scripts in `npc/npc-models/script` for examples on batch training and the use of pretrained checkpoint files from the paper experiments.
 
 ### Stage 1: Neural Attribute Recognition
 
@@ -38,8 +46,6 @@ Arguments:
 - `-b`: Batch size.
 - `-e`: Epochs.
 - `-s`: Seed.
-
-Refer to `npc/npc-models/script/train_neural.bash` for examples on batch training.
 
 ### Stage 2: Probabilistic Circuit (PC)
 
@@ -57,11 +63,9 @@ Arguments:
 
 PC models constructed using the knowledge-injected approach do not require training in Stage 2, as the approach does not involve parameter learning.
 
-Refer to `npc/npc-models/script/train_pc.bash` for examples on batch training.
-
 ### Stage 3: Joint Optimization
 
-For the data-driven approach, jointly optimize the independently trained Neural Attribute Recognition and PC models:
+For the data-driven approach, jointly optimize the independently trained Neural and PC models:
 
 ```bash
 cd npc/npc-models/src/npc-models
@@ -80,15 +84,15 @@ Use `-w` to specify the best Neural model checkpoint from Stage 1 and `-c` for t
 
 For the knowledge-injected approach, use the same command but omit `-c`.
 
-Refer to `npc/npc-models/script/train_npc.bash` for examples on batch training and the use of pretrained checkpoint files from the paper experiments.
-
 ## Testing
 
-At the end of each training session, the training scripts will test the trained models once. The identical test can be repeated by passing the best checkpoint files from the training session to the testing scripts. Note that wandb is automatically disabled in the testing scripts.
+At the end of each training session, the training scripts automatically test the trained models. The identical test can be repeated manually by running the testing scripts and passing the training run names as arguments. Note that wandb is automatically disabled in the testing scripts.
+
+Refer to the testing bash scripts in `npc/npc-models/script` for examples on batch training and the use of pretrained checkpoint files from the paper experiments.
 
 ### Neural Attribute Recognition
 
-Test the trained the Neural Attribute Recognition model:
+Test the trained Neural Attribute Recognition model:
 
 ```bash
 cd npc/npc-models/src/npc-models
@@ -114,7 +118,7 @@ Arguments:
 
 ### Neural Probabilistic Circuit (NPC)
 
-Test the trained Neural and PC models, either independently trained or jointly optimized, as follows:
+Test the trained Neural and PC models, either independently trained or jointly optimized, as a complete NPC pipeline:
 
 ```bash
 cd npc/npc-models/src/npc-models
@@ -126,29 +130,7 @@ Arguments:
 - `-r`: Neural run name.
 - `-p`: PC run name.
 
-### Notes
-
-Use `-r` to pass the Neural run name to be tested. Use `-p` to pass the PC run name to be tested.
-
-If a PC run name passed by `-p` corresponds to a jointly optimized knowledge-injected PC, modify the following parameter in `header.py` to point to the PC model constructed by the `learnspn` project using the knowledge-injected approach:
-
-```bash
-config_pc = {
-    ...
-    "file_path_pc": "../../../learnspn/outputs/manual/" + dataset_prefix + ".spn.txt",
-    ...
-}
-```
-
-Be sure to revert this parameter when switching back to the data-driven approach.
-
-The dataset prefix in `header.py` must match the one specified in the checkpoint file name.
-
-During testing, there is no need to manually set the seed as the testing scripts set the seed in `header.py` using the one in the checkpoint file name.
-
-Refer to `npc/npc-models/script/test_neural.bash`, `npc/npc-models/script/test_pc.bash`, and `npc/npc-models/script/test_npc.bash` for examples on batch testing and the use of pretrained checkpoint files from the paper experiments and.
-
-## Pretrained Weights
+## Pretrained Checkpoint Files
 
 Pretrained checkpoint files from the paper experiments are not released by default. Contact [Simon Yu](mailto:simonyu@simonyu.net) to request access. All pretrained checkpoint files should be placed under `npc-models/outputs/npc-models/checkpoints`. Create the directories if they do not already exist.
 
