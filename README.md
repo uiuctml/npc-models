@@ -5,6 +5,9 @@
 1. [Project Overview](#project-overview)
 1. [Project Prerequisites](#project-prerequisites)
 1. [Project Hierarchy](#project-hierarchy)
+1. [Neural Probabilistic Circuit]()
+1. [Baseline]()
+1. [Interpretability]()
 1. [Publications](#publications)
 1. [Acknowledgements](#acknowledgements)
 1. [License](#license)
@@ -12,7 +15,33 @@
 
 ## Project Overview
 
+This codebase provides scripts and utilities for training, testing, and evaluating the models developed under the Neural Probabilistic Circuit (NPC) project.
 
+The NPC pipeline follows a three-stage training algorithm:
+
+1. [Neural Attribute Recognition](https://arxiv.org/abs/2501.07021): trained through multi-task learning (MTL) to predict attributes from input dataset.
+2. [Probablistic Circuit (PC)](https://ieeexplore.ieee.org/document/6130310): constructed using data-driven or knowledge-injected approaches, and trained via the Concave–Convex Procedure (CCCP) for parameter learning.
+3. [Neural Probablistic Circuit (NPC)](https://arxiv.org/abs/2501.07021): combines the independently trained Neural and PC models and jointly optimizes them to produce final predictions.
+
+Furthermore, a set of baseline models is trained, tested, and evaluated for comparison:
+
+- [Residual Network (ResNet)](https://openaccess.thecvf.com/content_cvpr_2016/html/He_Deep_Residual_Learning_CVPR_2016_paper.html)
+- [Concept Bottleneck Model (CBM)](https://proceedings.mlr.press/v119/koh20a)
+- [Concept Embedding Model (CEM)](https://proceedings.neurips.cc/paper_files/paper/2022/hash/867c06823281e506e8059f5c13a57f75-Abstract-Conference.html)
+- [Deep Concept Reasoner (DCR)](https://proceedings.mlr.press/v202/barbiero23a.html)
+
+The trained models are evaluated across four datasets, as detailed in the `npc-dataset-utils` project. The resulting NPC demonstrates strong performance compared to baseline models:
+
+![NPC Performance](docs/npc-models/images/performance.png)
+
+Beyond its excellent performance, the NPC is inherently interpretable by design. Two model explanation techniques are employed to analyze reasoning process of the NPC:
+
+- [Most Probable Explanations (MPE)](https://ieeexplore.ieee.org/document/9363463)
+- [Counterfactual Explanations (CE)](https://christophm.github.io/interpretable-ml-book/counterfactual.html)
+
+The codebase includes the NPC Interpretation Utility, which visualizes generated MPEs and CEs for each instance, comparing them against both NPC predictions and ground truths.
+
+Refer to the [paper](https://arxiv.org/abs/2501.07021) for complete details on the design, formulation, training, and evaluation of the NPC.
 
 ## Project Prerequisites
 
@@ -93,6 +122,17 @@ Upon using this project, cite any relevant publications listed below:
   journal={Advances in neural information processing systems},
   volume={29},
   year={2016}
+}
+```
+
+```
+@inproceedings{poon2011sum,
+  title={Sum-product networks: A new deep architecture},
+  author={Poon, Hoifung and Domingos, Pedro},
+  booktitle={2011 IEEE International Conference on Computer Vision Workshops (ICCV Workshops)},
+  pages={689--690},
+  year={2011},
+  organization={IEEE}
 }
 ```
 
