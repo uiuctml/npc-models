@@ -5,9 +5,9 @@
 1. [Project Overview](#project-overview)
 1. [Project Prerequisites](#project-prerequisites)
 1. [Project Hierarchy](#project-hierarchy)
-1. [Neural Probabilistic Circuit]()
-1. [Baseline]()
-1. [Interpretability]()
+1. [Neural Probabilistic Circuit](#neural-probabilistic-circuit)
+1. [Baseline](#baseline)
+1. [Interpretability](#interpretability)
 1. [Publications](#publications)
 1. [Acknowledgements](#acknowledgements)
 1. [License](#license)
@@ -89,6 +89,12 @@ python3.10 -m pip install -r npc-models/requirements.txt
 Always ensure the virtual environment is activated before running the project.
 
 Before running this project, first ensure that all datasets are properly set up under `npc/datasets` by following the instructions in the `npc-dataset-utils` project. Then, construct and generate PCs for all datasets as described in the `learnspn` project instructions.
+
+## Neural Probabilistic Circuit
+
+## Baseline
+
+## Interpretability
 
 ## Publications
 

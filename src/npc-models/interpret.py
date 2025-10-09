@@ -399,11 +399,26 @@ def createWindowLayout():
 
     return layout_window
 
+def hideCorrectPredictions():
+    file_names_correct = []
+
+    for file_name in explanations.keys():
+        if list(explanations[file_name]["prediction"]["class"].keys())[0] == explanations[file_name]["ground_truth"]["class"]:
+            file_names_correct.append(file_name)
+
+    for file_name_correct in file_names_correct:
+        del explanations[file_name_correct]
+
+    return
+
 def main():
     global explanations
 
     with open(os.path.join(header.project_dir_outputs_interpret, header.dataset_prefix + ".json"), "r") as file_interpret:
         explanations = json.load(file_interpret)
+
+    if header.npc_interpret_hide_correct:
+        hideCorrectPredictions()
 
     window = PyQt5.QtWidgets.QWidget()
 

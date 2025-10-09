@@ -36,6 +36,7 @@ npc_attribute_exclude = ""
 npc_interpret = False
 npc_interpret_ce_learning_rate = 5e-2
 npc_interpret_ce_steps = 100
+npc_interpret_hide_correct = True
 npc_pc_backward = False
 npc_pc_cpu = True
 
