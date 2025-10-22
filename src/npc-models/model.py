@@ -64,10 +64,11 @@ class CBM(Model):
         for attribute_name in labels_attribute.keys():
             labels_categories += labels_attribute[attribute_name]
 
-        size_concept = len(labels_categories)
+        self.count_categories = len(labels_categories)
+        size_concept = self.count_categories
 
         if header.config_baseline["model_cbm_hybrid"]:
-            size_concept = len(labels_categories) * header.config_baseline["model_embedding_size"]
+            size_concept = self.count_categories * header.config_baseline["model_embedding_size"]
 
         self.net = torchvision.models.resnet34(weights = "IMAGENET1K_V1")
         self.net.fc = torch.nn.Linear(self.net.fc.in_features, size_concept)
@@ -79,7 +80,7 @@ class CBM(Model):
         output_neck = self.net(input)
         output_head = self.net.head(output_neck)
 
-        return (output_neck, output_head)
+        return (output_neck[:, :self.count_categories], output_head)
 
     def get_parameters(self):
         return self.net.parameters()
