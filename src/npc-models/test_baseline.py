@@ -57,12 +57,20 @@ def initializeRunName(run_name = ""):
 def processArguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--run-name", type = str, default = "", help = "Run name.", required = True)
+    parser.add_argument("-c", "--cbm-hybrid", type = int, default = None, help = "Whether CBM is hybrid.")
     arguments = parser.parse_args()
 
     initializeRunName(arguments.run_name)
 
+    if header.config_baseline["model"] == type.ModelBaseline.cbm.name and arguments.cbm_hybrid is not None:
+        if arguments.cbm_hybrid > 0:
+            header.config_baseline["model_cbm_hybrid"] = True
+        else:
+            header.config_baseline["model_cbm_hybrid"] = False
+
     logger.log_trace("Run name: \"" + header.config_baseline["run_name"] + "\".")
     logger.log_trace("Model: \"" + header.config_baseline["model"] + "\".")
+    logger.log_trace("Whether CBM is hybrid: " + str(header.config_baseline["model_cbm_hybrid"]) + ".")
     logger.log_trace("Seed: " + str(header.config_baseline["seed"]) + ".")
 
     return

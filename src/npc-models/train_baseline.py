@@ -23,6 +23,8 @@ import wandb
 def processArguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--model", type = str, default = "", help = "Model.")
+    parser.add_argument("-c", "--cbm-hybrid", type = int, default = None, help = "Whether CBM is hybrid.")
+    parser.add_argument("-w", "--weight-loss-concept", type = float, default = None, help = "Concept loss weight.")
     parser.add_argument("-b", "--batch-size", type = int, default = None, help = "Batch size.")
     parser.add_argument("-e", "--epochs", type = int, default = None, help = "Epochs.")
     parser.add_argument("-s", "--seed", type = int, default = None, help = "Seed.")
@@ -30,6 +32,15 @@ def processArguments():
 
     if arguments.model != "":
         header.config_baseline["model"] = arguments.model
+
+    if header.config_baseline["model"] == type.ModelBaseline.cbm.name and arguments.cbm_hybrid is not None:
+        if arguments.cbm_hybrid > 0:
+            header.config_baseline["model_cbm_hybrid"] = True
+        else:
+            header.config_baseline["model_cbm_hybrid"] = False
+
+    if arguments.weight_loss_concept is not None:
+        header.config_baseline["concept_loss_weight"] = arguments.weight_loss_concept
 
     if arguments.batch_size is not None:
         header.config_baseline["batch_size"] = arguments.batch_size
@@ -44,6 +55,8 @@ def processArguments():
 
     logger.log_trace("Run name: \"" + header.config_baseline["run_name"] + "\".")
     logger.log_trace("Model: \"" + header.config_baseline["model"] + "\".")
+    logger.log_trace("Whether CBM is hybrid: " + str(header.config_baseline["model_cbm_hybrid"]) + ".")
+    logger.log_trace("Concept loss weight: " + str(header.config_baseline["concept_loss_weight"]) + ".")
     logger.log_trace("Batch size: " + str(header.config_baseline["batch_size"]) + ".")
     logger.log_trace("Epochs: " + str(header.config_baseline["epochs"]) + ".")
     logger.log_trace("Seed: " + str(header.config_baseline["seed"]) + ".")
