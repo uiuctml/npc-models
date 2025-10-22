@@ -34,6 +34,7 @@ interpret_viewer_height = 300
 interpret_viewer_width = 300
 
 npc_attribute_exclude = ""
+npc_attributes_intervention = set()
 npc_interpret = False
 npc_interpret_ce_learning_rate = 5e-2
 npc_interpret_ce_steps = 100

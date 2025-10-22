@@ -318,11 +318,12 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
 
     accuracy_concept_epoch = 0
     accuracy_classification_epoch = 0
+    attributes_intervention_indices = set()
     ce_instances_corrected = 0
     ce_instances_incorrect = 0
     index_attribute_exclude = None
     interpret = {}
-    log_attribute_exclude = ""
+    log_message_attribute = ""
     mpe_alignment_epoch = []
     pc_output_rows = len(data_loader.dataset.labels_class)
     pc_output_cols = 1
@@ -330,10 +331,16 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
     tv_distance_epoch = 0
     tv_distances_epoch = []
 
+    if len(header.npc_attributes_intervention) > 0:
+        log_message_attribute = " with " + str(header.npc_attributes_intervention) + " intervened"
+
     for (index, attribute) in enumerate(data_loader.dataset.config["attributes"]):
+        if attribute["name"] in header.npc_attributes_intervention:
+            attributes_intervention_indices.add(index)
+
         if header.npc_attribute_exclude != "" and attribute["name"] == header.npc_attribute_exclude:
             index_attribute_exclude = index
-            log_attribute_exclude = " excluding \"" + attribute["name"] + "\""
+            log_message_attribute = " excluding \"" + attribute["name"] + "\""
             continue
 
         pc_output_cols *= len(attribute["labels"])
@@ -357,6 +364,14 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
             outputs_attribute_original = outputs_attribute_original[:index_attribute_exclude] + outputs_attribute_original[index_attribute_exclude + 1:]
 
         outputs_attribute = utility.applySoftmaxAttribute(outputs_attribute_original)
+
+        if len(attributes_intervention_indices) > 0:
+            for i in range(len(labels_attribute)):
+                if i in attributes_intervention_indices:
+                    outputs_attribute_original[i] = labels_attribute[i].clone()
+                    outputs_attribute[i] = labels_attribute[i].clone()
+                    outputs_attribute[i] /= torch.sum(outputs_attribute[i], dim = 1, keepdim = True)
+
         (matrix_pc, matrix_neural, output_npc) = computeNPCOutput(outputs_attribute, pc_joint, pc_marginal, pc_output_rows, pc_output_cols, device)
 
         (_, predictions_npc) = torch.max(output_npc, 1)
@@ -425,9 +440,9 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
     wandb.summary["testing/epoch/accuracy_classification"] = accuracy_classification_epoch
     wandb.summary["testing/epoch/tv_distance"] = tv_distance_epoch
 
-    logger.log_info("Testing mean TV distance" + log_attribute_exclude + ": " + str(tv_distance_epoch) + ".")
-    logger.log_info("Testing mean concept accuracy" + log_attribute_exclude + ": " + str(accuracy_concept_epoch) + ".")
-    logger.log_info("Testing classification accuracy" + log_attribute_exclude + ": " + str(accuracy_classification_epoch) + ".")
+    logger.log_info("Testing mean TV distance" + log_message_attribute + ": " + str(tv_distance_epoch) + ".")
+    logger.log_info("Testing mean concept accuracy" + log_message_attribute + ": " + str(accuracy_concept_epoch) + ".")
+    logger.log_info("Testing classification accuracy" + log_message_attribute + ": " + str(accuracy_classification_epoch) + ".")
 
     if header.npc_interpret:
         if ce_instances_incorrect != 0:
@@ -478,15 +493,34 @@ def main():
     pc_joint = pc.ProbabilisticCircuit(device_pc)
     pc_marginal = pc.ProbabilisticCircuit(device_pc)
 
+    if len(header.npc_attributes_intervention) > 0:
+        for attribute_intervention in header.npc_attributes_intervention:
+            if attribute_intervention not in utility.getLabelsAttribute(dataset_test.config).keys():
+                logger.log_warn("Unknown attribute for intervention: \"" + attribute_intervention + "\". Skip.")
+                header.npc_attributes_intervention = set()
+                break
+
+    if len(header.npc_attributes_intervention) > 0:
+        logger.log_info("Intervening attributes: " + str(header.npc_attributes_intervention) + ".")
+
+        if header.npc_attribute_exclude != "":
+            header.npc_attribute_exclude = ""
+            logger.log_info("Disabled attribute exclusion with intervention.")
+
+        if header.npc_interpret:
+            header.npc_interpret = False
+            logger.log_info("Disabled interpretation with intervention.")
+
     if header.npc_attribute_exclude != "":
         if header.npc_attribute_exclude in utility.getLabelsAttribute(dataset_test.config).keys():
-            logger.log_info("Excluded attribute \"" + header.npc_attribute_exclude + "\".")
+            logger.log_info("Excluding attribute \"" + header.npc_attribute_exclude + "\".")
 
             if header.npc_interpret:
                 header.npc_interpret = False
                 logger.log_info("Disabled interpretation with attribute exclusion.")
         else:
             logger.log_warn("Unknown attribute for exclusion: \"" + header.npc_attribute_exclude + "\". Skip.")
+            header.npc_attribute_exclude = ""
 
     logger.log_info("Loading PC \"" + header.config_pc["file_path_pc"] + "\"...")
 
