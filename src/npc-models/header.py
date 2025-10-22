@@ -55,6 +55,7 @@ config_baseline = {
     "learning_rate_scheduler_mode": "min",
     "learning_rate_scheduler_patience": 10,
     "model": "cbm",
+    "model_cbm_hybrid": False,
     "model_embedding_size": 16,
     "model_input_height": 224,
     "model_input_width": 224,
