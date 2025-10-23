@@ -368,7 +368,6 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
         if len(attributes_intervention_indices) > 0:
             for i in range(len(labels_attribute)):
                 if i in attributes_intervention_indices:
-                    outputs_attribute_original[i] = labels_attribute[i].clone()
                     outputs_attribute[i] = labels_attribute[i].clone()
                     outputs_attribute[i] /= torch.sum(outputs_attribute[i], dim = 1, keepdim = True)
 
@@ -378,7 +377,7 @@ def test(model_neural, pc_joint, pc_marginal, pc_settings_joint, data_loader, de
         prediction_correctness = (predictions_npc == labels_class)
         corrects_npc = torch.sum(prediction_correctness).item()
 
-        accuracy_concept_batch = utility.computeConceptAccuracy(outputs_attribute_original, labels_attribute, device)
+        accuracy_concept_batch = utility.computeConceptAccuracy(outputs_attribute, labels_attribute, device)
         accuracy_classification_batch = corrects_npc / input.size(0)
 
         accuracy_concept_epoch += accuracy_concept_batch
