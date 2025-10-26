@@ -36,7 +36,6 @@ cd "../../src/npc-models"
 ./test_npc.py -r "82.mnist.neural.resnet34mtl.2024.12.24.13.37.PowerEdge-R720" -p "82.mnist.pc.cccp.2024.12.22.15.56.Aurora-R11"
 
 # Independently trained with knowledge-injected PC
-# Update header.config_pc["file_path_pc"] to point to knowledge-injected PC
 ./test_npc.py -r "42.awa2.neural.resnet34mtl.2024.12.12.20.5.Aurora-R11"
 ./test_npc.py -r "52.awa2.neural.resnet34mtl.2024.12.24.0.30.Aurora-R11"
 ./test_npc.py -r "62.awa2.neural.resnet34mtl.2024.12.24.3.25.Aurora-R11"
