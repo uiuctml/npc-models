@@ -120,6 +120,7 @@ class DCR(Model):
         super().__init__()
 
         self.cem = CEM(config_dataset, device)
+        self.cem.eval()
 
         for parameter in self.cem.parameters():
             parameter.requires_grad = False
@@ -129,14 +130,22 @@ class DCR(Model):
         return
 
     def forward(self, input):
-        output_backbone = self.cem.net(input)
-        (concept_embedding, output_neck) = self.cem.net.neck(output_backbone)
+        with torch.set_grad_enabled(False):
+            output_backbone = self.cem.net(input)
+            (concept_embedding, output_neck) = self.cem.net.neck(output_backbone)
+
         output_head = self.dcr(concept_embedding, output_neck)
 
         return (output_neck, output_head)
 
     def get_parameters(self):
         return self.dcr.parameters()
+
+    def train(self, mode = True):
+        self.dcr.train(mode)
+        self.cem.eval()
+
+        return
 
 class ResNet34(Model):
     def __init__(self, config_dataset, device):
