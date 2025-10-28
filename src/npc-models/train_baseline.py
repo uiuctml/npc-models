@@ -24,7 +24,8 @@ def processArguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--model", type = str, default = "", help = "Model.")
     parser.add_argument("-c", "--cbm-hybrid", type = int, default = None, help = "Whether CBM is hybrid.")
-    parser.add_argument("-w", "--weight-loss-concept", type = float, default = None, help = "Concept loss weight.")
+    parser.add_argument("-l", "--weight-loss-concept", type = float, default = None, help = "Concept loss weight.")
+    parser.add_argument("-w", "--weights-cem", type = str, default = "", help = "CEM model pretrained weights.")
     parser.add_argument("-b", "--batch-size", type = int, default = None, help = "Batch size.")
     parser.add_argument("-e", "--epochs", type = int, default = None, help = "Epochs.")
     parser.add_argument("-s", "--seed", type = int, default = None, help = "Seed.")
@@ -42,6 +43,9 @@ def processArguments():
     if arguments.weight_loss_concept is not None:
         header.config_baseline["concept_loss_weight"] = arguments.weight_loss_concept
 
+    if arguments.weights_cem != "":
+        header.config_baseline["model_pretrained_weights"] = arguments.weights_cem
+
     if arguments.batch_size is not None:
         header.config_baseline["batch_size"] = arguments.batch_size
 
@@ -57,6 +61,7 @@ def processArguments():
     logger.log_trace("Model: \"" + header.config_baseline["model"] + "\".")
     logger.log_trace("Whether CBM is hybrid: " + str(header.config_baseline["model_cbm_hybrid"]) + ".")
     logger.log_trace("Concept loss weight: " + str(header.config_baseline["concept_loss_weight"]) + ".")
+    logger.log_trace("CEM model pretrained weights: \"" + header.config_baseline["model_pretrained_weights"] + "\".")
     logger.log_trace("Batch size: " + str(header.config_baseline["batch_size"]) + ".")
     logger.log_trace("Epochs: " + str(header.config_baseline["epochs"]) + ".")
     logger.log_trace("Seed: " + str(header.config_baseline["seed"]) + ".")
@@ -87,10 +92,7 @@ def computeLoss(output_neck, output_head, labels_attribute, labels_class):
         loss_task = torch.nn.functional.binary_cross_entropy_with_logits(output_head, labels_class)
         return header.config_baseline["concept_loss_weight"] * loss_attribute + loss_task
     elif header.config_baseline["model"] == type.ModelBaseline.dcr.name:
-        labels_attribute = test_baseline.getBinaryLabelsAttribute(labels_attribute)
-        loss_attribute = torch.nn.functional.binary_cross_entropy(output_neck, labels_attribute)
-        loss_task = torch.nn.functional.binary_cross_entropy(output_head, labels_class)
-        return header.config_baseline["concept_loss_weight"] * loss_attribute + loss_task
+        return torch.nn.functional.binary_cross_entropy(output_head, labels_class)
     else:
         logger.log_fatal("Unknown baseline model \"" + header.config_baseline["model"] + "\". Quit.")
         exit(-1)
@@ -234,6 +236,14 @@ def main():
     model_baseline = model_baseline.to(device)
     optimizer = torch.optim.SGD(model_baseline.module.get_parameters(), lr = header.config_baseline["optimizer_learning_rate"], momentum = header.config_baseline["optimizer_momentum"], weight_decay = header.config_baseline["optimizer_weight_decay"])
     learning_rate_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, header.config_baseline["learning_rate_scheduler_mode"], header.config_baseline["learning_rate_scheduler_factor"], header.config_baseline["learning_rate_scheduler_patience"])
+
+    if header.config_baseline["model"] == type.ModelBaseline.dcr.name:
+        if header.config_baseline["model_pretrained_weights"] != "":
+            utility.loadCheckpoint(header.config_baseline["model_pretrained_weights"], torch.nn.DataParallel(model_baseline.module.cem))
+        else:
+            logger.log_fatal("Missing CEM model pretrained weights for DCR. Quit.")
+            exit(-1)
+
     progress_bar = tqdm.tqdm(total = header.config_baseline["epochs"], position = 0)
 
     progress_bar.set_description_str("[INFO]: Epoch")

@@ -96,10 +96,12 @@ class CEM(Model):
         for attribute_name in labels_attribute.keys():
             labels_categories += labels_attribute[attribute_name]
 
+        self.count_categories = len(labels_categories)
+        self.count_classes = len(labels_class)
         self.net = torchvision.models.resnet34(weights = "IMAGENET1K_V1")
         self.net.fc = torch.nn.Linear(self.net.fc.in_features, header.config_baseline["model_embedding_size"])
-        self.net.neck = torch_explain.nn.concepts.ConceptEmbedding(header.config_baseline["model_embedding_size"], len(labels_categories), header.config_baseline["model_embedding_size"])
-        self.net.head = torch.nn.Linear(len(labels_categories) * header.config_baseline["model_embedding_size"], len(labels_class))
+        self.net.neck = torch_explain.nn.concepts.ConceptEmbedding(header.config_baseline["model_embedding_size"], self.count_categories, header.config_baseline["model_embedding_size"])
+        self.net.head = torch.nn.Linear(self.count_categories * header.config_baseline["model_embedding_size"], self.count_classes)
 
         return
 
@@ -117,29 +119,24 @@ class DCR(Model):
     def __init__(self, config_dataset, device):
         super().__init__()
 
-        labels_attribute = utility.getLabelsAttribute(config_dataset)
-        labels_class = utility.getLabelsClass(config_dataset)
-        labels_categories = []
+        self.cem = CEM(config_dataset, device)
 
-        for attribute_name in labels_attribute.keys():
-            labels_categories += labels_attribute[attribute_name]
+        for parameter in self.cem.parameters():
+            parameter.requires_grad = False
 
-        self.net = torchvision.models.resnet34(weights = "IMAGENET1K_V1")
-        self.net.fc = torch.nn.Linear(self.net.fc.in_features, header.config_baseline["model_embedding_size"])
-        self.net.neck = torch_explain.nn.concepts.ConceptEmbedding(header.config_baseline["model_embedding_size"], len(labels_categories), header.config_baseline["model_embedding_size"])
-        self.net.head = torch_explain.nn.concepts.ConceptReasoningLayer(header.config_baseline["model_embedding_size"], len(labels_class))
+        self.dcr = torch_explain.nn.concepts.ConceptReasoningLayer(header.config_baseline["model_embedding_size"], self.cem.count_classes)
 
         return
 
     def forward(self, input):
-        output_backbone = self.net(input)
-        (concept_embedding, output_neck) = self.net.neck(output_backbone)
-        output_head = self.net.head(concept_embedding, output_neck)
+        output_backbone = self.cem.net(input)
+        (concept_embedding, output_neck) = self.cem.net.neck(output_backbone)
+        output_head = self.dcr(concept_embedding, output_neck)
 
         return (output_neck, output_head)
 
     def get_parameters(self):
-        return self.net.parameters()
+        return self.dcr.parameters()
 
 class ResNet34(Model):
     def __init__(self, config_dataset, device):
